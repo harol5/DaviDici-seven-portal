@@ -2,12 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\FoxproApi\FoxproApi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class OrdersController extends Controller
 {
     // Show all orders.    
     public function all(){
+        $username = auth()->user()->username;
+        FoxproApi::call([
+            'action' => 'GetOrdersByUser',
+            'params' => [$username],
+            'keep_session' => false,
+        ]);
         return view('orders.orders');
     }
 

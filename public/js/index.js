@@ -15,3 +15,10 @@ orderOptions.forEach(option=>{
         option.classList.add("active-order-option");
     }
 })
+
+const flashMessage = document.querySelector("#flash-message");
+if(flashMessage){
+    setTimeout(()=>{
+        flashMessage.remove();
+    },3000);
+}

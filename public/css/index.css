@@ -113,6 +113,7 @@ main{
 }
 .greeting{
     color: #D1AA68;
+    font-size: 1.5em;
 }
 .search-order-input{
     border: none;

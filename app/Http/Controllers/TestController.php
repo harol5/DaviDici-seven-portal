@@ -20,8 +20,8 @@ class TestController extends Controller
         $api_secret = env('FOXPRO_API_SECRET');
 
         $data = [
-            'action' => 'GetVanityParts',
-            'params' => ['NYFS36CE'],
+            'action' => 'GetProductPrice',
+            'params' => ['Cheskie_celnycorp$g','71-WU-012-M03-V03'],
             'keep_session' => false,
         ];
         $js_data = json_encode($data);
@@ -32,6 +32,6 @@ class TestController extends Controller
         ])->withBody($js_data,'application/json')->get($api_url);
         
         $items = $response->json();
-        dd($items);
+        dd($response);
     }
 }
