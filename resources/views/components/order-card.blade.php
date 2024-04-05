@@ -1,19 +1,39 @@
+@props(['order'])
 @php
-$order = [
-    'number' => 'SO00001'
-]
+if($order['status'] === ''){
+    $order['status'] = "to be determined";
+}
 @endphp
-<div class="order-container">
+
+<div class="order-container" id="{{$order['ordernum']}}">
     <div class="order">
-        <h2>SO#000004</h2>
+        <h2>{{$order['ordernum']}}</h2>
         <div class="order-details-wrapper">
-            <p>details 1</p>
-            <p>details 2</p>
-            <p>details 3</p>
-            <p>details 4</p>
-            <p>details 5</p>
-            <p>details 5</p>
+            <span>
+                <h2>Status:</h2>
+                <p>{{$order['status']}}</p>
+            </span>
+            <span>
+                <h2>Sub-total:</h2>
+                <p>${{$order['subtotal']}}</p>
+            </span>
+            <span>
+                <h2>Order date:</h2>
+                <p>{{$order['orderdate']}}</p>
+            </span>
+            <span>
+                <h2>Total Credit:</h2>
+                <p>${{$order['totcredit']}}</p>
+            </span>
+            <span>
+                <h2>Submitted date:</h2>
+                <p>{{$order['submitted']}}</p>
+            </span>
+            <span>
+                <h2>Total:</h2>
+                <p>${{$order['total']}}</p>
+            </span>
         </div>
-        <a href="/orders/{{$order['number']}}/overview">View Order</a>
+        <a href="/orders/{{$order['ordernum']}}/overview">View Order</a>
     </div>
 </div>

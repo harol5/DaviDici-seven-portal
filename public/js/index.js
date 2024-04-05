@@ -22,3 +22,4 @@ if(flashMessage){
         flashMessage.remove();
     },3000);
 }
+

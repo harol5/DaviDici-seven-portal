@@ -39,10 +39,4 @@ Route::get('post/{id}', function($id){
 Route::get('search',function(Request $request){
     return $request->name . ' ' . $request->city;
 });
-Route::get('/test', function () {
-    return view('listings', [
-        'heading' => 'latest listing',
-        'listings' => Listing::all()
-    ]);
-});
 Route::get('/test-api', [TestController::class, 'getVanityParts']);

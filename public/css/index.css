@@ -118,9 +118,21 @@ main{
 .search-order-input{
     border: none;
     width: 350px;
+    padding: 5px;
 }
 
 /*orders*/
+#empty-orders-message{
+    text-align: center;
+    margin: 3em 0;
+}
+
+#empty-orders-message.search-result{
+    display: none;
+    text-align: center;
+    margin: 3em 0;
+}
+
 .orders-wrapper{
     display: flex;
     flex-wrap: wrap;
@@ -141,9 +153,12 @@ main{
     display: flex;
     flex-wrap: wrap;
     margin: 1em 0;
+    border-top: 1px solid #D1AA68;
+    border-bottom: 1px solid #D1AA68;
 }
-.order-details-wrapper p{
+.order-details-wrapper span {
     width: 50%;
+    margin: 17px 0;
 }
 
 /*============ORDER PAGE STYLING==============*/
