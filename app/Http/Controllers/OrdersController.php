@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Inertia\Inertia;
 use App\FoxproApi\FoxproApi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -20,35 +21,44 @@ class OrdersController extends Controller
             // assings an empty array so template can display proper message.
             $data['rows'] = []; 
         }
-        return view('orders.orders',['orders' => $data['rows']]);
+        // return view('orders.orders',['orders' => $data['rows']]);
+        return Inertia::render('Orders/Orders',['orders' => $data['rows']]);
     }
 
     // Show single order overview.
     public function orderOverview(Request $request){
         // throw 404 if order number does not exist
         $orderNumber = getOrderNumberFromPath($request->path());
-        return view('order.order-overview',['order' => ['ordernum' => $orderNumber]]);
+        return Inertia::render('Orders/OrderOverview',['order' => ['ordernum' => $orderNumber]]);
+
+        // return view('order.order-overview',['order' => ['ordernum' => $orderNumber]]);
     }
 
     // Show single order details.
     public function orderDetails(Request $request){
         // throw 404 if order number does not exist
         $orderNumber = getOrderNumberFromPath($request->path());
-        return view('order.order-details',['order' => ['ordernum' => $orderNumber]]);
+        return Inertia::render('Orders/OrderDetails',['order' => ['ordernum' => $orderNumber]]);
+
+        // return view('order.order-details',['order' => ['ordernum' => $orderNumber]]);
     }
 
     // Show single order delivery form.
     public function orderDelivery(Request $request){
         // throw 404 if order number does not exist
         $orderNumber = getOrderNumberFromPath($request->path());
-        return view('order.order-delivery',['order' => ['ordernum' => $orderNumber]]);
+        return Inertia::render('Orders/OrderDelivery',['order' => ['ordernum' => $orderNumber]]);
+
+        // return view('order.order-delivery',['order' => ['ordernum' => $orderNumber]]);
     }
 
     // Show single order payment form.
     public function orderPayment(Request $request){
         // throw 404 if order number does not exist
         $orderNumber = getOrderNumberFromPath($request->path());
-        return view('order.order-payment',['order' => ['ordernum' => $orderNumber]]);
+        return Inertia::render('Orders/OrderPayment',['order' => ['ordernum' => $orderNumber]]);
+
+        // return view('order.order-payment',['order' => ['ordernum' => $orderNumber]]);
     }
 
 }

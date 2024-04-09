@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -33,5 +34,9 @@ class TestController extends Controller
         
         $items = $response->json();
         dd($response);
+    }
+
+    public function reactPage(){
+        return Inertia::render('Users/Login');
     }
 }
