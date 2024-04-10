@@ -7,13 +7,15 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Session;
 
 class UserController extends Controller
 {
     // Show login form ----------
-    public function login(){
+    public function login(Request $request){
+        $message = $request->session()->get('message');
 
-        return Inertia::render('Users/Login');
+        return Inertia::render('Users/Login',['message' => $message]);
 
         //--- blade template
         // return view('users.login');
@@ -29,11 +31,7 @@ class UserController extends Controller
 
         if(auth()->attempt($formFields)) {
             $request->session()->regenerate();
-
-            return redirect()->intended('/orders');
-
-            //--- blade template
-            // return redirect()->intended('/orders')->with('message', 'You are now logged in!');
+            return redirect()->intended('/orders')->with('message', 'You are now logged in!');
         }
 
         return back()->withErrors(['email' => 'Invalid Credentials'])->onlyInput('email');
@@ -46,10 +44,7 @@ class UserController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
-
-        //--- blade template
-        // return redirect('/')->with('message', 'You have been logged out!');
+        return redirect('/')->with('message', 'You have been logged out!');
     }
 
 

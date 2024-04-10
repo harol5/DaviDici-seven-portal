@@ -1,3 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.overview-wrapper{
+    display: flex;
+}
+
+.overview-wrapper .order-details-wrapper{
+    flex-grow: 2;
+}
+
+.overview-wrapper .actions-pending-wrapper{
+    flex-grow: 1;
+    margin: 1em 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+.actions-pending-wrapper h1 {
+    margin: 1em auto;
+}
+
+.actions-pending-wrapper ul {
+    margin: 0 auto;
+}

@@ -7,7 +7,7 @@ function Inventory(){
                 <div className="gretting-search-wrapper">
                     <h1 className="greeting">Coming Soon!!</h1>
                 </div>
-            </div>
+            </div>            
         </UserAuthenticatedLayout>
     );
 }

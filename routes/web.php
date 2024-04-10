@@ -18,6 +18,7 @@ Route::middleware(['auth','auth.session'])->group(function () {
     // Orders routes
     Route::get('/orders', [OrdersController::class, 'all']);
     Route::get('/orders/{orderNumber}/overview', [OrdersController::class, 'orderOverview']);
+    Route::get('/orders/{orderNumber}/overview/status', [OrdersController::class, 'orderStatus']);
     Route::get('/orders/{orderNumber}/details', [OrdersController::class, 'orderDetails']);
     Route::get('/orders/{orderNumber}/delivery', [OrdersController::class, 'orderDelivery']);
     Route::get('/orders/{orderNumber}/payment', [OrdersController::class, 'orderPayment']);
@@ -27,7 +28,7 @@ Route::middleware(['auth','auth.session'])->group(function () {
         // return view('inventory.inventory');
         return Inertia::render("Inventory/Inventory");
     });
-    
+
     // Others
     Route::post('/logout', [UserController::class, 'logout']);
 });

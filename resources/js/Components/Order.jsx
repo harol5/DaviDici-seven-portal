@@ -2,7 +2,7 @@ import { Link } from '@inertiajs/react'
 
 function Order({order}){
     return (
-        <div className="order-container" id="{{$order['ordernum']}}">
+        <div className="order-container" id={order.ordernum}>
             <div className="order">
                 <h2>{order.ordernum}</h2>
                 <div className="order-details-wrapper">

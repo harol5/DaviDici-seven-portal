@@ -13,7 +13,12 @@ function OrderLayout({children,order,crrOrderOption}){
                                 : "options"
                         }
                     >
-                        <Link href={`/orders/${order.ordernum}/overview`}>
+                        <Link
+                            href={`/orders/${order.ordernum}/overview`}
+                            disabled={
+                                crrOrderOption === "overview" ? true : false
+                            }
+                        >
                             Overview
                         </Link>
                     </li>
@@ -24,7 +29,12 @@ function OrderLayout({children,order,crrOrderOption}){
                                 : "options"
                         }
                     >
-                        <Link href={`/orders/${order.ordernum}/details`}>
+                        <Link
+                            href={`/orders/${order.ordernum}/details`}
+                            disabled={
+                                crrOrderOption === "details" ? true : false
+                            }
+                        >
                             Order details
                         </Link>
                     </li>

@@ -6,7 +6,7 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('css/index.css') }}" >
     <title>Davidici Seven</title>
     @viteReactRefresh
-    @vite('resources/js/app.jsx')
+    @vite(['resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
     @inertiaHead
   </head>
   <body>
