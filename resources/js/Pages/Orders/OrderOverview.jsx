@@ -1,21 +1,27 @@
-import { Link } from "@inertiajs/react";
 import OrderLayout from "../../Layouts/OrderLayout";
 import UserAuthenticatedLayout from "../../Layouts/UserAuthenticatedLayout";
+import Modal from "../../Components/Modal";
+import ItemStatusCard from "../../Components/ItemStatusCard";
+import { useState } from "react";
 
-function OrderOverview({order}){
+function OrderOverview({order,items}){
+    const [openModal,setOpenModal] = useState(false);
+
+    const handleOpenModal = () => {
+        setOpenModal(true);
+    }
+
+    const handleCloseModal = () => {
+        setOpenModal(false);
+    }
+
     return (
         <UserAuthenticatedLayout crrPage="orders">
             <OrderLayout order={order} crrOrderOption="overview">
                 <section className="overview-wrapper">
                     <section className="order-details-wrapper">
                         <span>
-                            <Link
-                                href={`/orders/${order.ordernum}/overview/status`}
-                                as="button"
-                                type="button"
-                            >
-                                Check Status
-                            </Link>
+                            <button onClick={handleOpenModal}>Check Status</button>
                         </span>
                         <span>
                             <h2>Sub-total:</h2>
@@ -48,6 +54,13 @@ function OrderOverview({order}){
                     </section>
                 </section>
             </OrderLayout>
+            <Modal show={openModal} onClose={handleCloseModal}>
+                <h1>Order Status</h1>
+                <section>
+                    {items.map(item => <ItemStatusCard key={item.linenum} item={item} />)}
+                </section>            
+                <button onClick={handleCloseModal}>Close</button>
+            </Modal>
         </UserAuthenticatedLayout>
     ); 
 }

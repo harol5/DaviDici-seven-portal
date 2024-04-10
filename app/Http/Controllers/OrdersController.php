@@ -37,6 +37,11 @@ class OrdersController extends Controller
             'params' => [$username],
             'keep_session' => false,
         ]);
+        $status = FoxproApi::call([
+            'action' => 'GetSoStatus',
+            'params' => [$orderNumber],
+            'keep_session' => false,
+        ]);
 
         $order;
         foreach($data['rows'] as $row){
@@ -46,7 +51,7 @@ class OrdersController extends Controller
             }
         }
 
-        return Inertia::render('Orders/OrderOverview',['order' => $order]);
+        return Inertia::render('Orders/OrderOverview',['order' => $order, 'items' => $status['rows']]);
     }
 
     // Show modal with order status by line.
