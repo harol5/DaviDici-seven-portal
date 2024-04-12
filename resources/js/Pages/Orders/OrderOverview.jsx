@@ -21,7 +21,7 @@ function OrderOverview({order,items}){
                 <section className="overview-wrapper">
                     <section className="order-details-wrapper">
                         <span>
-                            <button onClick={handleOpenModal}>Check Status</button>
+                            <button className="check-status-button" onClick={handleOpenModal}>Check Status</button>
                         </span>
                         <span>
                             <h2>Sub-total:</h2>
@@ -49,17 +49,17 @@ function OrderOverview({order,items}){
                         <ul>
                             <li>fill out delivery</li>
                             <li>fill out payment details</li>
-                            <li>aprrove order</li>
+                            <li>approve order</li>
                         </ul>
                     </section>
                 </section>
             </OrderLayout>
             <Modal show={openModal} onClose={handleCloseModal}>
-                <h1>Order Status</h1>
-                <section>
+                <h1 className="order-status-title">Order Status</h1>
+                <section className="products-wrapper">
                     {items.map(item => <ItemStatusCard key={item.linenum} item={item} />)}
                 </section>            
-                <button onClick={handleCloseModal}>Close</button>
+                <button className="close-modal-button" onClick={handleCloseModal}>Close</button>
             </Modal>
         </UserAuthenticatedLayout>
     ); 

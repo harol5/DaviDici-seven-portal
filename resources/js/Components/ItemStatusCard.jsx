@@ -1,37 +1,37 @@
 function ItemStatusCard({item}){
     return (
-        <div className="flex">
-            <span>
-                <h2>Status:</h2>
+        <div className="product-wrapper">
+            <span className="description">
+                <h2>Description:</h2>
                 <p>{item.item}</p>
             </span>
-            <span>
-                <h2>Sub-total:</h2>
-                <p>${item.size}</p>
+            <span className="size">
+                <h2>Size:</h2>
+                <p>{item.size}</p>
             </span>
-            <span>
-                <h2>Order date:</h2>
+            <span className="model">
+                <h2>Model:</h2>
                 <p>{item.model}</p>
             </span>
-            <span>
-                <h2>Total Credit:</h2>
-                <p>${item.uscode}</p>
+            <span className="sku">
+                <h2>Sku:</h2>
+                <p>{item.uscode}</p>
             </span>
-            <span>
-                <h2>Submitted date:</h2>
-                <p>{item.price}</p>
+            <span className="price">
+                <h2>Price:</h2>
+                <p>${item.price}</p>
             </span>
-            <span>
-                <h2>Total:</h2>
+            <span className="qty">
+                <h2>Qty:</h2>
                 <p>${item.qty}</p>
             </span>
-            <span>
+            <span className="total">
                 <h2>Total:</h2>
                 <p>${item.total}</p>
             </span>
-            <span>
-                <h2>Total:</h2>
-                <p>${item.status}</p>
+            <span className="status">
+                <h2>Status:</h2>
+                <p>{item.status}</p>
             </span>
         </div>
     );

@@ -33,16 +33,3 @@ Route::middleware(['auth','auth.session'])->group(function () {
     Route::post('/logout', [UserController::class, 'logout']);
 });
 
-
-//=======routes for testing==========//
-Route::get('/hello',function(){
-    return response('<h1>hello world</h1>',200)
-        ->header('Content-Type', 'text/plain');
-});
-Route::get('post/{id}', function($id){
-    return response('Post ' . $id);
-})->where('id','[0-9]+');
-Route::get('search',function(Request $request){
-    return $request->name . ' ' . $request->city;
-});
-Route::get('/test-api', [TestController::class, 'getVanityParts']);
