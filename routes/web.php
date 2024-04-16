@@ -18,10 +18,12 @@ Route::middleware(['auth','auth.session'])->group(function () {
     // Orders routes
     Route::get('/orders', [OrdersController::class, 'all']);
     Route::get('/orders/{orderNumber}/overview', [OrdersController::class, 'orderOverview']);
-    Route::get('/orders/{orderNumber}/overview/status', [OrdersController::class, 'orderStatus']);
-    Route::get('/orders/{orderNumber}/details', [OrdersController::class, 'orderDetails']);
+    Route::get('/orders/{orderNumber}/details', [OrdersController::class, 'orderDetails'])->name('order.details');
     Route::get('/orders/{orderNumber}/delivery', [OrdersController::class, 'orderDelivery']);
     Route::get('/orders/{orderNumber}/payment', [OrdersController::class, 'orderPayment']);
+
+    Route::post('/orders/{orderNumber}/products/update', [OrdersController::class, 'updateQuantity']);
+    Route::post('/orders/{orderNumber}/products/delete', [OrdersController::class, 'deleteProduct']);
 
     // Inventory routes
     Route::get('/inventory', function(){
@@ -33,3 +35,4 @@ Route::middleware(['auth','auth.session'])->group(function () {
     Route::post('/logout', [UserController::class, 'logout']);
 });
 
+Route::get('/testing', [OrdersController::class, 'testApi']);

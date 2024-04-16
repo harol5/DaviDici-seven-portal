@@ -44,12 +44,13 @@
     text-align: center;
     margin: 2em 0;
 }
-.products-wrapper{
+.products-status-wrapper{
     padding: 0 10em;
     display: flex;
     flex-direction: column;
     gap: 2em 0;
 }
+
 .product-wrapper{
     display: flex;
     text-align: center;
@@ -58,16 +59,18 @@
     padding: 2em;
     font-size: 0.9em;
 }
-.product-wrapper .description{
-    flex-basis: 30%;
+.product-wrapper header, .product-wrapper section {
+    display: flex;
 }
-
-.product-wrapper .size, .model, .sku, .price, .qty, .total, .status {
+.product-wrapper .description{
+    flex-basis: 40%;
+}
+.product-wrapper .size, .model, .sku, .price, .qty, .total {
     flex-basis: 10%;
 }
 /*product headers*/
-.product-wrapper h2 {
-    margin-bottom: 5px;
+.product-wrapper header h2 {
+    margin-bottom: 10px;
 }
 .close-modal-button{
     display: block;
@@ -77,3 +80,26 @@
     border-radius: 5px;
     font-size: 0.9em;
 }
+
+
+
+/*===========Order Details Page=============*/
+.products-details-wrapper{
+    margin-top: 2em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em 0;
+}
+
+.qty input {
+    width: 50px;
+    padding: 2px 5px;
+}
+
+.delete-button{
+    padding: 3px 17px;
+    background-color: #BCBDC1;
+    border-radius: 5px;
+    border: 1px solid;
+}
+

@@ -1,10 +1,10 @@
 import OrderLayout from "../../Layouts/OrderLayout";
 import UserAuthenticatedLayout from "../../Layouts/UserAuthenticatedLayout";
 import Modal from "../../Components/Modal";
-import ItemStatusCard from "../../Components/ItemStatusCard";
+import ProducStatusCard from "../../Components/ProducStatusCard";
 import { useState } from "react";
 
-function OrderOverview({order,items}){
+function OrderOverview({order,products}){
     const [openModal,setOpenModal] = useState(false);
 
     const handleOpenModal = () => {
@@ -56,8 +56,8 @@ function OrderOverview({order,items}){
             </OrderLayout>
             <Modal show={openModal} onClose={handleCloseModal}>
                 <h1 className="order-status-title">Order Status</h1>
-                <section className="products-wrapper">
-                    {items.map(item => <ItemStatusCard key={item.linenum} item={item} />)}
+                <section className="products-status-wrapper">
+                    {products.map(product => <ProducStatusCard key={product.linenum} product={product} />)}
                 </section>            
                 <button className="close-modal-button" onClick={handleCloseModal}>Close</button>
             </Modal>

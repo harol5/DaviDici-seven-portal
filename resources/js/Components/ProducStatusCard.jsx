@@ -1,40 +1,40 @@
-function ItemStatusCard({item}){
+function ProducStatusCard({product}){
     return (
         <div className="product-wrapper">
             <span className="description">
                 <h2>Description:</h2>
-                <p>{item.item}</p>
+                <p>{product.item}</p>
             </span>
             <span className="size">
                 <h2>Size:</h2>
-                <p>{item.size}</p>
+                <p>{product.size}</p>
             </span>
             <span className="model">
                 <h2>Model:</h2>
-                <p>{item.model}</p>
+                <p>{product.model}</p>
             </span>
             <span className="sku">
                 <h2>Sku:</h2>
-                <p>{item.uscode}</p>
+                <p>{product.uscode}</p>
             </span>
             <span className="price">
                 <h2>Price:</h2>
-                <p>${item.price}</p>
+                <p>${product.price}</p>
             </span>
             <span className="qty">
                 <h2>Qty:</h2>
-                <p>${item.qty}</p>
+                <p>{product.qty}</p>
             </span>
             <span className="total">
                 <h2>Total:</h2>
-                <p>${item.total}</p>
+                <p>${product.total}</p>
             </span>
             <span className="status">
                 <h2>Status:</h2>
-                <p>{item.status}</p>
+                <p>{product.status}</p>
             </span>
         </div>
     );
 }
 
-export default ItemStatusCard;
+export default ProducStatusCard;

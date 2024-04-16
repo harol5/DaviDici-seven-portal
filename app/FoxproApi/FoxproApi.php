@@ -18,9 +18,12 @@ class FoxproApi{
         ])->withBody($js_data,'application/json')->get($api_url);
 
         $data = $response->json();
-
-        if(!$data || !array_key_exists('cols',$data) || !array_key_exists('rows',$data)){
-
+        // dd($response);
+        if(array_key_exists('Result',$data)){
+            return $data;
+        }
+        
+        if(!$data || !array_key_exists('cols',$data) || !array_key_exists('rows',$data) || $data['recordcount'] === 0){
             //TODO: you must log error for debugging.
             return ['status' => 500, 'message' => 'error requesting data from foxpro'];
         }
@@ -43,7 +46,7 @@ class FoxproApi{
 
         $object['rows'] = $records;
         $object['status'] = 201;
-
+        
         return $object;
     }
 }

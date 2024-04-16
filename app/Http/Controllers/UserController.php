@@ -53,7 +53,7 @@ class UserController extends Controller
         if(!Gate::allows('create-user')){
             abort(403);
         }
-        return view('users.register');
+        return Inertia::render('Users/Register');
     }
 
 

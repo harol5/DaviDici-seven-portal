@@ -97,7 +97,7 @@ nav > div{
 /*============MAIN STYLING==============*/
 main{
     background-color: #F4F5F3;
-    height: 100vh;
+    min-height: 100vh;
 }
 .main-content-wrapper{
     max-width: 82rem;

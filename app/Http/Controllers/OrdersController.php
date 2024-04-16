@@ -37,7 +37,7 @@ class OrdersController extends Controller
             'params' => [$username],
             'keep_session' => false,
         ]);
-        $status = FoxproApi::call([
+        $products = FoxproApi::call([
             'action' => 'GetSoStatus',
             'params' => [$orderNumber],
             'keep_session' => false,
@@ -51,25 +51,60 @@ class OrdersController extends Controller
             }
         }
 
-        return Inertia::render('Orders/OrderOverview',['order' => $order, 'items' => $status['rows']]);
+        return Inertia::render('Orders/OrderOverview',['order' => $order, 'products' => $products['rows']]);
     }
 
-    // Show modal with order status by line.
-    public function orderStatus(Request $request){
+    
+    // Show single order details.
+    public function orderDetails(Request $request){
+        // throw 404 if order number does not exist
+        $username = auth()->user()->username;
         $orderNumber = getOrderNumberFromPath($request->path());
         $data = FoxproApi::call([
+            'action' => 'getordersbyuser',
+            'params' => [$username],
+            'keep_session' => false,
+        ]);
+        $products = FoxproApi::call([
             'action' => 'GetSoStatus',
             'params' => [$orderNumber],
             'keep_session' => false,
         ]);
-        dd($data['rows']);
+        
+        $order;
+        foreach($data['rows'] as $row){
+            if ( $row['ordernum'] === $orderNumber ) {
+                $order = $row;
+                break;
+            }
+        }
+        return Inertia::render('Orders/OrderDetails',['order' => $order, 'products' => $products['rows']]);
     }
 
-    // Show single order details.
-    public function orderDetails(Request $request){
-        // throw 404 if order number does not exist
+    // Update quantity product
+    public function updateQuantity(Request $request){
+        $product = $request->all();
         $orderNumber = getOrderNumberFromPath($request->path());
-        return Inertia::render('Orders/OrderDetails',['order' => ['ordernum' => $orderNumber]]);
+        $res = FoxproApi::call([
+            'action' => 'ChangeOrderQty',
+            'params' => [$orderNumber,$product['uscode'],$product['linenum'],$product['qty']],
+            'keep_session' => false, 
+        ]);
+
+        return response($res)->header('Content-Type', 'application/json');
+    }
+
+    // Delete product
+    public function deleteProduct(Request $request){
+        $product = $request->all();
+        $orderNumber = getOrderNumberFromPath($request->path());
+        $res = FoxproApi::call([
+            'action' => 'DELETELINE',
+            'params' => [$orderNumber, $product['uscode'], $product['linenum'], $product['qty']],
+            'keep_session' => false, 
+        ]);
+
+        return redirect()->route('order.details',['orderNumber' => $orderNumber]);
     }
 
     // Show single order delivery form.
@@ -86,5 +121,14 @@ class OrdersController extends Controller
         return Inertia::render('Orders/OrderPayment',['order' => ['ordernum' => $orderNumber]]);
     }
 
+
+
+    public function testApi(){
+        $products = FoxproApi::call([
+            'action' => 'DELETELINE',
+            'params' => ['HAR000002','18-024-T2','1','1'],
+            'keep_session' => false, 
+        ]);
+    }
 }
 
