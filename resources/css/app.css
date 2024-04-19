@@ -37,6 +37,20 @@
     list-style:square;
 }
 
+/* ===========GENERAL STYLE FOR PRODUCT CARD=============*/
+.product-wrapper{    
+    text-align: center;    
+    border: 1px solid;
+    padding: 2em;
+    font-size: 0.9em;
+}
+.product-wrapper header, .product-wrapper section {
+    display: flex;
+}
+
+.product-wrapper header h2 {
+    margin-bottom: 10px;
+}
 
 /* ===========Content in status modal=============*/
 .order-status-title{
@@ -50,27 +64,14 @@
     flex-direction: column;
     gap: 2em 0;
 }
-
-.product-wrapper{
-    display: flex;
-    text-align: center;
-    align-items: center;
-    border: 1px solid;
-    padding: 2em;
-    font-size: 0.9em;
+.product-status-card{
+    display: block;
 }
-.product-wrapper header, .product-wrapper section {
-    display: flex;
+.product-status-card .description{
+    flex-basis: 30%;
 }
-.product-wrapper .description{
-    flex-basis: 40%;
-}
-.product-wrapper .size, .model, .sku, .price, .qty, .total {
+.product-status-card .size, .model, .sku, .price, .qty, .total, .status {
     flex-basis: 10%;
-}
-/*product headers*/
-.product-wrapper header h2 {
-    margin-bottom: 10px;
 }
 .close-modal-button{
     display: block;
@@ -81,8 +82,6 @@
     font-size: 0.9em;
 }
 
-
-
 /*===========Order Details Page=============*/
 .products-details-wrapper{
     margin-top: 2em;
@@ -90,12 +89,20 @@
     flex-direction: column;
     gap: 0.5em 0;
 }
-
+.product-details-card{
+    display: flex;
+    align-items: center;
+}
+.product-details-card .description{
+    flex-basis: 40%;
+}
+.product-details-card .size, .model, .sku, .price, .qty, .total {
+    flex-basis: 10%;
+}
 .qty input {
     width: 50px;
     padding: 2px 5px;
 }
-
 .delete-button{
     padding: 3px 17px;
     background-color: #BCBDC1;

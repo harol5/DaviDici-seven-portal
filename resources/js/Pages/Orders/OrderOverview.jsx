@@ -1,12 +1,12 @@
 import OrderLayout from "../../Layouts/OrderLayout";
 import UserAuthenticatedLayout from "../../Layouts/UserAuthenticatedLayout";
 import Modal from "../../Components/Modal";
-import ProducStatusCard from "../../Components/ProducStatusCard";
+import ProductStatusCard from "../../Components/ProductStatusCard";
 import { useState } from "react";
 
 function OrderOverview({order,products}){
     const [openModal,setOpenModal] = useState(false);
-
+    console.log("order from query",order);
     const handleOpenModal = () => {
         setOpenModal(true);
     }
@@ -57,7 +57,7 @@ function OrderOverview({order,products}){
             <Modal show={openModal} onClose={handleCloseModal}>
                 <h1 className="order-status-title">Order Status</h1>
                 <section className="products-status-wrapper">
-                    {products.map(product => <ProducStatusCard key={product.linenum} product={product} />)}
+                    {products.map(product => <ProductStatusCard key={product.linenum} product={product} />)}
                 </section>            
                 <button className="close-modal-button" onClick={handleCloseModal}>Close</button>
             </Modal>

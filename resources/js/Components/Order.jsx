@@ -31,7 +31,7 @@ function Order({order}){
                         <p>${order.total}</p>
                     </span>
                 </div>
-                <Link href={`/orders/${order.ordernum}/overview`}>View Order</Link>
+                <Link href={`/orders/${order.ordernum}/overview`} data={order}>View Order</Link>
             </div>
         </div>
     );

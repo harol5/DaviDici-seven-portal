@@ -31,25 +31,13 @@ class OrdersController extends Controller
         // throw 404 if order number does not exist
 
         $username = auth()->user()->username;
-        $orderNumber = getOrderNumberFromPath($request->path());
-        $data = FoxproApi::call([
-            'action' => 'getordersbyuser',
-            'params' => [$username],
-            'keep_session' => false,
-        ]);
+        $order = $request->all();
+        $orderNumber = getOrderNumberFromPath($request->path());        
         $products = FoxproApi::call([
             'action' => 'GetSoStatus',
             'params' => [$orderNumber],
             'keep_session' => false,
         ]);
-
-        $order;
-        foreach($data['rows'] as $row){
-            if ( $row['ordernum'] === $orderNumber ) {
-                $order = $row;
-                break;
-            }
-        }
 
         return Inertia::render('Orders/OrderOverview',['order' => $order, 'products' => $products['rows']]);
     }
@@ -59,26 +47,18 @@ class OrdersController extends Controller
     public function orderDetails(Request $request){
         // throw 404 if order number does not exist
         $username = auth()->user()->username;
-        $orderNumber = getOrderNumberFromPath($request->path());
-        $data = FoxproApi::call([
-            'action' => 'getordersbyuser',
-            'params' => [$username],
-            'keep_session' => false,
-        ]);
+        $order = $request->all();
+        
+        $orderNumber = getOrderNumberFromPath($request->path());      
+        
+        // Error: undefined rows?
         $products = FoxproApi::call([
             'action' => 'GetSoStatus',
             'params' => [$orderNumber],
             'keep_session' => false,
         ]);
-        
-        $order;
-        foreach($data['rows'] as $row){
-            if ( $row['ordernum'] === $orderNumber ) {
-                $order = $row;
-                break;
-            }
-        }
-        return Inertia::render('Orders/OrderDetails',['order' => $order, 'products' => $products['rows']]);
+
+        return Inertia::render('Orders/OrderDetails',['rawOrder' => $order, 'rawProducts' => $products['rows']]);
     }
 
     // Update quantity product
@@ -96,7 +76,7 @@ class OrdersController extends Controller
 
     // Delete product
     public function deleteProduct(Request $request){
-        $product = $request->all();
+        $product = $request->all();         
         $orderNumber = getOrderNumberFromPath($request->path());
         $res = FoxproApi::call([
             'action' => 'DELETELINE',
@@ -104,31 +84,36 @@ class OrdersController extends Controller
             'keep_session' => false, 
         ]);
 
-        return redirect()->route('order.details',['orderNumber' => $orderNumber]);
+        return response($res)->header('Content-Type', 'application/json');
+        // return redirect()->route('order.details',['orderNumber' => $orderNumber, 'order' => $order ]);
     }
 
-    // Show single order delivery form.
+    // TODO: Show single order delivery form. 
     public function orderDelivery(Request $request){
         // throw 404 if order number does not exist
+        $order = $request->all();
         $orderNumber = getOrderNumberFromPath($request->path());
-        return Inertia::render('Orders/OrderDelivery',['order' => ['ordernum' => $orderNumber]]);
+        return Inertia::render('Orders/OrderDelivery',['order' => $order]);
     }
 
     // Show single order payment form.
     public function orderPayment(Request $request){
         // throw 404 if order number does not exist
+        $order = $request->all();
         $orderNumber = getOrderNumberFromPath($request->path());
-        return Inertia::render('Orders/OrderPayment',['order' => ['ordernum' => $orderNumber]]);
+        return Inertia::render('Orders/OrderPayment',['order' => $order]);
     }
 
 
 
     public function testApi(){
-        $products = FoxproApi::call([
-            'action' => 'DELETELINE',
-            'params' => ['HAR000002','18-024-T2','1','1'],
+        $response = FoxproApi::call([
+            'action' => 'OrderEnter',
+            'params' => ['HarolE$Davidici_com','HAR000002','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
             'keep_session' => false, 
         ]);
+
+        return Inertia::render('Test',['response' => $response]);
     }
 }
 

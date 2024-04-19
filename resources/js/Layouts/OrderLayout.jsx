@@ -1,4 +1,3 @@
-import UserAuthenticatedLayout from "./UserAuthenticatedLayout";
 import { Link } from "@inertiajs/react";
 
 function OrderLayout({children,order,crrOrderOption}){
@@ -15,6 +14,7 @@ function OrderLayout({children,order,crrOrderOption}){
                     >
                         <Link
                             href={`/orders/${order.ordernum}/overview`}
+                            data={order}
                             disabled={
                                 crrOrderOption === "overview" ? true : false
                             }
@@ -31,6 +31,7 @@ function OrderLayout({children,order,crrOrderOption}){
                     >
                         <Link
                             href={`/orders/${order.ordernum}/details`}
+                            data={order}
                             disabled={
                                 crrOrderOption === "details" ? true : false
                             }
@@ -45,7 +46,7 @@ function OrderLayout({children,order,crrOrderOption}){
                                 : "options"
                         }
                     >
-                        <Link href={`/orders/${order.ordernum}/delivery`}>
+                        <Link href={`/orders/${order.ordernum}/delivery`} data={order}>
                             Delivery options
                         </Link>
                     </li>
@@ -56,7 +57,7 @@ function OrderLayout({children,order,crrOrderOption}){
                                 : "options"
                         }
                     >
-                        <Link href={`/orders/${order.ordernum}/payment`}>
+                        <Link href={`/orders/${order.ordernum}/payment`} data={order}>
                             Payment details
                         </Link>
                     </li>
