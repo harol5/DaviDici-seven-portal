@@ -6,6 +6,7 @@ use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -20,11 +21,13 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
-
+        
         DB::table('users')->insert([
             'name' => 'harol',
             'email' => 'hrcode95@gmail.com',
-            'password' => '123456789',
+            'username' => 'HarolE$Davidici_com',
+            'role' => 3478,
+            'password' => Hash::make(env('FOXPRO_PWD')),
         ]);
     }
 }
