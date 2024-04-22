@@ -18,7 +18,7 @@ class OrdersController extends Controller
             'params' => [$username],
             'keep_session' => false,
         ]);
-
+        // dd($data);
         if($data['status'] === 500){
             // assings an empty array so template can display proper message.
             $data['rows'] = []; 
@@ -76,16 +76,22 @@ class OrdersController extends Controller
 
     // Delete product
     public function deleteProduct(Request $request){
-        $product = $request->all();         
+        $req = $request->all(); 
+        $product = $req['product'];
+        $numOfProducts = $req['numOfProduct'];        
         $orderNumber = getOrderNumberFromPath($request->path());
+        
         $res = FoxproApi::call([
             'action' => 'DELETELINE',
             'params' => [$orderNumber, $product['uscode'], $product['linenum'], $product['qty']],
             'keep_session' => false, 
         ]);
 
-        return response($res)->header('Content-Type', 'application/json');
-        // return redirect()->route('order.details',['orderNumber' => $orderNumber, 'order' => $order ]);
+        if($numOfProducts === 1 ){
+            return redirect('/orders')->with('message', 'Order Number ' . $orderNumber . ' deleted!!');
+        }else{
+            return response($res)->header('Content-Type', 'application/json');        
+        }        
     }
 
     // TODO: Show single order delivery form. 

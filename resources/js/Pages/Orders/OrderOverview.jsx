@@ -6,7 +6,7 @@ import { useState } from "react";
 
 function OrderOverview({order,products}){
     const [openModal,setOpenModal] = useState(false);
-    console.log("order from query",order);
+    
     const handleOpenModal = () => {
         setOpenModal(true);
     }

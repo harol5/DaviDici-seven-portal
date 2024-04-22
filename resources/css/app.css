@@ -84,7 +84,8 @@
 
 /*===========Order Details Page=============*/
 .products-details-wrapper{
-    margin-top: 2em;
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
     display: flex;
     flex-direction: column;
     gap: 0.5em 0;
@@ -92,6 +93,7 @@
 .product-details-card{
     display: flex;
     align-items: center;
+    background-color: white;
 }
 .product-details-card .description{
     flex-basis: 40%;
@@ -100,8 +102,11 @@
     flex-basis: 10%;
 }
 .qty input {
-    width: 50px;
+    width: 53px;
     padding: 2px 5px;
+    background-color: #bcbdc135;
+    border-radius: 10px;
+    text-align: center;
 }
 .delete-button{
     padding: 3px 17px;
