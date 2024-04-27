@@ -94,12 +94,41 @@ class OrdersController extends Controller
         }        
     }
 
-    // TODO: Show single order delivery form. 
+    // Show single order delivery form. 
     public function orderDelivery(Request $request){
         // throw 404 if order number does not exist
         $order = $request->all();
         $orderNumber = getOrderNumberFromPath($request->path());
-        return Inertia::render('Orders/OrderDelivery',['order' => $order]);
+
+        // Error: undefined rows?
+        $products = FoxproApi::call([
+            'action' => 'GetSoStatus',
+            'params' => [$orderNumber],
+            'keep_session' => false,
+        ]);
+
+        // TODO: get delivery info if any.
+
+        return Inertia::render('Orders/OrderDelivery',['order' => $order, 'products' => $products['rows']]);
+    }
+
+    // Save delivery info into foxpro.
+    public function saveDeliveryInfo(Request $request){
+        $formFields = $request->validate([
+            'address' => 'required',
+            'cellphoneNumber' => 'required',
+            'city' => 'required',
+            'contactName' => 'required',
+            'customerEmail' => ['required','email'],
+            'customerName' => 'required',            
+            'deliveryType' => 'required',
+            'state' => 'required',
+            'telephoneNumber' => 'required',
+            'wholesalerEmail' => 'required',
+            'zipCode' => 'required'
+        ]);
+
+        return redirect('/orders')->with('message', 'info saved!!');
     }
 
     // Show single order payment form.
@@ -109,7 +138,6 @@ class OrdersController extends Controller
         $orderNumber = getOrderNumberFromPath($request->path());
         return Inertia::render('Orders/OrderPayment',['order' => $order]);
     }
-
 
 
     public function testApi(){

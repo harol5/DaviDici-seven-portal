@@ -1,7 +1,7 @@
 @extends('layout')
 @section('content')
 <div class="main-content-wrapper">
-<form method="POST" action="/users">
+<form method="POST" action="/csrf/testing">
     @csrf
     <div class="mb-6">
         <label for="name" class="inline-block text-lg mb-2"> Name </label>

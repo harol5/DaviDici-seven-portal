@@ -1,16 +1,16 @@
-import { useForm } from '@inertiajs/react'
-import FlashMessage from '../../Components/FlashMessage';
+import { useForm } from "@inertiajs/react";
+import FlashMessage from "../../Components/FlashMessage";
 
-function Login({message = ""}){
-
-    const {setData, post, errors } = useForm({
-        email:'',
-        password: '',
+function Login({ message = "" }) {
+    const { setData, post, errors } = useForm({
+        email: "",
+        password: "",
     });
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        post('/auth');
-    }
+        post("/auth");
+    };
 
     return (
         <section className="main-login">

@@ -24,6 +24,7 @@ Route::middleware(['auth','auth.session'])->group(function () {
 
     Route::post('/orders/{orderNumber}/products/update', [OrdersController::class, 'updateQuantity']);
     Route::post('/orders/{orderNumber}/products/delete', [OrdersController::class, 'deleteProduct']);
+    Route::post('/orders/{orderNumber}/products/delivery', [OrdersController::class, 'saveDeliveryInfo']);
 
     // Inventory routes
     Route::get('/inventory', function(){
@@ -36,3 +37,11 @@ Route::middleware(['auth','auth.session'])->group(function () {
 });
 
 Route::get('/testing', [OrdersController::class, 'testApi']);
+
+Route::get('/csrf', function(){
+    return view("users/register");
+});
+Route::post('/csrf/testing', function(Request $request){
+    dd($request->all());
+    return view("users/register");
+});
