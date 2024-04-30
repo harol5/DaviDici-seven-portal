@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-function FlashMessage({ message }) {
+function FlashMessage({ message }: { message: string }) {
     const [flashMessage, setMessage] = useState(message);
     useEffect(() => {
         if (message) {
@@ -13,7 +13,7 @@ function FlashMessage({ message }) {
             };
         }
     }, []);
-    
+
     return flashMessage ? (
         <div
             id="flash-message"

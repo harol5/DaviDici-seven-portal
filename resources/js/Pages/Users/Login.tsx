@@ -1,13 +1,19 @@
 import { useForm } from "@inertiajs/react";
 import FlashMessage from "../../Components/FlashMessage";
+import { FormEvent } from "react";
+
+interface loginCred {
+    email: string;
+    password: string;
+}
 
 function Login({ message = "" }) {
-    const { setData, post, errors } = useForm({
+    const { setData, post, errors } = useForm<loginCred>({
         email: "",
         password: "",
     });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         post("/auth");
     };

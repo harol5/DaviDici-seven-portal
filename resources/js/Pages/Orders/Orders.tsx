@@ -1,18 +1,29 @@
 import UserAuthenticatedLayout from "../../Layouts/UserAuthenticatedLayout";
 import Order from "../../Components/Order";
 import FlashMessage from "../../Components/FlashMessage";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
+import User from "../../Models/User";
 
-function Orders({ auth, orders, message = "" }) {
+interface ordersProp {
+    auth: User;
+    orders: any;
+    message: string;
+}
 
+function Orders({ auth, orders, message = "" }: ordersProp) {
+    console.log("auth:", auth);
+    console.log("orders:", orders);
+    console.log("message:", message);
     const [userOrders, setUserOrders] = useState(orders);
 
-    const handleSearhInput = (value) => {
-        const filteredOrders = orders.filter((order) =>
-            order.ordernum.includes(value.toLowerCase())
-        );      
+    const handleSearhInput = (e: ChangeEvent<HTMLInputElement>) => {
+        const filteredOrders = orders.filter((order: any) => {
+            const target = e.target!;
+            console.log("order:", order);
+            order.ordernum.includes(target.value.toLowerCase());
+        });
         setUserOrders(filteredOrders);
-    }
+    };
 
     return (
         <UserAuthenticatedLayout crrPage="orders">
@@ -25,7 +36,7 @@ function Orders({ auth, orders, message = "" }) {
                         className="search-order-input"
                         type="search"
                         placeholder="Search Order..."
-                        onInput={(e) => handleSearhInput(e.target.value)}
+                        onChange={handleSearhInput}
                     />
                 </div>
 
@@ -40,7 +51,7 @@ function Orders({ auth, orders, message = "" }) {
                             orders not found!
                         </p>
                         <div className="orders-wrapper">
-                            {userOrders.map((order) => (
+                            {userOrders.map((order: any) => (
                                 <Order key={order.ordernum} order={order} />
                             ))}
                         </div>
@@ -51,6 +62,5 @@ function Orders({ auth, orders, message = "" }) {
         </UserAuthenticatedLayout>
     );
 }
-
 
 export default Orders;
