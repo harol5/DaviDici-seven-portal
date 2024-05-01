@@ -1,4 +1,10 @@
-function ProductDeliveryCard({ product }) {
+import type { Product as ProductModel } from "../Models/Product";
+
+interface ProductDeliveryCardProps {
+    product: ProductModel;
+}
+
+function ProductDeliveryCard({ product }: ProductDeliveryCardProps) {
     return (
         <div className="product-wrapper product-delivery-card">
             <header>

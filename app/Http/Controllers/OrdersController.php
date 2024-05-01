@@ -128,7 +128,9 @@ class OrdersController extends Controller
             'zipCode' => 'required'
         ]);
 
-        return redirect('/orders')->with('message', 'info saved!!');
+        session()->flash('message','all good');
+        // return redirect('/orders')->with('message', 'info saved!!');
+        return response(['data' => 'good'])->header('Content-Type', 'application/json');        
     }
 
     // Show single order payment form.
@@ -141,16 +143,16 @@ class OrdersController extends Controller
 
 
     public function testApi(){
-        $response = FoxproApi::call([
-            'action' => 'OrderEnter',
-            'params' => ['HarolE$Davidici_com','HAR000002','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
-            'keep_session' => false, 
-        ]);
         // $response = FoxproApi::call([
-        //     'action' => 'GetProductPrice',
-        //     'params' => ['HarolE$Davidici_com','18-048-2S-T2'],
+        //     'action' => 'OrderEnter',
+        //     'params' => ['HarolE$Davidici_com','HAR000002','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
         //     'keep_session' => false, 
         // ]);
+        $response = FoxproApi::call([
+            'action' => 'GetProductPrice',
+            'params' => ['HarolE$Davidici_com','18-048-2S-T2'],
+            'keep_session' => false, 
+        ]);
 
         return Inertia::render('Test',['response' => $response]);
     }

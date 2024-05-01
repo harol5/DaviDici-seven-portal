@@ -2,14 +2,21 @@ import OrderLayout from "../../Layouts/OrderLayout";
 import UserAuthenticatedLayout from "../../Layouts/UserAuthenticatedLayout";
 import ProductDeliveryCard from "../../Components/ProductDeliveryCard";
 import DeliveryForm from "../../Components/DeliveryForm";
+import type { Order as OrderModel } from "../../Models/Order";
+import type { Product as ProductModel } from "../../Models/Product";
 
-function OrderDelivery({ order, products }) {
+interface OrderDeliveryProps {
+    order: OrderModel;
+    products: ProductModel[];
+}
+
+function OrderDelivery({ order, products }: OrderDeliveryProps) {
     return (
         <UserAuthenticatedLayout crrPage="orders">
             <OrderLayout order={order} crrOrderOption="delivery">
                 <h1>Delivery</h1>
                 <section className="products-delivery-wrapper">
-                    {products.map((product) => (
+                    {products.map((product: ProductModel) => (
                         <ProductDeliveryCard
                             key={product.linenum}
                             product={product}

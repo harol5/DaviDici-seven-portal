@@ -4,7 +4,7 @@ function Test({ response }: { response: any }) {
     console.log(response);
     return (
         <UserAuthenticatedLayout crrPage="orders">
-            {JSON.stringify(response)}
+            {JSON.stringify(response, null, 1)}
         </UserAuthenticatedLayout>
     );
 }
