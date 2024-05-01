@@ -1,6 +1,15 @@
-import { Link } from '@inertiajs/react'
+import { Link } from "@inertiajs/react";
+import type { Order as OrderModel, OrderRecord } from "../Models/Order";
 
-function Order({order}){
+interface OrderProps {
+    order: OrderModel;
+}
+
+function Order({ order }: OrderProps) {
+    const orderFormatted: OrderRecord = {
+        ...order,
+    };
+
     return (
         <div className="order-container" id={order.ordernum}>
             <div className="order">
@@ -31,7 +40,12 @@ function Order({order}){
                         <p>${order.total}</p>
                     </span>
                 </div>
-                <Link href={`/orders/${order.ordernum}/overview`} data={order}>View Order</Link>
+                <Link
+                    href={`/orders/${order.ordernum}/overview`}
+                    data={orderFormatted}
+                >
+                    View Order
+                </Link>
             </div>
         </div>
     );

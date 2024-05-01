@@ -3,24 +3,21 @@ import Order from "../../Components/Order";
 import FlashMessage from "../../Components/FlashMessage";
 import { ChangeEvent, useState } from "react";
 import User from "../../Models/User";
+import type { Order as OrderModel } from "../../Models/Order";
 
 interface ordersProp {
     auth: User;
-    orders: any;
+    orders: OrderModel[];
     message: string;
 }
 
-function Orders({ auth, orders, message = "" }: ordersProp) {
-    console.log("auth:", auth);
-    console.log("orders:", orders);
-    console.log("message:", message);
+function Orders({ auth, orders, message }: ordersProp) {
     const [userOrders, setUserOrders] = useState(orders);
 
     const handleSearhInput = (e: ChangeEvent<HTMLInputElement>) => {
-        const filteredOrders = orders.filter((order: any) => {
+        const filteredOrders = orders.filter((order: OrderModel) => {
             const target = e.target!;
-            console.log("order:", order);
-            order.ordernum.includes(target.value.toLowerCase());
+            return order.ordernum.includes(target.value.toLowerCase());
         });
         setUserOrders(filteredOrders);
     };
@@ -51,7 +48,7 @@ function Orders({ auth, orders, message = "" }: ordersProp) {
                             orders not found!
                         </p>
                         <div className="orders-wrapper">
-                            {userOrders.map((order: any) => (
+                            {userOrders.map((order) => (
                                 <Order key={order.ordernum} order={order} />
                             ))}
                         </div>

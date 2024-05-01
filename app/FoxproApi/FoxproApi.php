@@ -18,7 +18,7 @@ class FoxproApi{
         ])->withBody($js_data,'application/json')->get($api_url);
 
         $data = $response->json();
-        // dd($options);
+    
         if(array_key_exists('Result',$data)){
             return $data;
         }

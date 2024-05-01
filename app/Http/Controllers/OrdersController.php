@@ -76,7 +76,7 @@ class OrdersController extends Controller
 
     // Delete product
     public function deleteProduct(Request $request){
-        $req = $request->all(); 
+        $req = $request->all();        
         $product = $req['product'];
         $numOfProducts = $req['numOfProduct'];        
         $orderNumber = getOrderNumberFromPath($request->path());
@@ -146,6 +146,11 @@ class OrdersController extends Controller
             'params' => ['HarolE$Davidici_com','HAR000002','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
             'keep_session' => false, 
         ]);
+        // $response = FoxproApi::call([
+        //     'action' => 'GetProductPrice',
+        //     'params' => ['HarolE$Davidici_com','18-048-2S-T2'],
+        //     'keep_session' => false, 
+        // ]);
 
         return Inertia::render('Test',['response' => $response]);
     }

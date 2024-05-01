@@ -1,6 +1,6 @@
 import UserAuthenticatedLayout from "../Layouts/UserAuthenticatedLayout";
 
-function Test({response}){
+function Test({ response }: { response: any }) {
     console.log(response);
     return (
         <UserAuthenticatedLayout crrPage="orders">

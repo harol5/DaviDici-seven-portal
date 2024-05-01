@@ -1,6 +1,18 @@
 import { Link } from "@inertiajs/react";
+import { ReactNode } from "react";
+import type { Order as OrderModel, OrderRecord } from "../Models/Order";
 
-function OrderLayout({children,order,crrOrderOption}){
+interface OrderLayoutProps {
+    children?: ReactNode;
+    order: OrderModel;
+    crrOrderOption: string;
+}
+
+function OrderLayout({ children, order, crrOrderOption }: OrderLayoutProps) {
+    const orderFormatted: OrderRecord = {
+        ...order,
+    };
+
     return (
         <div className="main-content-wrapper -order">
             <div className="order-options-menu-wrapper">
@@ -14,7 +26,7 @@ function OrderLayout({children,order,crrOrderOption}){
                     >
                         <Link
                             href={`/orders/${order.ordernum}/overview`}
-                            data={order}
+                            data={orderFormatted}
                             disabled={
                                 crrOrderOption === "overview" ? true : false
                             }
@@ -31,7 +43,7 @@ function OrderLayout({children,order,crrOrderOption}){
                     >
                         <Link
                             href={`/orders/${order.ordernum}/details`}
-                            data={order}
+                            data={orderFormatted}
                             disabled={
                                 crrOrderOption === "details" ? true : false
                             }
@@ -46,7 +58,10 @@ function OrderLayout({children,order,crrOrderOption}){
                                 : "options"
                         }
                     >
-                        <Link href={`/orders/${order.ordernum}/delivery`} data={order}>
+                        <Link
+                            href={`/orders/${order.ordernum}/delivery`}
+                            data={orderFormatted}
+                        >
                             Delivery options
                         </Link>
                     </li>
@@ -57,7 +72,10 @@ function OrderLayout({children,order,crrOrderOption}){
                                 : "options"
                         }
                     >
-                        <Link href={`/orders/${order.ordernum}/payment`} data={order}>
+                        <Link
+                            href={`/orders/${order.ordernum}/payment`}
+                            data={orderFormatted}
+                        >
                             Payment details
                         </Link>
                     </li>
