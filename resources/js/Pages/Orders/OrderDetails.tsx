@@ -52,9 +52,8 @@ function OrderDetails({ rawOrder, rawProducts }: OrderDetailsProps) {
 
     const handleQty = (value: string, product: ProductModel) => {
         const newQty = Number.parseInt(value);
-
-        if (newQty < 1 || newQty > 50) {
-            toast.error("Quantity can not be 0 or greater than 50");
+        if (newQty < 1 || newQty > 50 || !newQty) {
+            toast.error("Quantity can not be 0 or empty!!");
         } else {
             const updatedQty: ProductModel = { ...product, qty: newQty };
             axios

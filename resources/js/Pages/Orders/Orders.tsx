@@ -11,7 +11,7 @@ interface ordersProp {
     message: string;
 }
 
-function Orders({ auth, orders, message }: ordersProp) {
+function Orders({ auth, orders, message = "" }: ordersProp) {
     const [userOrders, setUserOrders] = useState(orders);
 
     const handleSearhInput = (e: ChangeEvent<HTMLInputElement>) => {

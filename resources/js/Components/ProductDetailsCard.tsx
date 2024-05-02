@@ -48,8 +48,8 @@ function ProductDetailsCard({
                                 type="number"
                                 name="qty"
                                 defaultValue={product.qty}
-                                min={1}
-                                max={50}
+                                min={"1"}
+                                max={"50"}
                                 onChange={(e) =>
                                     handleQty(e.target.value, product)
                                 }

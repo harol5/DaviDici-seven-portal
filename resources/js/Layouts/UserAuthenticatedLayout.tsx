@@ -1,5 +1,4 @@
 import { Link } from "@inertiajs/react";
-import logo from "../../../public/images/davidici-logo-nav-cropped.png";
 import { ReactNode } from "react";
 
 interface UserLayoutProps {
@@ -12,8 +11,11 @@ function UserAuthenticatedLayout({ children, crrPage }: UserLayoutProps) {
         <>
             <nav>
                 <div>
-                    <img className="nav-logo" src={logo} />
-                    {/* <h1 className="nav-logo">davidici</h1> */}
+                    {/* <img
+                        className="nav-logo"
+                        src="images/davidici-logo-nav-cropped.png"
+                    /> */}
+                    <h1 className="nav-logo">davidici</h1>
                     <ul className="nav-links">
                         <li className={crrPage === "orders" ? "active" : ""}>
                             <Link href="/orders">Orders</Link>

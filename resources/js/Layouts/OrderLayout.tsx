@@ -1,5 +1,5 @@
 import { Link } from "@inertiajs/react";
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import type { Order as OrderModel, OrderRecord } from "../Models/Order";
 
 interface OrderLayoutProps {
@@ -9,6 +9,39 @@ interface OrderLayoutProps {
 }
 
 function OrderLayout({ children, order, crrOrderOption }: OrderLayoutProps) {
+    // converts Obj to Query String;
+    const serialize = (obj: any) => {
+        let str = [];
+        for (let p in obj)
+            if (obj.hasOwnProperty(p)) {
+                str.push(
+                    encodeURIComponent(p) + "=" + encodeURIComponent(obj[p])
+                );
+            }
+        return str.join("&");
+    };
+
+    useEffect(() => {
+        //this changes the query string on reload to make sure it have updated data.
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            event.preventDefault();
+            console.log("before reload");
+            console.log(serialize(order));
+            location.replace(
+                `${location.origin}/orders/${
+                    order.ordernum
+                }/${crrOrderOption}?${serialize(order)}`
+            );
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+
+        return () => {
+            console.log("removing event reload");
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [order]);
+
     const orderFormatted: OrderRecord = {
         ...order,
     };

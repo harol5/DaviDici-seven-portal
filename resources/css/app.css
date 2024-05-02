@@ -11,7 +11,7 @@
 /*===========LOGIN STYLING==============*/
 .main-login {
     height: 100vh;
-    background-image: url("../images/davidici-background.jpg");
+    background-image: url("../../images/davidici-background.jpg");
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -428,6 +428,7 @@ main {
 }
 .address-wrapper,
 .delivery-type-wrapper,
+.delivery-date,
 .delivery-instruction-wrapper {
     flex-basis: 100%;
 }

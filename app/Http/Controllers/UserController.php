@@ -14,11 +14,12 @@ class UserController extends Controller
     // Show login form ----------
     public function login(Request $request){
         $message = $request->session()->get('message');
+        $username = auth()->user();
+        if($username) {
+            return redirect('/orders');
+        }
 
         return Inertia::render('Users/Login',['message' => $message]);
-
-        //--- blade template
-        // return view('users.login');
     }
 
 
