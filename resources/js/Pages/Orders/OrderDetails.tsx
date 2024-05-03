@@ -91,10 +91,11 @@ function OrderDetails({ rawOrder, rawProducts }: OrderDetailsProps) {
 
     const handleDelete = (product: ProductModel) => {
         if (products.length === 1) {
+            //specific type just for inertia.
             const productFormatted: ProductRecord = {
                 ...product,
             };
-
+            // Router from inertia is used in this case because when there is no products, user should be redirect to main page.
             router.post(`/orders/${order.ordernum}/products/delete`, {
                 product: productFormatted,
                 numOfProduct: products.length,
@@ -153,7 +154,7 @@ function OrderDetails({ rawOrder, rawProducts }: OrderDetailsProps) {
                         />
                     ))}
                 </section>
-                <section className="flex">
+                {/* <section className="flex">
                     <div className="mr-4">
                         <h2>Sub-total:</h2>
                         <h2>Total Credit:</h2>
@@ -164,7 +165,7 @@ function OrderDetails({ rawOrder, rawProducts }: OrderDetailsProps) {
                         <p>${order.totcredit}</p>
                         <p className="border-t border-black">${order.total}</p>
                     </div>
-                </section>
+                </section> */}
             </OrderLayout>
             <ToastContainer />
         </UserAuthenticatedLayout>

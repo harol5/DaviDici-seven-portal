@@ -9,7 +9,7 @@ interface OrderLayoutProps {
 }
 
 function OrderLayout({ children, order, crrOrderOption }: OrderLayoutProps) {
-    // converts Obj to Query String;
+    // HELPER FUNC --> converts Obj to Query String;
     const serialize = (obj: any) => {
         let str = [];
         for (let p in obj)
@@ -21,8 +21,8 @@ function OrderLayout({ children, order, crrOrderOption }: OrderLayoutProps) {
         return str.join("&");
     };
 
+    //this changes the query string on reload to make sure it have updated data.
     useEffect(() => {
-        //this changes the query string on reload to make sure it have updated data.
         const handleBeforeUnload = (event: BeforeUnloadEvent) => {
             event.preventDefault();
             console.log("before reload");
@@ -120,6 +120,20 @@ function OrderLayout({ children, order, crrOrderOption }: OrderLayoutProps) {
                         <h1>Order Number:</h1>
                         <span>{order.ordernum}</span>
                     </div>
+                    <section className="grow flex justify-between text-center">
+                        <div className="grow mx-6 border-l border-black">
+                            <h2>sub-total:</h2>
+                            <p>${order.subtotal}</p>
+                        </div>
+                        <div className="grow">
+                            <h2>credit:</h2>
+                            <p>${order.totcredit}</p>
+                        </div>
+                        <div className="grow mx-6 border-r border-black">
+                            <h2>Total:</h2>
+                            <p className="">${order.total}</p>
+                        </div>
+                    </section>
                     <div className="order-buttons-wrapper">
                         <button>print order</button>
                         <button>approve order</button>

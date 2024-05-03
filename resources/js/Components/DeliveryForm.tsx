@@ -1,14 +1,23 @@
 import type { Order as OrderModel } from "../Models/Order";
-import { FormEvent, useState } from "react";
+import { Dispatch, FormEvent, SetStateAction, useState } from "react";
 import { useForm } from "@inertiajs/react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import type { DeliveryFoxpro as DeliveryFoxproModel } from "../Models/Delivery";
+
 interface DeliveryFormProps {
     order: OrderModel;
+    deliveryInfo: DeliveryFoxproModel;
+    setDeliveryFee: (deliveryFee: number) => void;
 }
 
-function DeliveryForm({ order }: DeliveryFormProps) {
+function DeliveryForm({
+    order,
+    deliveryInfo,
+    setDeliveryFee,
+}: DeliveryFormProps) {
+    console.log("delivery form component ran!!");
     const getDate = () => {
         //TODO: must improve the calculation of the date.
         const dateObj = new Date();
@@ -16,14 +25,14 @@ function DeliveryForm({ order }: DeliveryFormProps) {
         const nextDate = dateObj.getUTCDate() + 7;
 
         const year = dateObj.getUTCFullYear();
-        const day = dateObj.getUTCDay();
+        // const day = dateObj.getUTCDay();
 
         // Using padded values, so that 2023/1/7 becomes 2023/01/07
         const pMonth = month.toString().padStart(2, "0");
         const pNextDate = nextDate.toString().padStart(2, "0");
 
         const startDate = `${year}-${pMonth}-${pNextDate}`;
-
+        console.log(startDate);
         return startDate;
     };
 
@@ -42,21 +51,26 @@ function DeliveryForm({ order }: DeliveryFormProps) {
         zipCode: [],
     });
 
+    const [isDataSaved, setIsDataSaved] = useState(() =>
+        deliveryInfo.sadd ? true : false
+    );
+
     const { data, setData } = useForm({
-        date: getDate(),
-        address: "",
-        cellphoneNumber: "",
-        city: "",
-        contactName: "",
-        customerEmail: "",
-        customerName: "",
-        deliveryType: "to dealer",
-        state: "",
-        telephoneNumber: "",
-        wholesalerEmail: "",
-        zipCode: "",
-        deliveryInstruction: "",
+        date: deliveryInfo.deldate || getDate(),
+        address: deliveryInfo.sadd,
+        cellphoneNumber: deliveryInfo.scell,
+        city: deliveryInfo.scity,
+        contactName: deliveryInfo.contact,
+        customerEmail: deliveryInfo.semail,
+        customerName: deliveryInfo.sname,
+        deliveryType: deliveryInfo.dtype,
+        state: deliveryInfo.sst,
+        telephoneNumber: deliveryInfo.stel,
+        wholesalerEmail: deliveryInfo.swmail,
+        zipCode: deliveryInfo.szip,
+        deliveryInstruction: deliveryInfo.spinst,
     });
+    console.log("info from foxpro:", data);
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -72,7 +86,16 @@ function DeliveryForm({ order }: DeliveryFormProps) {
                 `/orders/${order.ordernum}/products/delivery`,
                 { ...data, date: formattedDeliveryDate }
             );
-            console.log(res);
+
+            const deliveryFee =
+                data.deliveryType === "TO DEALER"
+                    ? 50 //$
+                    : data.deliveryType === "DAVIDICI FINAL MILE"
+                    ? 75 //$
+                    : 0; //$
+
+            setIsDataSaved(true);
+            setDeliveryFee(deliveryFee);
             toast.success(res.data.message);
         } catch (error) {
             if (axios.isAxiosError(error)) {
@@ -86,6 +109,7 @@ function DeliveryForm({ order }: DeliveryFormProps) {
             }
         }
     };
+
     return (
         <>
             <form onSubmit={handleSubmit} className="delivery-form">
@@ -96,17 +120,28 @@ function DeliveryForm({ order }: DeliveryFormProps) {
                         id="delivery-date"
                         name="date"
                         min={data.date}
-                        max="2024-05-20"
+                        max="2024-06-20"
                         value={data.date}
                         onChange={(e) => setData("date", e.currentTarget.value)}
+                        readOnly={isDataSaved}
                     />
                     {errors.date && (
                         <p className="text-red-500">{errors.date}</p>
                     )}
                 </div>
 
+                <div className="edit-button-wrapper">
+                    <button
+                        type="button"
+                        disabled={!isDataSaved}
+                        onClick={() => setIsDataSaved(false)}
+                    >
+                        Edit
+                    </button>
+                </div>
+
                 <div className="customer-name-wrapper">
-                    <label htmlFor="customer-name">Customer name</label>
+                    <label htmlFor="customer-name">Customer name:</label>
                     <input
                         type="text"
                         name="customerName"
@@ -115,6 +150,7 @@ function DeliveryForm({ order }: DeliveryFormProps) {
                             setData("customerName", e.target.value)
                         }
                         value={data.customerName}
+                        readOnly={isDataSaved}
                     />
                     {errors.customerName && (
                         <p className="text-red-500">{errors.customerName}</p>
@@ -122,13 +158,14 @@ function DeliveryForm({ order }: DeliveryFormProps) {
                 </div>
 
                 <div className="contact-name-wrapper">
-                    <label htmlFor="contact-name">Contact name</label>
+                    <label htmlFor="contact-name">Contact name:</label>
                     <input
                         type="text"
                         name="contactName"
                         id="contact-name"
                         value={data.contactName}
                         onChange={(e) => setData("contactName", e.target.value)}
+                        readOnly={isDataSaved}
                     />
                     {errors.contactName && (
                         <p className="text-red-500">{errors.contactName}</p>
@@ -136,7 +173,7 @@ function DeliveryForm({ order }: DeliveryFormProps) {
                 </div>
 
                 <div className="telephone-number-wrapper">
-                    <label htmlFor="telephone-number">Telephone number</label>
+                    <label htmlFor="telephone-number">Telephone number:</label>
                     <input
                         type="tel"
                         name="telephoneNumber"
@@ -145,6 +182,7 @@ function DeliveryForm({ order }: DeliveryFormProps) {
                             setData("telephoneNumber", e.target.value)
                         }
                         value={data.telephoneNumber}
+                        readOnly={isDataSaved}
                     />
                     {errors.telephoneNumber && (
                         <p className="text-red-500">{errors.telephoneNumber}</p>
@@ -152,7 +190,7 @@ function DeliveryForm({ order }: DeliveryFormProps) {
                 </div>
 
                 <div className="cellphone-number-wrapper">
-                    <label htmlFor="cellphone-number">Cellphone number</label>
+                    <label htmlFor="cellphone-number">Cellphone number:</label>
                     <input
                         type="tel"
                         name="cellphoneNumber"
@@ -161,6 +199,7 @@ function DeliveryForm({ order }: DeliveryFormProps) {
                             setData("cellphoneNumber", e.target.value)
                         }
                         value={data.cellphoneNumber}
+                        readOnly={isDataSaved}
                     />
                     {errors.cellphoneNumber && (
                         <p className="text-red-500">{errors.cellphoneNumber}</p>
@@ -168,7 +207,7 @@ function DeliveryForm({ order }: DeliveryFormProps) {
                 </div>
 
                 <div className="wholesaler-email-wrapper">
-                    <label htmlFor="wholesaler-email">Wholesaler email</label>
+                    <label htmlFor="wholesaler-email">Wholesaler email:</label>
                     <input
                         type="email"
                         name="wholesalerEmail"
@@ -177,6 +216,7 @@ function DeliveryForm({ order }: DeliveryFormProps) {
                             setData("wholesalerEmail", e.target.value)
                         }
                         value={data.wholesalerEmail}
+                        readOnly={isDataSaved}
                     />
                     {errors.wholesalerEmail && (
                         <p className="text-red-500">{errors.wholesalerEmail}</p>
@@ -184,7 +224,7 @@ function DeliveryForm({ order }: DeliveryFormProps) {
                 </div>
 
                 <div className="customer-email-wrapper">
-                    <label htmlFor="customer-email">Customer email</label>
+                    <label htmlFor="customer-email">Customer email:</label>
                     <input
                         type="email"
                         name="customerEmail"
@@ -193,6 +233,7 @@ function DeliveryForm({ order }: DeliveryFormProps) {
                             setData("customerEmail", e.target.value)
                         }
                         value={data.customerEmail}
+                        readOnly={isDataSaved}
                     />
                     {errors.customerEmail && (
                         <p className="text-red-500">{errors.customerEmail}</p>
@@ -200,13 +241,14 @@ function DeliveryForm({ order }: DeliveryFormProps) {
                 </div>
 
                 <div className="address-wrapper">
-                    <label htmlFor="address">Address</label>
+                    <label htmlFor="address">Address:</label>
                     <input
                         type="text"
                         name="address"
                         id="address"
                         onChange={(e) => setData("address", e.target.value)}
                         value={data.address}
+                        readOnly={isDataSaved}
                     />
                     {errors.address && (
                         <p className="text-red-500">{errors.address}</p>
@@ -214,13 +256,14 @@ function DeliveryForm({ order }: DeliveryFormProps) {
                 </div>
 
                 <div className="city-wrapper">
-                    <label htmlFor="city">City</label>
+                    <label htmlFor="city">City:</label>
                     <input
                         type="text"
                         name="city"
                         id="city"
                         onChange={(e) => setData("city", e.target.value)}
                         value={data.city}
+                        readOnly={isDataSaved}
                     />
                     {errors.city && (
                         <p className="text-red-500">{errors.city}</p>
@@ -228,13 +271,14 @@ function DeliveryForm({ order }: DeliveryFormProps) {
                 </div>
 
                 <div className="state-wrapper">
-                    <label htmlFor="state">State</label>
+                    <label htmlFor="state">State:</label>
                     <input
                         type="text"
                         name="state"
                         id="state"
                         onChange={(e) => setData("state", e.target.value)}
                         value={data.state}
+                        readOnly={isDataSaved}
                     />
                     {errors.state && (
                         <p className="text-red-500">{errors.state}</p>
@@ -242,13 +286,14 @@ function DeliveryForm({ order }: DeliveryFormProps) {
                 </div>
 
                 <div className="zip-code-wrapper">
-                    <label htmlFor="zip-code">Zip code</label>
+                    <label htmlFor="zip-code">Zip code:</label>
                     <input
                         type="text"
                         name="zipCode"
                         id="zip-code"
                         onChange={(e) => setData("zipCode", e.target.value)}
                         value={data.zipCode}
+                        readOnly={isDataSaved}
                     />
                     {errors.zipCode && (
                         <p className="text-red-500">{errors.zipCode}</p>
@@ -256,7 +301,7 @@ function DeliveryForm({ order }: DeliveryFormProps) {
                 </div>
 
                 <div className="delivery-type-wrapper">
-                    <label htmlFor="delivery-type">Delivery type</label>
+                    <label htmlFor="delivery-type">Delivery type:</label>
                     <select
                         name="deliveryType"
                         id="delivery-type"
@@ -264,12 +309,13 @@ function DeliveryForm({ order }: DeliveryFormProps) {
                             setData("deliveryType", e.target.value)
                         }
                         value={data.deliveryType}
+                        disabled={isDataSaved}
                     >
-                        <option value="to dealer">To Dealer ($50 fee)</option>
-                        <option value="davidici final mile">
+                        <option value="TO DEALER">To Dealer ($50 fee)</option>
+                        <option value="DAVIDICI FINAL MILE">
                             Davidici Final Mile ($75 fee)
                         </option>
-                        <option value="pick up">Pick up</option>
+                        <option value="PICK UP">Pick up</option>
                     </select>
                     {errors.deliveryType && (
                         <p className="text-red-500">{errors.deliveryType}</p>
@@ -278,21 +324,25 @@ function DeliveryForm({ order }: DeliveryFormProps) {
 
                 <div className="delivery-instruction-wrapper">
                     <label htmlFor="delivery-instruction">
-                        Delivery Instructions
+                        Delivery Instructions:
                     </label>
                     <textarea
                         name="deliveryInstruction"
                         id="delivery-instruction"
                         cols={30}
-                        rows={10}
+                        rows={5}
                         onChange={(e) =>
                             setData("deliveryInstruction", e.target.value)
                         }
                         value={data.deliveryInstruction}
+                        readOnly={isDataSaved}
                     ></textarea>
                 </div>
-                <div>
-                    <button type="submit">Submit</button>
+
+                <div className="submit-button-wrapper">
+                    <button type="submit" disabled={isDataSaved}>
+                        Submit
+                    </button>
                 </div>
             </form>
             <ToastContainer />

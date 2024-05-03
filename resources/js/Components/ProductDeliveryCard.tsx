@@ -1,10 +1,16 @@
 import type { Product as ProductModel } from "../Models/Product";
+import type { DeliveryFoxpro } from "../Models/Delivery";
 
 interface ProductDeliveryCardProps {
     product: ProductModel;
+    productDeliStatus: DeliveryFoxpro;
 }
 
-function ProductDeliveryCard({ product }: ProductDeliveryCardProps) {
+function ProductDeliveryCard({
+    product,
+    productDeliStatus,
+}: ProductDeliveryCardProps) {
+    console.log(productDeliStatus);
     return (
         <div className="product-wrapper product-delivery-card">
             <header>

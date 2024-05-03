@@ -13,3 +13,24 @@ export type Delivery = {
     ln: number;
     qty: number;
 };
+
+export type DeliveryFoxpro = {
+    contact: string;
+    deldate: string;
+    dtype: string;
+    ln: number;
+    qty: number;
+    sadd: string;
+    scell: string;
+    scity: string;
+    semail: string;
+    shipper: string;
+    sname: string;
+    spinst: string;
+    sst: string;
+    stel: string;
+    swmail: string;
+    szip: string;
+    uscode: string;
+    waddress: string;
+};

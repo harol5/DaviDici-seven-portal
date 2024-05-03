@@ -93,7 +93,7 @@ nav > div {
     color: black;
 }
 .active {
-    border-bottom: 1px solid #d1aa68;
+    border-bottom: 1.5px solid #d1aa68;
 }
 
 /*============MAIN STYLING==============*/
@@ -172,7 +172,7 @@ main {
 /*order page content specific class*/
 .-order {
     display: flex;
-    padding-top: 2em;
+    padding-top: 2.5em;
 }
 
 /*order options*/
@@ -397,11 +397,41 @@ main {
     flex-basis: 10%;
 }
 
-/* form */
+/* -----------FORM */
 .delivery-form {
     display: flex;
     flex-wrap: wrap;
+    margin-bottom: 5em;
 }
+/* FORM LAYOUT*/
+.delivery-date {
+    flex-basis: 20%;
+}
+.edit-button-wrapper {
+    flex-basis: 80%;
+    justify-content: center;
+    align-items: end;
+}
+.customer-name-wrapper,
+.contact-name-wrapper,
+.telephone-number-wrapper,
+.cellphone-number-wrapper,
+.wholesaler-email-wrapper,
+.customer-email-wrapper {
+    flex-basis: 50%;
+}
+.address-wrapper,
+.delivery-type-wrapper,
+.submit-button-wrapper,
+.delivery-instruction-wrapper {
+    flex-basis: 100%;
+}
+.city-wrapper,
+.state-wrapper,
+.zip-code-wrapper {
+    flex-basis: 33.33333%;
+}
+
 /* labels/inputs wrapper */
 .delivery-form > div {
     display: flex;
@@ -417,39 +447,50 @@ main {
 .delivery-form select {
     padding: 0.3em;
 }
-
-.customer-name-wrapper,
-.contact-name-wrapper,
-.telephone-number-wrapper,
-.cellphone-number-wrapper,
-.wholesaler-email-wrapper,
-.customer-email-wrapper {
-    flex-basis: 50%;
-}
-.address-wrapper,
-.delivery-type-wrapper,
-.delivery-date,
-.delivery-instruction-wrapper {
-    flex-basis: 100%;
-}
-.city-wrapper,
-.state-wrapper,
-.zip-code-wrapper {
-    flex-basis: 33.33333%;
+.delivery-form textarea {
+    padding: 0.3em;
 }
 
+/*FIELDS STYLING*/
 .customer-name-wrapper,
 .telephone-number-wrapper,
 .wholesaler-email-wrapper,
 .city-wrapper {
     padding-right: 1em;
 }
-
 .contact-name-wrapper,
 .cellphone-number-wrapper,
 .customer-email-wrapper,
 .zip-code-wrapper {
     padding-left: 1em;
+}
+.edit-button {
+    justify-content: center;
+    align-items: end;
+}
+
+.submit-button-wrapper {
+    justify-content: center;
+    align-items: center;
+}
+
+.submit-button-wrapper button,
+.edit-button-wrapper button {
+    background-color: #d1aa68;
+    width: 6em;
+    padding: 0.2em 1em;
+    border-radius: 3px;
+    border: solid 1px;
+    font-weight: lighter;
+}
+
+/*STATE STYLING*/
+.delivery-form input:read-only,
+.delivery-form textarea:read-only,
+.delivery-form select:disabled,
+.delivery-form button:disabled {
+    background-color: #f0f0f0;
+    color: #616161;
 }
 
 /*============RESPONSIVE STYLING==============*/
