@@ -32,7 +32,7 @@ function DeliveryForm({
         const pNextDate = nextDate.toString().padStart(2, "0");
 
         const startDate = `${year}-${pMonth}-${pNextDate}`;
-        console.log(startDate);
+        console.log("getDate func called!!",startDate);
         return startDate;
     };
 
@@ -63,7 +63,7 @@ function DeliveryForm({
         contactName: deliveryInfo.contact,
         customerEmail: deliveryInfo.semail,
         customerName: deliveryInfo.sname,
-        deliveryType: deliveryInfo.dtype,
+        deliveryType: deliveryInfo.dtype || "TO DEALER", // default delivery type.
         state: deliveryInfo.sst,
         telephoneNumber: deliveryInfo.stel,
         wholesalerEmail: deliveryInfo.swmail,
@@ -71,7 +71,7 @@ function DeliveryForm({
         deliveryInstruction: deliveryInfo.spinst,
     });
     console.log("info from foxpro:", data);
-
+    console.log("" || "this");
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
@@ -84,19 +84,22 @@ function DeliveryForm({
         try {
             const res = await axios.post(
                 `/orders/${order.ordernum}/products/delivery`,
-                { ...data, date: formattedDeliveryDate }
-            );
-
-            const deliveryFee =
-                data.deliveryType === "TO DEALER"
-                    ? 50 //$
-                    : data.deliveryType === "DAVIDICI FINAL MILE"
-                    ? 75 //$
-                    : 0; //$
-
-            setIsDataSaved(true);
-            setDeliveryFee(deliveryFee);
-            toast.success(res.data.message);
+                { ...data, date: formattedDeliveryDate, deliveryInstruction: data.deliveryInstruction || "N/A" }
+            );            
+            if(res.data.foxproRes.status === 201){
+                const deliveryFee =
+                    data.deliveryType === "TO DEALER"
+                        ? 50 //$
+                        : data.deliveryType === "DAVIDICI FINAL MILE"
+                        ? 75 //$
+                        : 0; //$
+    
+                setIsDataSaved(true);
+                setDeliveryFee(deliveryFee);
+                toast.success(res.data.message);
+            }else{
+                toast.error(res.data.message);
+            }
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 console.log(error.response?.data);

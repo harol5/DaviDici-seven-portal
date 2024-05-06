@@ -158,9 +158,11 @@ class OrdersController extends Controller
             'keep_session' => false,
         ]);
 
-        //TODO: Hershel needs to send an ok message if the transaction was succesful. returning null at this moment.
+        if($res['Result'] === 'Info Updated Successfully'){
+            return response(['foxproRes' => $res, 'message' => 'dalivery information saved!!', 'information' => $deliveryInfo])->header('Content-Type', 'application/json');        
+        }
         
-        return response(['data' => $res, 'message' => 'dalivery information saved!!', 'information' => $deliveryInfo])->header('Content-Type', 'application/json');        
+        return response(['foxproRes' => $res, 'message' => 'internal issue', 'information' => $deliveryInfo])->header('Content-Type', 'application/json');
     }
 
     // Show single order payment form.
@@ -173,11 +175,11 @@ class OrdersController extends Controller
 
 
     public function testApi(){
-        $response = FoxproApi::call([
-            'action' => 'OrderEnter',
-            'params' => ['HarolE$Davidici_com','HAR000003','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
-            'keep_session' => false, 
-        ]);
+        // $response = FoxproApi::call([
+        //     'action' => 'OrderEnter',
+        //     'params' => ['HarolE$Davidici_com','HAR000002','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
+        //     'keep_session' => false, 
+        // ]);
 
         // $response = FoxproApi::call([
         //     'action' => 'GetProductPrice',
@@ -185,11 +187,11 @@ class OrdersController extends Controller
         //     'keep_session' => false, 
         // ]);
 
-        // $response = FoxproApi::call([
-        //     'action' => 'SaveDeliveryInfo',
-        //     'params' => ['HAR000001','05/20/2024','my side units','john doe','1234567890','1234567890','wholesaler@email.com','customer@email.com','123 main st','brooklyn','ny','11223','pick up','','ALL'],
-        //     'keep_session' => false, 
-        // ]);
+        $response = FoxproApi::call([
+            'action' => 'SaveDeliveryInfo',
+            'params' => ['HAR000001','05/20/2024','my vanities','john doe','1234567890','1234567890','wholesaler@email.com','customer@email.com','123 main st','brooklyn','ny','11223','pick up','','ALL'],
+            'keep_session' => false, 
+        ]);
 
         // $response = FoxproApi::call([
         //     'action' => 'GetDeliveryInfo',

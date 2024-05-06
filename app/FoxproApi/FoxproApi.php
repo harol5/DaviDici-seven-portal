@@ -11,15 +11,15 @@ class FoxproApi{
         $api_user = env('FOXPRO_API_USER');
         $api_secret = env('FOXPRO_API_SECRET');
         $js_data = json_encode($options);
-    
+        
         $response = Http::withHeaders([
             'Origin' => $request_origin,
             'Authorization' => 'Basic ' . base64_encode($api_user . ':' . $api_secret),
         ])->withBody($js_data,'application/json')->get($api_url);
 
         $data = $response->json();
-        // dd($response);
-        if(is_array($data) && array_key_exists('Result',$data)){
+        
+        if(is_array($data) && array_key_exists('Result',$data)){            
             return $data;
         }
 
