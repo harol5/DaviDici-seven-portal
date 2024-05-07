@@ -153,19 +153,7 @@ function OrderDetails({ rawOrder, rawProducts }: OrderDetailsProps) {
                             handleDelete={handleDelete}
                         />
                     ))}
-                </section>
-                {/* <section className="flex">
-                    <div className="mr-4">
-                        <h2>Sub-total:</h2>
-                        <h2>Total Credit:</h2>
-                        <h2>Total:</h2>
-                    </div>
-                    <div>
-                        <p>${order.subtotal}</p>
-                        <p>${order.totcredit}</p>
-                        <p className="border-t border-black">${order.total}</p>
-                    </div>
-                </section> */}
+                </section>              
             </OrderLayout>
             <ToastContainer />
         </UserAuthenticatedLayout>

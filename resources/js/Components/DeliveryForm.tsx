@@ -9,7 +9,7 @@ import type { DeliveryFoxpro as DeliveryFoxproModel } from "../Models/Delivery";
 interface DeliveryFormProps {
     order: OrderModel;
     deliveryInfo: DeliveryFoxproModel;
-    setDeliveryFee: (deliveryFee: number) => void;
+    setDeliveryFee: (crrDeliveryType: string, newDeliveryFee: string) => void;
 }
 
 function DeliveryForm({
@@ -17,25 +17,23 @@ function DeliveryForm({
     deliveryInfo,
     setDeliveryFee,
 }: DeliveryFormProps) {
-    console.log("delivery form component ran!!");
-    const getDate = () => {
-        //TODO: must improve the calculation of the date.
+    
+    const getDate = () => {        
         const dateObj = new Date();
-        const month = dateObj.getUTCMonth() + 1; // months from 1-12
-        const nextDate = dateObj.getUTCDate() + 7;
+        dateObj.setDate(dateObj.getUTCDate() + 7);
 
+        const month = dateObj.getUTCMonth() + 1; // months from 1-12
+        const date = dateObj.getUTCDate();
         const year = dateObj.getUTCFullYear();
-        // const day = dateObj.getUTCDay();
 
         // Using padded values, so that 2023/1/7 becomes 2023/01/07
         const pMonth = month.toString().padStart(2, "0");
-        const pNextDate = nextDate.toString().padStart(2, "0");
-
+        const pNextDate = date.toString().padStart(2, "0");
         const startDate = `${year}-${pMonth}-${pNextDate}`;
-        console.log("getDate func called!!",startDate);
+
         return startDate;
     };
-
+    
     const [errors, setErrors] = useState({
         date: [],
         address: [],
@@ -55,6 +53,8 @@ function DeliveryForm({
         deliveryInfo.sadd ? true : false
     );
 
+    const [crrDeliveryType,setCrrDeliveryType] = useState(deliveryInfo.dtype);
+
     const { data, setData } = useForm({
         date: deliveryInfo.deldate || getDate(),
         address: deliveryInfo.sadd,
@@ -70,8 +70,7 @@ function DeliveryForm({
         zipCode: deliveryInfo.szip,
         deliveryInstruction: deliveryInfo.spinst,
     });
-    console.log("info from foxpro:", data);
-    console.log("" || "this");
+    
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
@@ -79,27 +78,22 @@ function DeliveryForm({
         const year = dateAsArray.shift()!;
         dateAsArray.push(year);
         const formattedDeliveryDate = dateAsArray.join("/");
-        console.log(formattedDeliveryDate);
 
         try {
             const res = await axios.post(
                 `/orders/${order.ordernum}/products/delivery`,
                 { ...data, date: formattedDeliveryDate, deliveryInstruction: data.deliveryInstruction || "N/A" }
-            );            
-            if(res.data.foxproRes.status === 201){
-                const deliveryFee =
-                    data.deliveryType === "TO DEALER"
-                        ? 50 //$
-                        : data.deliveryType === "DAVIDICI FINAL MILE"
-                        ? 75 //$
-                        : 0; //$
-    
-                setIsDataSaved(true);
-                setDeliveryFee(deliveryFee);
+            );  
+                      
+            if(res.data.foxproRes.status === 201){                                
+                setIsDataSaved(true);                
+                setDeliveryFee(crrDeliveryType, data.deliveryType);
+                setCrrDeliveryType(data.deliveryType);
                 toast.success(res.data.message);
             }else{
                 toast.error(res.data.message);
             }
+
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 console.log(error.response?.data);
@@ -122,7 +116,7 @@ function DeliveryForm({
                         type="date"
                         id="delivery-date"
                         name="date"
-                        min={data.date}
+                        min={getDate()}
                         max="2024-06-20"
                         value={data.date}
                         onChange={(e) => setData("date", e.currentTarget.value)}

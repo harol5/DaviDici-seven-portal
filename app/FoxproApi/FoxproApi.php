@@ -19,7 +19,8 @@ class FoxproApi{
 
         $data = $response->json();
         
-        if(is_array($data) && array_key_exists('Result',$data)){            
+        if(is_array($data) && array_key_exists('Result',$data)){       
+            $data['status'] = 201;   
             return $data;
         }
 
