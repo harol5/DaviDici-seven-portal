@@ -24,6 +24,7 @@
     "include": [
         "resources/**/*.ts",
         "resources/**/*.d.ts",
-        "resources/**/*.tsx"
+        "resources/**/*.tsx", 
+        "resources/js/Pages/Orders/OrderPayment.tsx"
     ]
 }

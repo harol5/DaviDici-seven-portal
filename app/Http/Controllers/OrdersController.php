@@ -177,7 +177,7 @@ class OrdersController extends Controller
     public function testApi(){
         $response = FoxproApi::call([
             'action' => 'OrderEnter',
-            'params' => ['HarolE$Davidici_com','HAR000001','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
+            'params' => ['HarolE$Davidici_com','HAR000002','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
             'keep_session' => false, 
         ]);
 
