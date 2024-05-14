@@ -3,6 +3,8 @@ import OrderLayout from "../../Layouts/OrderLayout";
 import UserAuthenticatedLayout from "../../Layouts/UserAuthenticatedLayout";
 import type { Order as OrderModel } from "../../Models/Order";
 import type { CardInfo as CardInfoModel } from "../../Models/CardInfo";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 
 interface OrderPaymentProps {
@@ -117,27 +119,25 @@ function OrderPayment({ order }: OrderPaymentProps) {
                     },
                 }
             );
-            console.log(res);
-
             const token = res.data.value;
+            console.log("token response:", token);
+
             const res2 = await axios.post(
-                "https://sandbox.api.intuit.com/quickbooks/v4/payments/charges",
+                `/orders/${order.ordernum}/products/payment`,
                 {
                     currency: "USD",
-                    amount: "10.55",
+                    amount: order.total,
                     context: {
                         mobile: false,
                         isEcommerce: true,
                     },
                     token: token,
-                },
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
                 }
             );
-            console.log(res2);
+
+            console.log("charges response (Intuit):", res2);
+            if (res2.data.status === 201)
+                toast.success("Transaction approved!!");
         } catch (err) {
             console.log(err);
         }
@@ -147,86 +147,98 @@ function OrderPayment({ order }: OrderPaymentProps) {
         <UserAuthenticatedLayout crrPage="orders">
             <OrderLayout order={order} crrOrderOption="payment">
                 <h1>Payment</h1>
-                <form id="payment-form" onSubmit={handleSubmit}>
-                    <label htmlFor="card-num">Card number:</label>
-                    <input
-                        type="tel"
-                        pattern="\d*"
-                        minLength={14}
-                        maxLength={19}
-                        id="card-num"
-                        name="number"
-                        value={state.number}
-                        placeholder="Credit Card Number"
-                        autoComplete="cc-number"
-                        onChange={(e) => {
-                            dispatch({
-                                type: "set-number",
-                                payload: e.currentTarget.value,
-                            });
-                        }}
-                    />
+                <form
+                    id="payment-form"
+                    onSubmit={handleSubmit}
+                    className="flex flex-col"
+                >
+                    <div>
+                        <label htmlFor="card-num">Card number:</label>
+                        <input
+                            type="tel"
+                            pattern="\d*"
+                            minLength={14}
+                            maxLength={19}
+                            id="card-num"
+                            name="number"
+                            value={state.number}
+                            placeholder="Credit Card Number"
+                            autoComplete="cc-number"
+                            onChange={(e) => {
+                                dispatch({
+                                    type: "set-number",
+                                    payload: e.currentTarget.value,
+                                });
+                            }}
+                        />
+                    </div>
 
-                    <label htmlFor="exp-date">Expiration date:</label>
-                    <input
-                        type="tel"
-                        maxLength={2}
-                        id="exp-date"
-                        name="expMonth"
-                        min={"01"}
-                        max={"12"}
-                        value={state.expMonth}
-                        placeholder="MM"
-                        onChange={(e) => {
-                            dispatch({
-                                type: "set-expMonth",
-                                payload: e.currentTarget.value,
-                            });
-                        }}
-                    />
-                    <input
-                        type="tel"
-                        maxLength={4}
-                        name="expYear"
-                        value={state.expYear}
-                        placeholder="YYYY, Ex: 2027"
-                        onChange={(e) => {
-                            dispatch({
-                                type: "set-expYear",
-                                payload: e.currentTarget.value,
-                            });
-                        }}
-                    />
+                    <div>
+                        <label htmlFor="exp-date">Expiration date:</label>
+                        <input
+                            type="tel"
+                            maxLength={2}
+                            id="exp-date"
+                            name="expMonth"
+                            min={"01"}
+                            max={"12"}
+                            value={state.expMonth}
+                            placeholder="MM"
+                            onChange={(e) => {
+                                dispatch({
+                                    type: "set-expMonth",
+                                    payload: e.currentTarget.value,
+                                });
+                            }}
+                        />
+                        <input
+                            type="tel"
+                            maxLength={4}
+                            name="expYear"
+                            value={state.expYear}
+                            placeholder="YYYY, Ex: 2027"
+                            onChange={(e) => {
+                                dispatch({
+                                    type: "set-expYear",
+                                    payload: e.currentTarget.value,
+                                });
+                            }}
+                        />
+                    </div>
 
-                    <label htmlFor="cvc">Security code:</label>
-                    <input
-                        type="tel"
-                        name="cvc"
-                        value={state.cvc}
-                        placeholder="CVC"
-                        autoComplete="cc-csc"
-                        id="cvc"
-                        onChange={(e) => {
-                            dispatch({
-                                type: "set-cvc",
-                                payload: e.currentTarget.value,
-                            });
-                        }}
-                    />
+                    <div>
+                        <label htmlFor="cvc">Security code:</label>
+                        <input
+                            type="tel"
+                            name="cvc"
+                            value={state.cvc}
+                            placeholder="CVC"
+                            autoComplete="cc-csc"
+                            id="cvc"
+                            onChange={(e) => {
+                                dispatch({
+                                    type: "set-cvc",
+                                    payload: e.currentTarget.value,
+                                });
+                            }}
+                        />
+                    </div>
 
-                    <label htmlFor="name">Name on card:</label>
-                    <input
-                        type="text"
-                        name="name"
-                        value={state.name}
-                        id="name"
-                        onChange={(e) => {
-                            dispatch({
-                                type: "set-name",
-                                payload: e.currentTarget.value,
-                            });
-                        }}
-                    />
+                    <div>
+                        <label htmlFor="name">Name on card:</label>
+                        <input
+                            type="text"
+                            name="name"
+                            value={state.name}
+                            id="name"
+                            onChange={(e) => {
+                                dispatch({
+                                    type: "set-name",
+                                    payload: e.currentTarget.value,
+                                });
+                            }}
+                        />
+                    </div>
 
                     <label htmlFor="billing-address">Address</label>
                     <input
@@ -241,14 +253,6 @@ function OrderPayment({ order }: OrderPaymentProps) {
                             });
                         }}
                     />
-
-                    {/* <label htmlFor="country">Country:</label>
-                    <input
-                        type="text"
-                        name="country"
-                        id="country"
-                        onChange={handleOnChange}
-                    /> */}
 
                     <label htmlFor="city">City:</label>
                     <input
@@ -350,6 +354,7 @@ function OrderPayment({ order }: OrderPaymentProps) {
                     <button type="submit">submit</button>
                 </form>
             </OrderLayout>
+            <ToastContainer />
         </UserAuthenticatedLayout>
     );
 }

@@ -1,5 +1,5 @@
 import type { Order as OrderModel } from "../Models/Order";
-import { Dispatch, FormEvent, SetStateAction, useState } from "react";
+import { FormEvent, useState } from "react";
 import { useForm } from "@inertiajs/react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
@@ -17,8 +17,7 @@ function DeliveryForm({
     deliveryInfo,
     setDeliveryFee,
 }: DeliveryFormProps) {
-    
-    const getDate = () => {        
+    const getDate = () => {
         const dateObj = new Date();
         dateObj.setDate(dateObj.getUTCDate() + 7);
 
@@ -33,7 +32,7 @@ function DeliveryForm({
 
         return startDate;
     };
-    
+
     const [errors, setErrors] = useState({
         date: [],
         address: [],
@@ -53,7 +52,7 @@ function DeliveryForm({
         deliveryInfo.sadd ? true : false
     );
 
-    const [crrDeliveryType,setCrrDeliveryType] = useState(deliveryInfo.dtype);
+    const [crrDeliveryType, setCrrDeliveryType] = useState(deliveryInfo.dtype);
 
     const { data, setData } = useForm({
         date: deliveryInfo.deldate || getDate(),
@@ -70,7 +69,7 @@ function DeliveryForm({
         zipCode: deliveryInfo.szip,
         deliveryInstruction: deliveryInfo.spinst,
     });
-    
+
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
@@ -82,18 +81,21 @@ function DeliveryForm({
         try {
             const res = await axios.post(
                 `/orders/${order.ordernum}/products/delivery`,
-                { ...data, date: formattedDeliveryDate, deliveryInstruction: data.deliveryInstruction || "N/A" }
-            );  
-                      
-            if(res.data.foxproRes.status === 201){                                
-                setIsDataSaved(true);                
+                {
+                    ...data,
+                    date: formattedDeliveryDate,
+                    deliveryInstruction: data.deliveryInstruction || "N/A",
+                }
+            );
+
+            if (res.data.foxproRes.status === 201) {
+                setIsDataSaved(true);
                 setDeliveryFee(crrDeliveryType, data.deliveryType);
                 setCrrDeliveryType(data.deliveryType);
                 toast.success(res.data.message);
-            }else{
+            } else {
                 toast.error(res.data.message);
             }
-
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 console.log(error.response?.data);

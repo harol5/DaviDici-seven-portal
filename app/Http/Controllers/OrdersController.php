@@ -6,6 +6,7 @@ use Inertia\Inertia;
 use App\FoxproApi\FoxproApi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class OrdersController extends Controller
 {
@@ -173,11 +174,34 @@ class OrdersController extends Controller
         return Inertia::render('Orders/OrderPayment',['order' => $order]);
     }
 
+    public function createCharge(Request $request){
+        $info = $request->all();
+        $js_data = json_encode($info);
+        $uuidTransaction = (string) Str::uuid();
+        
+
+        $response = Http::withHeaders([
+            'Authorization' => env('INTUIT_AUTH_TOKEN'),                      
+            'Content-Type' => 'application/json',
+            'Request-Id' => $uuidTransaction,
+        ])->withBody($js_data)->post('https://sandbox.api.intuit.com/quickbooks/v4/payments/charges');
+        
+
+        if($response->successful()){
+            return response(['intuitRes' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');
+        }else if($response->clientError()){
+            // 401 -> access token expired!!
+            return response(['intuitRes' => "client error", 'status' => $response->status()])->header('Content-Type', 'application/json');
+        }else {
+            return response(['intuitRes' => "something else happened"])->header('Content-Type', 'application/json');
+        }
+    }
+
 
     public function testApi(){
         $response = FoxproApi::call([
             'action' => 'OrderEnter',
-            'params' => ['HarolE$Davidici_com','HAR000002','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
+            'params' => ['HarolE$Davidici_com','HAR000001','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
             'keep_session' => false, 
         ]);
 
