@@ -12,11 +12,10 @@ function UserAuthenticatedLayout({ children, crrPage }: UserLayoutProps) {
         <>
             <nav>
                 <div>
-                    {/* <img
+                    <img
                         className="nav-logo"
-                        src="images/davidici-logo-nav-cropped.png"
-                    /> */}
-                    <h1 className="nav-logo">davidici</h1>
+                        src="https://seven.test/images/davidici-logo-nav-cropped.png"
+                    />
                     <ul className="nav-links">
                         <li className={crrPage === "orders" ? "active" : ""}>
                             <Link href="/orders">Orders</Link>
