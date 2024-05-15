@@ -7,6 +7,7 @@ interface UserLayoutProps {
 }
 
 function UserAuthenticatedLayout({ children, crrPage }: UserLayoutProps) {
+    console.log("user auth layout component ran!!");
     return (
         <>
             <nav>

@@ -19,7 +19,7 @@ class OrdersController extends Controller
             'params' => [$username],
             'keep_session' => false,
         ]);
-        // dd($data);
+        
         if($data['status'] === 500){
             // assings an empty array so template can display proper message.
             $data['rows'] = []; 
@@ -43,7 +43,6 @@ class OrdersController extends Controller
         return Inertia::render('Orders/OrderOverview',['order' => $order, 'products' => $products['rows']]);
     }
 
-    
     // Show single order details.
     public function orderDetails(Request $request){
         // throw 404 if order number does not exist
@@ -166,7 +165,7 @@ class OrdersController extends Controller
         return response(['foxproRes' => $res, 'message' => 'internal issue', 'information' => $deliveryInfo])->header('Content-Type', 'application/json');
     }
 
-    // Show single order payment form.
+    // Show payment form.
     public function orderPayment(Request $request){
         // throw 404 if order number does not exist
         $order = $request->all();
@@ -174,6 +173,7 @@ class OrdersController extends Controller
         return Inertia::render('Orders/OrderPayment',['order' => $order]);
     }
 
+    // Creates a transaction.
     public function createCharge(Request $request){
         $info = $request->all();
         $js_data = json_encode($info);
@@ -197,6 +197,54 @@ class OrdersController extends Controller
         }
     }
 
+    // Create a order number for new order
+    public function createOrderNumber(Request $request){        
+        $username = auth()->user()->username;
+        $message = $request->session()->get('message');
+
+        $products = $request->all();
+        $products['username'] = $username;
+        $products['message'] = $message;        
+
+        // Get all orders
+        $orders = FoxproApi::call([
+            'action' => 'getordersbyuser',
+            'params' => [$username],
+            'keep_session' => false,
+        ]);
+
+        // get how many orders the client has.
+        $numOfOrders = count($orders['rows']);
+
+        // if there are orders.
+        if($numOfOrders > 0){
+            // get the last order number.
+            $lastOrderNum = $orders['rows'][$numOfOrders - 1]['ordernum'];
+
+            // get 3 first letters.
+            $charsFromOrderNum = substr($lastOrderNum, 0, 3); 
+
+            // get only int from order number and increment it by one.
+            $NumsFromOrderNum = substr($lastOrderNum, 3);            
+            $nextOrderNumber = (int)$NumsFromOrderNum + 1;
+
+            $newOrderNumber = $charsFromOrderNum . $nextOrderNumber;
+
+            return Inertia::render('Orders/OrderNumber', ['nextOrderNumber' => $newOrderNumber, 'products' => $products]);             
+        }else {
+            //TODO: somehow get the first letter for the new customer and start order nums from 1.
+            return Inertia::render('Orders/OrderNumber', ['nextOrderNumber' => 'NEW000001', 'products' => $products]); 
+        }                
+    }
+
+    // Create new order.
+    public function createOrder(Request $request){
+        $response = FoxproApi::call([
+            'action' => 'OrderEnter',
+            'params' => ['HarolE$Davidici_com','HAR000001','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
+            'keep_session' => false, 
+        ]);
+    }
 
     public function testApi(){
         $response = FoxproApi::call([
@@ -204,7 +252,7 @@ class OrdersController extends Controller
             'params' => ['HarolE$Davidici_com','HAR000001','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
             'keep_session' => false, 
         ]);
-
+        
         // $response = FoxproApi::call([
         //     'action' => 'GetProductPrice',
         //     'params' => ['HarolE$Davidici_com','18-048-2S-T2'],

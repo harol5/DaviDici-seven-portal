@@ -38,7 +38,7 @@ class UserController extends Controller
         return back()->withErrors(['email' => 'Invalid Credentials'])->onlyInput('email');
     }
 
-    // logout user ------------
+    // Logout user ------------
     public function logout(Request $request){
         auth()->logout();
 
