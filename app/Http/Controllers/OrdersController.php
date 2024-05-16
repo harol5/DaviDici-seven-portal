@@ -201,10 +201,7 @@ class OrdersController extends Controller
     public function createOrderNumber(Request $request){        
         $username = auth()->user()->username;
         $message = $request->session()->get('message');
-
         $products = $request->all();
-        $products['username'] = $username;
-        $products['message'] = $message;        
 
         // Get all orders
         $orders = FoxproApi::call([
@@ -212,6 +209,12 @@ class OrdersController extends Controller
             'params' => [$username],
             'keep_session' => false,
         ]);
+
+        if($orders['status'] === 500){
+            // TODO: log error.
+            // assings an empty array so template can display proper message.
+            $orders['rows'] = []; 
+        }
 
         // get how many orders the client has.
         $numOfOrders = count($orders['rows']);
@@ -230,26 +233,38 @@ class OrdersController extends Controller
 
             $newOrderNumber = $charsFromOrderNum . $nextOrderNumber;
 
-            return Inertia::render('Orders/OrderNumber', ['nextOrderNumber' => $newOrderNumber, 'products' => $products]);             
+            return Inertia::render('Orders/OrderNumber', ['nextOrderNumber' => $newOrderNumber, 'products' => $products, 'orders' => $orders['rows'], 'message' => $message]);             
         }else {
             //TODO: somehow get the first letter for the new customer and start order nums from 1.
-            return Inertia::render('Orders/OrderNumber', ['nextOrderNumber' => 'NEW000001', 'products' => $products]); 
+            return Inertia::render('Orders/OrderNumber', ['nextOrderNumber' => 'NEW000001', 'products' => $products, 'orders' => $orders['rows'], 'message' => $message]); 
         }                
     }
 
     // Create new order.
     public function createOrder(Request $request){
+        $username = auth()->user()->username;
+        $data = $request->all();
+        
+        // Result: "This sales order already exists" | "All items entered"
         $response = FoxproApi::call([
             'action' => 'OrderEnter',
-            'params' => ['HarolE$Davidici_com','HAR000001','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
+            'params' => [$username, $data['newOrderNum'], $data['skus']],
             'keep_session' => false, 
         ]);
+
+        if($response['Result'] === 'All items entered'){
+            return redirect('/orders')->with('message', 'Order Number ' . $data['newOrderNum'] . ' created!!');
+        }
+
+        // TODO: log error.
+        // something went wrong. display the result from foxpro on a flash message.
+        return redirect('/orders')->with('message', $response['Result']);
     }
 
     public function testApi(){
         $response = FoxproApi::call([
             'action' => 'OrderEnter',
-            'params' => ['HarolE$Davidici_com','HAR000001','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
+            'params' => ['HarolE$Davidici_com','HAR000003','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
             'keep_session' => false, 
         ]);
         

@@ -28,22 +28,30 @@ function OrderDelivery({
     const [order, setOrder] = useState(formatOrder);
     //-------------------------------------------------------
 
-    const handleSetOrder = (crrDeliveryType: string, newDeliveryFee: string) => {        
-        setOrder((prev) => {                        
-            const oldDeliveryFee = 
-                crrDeliveryType === "TO DEALER" ? 50 : 
-                crrDeliveryType === "DAVIDICI FINAL MILE" ? 75 : 0; 
-            
-            const deliveryFee =
-                newDeliveryFee === "TO DEALER" ? 50 :
-                newDeliveryFee === "DAVIDICI FINAL MILE" ? 75 : 0;         
+    const handleSetOrder = (
+        crrDeliveryType: string,
+        newDeliveryFee: string
+    ) => {
+        setOrder((prev) => {
+            const oldDeliveryFee =
+                crrDeliveryType === "TO DEALER"
+                    ? 50
+                    : crrDeliveryType === "DAVIDICI FINAL MILE"
+                    ? 75
+                    : 0;
 
-            const newTotal = (prev.total - oldDeliveryFee) + deliveryFee;
-            
-            return { ...prev, total: newTotal, subtotal: newTotal }
+            const deliveryFee =
+                newDeliveryFee === "TO DEALER"
+                    ? 50
+                    : newDeliveryFee === "DAVIDICI FINAL MILE"
+                    ? 75
+                    : 0;
+
+            const newTotal = prev.total - oldDeliveryFee + deliveryFee;
+
+            return { ...prev, total: newTotal, subtotal: newTotal };
         });
     };
-    console.log("delivery page - order state:", order);
 
     return (
         <UserAuthenticatedLayout crrPage="orders">

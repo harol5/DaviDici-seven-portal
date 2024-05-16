@@ -153,7 +153,7 @@ function OrderDetails({ rawOrder, rawProducts }: OrderDetailsProps) {
                             handleDelete={handleDelete}
                         />
                     ))}
-                </section>              
+                </section>
             </OrderLayout>
             <ToastContainer />
         </UserAuthenticatedLayout>
