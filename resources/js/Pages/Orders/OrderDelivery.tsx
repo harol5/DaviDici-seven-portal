@@ -4,12 +4,12 @@ import ProductDeliveryCard from "../../Components/ProductDeliveryCard";
 import DeliveryForm from "../../Components/DeliveryForm";
 import type { Order as OrderModel } from "../../Models/Order";
 import type { Product as ProductModel } from "../../Models/Product";
-import type { DeliveryFoxpro } from "../../Models/Delivery";
+import type { DeliveryFoxpro as DeliveryInfoModel } from "../../Models/Delivery";
 import { useState } from "react";
 interface OrderDeliveryProps {
     rawOrder: OrderModel;
     products: ProductModel[];
-    deliveryInfoByProd: DeliveryFoxpro[];
+    deliveryInfoByProd: DeliveryInfoModel[];
 }
 
 function OrderDelivery({
@@ -27,7 +27,7 @@ function OrderDelivery({
     };
     const [order, setOrder] = useState(formatOrder);
     //-------------------------------------------------------
-
+    console.log(deliveryInfoByProd);
     const handleSetOrder = (
         crrDeliveryType: string,
         newDeliveryFee: string

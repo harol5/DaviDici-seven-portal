@@ -67,6 +67,7 @@
 }
 
 /*===========NAVBAR STYLING==============*/
+
 nav > div {
     display: flex;
     justify-content: space-between;
@@ -439,16 +440,22 @@ main {
     margin-bottom: 1.2em;
 }
 .delivery-form label {
-    margin-bottom: 0.5em;
+    margin-bottom: 0.1em;
 }
 .delivery-form input {
     padding: 0.3em;
+    border: 1px solid;
+    border-radius: 3px;
 }
 .delivery-form select {
     padding: 0.3em;
+    border: 1px solid;
+    border-radius: 3px;
 }
 .delivery-form textarea {
     padding: 0.3em;
+    border: 1px solid;
+    border-radius: 3px;
 }
 
 /*FIELDS STYLING*/
@@ -489,8 +496,15 @@ main {
 .delivery-form textarea:read-only,
 .delivery-form select:disabled,
 .delivery-form button:disabled {
-    background-color: #f0f0f0;
     color: #616161;
+    outline: none;
+    cursor: auto;
+    border-bottom: 1px solid #616161;
+}
+
+.delivery-form button:disabled[type="button"],
+.delivery-form button:disabled[type="submit"] {
+    background-color: #bcbdc1;
 }
 
 /*============RESPONSIVE STYLING==============*/

@@ -111,7 +111,10 @@ function DeliveryForm({
 
     return (
         <>
-            <form onSubmit={handleSubmit} className="delivery-form">
+            <form
+                onSubmit={handleSubmit}
+                className="delivery-form bg-white py-7 px-10 rounded-md"
+            >
                 <div className="delivery-date">
                     <label htmlFor="delivery-date">Choose delivery date:</label>
                     <input

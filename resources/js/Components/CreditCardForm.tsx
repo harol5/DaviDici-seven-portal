@@ -109,7 +109,7 @@ function CreditCardForm({ handleSubmit }: CreditCardFormProps) {
                         Card number:
                     </label>
                     <input
-                        className="p-[0.2em]"
+                        className="px-[0.2em] border border-black rounded"
                         type="tel"
                         minLength={14}
                         maxLength={19}
@@ -130,9 +130,9 @@ function CreditCardForm({ handleSubmit }: CreditCardFormProps) {
                     <label htmlFor="exp-date" className="mb-1">
                         Expiration date:
                     </label>
-                    <div className="flex">
+                    <div className="flex gap-1">
                         <input
-                            className="p-[0.2em] w-[40px]"
+                            className="px-[0.2em] w-[40px] border border-black rounded"
                             type="tel"
                             maxLength={2}
                             id="exp-date"
@@ -150,7 +150,7 @@ function CreditCardForm({ handleSubmit }: CreditCardFormProps) {
                         />
                         /
                         <input
-                            className="p-[0.2em] w-[60px]"
+                            className="px-[0.2em] w-[60px] border border-black rounded"
                             type="tel"
                             maxLength={4}
                             name="expYear"
@@ -171,7 +171,7 @@ function CreditCardForm({ handleSubmit }: CreditCardFormProps) {
                         Security code:
                     </label>
                     <input
-                        className="p-[0.2em]"
+                        className="px-[0.2em] border border-black rounded"
                         type="tel"
                         name="cvc"
                         value={state.cvc}
@@ -194,7 +194,7 @@ function CreditCardForm({ handleSubmit }: CreditCardFormProps) {
                         Name on card:
                     </label>
                     <input
-                        className="p-[0.2em]"
+                        className="px-[0.2em] border border-black rounded"
                         type="text"
                         name="name"
                         value={state.name}
@@ -213,7 +213,7 @@ function CreditCardForm({ handleSubmit }: CreditCardFormProps) {
                         Address
                     </label>
                     <input
-                        className="p-[0.2em]"
+                        className="px-[0.2em] border border-black rounded"
                         type="text"
                         name="address"
                         value={state.address.streetAddress}
@@ -232,7 +232,7 @@ function CreditCardForm({ handleSubmit }: CreditCardFormProps) {
                         City:
                     </label>
                     <input
-                        className="p-[0.2em]"
+                        className="px-[0.2em] border border-black rounded"
                         type="text"
                         name="city"
                         value={state.address.city}
@@ -251,7 +251,7 @@ function CreditCardForm({ handleSubmit }: CreditCardFormProps) {
                         State:
                     </label>
                     <select
-                        className="p-[0.3em]"
+                        className="px-[0.3em] border border-black rounded"
                         id="state"
                         name="state"
                         value={state.address.region}
@@ -324,7 +324,7 @@ function CreditCardForm({ handleSubmit }: CreditCardFormProps) {
                     </label>
                     <input
                         type="text"
-                        className="p-[0.2em]"
+                        className="px-[0.2em] border border-black rounded"
                         name="zipCode"
                         value={state.address.postalCode}
                         id="zip-code"
@@ -339,7 +339,12 @@ function CreditCardForm({ handleSubmit }: CreditCardFormProps) {
             </div>
 
             <div className="">
-                <button type="submit">submit</button>
+                <button
+                    className="border border-black rounded px-3"
+                    type="submit"
+                >
+                    submit
+                </button>
             </div>
         </form>
     );

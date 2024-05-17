@@ -14,17 +14,18 @@ class OrdersController extends Controller
     public function all(Request $request){
         $username = auth()->user()->username;
         $message = $request->session()->get('message');
-        $data = FoxproApi::call([
+        $orders = FoxproApi::call([
             'action' => 'getordersbyuser',
             'params' => [$username],
             'keep_session' => false,
         ]);
         
-        if($data['status'] === 500){
+        if($orders['status'] === 500){
             // assings an empty array so template can display proper message.
-            $data['rows'] = []; 
+            $orders['rows'] = []; 
         }
-        return Inertia::render('Orders/Orders',['orders' => $data['rows'], 'message' => $message]);
+
+        return Inertia::render('Orders/Orders',['orders' => $orders['rows'], 'message' => $message]);
     }
 
     // Show single order overview.
@@ -170,7 +171,13 @@ class OrdersController extends Controller
         // throw 404 if order number does not exist
         $order = $request->all();
         $orderNumber = getOrderNumberFromPath($request->path());
-        return Inertia::render('Orders/OrderPayment',['order' => $order]);
+
+        $deliveryInfo = FoxproApi::call([
+            'action' => 'GetDeliveryInfo',
+            'params' => [$orderNumber],
+            'keep_session' => false,
+        ]);
+        return Inertia::render('Orders/OrderPayment',['order' => $order, 'deliveryInfo' => $deliveryInfo['rows']]);
     }
 
     // Creates a transaction.

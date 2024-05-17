@@ -1,107 +1,190 @@
 import { FormEvent, useReducer } from "react";
-import type { CardInfo as CardInfoModel } from "../Models/CardInfo";
+import type { BankInfo as BankInfoModel } from "../Models/BankInfo";
 
 interface CreditCardFormProps {
-    handleSubmit: (e: FormEvent, state: CardInfoModel) => void;
+    handleSubmit: (e: FormEvent, state: BankInfoModel) => void;
 }
 
 type Action = {
     type:
-        | "set-number"
-        | "set-expMonth"
-        | "set-expYear"
-        | "set-cvc"
         | "set-name"
-        | "set-streetAddress"
-        | "set-postalCode"
-        | "set-city"
-        | "set-region";
+        | "set-accountNumber"
+        | "set-accountType"
+        | "set-routingNumber"
+        | "set-phone";
 
     payload: string;
 };
 
 function BankAccountForm({ handleSubmit }: CreditCardFormProps) {
-    const card: CardInfoModel = {
-        number: "",
-        expMonth: "",
-        expYear: "",
-        cvc: "",
+    const bank: BankInfoModel = {
         name: "",
-        address: {
-            streetAddress: "",
-            postalCode: "",
-            city: "",
-            region: "",
-        },
+        accountNumber: "",
+        accountType: "PERSONAL_CHECKING",
+        routingNumber: "",
+        phone: "",
     };
 
-    const reducer = (state: CardInfoModel, action: Action) => {
+    const reducer = (state: BankInfoModel, action: Action) => {
         switch (action.type) {
-            case "set-number":
-                return {
-                    ...state,
-                    number: action.payload,
-                };
-            case "set-expMonth":
-                return {
-                    ...state,
-                    expMonth: action.payload,
-                };
-            case "set-expYear":
-                return {
-                    ...state,
-                    expYear: action.payload,
-                };
-            case "set-cvc":
-                return {
-                    ...state,
-                    cvc: action.payload,
-                };
             case "set-name":
                 return {
                     ...state,
                     name: action.payload,
                 };
-            case "set-streetAddress":
+            case "set-accountNumber":
                 return {
                     ...state,
-                    address: {
-                        ...state.address,
-                        streetAddress: action.payload,
-                    },
+                    accountNumber: action.payload,
                 };
-            case "set-postalCode":
+            case "set-accountType":
                 return {
                     ...state,
-                    address: {
-                        ...state.address,
-                        postalCode: action.payload,
-                    },
+                    accountType: action.payload,
                 };
-            case "set-city":
+            case "set-routingNumber":
                 return {
                     ...state,
-                    address: {
-                        ...state.address,
-                        city: action.payload,
-                    },
+                    routingNumber: action.payload,
                 };
-            case "set-region":
+            case "set-phone":
                 return {
                     ...state,
-                    address: {
-                        ...state.address,
-                        region: action.payload,
-                    },
+                    phone: action.payload,
                 };
             default:
                 throw new Error();
         }
     };
 
-    const [state, dispatch] = useReducer(reducer, card);
+    const [state, dispatch] = useReducer(reducer, bank);
 
-    return <h1>bank account form</h1>;
+    return (
+        <form id="payment-form" onSubmit={(e) => handleSubmit(e, state)}>
+            <div className="flex gap-3 flex-col mb-2">
+                <div className="flex flex-col">
+                    <label htmlFor="name" className="mb-1">
+                        Name:
+                    </label>
+                    <input
+                        className="px-[0.2em] border border-black rounded"
+                        type="text"
+                        name="name"
+                        value={state.name}
+                        id="name"
+                        required
+                        onChange={(e) => {
+                            dispatch({
+                                type: "set-name",
+                                payload: e.currentTarget.value,
+                            });
+                        }}
+                    />
+                </div>
+
+                <div className="flex flex-col">
+                    <label htmlFor="account-number" className="mb-1">
+                        Account number:
+                    </label>
+                    <input
+                        className="px-[0.2em] border border-black rounded"
+                        type="text"
+                        name="accountNumber"
+                        value={state.accountNumber}
+                        id="account-number"
+                        required
+                        onChange={(e) => {
+                            dispatch({
+                                type: "set-accountNumber",
+                                payload: e.currentTarget.value,
+                            });
+                        }}
+                    />
+                </div>
+
+                <div className="flex flex-col">
+                    <label htmlFor="account-type" className="mb-1">
+                        Account type:
+                    </label>
+                    <select
+                        className="px-[0.3em] py-[0.17em] border border-black rounded"
+                        id="account-type"
+                        name="accountType"
+                        value={state.accountType}
+                        required
+                        onChange={(e) => {
+                            dispatch({
+                                type: "set-accountType",
+                                payload: e.currentTarget.value,
+                            });
+                        }}
+                    >
+                        <option value="PERSONAL_CHECKING">
+                            personal checking
+                        </option>
+                        <option value="PERSONAL_SAVINGS">
+                            personal savings
+                        </option>
+                        <option value="BUSINESS_CHECKING">
+                            business checking
+                        </option>
+                        <option value="BUSINESS_SAVINGS">
+                            business savings
+                        </option>
+                    </select>
+                </div>
+
+                <div className="flex flex-col">
+                    <label htmlFor="routing-number" className="mb-1">
+                        Routing number:
+                    </label>
+                    <input
+                        className="px-[0.2em] border border-black rounded"
+                        type="text"
+                        name="routingNumber"
+                        value={state.routingNumber}
+                        id="routing-number"
+                        required
+                        onChange={(e) => {
+                            dispatch({
+                                type: "set-routingNumber",
+                                payload: e.currentTarget.value,
+                            });
+                        }}
+                    />
+                </div>
+
+                <div className="flex flex-col">
+                    <label htmlFor="phone" className="mb-1">
+                        Zip code:
+                    </label>
+                    <input
+                        type="text"
+                        className="px-[0.2em] border border-black rounded"
+                        name="phone"
+                        value={state.phone}
+                        id="phone"
+                        required
+                        onChange={(e) => {
+                            dispatch({
+                                type: "set-phone",
+                                payload: e.currentTarget.value,
+                            });
+                        }}
+                    />
+                </div>
+            </div>
+
+            <div className="">
+                <button
+                    className="border border-black rounded px-3"
+                    type="submit"
+                >
+                    submit
+                </button>
+            </div>
+        </form>
+    );
 }
 
 export default BankAccountForm;
