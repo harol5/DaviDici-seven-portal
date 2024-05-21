@@ -53,7 +53,7 @@ function OrderLayout({ children, order, crrOrderOption }: OrderLayoutProps) {
                     <li
                         className={
                             crrOrderOption === "overview"
-                                ? "options active-order-option"
+                                ? "active-order-option options"
                                 : "options"
                         }
                     >
@@ -115,7 +115,7 @@ function OrderLayout({ children, order, crrOrderOption }: OrderLayoutProps) {
                 </ul>
             </div>
             <div className="order-main-content-wrapper">
-                <div className="order-header-wrapper">
+                <div className="order-header-wrapper shadow-2xl px-5 bg-zinc-50 rounded-md">
                     <div className="order-number-wrapper">
                         <h1>Order Number:</h1>
                         <span>{order.ordernum}</span>

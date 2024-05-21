@@ -5,16 +5,16 @@ import DeliveryForm from "../../Components/DeliveryForm";
 import type { Order as OrderModel } from "../../Models/Order";
 import type { Product as ProductModel } from "../../Models/Product";
 import type { DeliveryFoxpro as DeliveryInfoModel } from "../../Models/Delivery";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 interface OrderDeliveryProps {
     rawOrder: OrderModel;
-    products: ProductModel[];
+    rawProducts: ProductModel[];
     deliveryInfoByProd: DeliveryInfoModel[];
 }
 
 function OrderDelivery({
     rawOrder,
-    products,
+    rawProducts,
     deliveryInfoByProd,
 }: OrderDeliveryProps) {
     //--TODO: this could be acustom hook? same logic on orderDetails component
@@ -27,7 +27,13 @@ function OrderDelivery({
     };
     const [order, setOrder] = useState(formatOrder);
     //-------------------------------------------------------
-    console.log(deliveryInfoByProd);
+
+    const products = useMemo(() => {
+        return rawProducts.filter(
+            (product) => product.item !== "3% Credit Card Charge"
+        );
+    }, [rawProducts]);
+
     const handleSetOrder = (
         crrDeliveryType: string,
         newDeliveryFee: string

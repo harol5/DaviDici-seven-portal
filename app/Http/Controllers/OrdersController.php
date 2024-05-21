@@ -34,14 +34,22 @@ class OrdersController extends Controller
 
         $username = auth()->user()->username;
         $order = $request->all();
-        $orderNumber = getOrderNumberFromPath($request->path());        
+        $orderNumber = getOrderNumberFromPath($request->path());     
+
         $products = FoxproApi::call([
             'action' => 'GetSoStatus',
             'params' => [$orderNumber],
             'keep_session' => false,
         ]);
-
-        return Inertia::render('Orders/OrderOverview',['order' => $order, 'products' => $products['rows']]);
+   
+        return Inertia::render('Orders/OrderOverview',
+            [
+                'order' => $order, 
+                'products' => $products['rows'], 
+                'isPaymentSubmitted' => $this->isPaymentSubmitted($orderNumber), 
+                'isDeliveryInfoSave' => $this->isDeliveryInfoSave($orderNumber),
+            ]
+        );
     }
 
     // Show single order details.
@@ -49,7 +57,6 @@ class OrdersController extends Controller
         // throw 404 if order number does not exist
         $username = auth()->user()->username;
         $order = $request->all();
-        
         $orderNumber = getOrderNumberFromPath($request->path());      
         
         // Error: undefined rows?
@@ -57,9 +64,9 @@ class OrdersController extends Controller
             'action' => 'GetSoStatus',
             'params' => [$orderNumber],
             'keep_session' => false,
-        ]);
-
-        return Inertia::render('Orders/OrderDetails',['rawOrder' => $order, 'rawProducts' => $products['rows']]);
+        ]);        
+        
+        return Inertia::render('Orders/OrderDetails',['rawOrder' => $order, 'rawProducts' => $products['rows'], 'isPaymentSubmitted' => $this->isPaymentSubmitted($orderNumber)]);
     }
 
     // Update quantity product
@@ -114,7 +121,7 @@ class OrdersController extends Controller
             'keep_session' => false,
         ]);
         
-        return Inertia::render('Orders/OrderDelivery', ['rawOrder' => $order, 'products' => $products['rows'], 'deliveryInfoByProd' => $deliveryInfo['rows']]);
+        return Inertia::render('Orders/OrderDelivery', ['rawOrder' => $order, 'rawProducts' => $products['rows'], 'deliveryInfoByProd' => $deliveryInfo['rows']]);
     }
 
     // Save delivery info into foxpro.
@@ -185,7 +192,7 @@ class OrdersController extends Controller
         $info = $request->all();
         $js_data = json_encode($info);
         $uuidTransaction = (string) Str::uuid();
-        
+        $orderNumber = getOrderNumberFromPath($request->path());
 
         $response = Http::withHeaders([
             'Authorization' => env('INTUIT_AUTH_TOKEN'),                      
@@ -195,10 +202,43 @@ class OrdersController extends Controller
         
 
         if($response->successful()){
-            return response(['intuitRes' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');
+
+            // "Result" : "Info Updated Successfully" |
+            $cashReceiptRes = FoxproApi::call([
+                'action' => 'SaveCR',
+                'params' => [$orderNumber,'CC','100.23','05/20/2024','harol rojas','1234567890000','12/24','123'],
+                'keep_session' => false,
+            ]);
+
+            return response(['intuitRes' => $response->json(), 'status' => $response->status(), 'foxpro' => $cashReceiptRes])->header('Content-Type', 'application/json');
+
         }else if($response->clientError()){
             // 401 -> access token expired!!
             return response(['intuitRes' => "client error", 'status' => $response->status()])->header('Content-Type', 'application/json');
+        }else {
+            return response(['intuitRes' => "something else happened"])->header('Content-Type', 'application/json');
+        }
+    }
+
+    // create bank transaction.
+    public function createBankCharge(Request $request){        
+        $info = $request->all();
+        $js_data = json_encode($info);
+        $uuidTransaction = (string) Str::uuid();
+        $orderNumber = getOrderNumberFromPath($request->path());
+        
+        $response = Http::withHeaders([
+            'Authorization' => env('INTUIT_AUTH_TOKEN'),                      
+            'Content-Type' => 'application/json',
+            'Request-Id' => $uuidTransaction,
+        ])->withBody($js_data)->post('https://sandbox.api.intuit.com/quickbooks/v4/payments/echecks');
+
+        if($response->successful()){
+            return response(['intuitRes' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');
+
+        }else if($response->clientError()){
+            // 401 -> access token expired!!
+            return response(['intuitRes' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');
         }else {
             return response(['intuitRes' => "something else happened"])->header('Content-Type', 'application/json');
         }
@@ -271,9 +311,9 @@ class OrdersController extends Controller
     public function testApi(){
         $response = FoxproApi::call([
             'action' => 'OrderEnter',
-            'params' => ['HarolE$Davidici_com','HAR000003','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
+            'params' => ['HarolE$Davidici_com','HAR000004','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
             'keep_session' => false, 
-        ]);
+        ]);                
         
         // $response = FoxproApi::call([
         //     'action' => 'GetProductPrice',
@@ -295,6 +335,38 @@ class OrdersController extends Controller
 
         // return Inertia::render('Test',['response' => $response]);
         return response(['response' => $response])->header('Content-Type', 'application/json');
+    }
+
+
+    //=========HELPER FUNCTIONS=============//
+    public function isPaymentSubmitted($orderNumber){
+
+        // "Result": "There are no payments for this sales order number" |
+        $paymentInfo = FoxproApi::call([
+            'action' => 'GetCR',
+            'params' => [$orderNumber],
+            'keep_session' => false, 
+        ]);
+
+        if(!array_key_exists('rows',$paymentInfo)) {
+            return false;
+        }else {
+            return true;
+        }
+    }
+
+    public function isDeliveryInfoSave($orderNumber){
+        $deliveryInfo = FoxproApi::call([
+            'action' => 'GetDeliveryInfo',
+            'params' => [$orderNumber],
+            'keep_session' => false,
+        ]);
+
+        if(array_key_exists('rows',$deliveryInfo) && $deliveryInfo['rows'][0]['deldate']) {
+            return true;
+        }else {
+            return false;
+        }
     }
 }
 

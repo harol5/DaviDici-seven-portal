@@ -21,6 +21,8 @@ function OrderPayment({ order, deliveryInfo }: OrderPaymentProps) {
         "credit card" | "bank account"
     >("credit card");
 
+    const [isTransactionApproved, setIsTransactionApproved] = useState(false);
+
     const deliveryFee = useMemo(() => {
         const crrDeliveryType = deliveryInfo[0].dtype;
         return crrDeliveryType === "TO DEALER"
@@ -71,8 +73,10 @@ function OrderPayment({ order, deliveryInfo }: OrderPaymentProps) {
             );
 
             console.log("charges response (Intuit):", res2);
-            if (res2.data.status === 201)
+            if (res2.data.intuitRes.status === "CAPTURED") {
+                setIsTransactionApproved(true);
                 toast.success("Transaction approved!!");
+            }
         } catch (err) {
             console.log(err);
         }
@@ -81,13 +85,37 @@ function OrderPayment({ order, deliveryInfo }: OrderPaymentProps) {
     const handleBankSubmit = async (e: FormEvent, state: BankInfoModel) => {
         e.preventDefault();
         console.log(state);
+        // const info = { ...state, amount: finalTotal.grandTotal };
+        const info = { ...state, amount: 5.55 };
+        console.log(info);
+
+        try {
+            const res = await axios.post(
+                `/orders/${order.ordernum}/products/payment-bank`,
+                info
+            );
+
+            const status = res.data.intuitRes;
+            if (status === "PENDING" || status === "SUCCEEDED") {
+                setIsTransactionApproved(true);
+                toast.success("Transaction approved!!");
+            }
+
+            if (status === "DECLINED") {
+                toast.error("Transaction declined!!");
+            }
+
+            console.log(res);
+        } catch (err) {
+            console.log(err);
+        }
     };
 
     return (
         <UserAuthenticatedLayout crrPage="orders">
             <OrderLayout order={order} crrOrderOption="payment">
-                <section className="flex mt-6 bg-white py-10 px-16 rounded-md">
-                    <section className="w-[18em] pr-10 border-r border-r-black">
+                <section className="flex mt-6 bg-zinc-50 shadow-2xl rounded-md">
+                    <section className="w-[18em] p-10 my-10 ml-10 border-r border-r-black">
                         <h1 className="text-center font-medium text-lg text-davidiciGold">
                             Charges Breakdown
                         </h1>
@@ -162,7 +190,7 @@ function OrderPayment({ order, deliveryInfo }: OrderPaymentProps) {
                             </div>
                         </section>
                     </section>
-                    <section className="grow pl-10">
+                    <section className="grow px-14 py-6 my-10 mr-10">
                         <div className="flex gap-4  pb-2 mb-2">
                             <p
                                 className={

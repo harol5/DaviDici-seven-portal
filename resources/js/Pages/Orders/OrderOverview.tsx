@@ -9,9 +9,18 @@ import type { Product as ProductModel } from "../../Models/Product";
 interface OrderOverviewProps {
     order: OrderModel;
     products: ProductModel[];
+    isPaymentSubmitted: boolean;
+    isDeliveryInfoSave: boolean;
 }
 
-function OrderOverview({ order, products }: OrderOverviewProps) {
+function OrderOverview({
+    order,
+    products,
+    isPaymentSubmitted,
+    isDeliveryInfoSave,
+}: OrderOverviewProps) {
+    console.log("is Payment submitted:", isPaymentSubmitted);
+    console.log("is delivery info submitted:", isDeliveryInfoSave);
     const [openModal, setOpenModal] = useState(false);
 
     const handleOpenModal = () => {
@@ -25,7 +34,7 @@ function OrderOverview({ order, products }: OrderOverviewProps) {
     return (
         <UserAuthenticatedLayout crrPage="orders">
             <OrderLayout order={order} crrOrderOption="overview">
-                <section className="overview-wrapper">
+                <section className="overview-wrapper mt-6 bg-zinc-50 shadow-2xl py-10 px-16 rounded-md">
                     <section className="order-details-wrapper">
                         <span>
                             <button
@@ -59,9 +68,10 @@ function OrderOverview({ order, products }: OrderOverviewProps) {
                     <section className="actions-pending-wrapper">
                         <h1>Actions Pending</h1>
                         <ul>
-                            <li>fill out delivery</li>
-                            <li>fill out payment details</li>
-                            <li>approve order</li>
+                            {!isDeliveryInfoSave && <li>fill out delivery</li>}
+                            {!isPaymentSubmitted && (
+                                <li>fill out payment details</li>
+                            )}
                         </ul>
                     </section>
                 </section>

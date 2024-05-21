@@ -31,6 +31,7 @@ Route::middleware(['auth','auth.session'])->group(function () {
     Route::post('/orders/{orderNumber}/products/delete', [OrdersController::class, 'deleteProduct']);
     Route::post('/orders/{orderNumber}/products/delivery', [OrdersController::class, 'saveDeliveryInfo']);
     Route::post('/orders/{orderNumber}/products/payment', [OrdersController::class, 'createCharge']);
+    Route::post('/orders/{orderNumber}/products/payment-bank', [OrdersController::class, 'createBankCharge']);
 
     // Inventory routes.
     Route::get('/inventory', function(){

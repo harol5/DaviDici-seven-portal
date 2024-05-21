@@ -7,6 +7,7 @@ interface ProductDetailsCardProps {
     numOfProducts: number;
     handleQty: (value: string, product: ProductModel) => void;
     handleDelete: (product: ProductModel) => void;
+    isPaymentSubmitted: boolean;
 }
 
 function ProductDetailsCard({
@@ -14,6 +15,7 @@ function ProductDetailsCard({
     numOfProducts,
     handleQty,
     handleDelete,
+    isPaymentSubmitted,
 }: ProductDetailsCardProps) {
     const [openModal, setOpenModal] = useState(false);
 
@@ -26,8 +28,12 @@ function ProductDetailsCard({
     };
     return (
         <>
-            <section className="product-wrapper product-details-card">
-                <div className="basis-[90%]">
+            <section className="product-wrapper product-details-card shadow-sm shadow-gray-300">
+                <div
+                    className={
+                        isPaymentSubmitted ? "basis-[100%]" : "basis-[90%]"
+                    }
+                >
                     <header>
                         <h2 className="description">Description:</h2>
                         <h2 className="size">Size:</h2>
@@ -53,16 +59,23 @@ function ProductDetailsCard({
                                 onChange={(e) =>
                                     handleQty(e.target.value, product)
                                 }
+                                readOnly={isPaymentSubmitted}
                             />
                         </span>
                         <p className="total">${product.total}</p>
                     </section>
                 </div>
-                <div className="basis-[10%]">
-                    <button className="delete-button" onClick={handleOpenModal}>
-                        Delete
-                    </button>
-                </div>
+                {!isPaymentSubmitted && (
+                    <div className="basis-[10%]">
+                        <button
+                            className="delete-button"
+                            onClick={handleOpenModal}
+                            disabled={isPaymentSubmitted}
+                        >
+                            Delete
+                        </button>
+                    </div>
+                )}
             </section>
             <Modal
                 show={openModal}

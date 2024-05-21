@@ -15,9 +15,14 @@ import type {
 interface OrderDetailsProps {
     rawOrder: OrderModel;
     rawProducts: ProductModel[];
+    isPaymentSubmitted: boolean;
 }
 
-function OrderDetails({ rawOrder, rawProducts }: OrderDetailsProps) {
+function OrderDetails({
+    rawOrder,
+    rawProducts,
+    isPaymentSubmitted,
+}: OrderDetailsProps) {
     const formatOrder = () => {
         const subtotal = Number.parseFloat(rawOrder.subtotal as string);
         const totcredit = Number.parseFloat(rawOrder.totcredit as string);
@@ -25,9 +30,14 @@ function OrderDetails({ rawOrder, rawProducts }: OrderDetailsProps) {
 
         return { ...rawOrder, subtotal, totcredit, total };
     };
+    const formatProducts = () => {
+        return rawProducts.filter(
+            (product) => product.item !== "3% Credit Card Charge"
+        );
+    };
 
     const [order, setOrder] = useState(formatOrder);
-    const [products, setProducts] = useState(rawProducts);
+    const [products, setProducts] = useState(formatProducts);
 
     const handleGrandTotal = (
         outdatedProduct: ProductModel,
@@ -143,7 +153,7 @@ function OrderDetails({ rawOrder, rawProducts }: OrderDetailsProps) {
     return (
         <UserAuthenticatedLayout crrPage="orders">
             <OrderLayout order={order} crrOrderOption="details">
-                <section className="products-details-wrapper">
+                <section className="products-details-wrapper bg-zinc-50 shadow-2xl py-10 px-10 rounded-md">
                     {products.map((product) => (
                         <ProductDetailsCard
                             key={product.linenum}
@@ -151,6 +161,7 @@ function OrderDetails({ rawOrder, rawProducts }: OrderDetailsProps) {
                             numOfProducts={products.length}
                             handleQty={handleQty}
                             handleDelete={handleDelete}
+                            isPaymentSubmitted={isPaymentSubmitted}
                         />
                     ))}
                 </section>

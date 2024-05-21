@@ -11,18 +11,23 @@ type Action = {
         | "set-accountNumber"
         | "set-accountType"
         | "set-routingNumber"
-        | "set-phone";
+        | "set-phone"
+        | "set-amount";
 
     payload: string;
 };
 
 function BankAccountForm({ handleSubmit }: CreditCardFormProps) {
-    const bank: BankInfoModel = {
-        name: "",
-        accountNumber: "",
-        accountType: "PERSONAL_CHECKING",
-        routingNumber: "",
-        phone: "",
+    const eCheck: BankInfoModel = {
+        bankAccount: {
+            name: "",
+            accountNumber: "",
+            accountType: "PERSONAL_CHECKING",
+            routingNumber: "",
+            phone: "",
+        },
+        paymentMode: "WEB",
+        amount: 0,
     };
 
     const reducer = (state: BankInfoModel, action: Action) => {
@@ -30,34 +35,49 @@ function BankAccountForm({ handleSubmit }: CreditCardFormProps) {
             case "set-name":
                 return {
                     ...state,
-                    name: action.payload,
+                    bankAccount: {
+                        ...state.bankAccount,
+                        name: action.payload,
+                    },
                 };
             case "set-accountNumber":
                 return {
                     ...state,
-                    accountNumber: action.payload,
+                    bankAccount: {
+                        ...state.bankAccount,
+                        accountNumber: action.payload,
+                    },
                 };
             case "set-accountType":
                 return {
                     ...state,
-                    accountType: action.payload,
+                    bankAccount: {
+                        ...state.bankAccount,
+                        accountType: action.payload,
+                    },
                 };
             case "set-routingNumber":
                 return {
                     ...state,
-                    routingNumber: action.payload,
+                    bankAccount: {
+                        ...state.bankAccount,
+                        routingNumber: action.payload,
+                    },
                 };
             case "set-phone":
                 return {
                     ...state,
-                    phone: action.payload,
+                    bankAccount: {
+                        ...state.bankAccount,
+                        phone: action.payload,
+                    },
                 };
             default:
                 throw new Error();
         }
     };
 
-    const [state, dispatch] = useReducer(reducer, bank);
+    const [state, dispatch] = useReducer(reducer, eCheck);
 
     return (
         <form id="payment-form" onSubmit={(e) => handleSubmit(e, state)}>
@@ -70,7 +90,7 @@ function BankAccountForm({ handleSubmit }: CreditCardFormProps) {
                         className="px-[0.2em] border border-black rounded"
                         type="text"
                         name="name"
-                        value={state.name}
+                        value={state.bankAccount.name}
                         id="name"
                         required
                         onChange={(e) => {
@@ -90,7 +110,7 @@ function BankAccountForm({ handleSubmit }: CreditCardFormProps) {
                         className="px-[0.2em] border border-black rounded"
                         type="text"
                         name="accountNumber"
-                        value={state.accountNumber}
+                        value={state.bankAccount.accountNumber}
                         id="account-number"
                         required
                         onChange={(e) => {
@@ -110,7 +130,7 @@ function BankAccountForm({ handleSubmit }: CreditCardFormProps) {
                         className="px-[0.3em] py-[0.17em] border border-black rounded"
                         id="account-type"
                         name="accountType"
-                        value={state.accountType}
+                        value={state.bankAccount.accountType}
                         required
                         onChange={(e) => {
                             dispatch({
@@ -142,7 +162,7 @@ function BankAccountForm({ handleSubmit }: CreditCardFormProps) {
                         className="px-[0.2em] border border-black rounded"
                         type="text"
                         name="routingNumber"
-                        value={state.routingNumber}
+                        value={state.bankAccount.routingNumber}
                         id="routing-number"
                         required
                         onChange={(e) => {
@@ -156,14 +176,15 @@ function BankAccountForm({ handleSubmit }: CreditCardFormProps) {
 
                 <div className="flex flex-col">
                     <label htmlFor="phone" className="mb-1">
-                        Zip code:
+                        Phone number:
                     </label>
                     <input
-                        type="text"
+                        type="tel"
                         className="px-[0.2em] border border-black rounded"
                         name="phone"
-                        value={state.phone}
+                        value={state.bankAccount.phone}
                         id="phone"
+                        min={10}
                         required
                         onChange={(e) => {
                             dispatch({
