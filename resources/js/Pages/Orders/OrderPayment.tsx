@@ -19,12 +19,11 @@ interface OrderPaymentProps {
 }
 
 function OrderPayment({ order, deliveryInfo, depositInfo }: OrderPaymentProps) {
-    console.log(depositInfo);
     const [crrPaymentMethod, setCrrPaymentMethod] = useState<
         "credit card" | "bank account"
     >("credit card");
     const [isLoading, setIsLoading] = useState(false);
-    const [isTransactionApproved, setIsTransactionApproved] = useState(false);
+    const [isTransactionApproved, setIsTransactionApproved] = useState(true); // set true for first version
     const [bankValidationErrors, setBankErrors] = useState({});
     const [cardValidationErrors, setCardErrors] = useState({});
 
@@ -117,7 +116,6 @@ function OrderPayment({ order, deliveryInfo, depositInfo }: OrderPaymentProps) {
             setIsLoading(false);
         }
     };
-
     const isValidBankInfo = (info: BankInfoModel): boolean => {
         let crrErrors = { routingNumber: "", phone: "" };
         if (info.bankAccount.routingNumber.length !== 9) {
@@ -199,142 +197,146 @@ function OrderPayment({ order, deliveryInfo, depositInfo }: OrderPaymentProps) {
     return (
         <UserAuthenticatedLayout crrPage="orders">
             <OrderLayout order={order} crrOrderOption="payment">
-                <section className="flex mt-6 p-5 bg-zinc-50 shadow-inner shadow-gray-200 rounded-md relative">
-                    {isTransactionApproved && (
-                        <div className="absolute bg-gray-200/50 backdrop-blur-sm w-[100%] h-[100%]">
-                            <h1 className="">Payment submitted</h1>
-                        </div>
-                    )}
-                    {isLoading && (
-                        <div className="absolute bg-gray-200/50 backdrop-blur-sm w-[100%] h-[100%]">
-                            <p>loading...</p>
-                        </div>
-                    )}
-                    <section className="w-[18em] p-8 shadow-sm shadow-gray-900 rounded mr-2">
-                        <h1 className="text-center font-medium text-lg text-davidiciGold">
-                            Charges Breakdown
-                        </h1>
-                        <section className="flex flex-col gap-4 mt-4">
-                            <div className="flex justify-between">
-                                <span className="">
-                                    <h2>products:</h2>
-                                </span>
-                                <span className="">
-                                    <p>
-                                        $
-                                        {(order.subtotal as number) -
-                                            deliveryFee}
-                                    </p>
-                                </span>
+                {isTransactionApproved && (
+                    <div className="absolute bg-gray-200/50 backdrop-blur-sm mt-6 p-5">
+                        {/* <h1 className="">Payment submitted</h1> */}
+                        <h1 className="">Currently in development...</h1>
+                    </div>
+                )}
+                {!isTransactionApproved && (
+                    <section className="flex mt-6 p-5 bg-zinc-50 shadow-inner shadow-gray-200 rounded-md relative">
+                        {/*place transaction approved here*/}
+                        {isLoading && (
+                            <div className="absolute bg-gray-200/50 backdrop-blur-sm w-[100%] h-[100%]">
+                                <p>loading...</p>
                             </div>
-
-                            <div className="flex justify-between border-b pb-2 border-b-black">
-                                <span className="">
-                                    <h2>delivery fee:</h2>
-                                </span>
-                                <span className="">
-                                    <p>+${deliveryFee}</p>
-                                </span>
-                            </div>
-
-                            <div className="flex justify-between ">
-                                <span className="">
-                                    <h2>sub-total:</h2>
-                                </span>
-                                <span className="">
-                                    <p>${order.subtotal}</p>
-                                </span>
-                            </div>
-
-                            <div className="flex justify-between">
-                                <span className="">
-                                    <h2>credit:</h2>
-                                </span>
-                                <span className="">
-                                    <p>-${order.totcredit}</p>
-                                </span>
-                            </div>
-
-                            <div
-                                className={
-                                    crrPaymentMethod === "bank account"
-                                        ? "border-b pb-1 border-b-black flex justify-between"
-                                        : "flex justify-between"
-                                }
-                            >
-                                <span className="">
-                                    <h2>deposit:</h2>
-                                </span>
-                                <span className="">
-                                    <p>${depositInfo?.depneeded}</p>
-                                </span>
-                            </div>
-
-                            {crrPaymentMethod === "credit card" && (
-                                <div className="border-b pb-2 border-b-black flex justify-between">
+                        )}
+                        <section className="w-[18em] p-8 shadow-sm shadow-gray-900 rounded mr-2">
+                            <h1 className="text-center font-medium text-lg text-davidiciGold">
+                                Charges Breakdown
+                            </h1>
+                            <section className="flex flex-col gap-4 mt-4">
+                                <div className="flex justify-between">
                                     <span className="">
-                                        <h2>3% credit card fee:</h2>
+                                        <h2>products:</h2>
                                     </span>
                                     <span className="">
                                         <p>
-                                            +$
-                                            {finalTotal.fee}
+                                            $
+                                            {(order.subtotal as number) -
+                                                deliveryFee}
                                         </p>
                                     </span>
                                 </div>
-                            )}
 
-                            <div className="flex justify-between">
-                                <span className="">
-                                    <h2>Due Today:</h2>
-                                </span>
-                                <span className="">
-                                    <p>${finalTotal.grandTotal}</p>
-                                </span>
+                                <div className="flex justify-between border-b pb-2 border-b-black">
+                                    <span className="">
+                                        <h2>delivery fee:</h2>
+                                    </span>
+                                    <span className="">
+                                        <p>+${deliveryFee}</p>
+                                    </span>
+                                </div>
+
+                                <div className="flex justify-between ">
+                                    <span className="">
+                                        <h2>sub-total:</h2>
+                                    </span>
+                                    <span className="">
+                                        <p>${order.subtotal}</p>
+                                    </span>
+                                </div>
+
+                                <div className="flex justify-between">
+                                    <span className="">
+                                        <h2>credit:</h2>
+                                    </span>
+                                    <span className="">
+                                        <p>-${order.totcredit}</p>
+                                    </span>
+                                </div>
+
+                                <div
+                                    className={
+                                        crrPaymentMethod === "bank account"
+                                            ? "border-b pb-1 border-b-black flex justify-between"
+                                            : "flex justify-between"
+                                    }
+                                >
+                                    <span className="">
+                                        <h2>deposit:</h2>
+                                    </span>
+                                    <span className="">
+                                        <p>${depositInfo?.depneeded}</p>
+                                    </span>
+                                </div>
+
+                                {crrPaymentMethod === "credit card" && (
+                                    <div className="border-b pb-2 border-b-black flex justify-between">
+                                        <span className="">
+                                            <h2>3% credit card fee:</h2>
+                                        </span>
+                                        <span className="">
+                                            <p>
+                                                +$
+                                                {finalTotal.fee}
+                                            </p>
+                                        </span>
+                                    </div>
+                                )}
+
+                                <div className="flex justify-between">
+                                    <span className="">
+                                        <h2>Due Today:</h2>
+                                    </span>
+                                    <span className="">
+                                        <p>${finalTotal.grandTotal}</p>
+                                    </span>
+                                </div>
+                            </section>
+                        </section>
+                        <section className="grow p-8">
+                            <div className="flex gap-4  pb-2 mb-2">
+                                <p
+                                    className={
+                                        crrPaymentMethod === "credit card"
+                                            ? "border-b border-davidiciGold px-5 py-1 shadow-sm shadow-davidiciGold transition-shadow hover:shadow-none cursor-pointer"
+                                            : "px-5 py-1 cursor-pointer"
+                                    }
+                                    onClick={() =>
+                                        setCrrPaymentMethod("credit card")
+                                    }
+                                >
+                                    Credit
+                                </p>
+                                <p
+                                    className={
+                                        crrPaymentMethod === "bank account"
+                                            ? "border-b border-davidiciGold px-5 py-1 cursor-pointer"
+                                            : "px-5 py-1 cursor-pointer"
+                                    }
+                                    onClick={() =>
+                                        setCrrPaymentMethod("bank account")
+                                    }
+                                >
+                                    Bank account
+                                </p>
                             </div>
+                            {crrPaymentMethod === "credit card" && (
+                                <CreditCardForm
+                                    handleSubmit={handleCardSubmit}
+                                    errors={cardValidationErrors}
+                                />
+                            )}
+                            {crrPaymentMethod === "bank account" && (
+                                <BankAccountForm
+                                    handleSubmit={handleBankSubmit}
+                                    errors={bankValidationErrors}
+                                />
+                            )}
                         </section>
                     </section>
-                    <section className="grow p-8">
-                        <div className="flex gap-4  pb-2 mb-2">
-                            <p
-                                className={
-                                    crrPaymentMethod === "credit card"
-                                        ? "border-b border-davidiciGold px-5 py-1 shadow-sm shadow-davidiciGold transition-shadow hover:shadow-none cursor-pointer"
-                                        : "px-5 py-1 cursor-pointer"
-                                }
-                                onClick={() =>
-                                    setCrrPaymentMethod("credit card")
-                                }
-                            >
-                                Credit
-                            </p>
-                            <p
-                                className={
-                                    crrPaymentMethod === "bank account"
-                                        ? "border-b border-davidiciGold px-5 py-1 cursor-pointer"
-                                        : "px-5 py-1 cursor-pointer"
-                                }
-                                onClick={() =>
-                                    setCrrPaymentMethod("bank account")
-                                }
-                            >
-                                Bank account
-                            </p>
-                        </div>
-                        {crrPaymentMethod === "credit card" && (
-                            <CreditCardForm
-                                handleSubmit={handleCardSubmit}
-                                errors={cardValidationErrors}
-                            />
-                        )}
-                        {crrPaymentMethod === "bank account" && (
-                            <BankAccountForm
-                                handleSubmit={handleBankSubmit}
-                                errors={bankValidationErrors}
-                            />
-                        )}
-                    </section>
-                </section>
+                )}
             </OrderLayout>
             <ToastContainer />
         </UserAuthenticatedLayout>

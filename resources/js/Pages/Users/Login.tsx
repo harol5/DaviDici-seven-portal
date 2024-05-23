@@ -9,7 +9,6 @@ interface loginCred {
 }
 
 function Login({ message = "" }) {
-    console.log(message);
     const { setData, post, errors } = useForm<loginCred>({
         email: "",
         password: "",

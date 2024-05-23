@@ -34,7 +34,7 @@ class OrdersController extends Controller
 
         $username = auth()->user()->username;
         $order = $request->all();
-        $orderNumber = getOrderNumberFromPath($request->path());     
+        $orderNumber = getOrderNumberFromPath($request->path());
 
         $products = FoxproApi::call([
             'action' => 'GetSoStatus',
@@ -50,6 +50,18 @@ class OrdersController extends Controller
                 'isDeliveryInfoSave' => $this->isDeliveryInfoSave($orderNumber),
             ]
         );
+    }
+
+    // Get orders products
+    public function getProducts(Request $request){
+        $orderNumber = getOrderNumberFromPath($request->path());
+        $products = FoxproApi::call([
+            'action' => 'GetSoStatus',
+            'params' => [$orderNumber],
+            'keep_session' => false,
+        ]);
+
+        return response(['products' => $products['rows']])->header('Content-Type', 'application/json');
     }
 
     // Show single order details.
@@ -356,7 +368,7 @@ class OrdersController extends Controller
     public function testApi(){
         $response = FoxproApi::call([
             'action' => 'OrderEnter',
-            'params' => ['HarolE$Davidici_com','HAR000009','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
+            'params' => ['HarolE$Davidici_com','HAR000010','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
             'keep_session' => false, 
         ]);
         
@@ -410,7 +422,7 @@ class OrdersController extends Controller
             'params' => [$orderNumber],
             'keep_session' => false, 
         ]);        
-
+        
         if(!array_key_exists('rows',$paymentInfo)) {
             return false;
         }else {

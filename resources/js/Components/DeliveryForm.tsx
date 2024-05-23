@@ -135,8 +135,11 @@ function DeliveryForm({
                 <div className="edit-button-wrapper">
                     <button
                         type="button"
-                        disabled={!isDataSaved}
+                        disabled={
+                            !isDataSaved || (order.submitted ? true : false)
+                        }
                         onClick={() => setIsDataSaved(false)}
+                        className="shadow-sm shadow-gray-500 transition-shadow hover:shadow-none"
                     >
                         Edit
                     </button>

@@ -51,7 +51,7 @@ function Modal({
                     leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                 >
                     <Dialog.Panel
-                        className={`modal-content ${maxWidth} bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:mx-auto`}
+                        className={`modal-content ${maxWidth} bg-white rounded-lg shadow-davidiciGold/40 overflow-hidden shadow-2xl transform transition-all sm:mx-auto`}
                     >
                         {children}
                     </Dialog.Panel>

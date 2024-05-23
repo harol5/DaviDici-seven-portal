@@ -37,7 +37,6 @@ function OrderLayout({ children, order, crrOrderOption }: OrderLayoutProps) {
         window.addEventListener("beforeunload", handleBeforeUnload);
 
         return () => {
-            console.log("removing event reload");
             window.removeEventListener("beforeunload", handleBeforeUnload);
         };
     }, [order]);
@@ -135,8 +134,12 @@ function OrderLayout({ children, order, crrOrderOption }: OrderLayoutProps) {
                         </div>
                     </section>
                     <div className="order-buttons-wrapper">
-                        <button>print order</button>
-                        <button>approve order</button>
+                        <button className="rounded shadow-sm shadow-gray-300 px-4 py-1 transition-shadow  hover:shadow-gray-500">
+                            print order
+                        </button>
+                        <button className="rounded shadow-sm shadow-gray-300 px-4 py-1 transition-shadow  hover:shadow-gray-500">
+                            approve order
+                        </button>
                     </div>
                 </div>
                 <div className="order-body-wrapper">{children}</div>

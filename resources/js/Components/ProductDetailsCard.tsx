@@ -8,6 +8,7 @@ interface ProductDetailsCardProps {
     handleQty: (value: string, product: ProductModel) => void;
     handleDelete: (product: ProductModel) => void;
     isPaymentSubmitted: boolean;
+    isSubmitedDate: boolean;
 }
 
 function ProductDetailsCard({
@@ -16,13 +17,14 @@ function ProductDetailsCard({
     handleQty,
     handleDelete,
     isPaymentSubmitted,
+    isSubmitedDate,
 }: ProductDetailsCardProps) {
     const [openModal, setOpenModal] = useState(false);
-
     const handleOpenModal = () => {
         setOpenModal(true);
     };
 
+    const isPaymentORSubmittedDate = isPaymentSubmitted || isSubmitedDate;
     const handleCloseModal = () => {
         setOpenModal(false);
     };
@@ -31,7 +33,9 @@ function ProductDetailsCard({
             <section className="product-wrapper product-details-card shadow-sm shadow-gray-300">
                 <div
                     className={
-                        isPaymentSubmitted ? "basis-[100%]" : "basis-[90%]"
+                        isPaymentSubmitted || isSubmitedDate
+                            ? "basis-[100%]"
+                            : "basis-[90%]"
                     }
                 >
                     <header>
@@ -59,18 +63,18 @@ function ProductDetailsCard({
                                 onChange={(e) =>
                                     handleQty(e.target.value, product)
                                 }
-                                readOnly={isPaymentSubmitted}
+                                readOnly={isPaymentSubmitted || isSubmitedDate}
                             />
                         </span>
                         <p className="total">${product.total}</p>
                     </section>
                 </div>
-                {!isPaymentSubmitted && (
+                {!isPaymentORSubmittedDate && (
                     <div className="basis-[10%]">
                         <button
                             className="rounded border shadow-sm shadow-gray-950 px-4 py-1 transition-shadow hover:shadow-none hover:bg-red-400 hover:text-white"
                             onClick={handleOpenModal}
-                            disabled={isPaymentSubmitted}
+                            disabled={isPaymentSubmitted || isSubmitedDate}
                         >
                             remove
                         </button>
@@ -92,15 +96,15 @@ function ProductDetailsCard({
                     <p className=" my-4">
                         are you sure you want to remove this product?
                     </p>
-                    <section className="flex justify-center my-4">
+                    <section className="flex justify-center my-4 gap-4">
                         <button
-                            className="bg-white py-1 px-4 mx-2 border border-black rounded"
+                            className="rounded border shadow-sm shadow-gray-950 px-4 py-1 transition-shadow hover:shadow-none text-sm"
                             onClick={handleCloseModal}
                         >
                             cancel
                         </button>
                         <button
-                            className="bg-red-500 py-1 px-4 mx-2 border border-black rounded"
+                            className="rounded border shadow-sm shadow-gray-950 px-4 py-1 transition-shadow hover:shadow-none bg-red-500 hover:text-white text-sm"
                             onClick={() => handleDelete(product)}
                         >
                             confirm

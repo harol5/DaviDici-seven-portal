@@ -10,7 +10,6 @@ function ProductDeliveryCard({
     product,
     productDeliStatus,
 }: ProductDeliveryCardProps) {
-    console.log(productDeliStatus);
     return (
         <div className="product-wrapper product-delivery-card shadow-sm shadow-gray-300">
             <header>

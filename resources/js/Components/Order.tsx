@@ -1,5 +1,10 @@
 import { Link } from "@inertiajs/react";
 import type { Order as OrderModel, OrderRecord } from "../Models/Order";
+import Modal from "./Modal";
+import ProductStatusCard from "./ProductStatusCard";
+import { useState } from "react";
+import type { Product as ProductModel } from "../Models/Product";
+import axios from "axios";
 
 interface OrderProps {
     order: OrderModel;
@@ -10,17 +15,40 @@ function Order({ order }: OrderProps) {
         ...order,
     };
 
+    const [openModal, setOpenModal] = useState(false);
+    const [products, setProducts] = useState<ProductModel[]>([]);
+
+    const handleOpenModal = async () => {
+        setOpenModal(true);
+        try {
+            const response = await axios.get(
+                `/orders/${order.ordernum}/products`
+            );
+            setProducts(response.data.products);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const handleCloseModal = () => {
+        setOpenModal(false);
+    };
+
     return (
         <div
-            className="order-container shadow shadow-gray-300 m-3 text-[0.9em] transition-shadow hover:shadow-none hover:boder hover:border-davidiciGold"
+            className="order-container shadow shadow-gray-300 m-3 text-[0.9em] transition-shadow hover:shadow-davidiciGold/70 hover:shadow-md"
             id={order.ordernum}
         >
             <div className="order">
                 <h2>{order.ordernum}</h2>
                 <div className="order-details-wrapper">
                     <span>
-                        <h2>Status:</h2>
-                        <p>{order.status}</p>
+                        <button
+                            className="rounded border shadow-sm shadow-gray-100 px-5 py-2 transition-shadow hover:shadow-gray-700 text-sm"
+                            onClick={handleOpenModal}
+                        >
+                            check status
+                        </button>
                     </span>
                     <span>
                         <h2>Sub-total:</h2>
@@ -36,7 +64,11 @@ function Order({ order }: OrderProps) {
                     </span>
                     <span>
                         <h2>Submitted date:</h2>
-                        <p>{order.submitted}</p>
+                        {order.submitted ? (
+                            <p>{order.submitted}</p>
+                        ) : (
+                            <p>pending for approval</p>
+                        )}
                     </span>
                     <span>
                         <h2>Total:</h2>
@@ -51,6 +83,23 @@ function Order({ order }: OrderProps) {
                     View Order
                 </Link>
             </div>
+            <Modal show={openModal} onClose={handleCloseModal}>
+                <h1 className="order-status-title text-lg">Order Status</h1>
+                <section className="products-status-wrapper bg-zinc-50 shadow-inner shadow-gray-300 rounded-md mx-16">
+                    {products.map((product) => (
+                        <ProductStatusCard
+                            key={product.linenum}
+                            product={product}
+                        />
+                    ))}
+                </section>
+                <button
+                    className="close-modal-button rounded border shadow-sm shadow-gray-950 px-5 py-2 transition-shadow hover:shadow-none"
+                    onClick={handleCloseModal}
+                >
+                    Close
+                </button>
+            </Modal>
         </div>
     );
 }

@@ -17,7 +17,6 @@ function OrderDelivery({
     rawProducts,
     deliveryInfoByProd,
 }: OrderDeliveryProps) {
-    console.log(deliveryInfoByProd);
     //--TODO: this could be acustom hook? same logic on orderDetails component
     const formatOrder = () => {
         const subtotal = Number.parseFloat(rawOrder.subtotal as string);

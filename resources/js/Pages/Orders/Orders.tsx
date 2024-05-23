@@ -1,7 +1,7 @@
 import UserAuthenticatedLayout from "../../Layouts/UserAuthenticatedLayout";
 import Order from "../../Components/Order";
 import FlashMessage from "../../Components/FlashMessage";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useMemo, useState } from "react";
 import User from "../../Models/User";
 import type { Order as OrderModel } from "../../Models/Order";
 
@@ -22,13 +22,38 @@ function Orders({ auth, orders, message = "" }: ordersProp) {
         setUserOrders(filteredOrders);
     };
 
+    const dayTime = useMemo(() => {
+        const date = new Date();
+        const hours = date.getHours();
+        const ampm =
+            hours >= 12 && hours < 18
+                ? "pm"
+                : hours >= 18 && hours <= 23
+                ? "night"
+                : "am";
+        return ampm;
+    }, []);
+
     return (
         <UserAuthenticatedLayout crrPage="orders">
             <div className="main-content-wrapper">
                 <div className="gretting-search-wrapper">
-                    <h1 className="greeting">
-                        Good Afternoon {auth?.user.name}
-                    </h1>
+                    {dayTime === "am" && (
+                        <h1 className="greeting">
+                            Good Morning {auth?.user.name}
+                        </h1>
+                    )}
+                    {dayTime === "pm" && (
+                        <h1 className="greeting">
+                            Good Afternoon {auth?.user.name}
+                        </h1>
+                    )}
+                    {dayTime === "night" && (
+                        <h1 className="greeting">
+                            Good Evening {auth?.user.name}
+                        </h1>
+                    )}
+
                     <input
                         className="search-order-input"
                         type="search"
