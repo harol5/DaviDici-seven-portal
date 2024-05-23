@@ -1,4 +1,4 @@
-import ProductModel from "../Models/Product";
+import type { Product as ProductModel } from "../Models/Product";
 
 interface ProductStatusProps {
     product: ProductModel;
@@ -6,7 +6,7 @@ interface ProductStatusProps {
 
 function ProductStatusCard({ product }: ProductStatusProps) {
     return (
-        <div className="product-wrapper product-status-card">
+        <div className="product-wrapper product-status-card shadow-sm shadow-gray-300">
             <header>
                 <h2 className="description">Description:</h2>
                 <h2 className="size">Size:</h2>

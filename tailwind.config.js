@@ -19,6 +19,8 @@ export default {
             orange: colors.orange,
             zinc: colors.zinc,
             slate: colors.slate,
+            lime: colors.lime,
+            green: colors.green,
         },
         extend: {},
     },

@@ -19,6 +19,7 @@ function OrderOverview({
     isPaymentSubmitted,
     isDeliveryInfoSave,
 }: OrderOverviewProps) {
+    console.log(order);
     console.log("is Payment submitted:", isPaymentSubmitted);
     console.log("is delivery info submitted:", isDeliveryInfoSave);
     const [openModal, setOpenModal] = useState(false);
@@ -34,14 +35,14 @@ function OrderOverview({
     return (
         <UserAuthenticatedLayout crrPage="orders">
             <OrderLayout order={order} crrOrderOption="overview">
-                <section className="overview-wrapper mt-6 bg-zinc-50 shadow-2xl py-10 px-16 rounded-md">
+                <section className="overview-wrapper mt-6 bg-zinc-50 shadow-inner shadow-gray-300 py-10 px-10 rounded-md ">
                     <section className="order-details-wrapper">
                         <span>
                             <button
-                                className="check-status-button"
+                                className="rounded border shadow-sm shadow-gray-950 px-5 py-2 transition-shadow hover:shadow-none"
                                 onClick={handleOpenModal}
                             >
-                                Check Status
+                                check status
                             </button>
                         </span>
                         <span>
@@ -77,8 +78,8 @@ function OrderOverview({
                 </section>
             </OrderLayout>
             <Modal show={openModal} onClose={handleCloseModal}>
-                <h1 className="order-status-title">Order Status</h1>
-                <section className="products-status-wrapper">
+                <h1 className="order-status-title text-lg">Order Status</h1>
+                <section className="products-status-wrapper bg-zinc-50 shadow-inner shadow-gray-300 rounded-md mx-16">
                     {products.map((product) => (
                         <ProductStatusCard
                             key={product.linenum}
@@ -87,7 +88,7 @@ function OrderOverview({
                     ))}
                 </section>
                 <button
-                    className="close-modal-button"
+                    className="close-modal-button rounded border shadow-sm shadow-gray-950 px-5 py-2 transition-shadow hover:shadow-none"
                     onClick={handleCloseModal}
                 >
                     Close

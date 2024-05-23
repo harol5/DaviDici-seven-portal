@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 function FlashMessage({ message }: { message: string }) {
     const [flashMessage, setMessage] = useState(message);
+    console.log(flashMessage);
     useEffect(() => {
         if (message) {
             const timeout = setTimeout(() => {

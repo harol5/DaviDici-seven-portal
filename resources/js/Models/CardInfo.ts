@@ -5,9 +5,6 @@ export type CardInfo = {
     cvc: string;
     name: string;
     address: {
-        streetAddress: string;
         postalCode: string;
-        city: string;
-        region: string;
     };
 };

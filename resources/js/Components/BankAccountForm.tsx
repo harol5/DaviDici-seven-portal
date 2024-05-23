@@ -3,6 +3,7 @@ import type { BankInfo as BankInfoModel } from "../Models/BankInfo";
 
 interface CreditCardFormProps {
     handleSubmit: (e: FormEvent, state: BankInfoModel) => void;
+    errors: any;
 }
 
 type Action = {
@@ -17,7 +18,7 @@ type Action = {
     payload: string;
 };
 
-function BankAccountForm({ handleSubmit }: CreditCardFormProps) {
+function BankAccountForm({ handleSubmit, errors }: CreditCardFormProps) {
     const eCheck: BankInfoModel = {
         bankAccount: {
             name: "",
@@ -93,6 +94,7 @@ function BankAccountForm({ handleSubmit }: CreditCardFormProps) {
                         value={state.bankAccount.name}
                         id="name"
                         required
+                        maxLength={64}
                         onChange={(e) => {
                             dispatch({
                                 type: "set-name",
@@ -108,11 +110,13 @@ function BankAccountForm({ handleSubmit }: CreditCardFormProps) {
                     </label>
                     <input
                         className="px-[0.2em] border border-black rounded"
-                        type="text"
+                        type="tel"
                         name="accountNumber"
                         value={state.bankAccount.accountNumber}
                         id="account-number"
                         required
+                        min={4}
+                        max={17}
                         onChange={(e) => {
                             dispatch({
                                 type: "set-accountNumber",
@@ -158,13 +162,16 @@ function BankAccountForm({ handleSubmit }: CreditCardFormProps) {
                     <label htmlFor="routing-number" className="mb-1">
                         Routing number:
                     </label>
+                    {errors.routingNumber && <p>{errors.routingNumber}</p>}
                     <input
                         className="px-[0.2em] border border-black rounded"
-                        type="text"
+                        type="tel"
                         name="routingNumber"
                         value={state.bankAccount.routingNumber}
                         id="routing-number"
                         required
+                        min={9}
+                        max={9}
                         onChange={(e) => {
                             dispatch({
                                 type: "set-routingNumber",
@@ -178,6 +185,7 @@ function BankAccountForm({ handleSubmit }: CreditCardFormProps) {
                     <label htmlFor="phone" className="mb-1">
                         Phone number:
                     </label>
+                    {errors.phone && <p>{errors.phone}</p>}
                     <input
                         type="tel"
                         className="px-[0.2em] border border-black rounded"
@@ -185,6 +193,7 @@ function BankAccountForm({ handleSubmit }: CreditCardFormProps) {
                         value={state.bankAccount.phone}
                         id="phone"
                         min={10}
+                        max={10}
                         required
                         onChange={(e) => {
                             dispatch({

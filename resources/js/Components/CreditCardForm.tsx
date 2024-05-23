@@ -3,6 +3,7 @@ import type { CardInfo as CardInfoModel } from "../Models/CardInfo";
 
 interface CreditCardFormProps {
     handleSubmit: (e: FormEvent, state: CardInfoModel) => void;
+    errors: any;
 }
 
 type Action = {
@@ -12,15 +13,13 @@ type Action = {
         | "set-expYear"
         | "set-cvc"
         | "set-name"
-        | "set-streetAddress"
-        | "set-postalCode"
-        | "set-city"
-        | "set-region";
+        | "set-postalCode";
 
     payload: string;
 };
 
-function CreditCardForm({ handleSubmit }: CreditCardFormProps) {
+function CreditCardForm({ handleSubmit, errors }: CreditCardFormProps) {
+    console.log(errors);
     const card: CardInfoModel = {
         number: "",
         expMonth: "",
@@ -28,10 +27,7 @@ function CreditCardForm({ handleSubmit }: CreditCardFormProps) {
         cvc: "",
         name: "",
         address: {
-            streetAddress: "",
             postalCode: "",
-            city: "",
-            region: "",
         },
     };
 
@@ -62,36 +58,12 @@ function CreditCardForm({ handleSubmit }: CreditCardFormProps) {
                     ...state,
                     name: action.payload,
                 };
-            case "set-streetAddress":
-                return {
-                    ...state,
-                    address: {
-                        ...state.address,
-                        streetAddress: action.payload,
-                    },
-                };
             case "set-postalCode":
                 return {
                     ...state,
                     address: {
                         ...state.address,
                         postalCode: action.payload,
-                    },
-                };
-            case "set-city":
-                return {
-                    ...state,
-                    address: {
-                        ...state.address,
-                        city: action.payload,
-                    },
-                };
-            case "set-region":
-                return {
-                    ...state,
-                    address: {
-                        ...state.address,
-                        region: action.payload,
                     },
                 };
             default:
@@ -113,6 +85,7 @@ function CreditCardForm({ handleSubmit }: CreditCardFormProps) {
                         type="tel"
                         minLength={14}
                         maxLength={19}
+                        required
                         id="card-num"
                         name="number"
                         value={state.number}
@@ -139,6 +112,7 @@ function CreditCardForm({ handleSubmit }: CreditCardFormProps) {
                             name="expMonth"
                             min={"01"}
                             max={"12"}
+                            required
                             value={state.expMonth}
                             placeholder="mm"
                             onChange={(e) => {
@@ -153,6 +127,7 @@ function CreditCardForm({ handleSubmit }: CreditCardFormProps) {
                             className="px-[0.2em] w-[60px] border border-black rounded"
                             type="tel"
                             maxLength={4}
+                            required
                             name="expYear"
                             value={state.expYear}
                             placeholder="yyyy"
@@ -178,6 +153,7 @@ function CreditCardForm({ handleSubmit }: CreditCardFormProps) {
                         placeholder="CVC"
                         autoComplete="cc-csc"
                         id="cvc"
+                        required
                         onChange={(e) => {
                             dispatch({
                                 type: "set-cvc",
@@ -209,116 +185,6 @@ function CreditCardForm({ handleSubmit }: CreditCardFormProps) {
                 </div>
 
                 <div className="flex flex-col">
-                    <label htmlFor="billing-address" className="mb-1">
-                        Address
-                    </label>
-                    <input
-                        className="px-[0.2em] border border-black rounded"
-                        type="text"
-                        name="address"
-                        value={state.address.streetAddress}
-                        id="billing-address"
-                        onChange={(e) => {
-                            dispatch({
-                                type: "set-streetAddress",
-                                payload: e.currentTarget.value,
-                            });
-                        }}
-                    />
-                </div>
-
-                <div className="flex flex-col">
-                    <label htmlFor="city" className="mb-1">
-                        City:
-                    </label>
-                    <input
-                        className="px-[0.2em] border border-black rounded"
-                        type="text"
-                        name="city"
-                        value={state.address.city}
-                        id="city"
-                        onChange={(e) => {
-                            dispatch({
-                                type: "set-city",
-                                payload: e.currentTarget.value,
-                            });
-                        }}
-                    />
-                </div>
-
-                <div className="flex flex-col">
-                    <label htmlFor="state" className="mb-1">
-                        State:
-                    </label>
-                    <select
-                        className="px-[0.3em] border border-black rounded"
-                        id="state"
-                        name="state"
-                        value={state.address.region}
-                        onChange={(e) => {
-                            dispatch({
-                                type: "set-region",
-                                payload: e.currentTarget.value,
-                            });
-                        }}
-                    >
-                        <option value="">N/A</option>
-                        <option value="AK">Alaska</option>
-                        <option value="AL">Alabama</option>
-                        <option value="AR">Arkansas</option>
-                        <option value="AZ">Arizona</option>
-                        <option value="CA">California</option>
-                        <option value="CO">Colorado</option>
-                        <option value="CT">Connecticut</option>
-                        <option value="DC">District of Columbia</option>
-                        <option value="DE">Delaware</option>
-                        <option value="FL">Florida</option>
-                        <option value="GA">Georgia</option>
-                        <option value="HI">Hawaii</option>
-                        <option value="IA">Iowa</option>
-                        <option value="ID">Idaho</option>
-                        <option value="IL">Illinois</option>
-                        <option value="IN">Indiana</option>
-                        <option value="KS">Kansas</option>
-                        <option value="KY">Kentucky</option>
-                        <option value="LA">Louisiana</option>
-                        <option value="MA">Massachusetts</option>
-                        <option value="MD">Maryland</option>
-                        <option value="ME">Maine</option>
-                        <option value="MI">Michigan</option>
-                        <option value="MN">Minnesota</option>
-                        <option value="MO">Missouri</option>
-                        <option value="MS">Mississippi</option>
-                        <option value="MT">Montana</option>
-                        <option value="NC">North Carolina</option>
-                        <option value="ND">North Dakota</option>
-                        <option value="NE">Nebraska</option>
-                        <option value="NH">New Hampshire</option>
-                        <option value="NJ">New Jersey</option>
-                        <option value="NM">New Mexico</option>
-                        <option value="NV">Nevada</option>
-                        <option value="NY">New York</option>
-                        <option value="OH">Ohio</option>
-                        <option value="OK">Oklahoma</option>
-                        <option value="OR">Oregon</option>
-                        <option value="PA">Pennsylvania</option>
-                        <option value="PR">Puerto Rico</option>
-                        <option value="RI">Rhode Island</option>
-                        <option value="SC">South Carolina</option>
-                        <option value="SD">South Dakota</option>
-                        <option value="TN">Tennessee</option>
-                        <option value="TX">Texas</option>
-                        <option value="UT">Utah</option>
-                        <option value="VA">Virginia</option>
-                        <option value="VT">Vermont</option>
-                        <option value="WA">Washington</option>
-                        <option value="WI">Wisconsin</option>
-                        <option value="WV">West Virginia</option>
-                        <option value="WY">Wyoming</option>
-                    </select>
-                </div>
-
-                <div className="flex flex-col">
                     <label htmlFor="zip-code" className="mb-1">
                         Zip code:
                     </label>
@@ -327,6 +193,9 @@ function CreditCardForm({ handleSubmit }: CreditCardFormProps) {
                         className="px-[0.2em] border border-black rounded"
                         name="zipCode"
                         value={state.address.postalCode}
+                        minLength={5}
+                        maxLength={10}
+                        required
                         id="zip-code"
                         onChange={(e) => {
                             dispatch({
@@ -338,12 +207,12 @@ function CreditCardForm({ handleSubmit }: CreditCardFormProps) {
                 </div>
             </div>
 
-            <div className="">
+            <div className="flex justify-center mt-5">
                 <button
-                    className="border border-black rounded px-3"
+                    className="rounded border shadow-sm shadow-gray-950 px-5 py-2 text-sm transition-shadow hover:shadow-none hover:bg-green-400/95 hover:text-white hover:border-green-700"
                     type="submit"
                 >
-                    submit
+                    Submit and Approve
                 </button>
             </div>
         </form>

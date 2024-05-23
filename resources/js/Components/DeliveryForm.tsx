@@ -72,7 +72,7 @@ function DeliveryForm({
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
+        console.log("delivery info sent to api", data);
         const dateAsArray = data.date.split("-");
         const year = dateAsArray.shift()!;
         dateAsArray.push(year);
@@ -113,7 +113,7 @@ function DeliveryForm({
         <>
             <form
                 onSubmit={handleSubmit}
-                className="delivery-form bg-white py-7 px-10 rounded-md"
+                className="delivery-form bg-zinc-50 shadow-inner shadow-gray-300 py-10 px-10 rounded-md"
             >
                 <div className="delivery-date">
                     <label htmlFor="delivery-date">Choose delivery date:</label>
@@ -342,7 +342,11 @@ function DeliveryForm({
                 </div>
 
                 <div className="submit-button-wrapper">
-                    <button type="submit" disabled={isDataSaved}>
+                    <button
+                        type="submit"
+                        disabled={isDataSaved}
+                        className="shadow-sm shadow-gray-500 transition-shadow hover:shadow-none"
+                    >
                         Submit
                     </button>
                 </div>

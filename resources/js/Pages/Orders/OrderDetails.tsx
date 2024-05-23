@@ -153,7 +153,7 @@ function OrderDetails({
     return (
         <UserAuthenticatedLayout crrPage="orders">
             <OrderLayout order={order} crrOrderOption="details">
-                <section className="products-details-wrapper bg-zinc-50 shadow-2xl py-10 px-10 rounded-md">
+                <section className="products-details-wrapper bg-zinc-50 shadow-inner shadow-gray-300 py-10 px-10 rounded-md">
                     {products.map((product) => (
                         <ProductDetailsCard
                             key={product.linenum}

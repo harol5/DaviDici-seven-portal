@@ -2,10 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+    font-family: "leaner";
+    src: url("https://seven.test/fonts/Leaner-Thin.ttf");
+}
+@font-face {
+    font-family: "Crox-ExtraLight";
+    src: url("https://seven.test/fonts/crox/Crox-ExtraLight.otf");
+}
+@font-face {
+    font-family: "Crox-Poster-Italic";
+    src: url("https://seven.test/fonts/crox/Crox-Poster-Italic.otf");
+}
+@font-face {
+    font-family: "DMSans-Italic";
+    src: url("https://seven.test/fonts/DM_Sans/DMSans-Italic-VariableFont_opsz,wght.ttf");
+}
+@font-face {
+    font-family: "DMSans";
+    src: url("https://seven.test/fonts/DM_Sans/DMSans-VariableFont_opsz,wght.ttf");
+}
+
 * {
     margin: 0;
     box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
+    /* font-family: Arial, Helvetica, sans-serif; */
+    /* font-family: Cambria, Cochin, Georgia, Times, "Times New Roman", serif; */
+    /* font-family: leaner; */
+    /* font-family: Crox-Poster-Italic; */
+    font-family: DMSans;
+    /* font-family: DMSans-Italic; */
+    font-weight: 400;
 }
 
 /*===========LOGIN STYLING==============*/
@@ -85,7 +112,7 @@ nav > div {
 }
 .nav-links li {
     margin: 0 10px;
-    padding: 0 1em 0.2em;
+    padding: 0 1.5em 0.2em;
 }
 .nav-links li > a {
     text-decoration: none;
@@ -145,7 +172,7 @@ main {
 
 /*individual orders*/
 .order-container {
-    width: 33.33333333%;
+    width: 31.5%;
 }
 .order {
     background-color: white;
@@ -160,7 +187,8 @@ main {
 .order-details-wrapper {
     display: flex;
     flex-wrap: wrap;
-    margin: 1em 0;
+    margin: 1.5em 0;
+    margin-bottom: 1.8em;
     border-top: 1px solid #d1aa68;
     border-bottom: 1px solid #d1aa68;
 }
@@ -188,12 +216,13 @@ main {
 .order-options-menu-wrapper ul .options {
     border-radius: 5px;
     margin-bottom: 1em;
-    box-shadow: -5px -3px 4px rgba(0, 0, 0, 0.125);
-    /* background-color: #fafafa; */
-    font-size: 0.92em;
+    box-shadow: 1px -2px 5px rgba(0, 0, 0, 0.43);
+    /* font-size: 0.92em; */
+    transition: box-shadow 0.4s ease;
 }
 .order-options-menu-wrapper ul .options:hover {
-    background-color: #8383832b;
+    border: #d1aa68 0.025em solid;
+    box-shadow: none;
 }
 .order-options-menu-wrapper ul .options > a {
     display: block;
@@ -290,11 +319,10 @@ main {
 .order-status-title {
     color: #d1aa68;
     text-align: center;
-    margin: 2em 0;
+    margin: 1.5em 0;
 }
 
 .products-status-wrapper {
-    padding: 0 10em;
     display: flex;
     flex-direction: column;
     gap: 2em 0;
@@ -339,7 +367,6 @@ main {
 .product-details-card {
     display: flex;
     align-items: center;
-    /* background-color: white; */
 }
 
 .product-details-card .description {
@@ -377,12 +404,11 @@ main {
     margin-bottom: 1.5em;
     display: flex;
     flex-direction: column;
-    gap: 0.5em 0;
+    gap: 3em 0;
 }
 
 .product-delivery-card {
     display: block;
-    background-color: white;
 }
 
 .product-delivery-card .description {
@@ -445,18 +471,21 @@ main {
 }
 .delivery-form input {
     padding: 0.3em;
-    border: 1px solid;
+    /* border: 1px solid; */
     border-radius: 3px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.413);
 }
 .delivery-form select {
     padding: 0.3em;
-    border: 1px solid;
+    /* border: 1px solid; */
     border-radius: 3px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.413);
 }
 .delivery-form textarea {
     padding: 0.3em;
-    border: 1px solid;
+    /* border: 1px solid; */
     border-radius: 3px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.413);
 }
 
 /*FIELDS STYLING*/
@@ -500,7 +529,8 @@ main {
     color: #616161;
     outline: none;
     cursor: auto;
-    border-bottom: 1px solid #616161;
+    box-shadow: none;
+    /* border-bottom: 1px solid #616161; */
 }
 
 .delivery-form button:disabled[type="button"],

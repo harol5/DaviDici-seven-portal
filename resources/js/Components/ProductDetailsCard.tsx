@@ -68,11 +68,11 @@ function ProductDetailsCard({
                 {!isPaymentSubmitted && (
                     <div className="basis-[10%]">
                         <button
-                            className="delete-button"
+                            className="rounded border shadow-sm shadow-gray-950 px-4 py-1 transition-shadow hover:shadow-none hover:bg-red-400 hover:text-white"
                             onClick={handleOpenModal}
                             disabled={isPaymentSubmitted}
                         >
-                            Delete
+                            remove
                         </button>
                     </div>
                 )}

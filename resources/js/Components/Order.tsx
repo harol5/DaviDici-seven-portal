@@ -11,7 +11,10 @@ function Order({ order }: OrderProps) {
     };
 
     return (
-        <div className="order-container" id={order.ordernum}>
+        <div
+            className="order-container shadow shadow-gray-300 m-3 text-[0.9em] transition-shadow hover:shadow-none hover:boder hover:border-davidiciGold"
+            id={order.ordernum}
+        >
             <div className="order">
                 <h2>{order.ordernum}</h2>
                 <div className="order-details-wrapper">
@@ -43,6 +46,7 @@ function Order({ order }: OrderProps) {
                 <Link
                     href={`/orders/${order.ordernum}/overview`}
                     data={orderFormatted}
+                    className="rounded border shadow-sm shadow-gray-100 px-5 py-2 transition-shadow hover:shadow-gray-700"
                 >
                     View Order
                 </Link>

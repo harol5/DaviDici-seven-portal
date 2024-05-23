@@ -143,7 +143,7 @@ class OrdersController extends Controller
 
         $orderNumber = getOrderNumberFromPath($request->path());
         $deliveryInfo = $request->all();
-        
+        info($deliveryInfo);
         $res = FoxproApi::call([
             'action' => 'SaveDeliveryInfo',
             'params' => [
@@ -162,10 +162,11 @@ class OrdersController extends Controller
                 $deliveryInfo['deliveryType'],
                 $deliveryInfo['deliveryInstruction'],
                 'ALL',
+                '0'
             ],
             'keep_session' => false,
         ]);
-
+        info($res);
         if($res['Result'] === 'Info Updated Successfully'){
             return response(['foxproRes' => $res, 'message' => 'dalivery information saved!!', 'information' => $deliveryInfo])->header('Content-Type', 'application/json');        
         }
@@ -178,13 +179,25 @@ class OrdersController extends Controller
         // throw 404 if order number does not exist
         $order = $request->all();
         $orderNumber = getOrderNumberFromPath($request->path());
+        $userEmail = auth()->user()->attributesToArray()['email'];    
 
         $deliveryInfo = FoxproApi::call([
             'action' => 'GetDeliveryInfo',
             'params' => [$orderNumber],
             'keep_session' => false,
         ]);
-        return Inertia::render('Orders/OrderPayment',['order' => $order, 'deliveryInfo' => $deliveryInfo['rows']]);
+             
+        $depositInfo = FoxproApi::call([
+            'action' => 'getpercentdeposit',
+            'params' => ['harole@davidici.com',$orderNumber],
+            'keep_session' => false,
+        ]);
+
+        return Inertia::render('Orders/OrderPayment',[
+            'order' => $order, 
+            'deliveryInfo' => $deliveryInfo['rows'],                         
+            'depositInfo' => $depositInfo['rows'][0],
+        ]);
     }
 
     // Creates a transaction.
@@ -195,7 +208,7 @@ class OrdersController extends Controller
         $orderNumber = getOrderNumberFromPath($request->path());
 
         $response = Http::withHeaders([
-            'Authorization' => env('INTUIT_AUTH_TOKEN'),                      
+            'Authorization' => 'Bearer ' . env('INTUIT_AUTH_TOKEN'),                      
             'Content-Type' => 'application/json',
             'Request-Id' => $uuidTransaction,
         ])->withBody($js_data)->post('https://sandbox.api.intuit.com/quickbooks/v4/payments/charges');
@@ -206,15 +219,21 @@ class OrdersController extends Controller
             // "Result" : "Info Updated Successfully" |
             $cashReceiptRes = FoxproApi::call([
                 'action' => 'SaveCR',
-                'params' => [$orderNumber,'CC','100.23','05/20/2024','harol rojas','1234567890000','12/24','123'],
+                // get amount without credit card fee.
+                'params' => [$orderNumber,'CC',$info['amount'],'05/22/2024','harol rojas','1234567890000','12/24','123'],
                 'keep_session' => false,
             ]);
 
-            return response(['intuitRes' => $response->json(), 'status' => $response->status(), 'foxpro' => $cashReceiptRes])->header('Content-Type', 'application/json');
+            return response(['intuitRes' => $response->json(), 'status' => $response->status(), 'cashRes' => $cashReceiptRes])->header('Content-Type', 'application/json');
 
-        }else if($response->clientError()){
+        }else if($response->clientError()){           
             // 401 -> access token expired!!
-            return response(['intuitRes' => "client error", 'status' => $response->status()])->header('Content-Type', 'application/json');
+            if($response->status() === 401){
+                $this->getAccessToken();
+            }        
+            
+            // 400 -> invalid information!!
+            return response(['intuitRes' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');
         }else {
             return response(['intuitRes' => "something else happened"])->header('Content-Type', 'application/json');
         }
@@ -232,6 +251,32 @@ class OrdersController extends Controller
             'Content-Type' => 'application/json',
             'Request-Id' => $uuidTransaction,
         ])->withBody($js_data)->post('https://sandbox.api.intuit.com/quickbooks/v4/payments/echecks');
+                        
+        if($response->successful()){
+            return response(['intuitRes' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');
+
+        }else if($response->clientError()){
+            // 401 -> access token expired!!            
+            // $this->getAccessToken();
+
+            // 400 -> invalid information!!
+
+            return response(['intuitRes' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');
+        }else {
+            return response(['intuitRes' => "something else happened"])->header('Content-Type', 'application/json');
+        }
+    }
+
+    // get status of a eCheck
+    public function getStatusCheck(Request $request){
+        $info = $request->all();        
+        $uuidTransaction = (string) Str::uuid();
+        $orderNumber = getOrderNumberFromPath($request->path());
+
+        $response = Http::withHeaders([
+            'Authorization' => env('INTUIT_AUTH_TOKEN'),            
+            'Request-Id' => $uuidTransaction,
+        ])->get('https://sandbox.api.intuit.com/quickbooks/v4/payments/echecks/' . $info['id']);        
 
         if($response->successful()){
             return response(['intuitRes' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');
@@ -311,9 +356,9 @@ class OrdersController extends Controller
     public function testApi(){
         $response = FoxproApi::call([
             'action' => 'OrderEnter',
-            'params' => ['HarolE$Davidici_com','HAR000004','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
+            'params' => ['HarolE$Davidici_com','HAR000009','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
             'keep_session' => false, 
-        ]);                
+        ]);
         
         // $response = FoxproApi::call([
         //     'action' => 'GetProductPrice',
@@ -333,6 +378,24 @@ class OrdersController extends Controller
         //     'keep_session' => false, 
         // ]);
 
+        // $response = FoxproApi::call([
+        //     'action' => 'getpercentdeposit',
+        //     'params' => ['harole@davidici.com','HAR000005'],
+        //     'keep_session' => false,
+        // ]);
+
+        // $response = FoxproApi::call([
+        //     'action' => 'SaveCR',
+        //     'params' => ['HAR000004','CC','100.23','05/21/2024','harol rojas','1234567890000','12/24','123'],
+        //     'keep_session' => false,
+        // ]);
+        
+        // $response = FoxproApi::call([
+        //     'action' => 'SaveCR',
+        //     'params' => ['HAR000004','CC','100.23','05/21/2024','harol rojas','1234567890000','12/24','123'],
+        //     'keep_session' => false,
+        // ]);
+
         // return Inertia::render('Test',['response' => $response]);
         return response(['response' => $response])->header('Content-Type', 'application/json');
     }
@@ -346,7 +409,7 @@ class OrdersController extends Controller
             'action' => 'GetCR',
             'params' => [$orderNumber],
             'keep_session' => false, 
-        ]);
+        ]);        
 
         if(!array_key_exists('rows',$paymentInfo)) {
             return false;
@@ -366,6 +429,39 @@ class OrdersController extends Controller
             return true;
         }else {
             return false;
+        }
+    }
+
+    public function getAccessToken(){
+        $clientId = env('INTUIT_CLIENT_ID');
+        $clientSecret = env('INTUIT_CLIENT_SECRECT');
+        $refreshToken = env('INTUIT_REFRESH_TOKEN');
+        
+        $auth = 'Basic ' . base64_encode($clientId . ':' . $clientSecret);
+        $data = http_build_query(['grant_type' => 'refresh_token', 'refresh_token' => $refreshToken]);
+
+        $response = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Authorization' => $auth,                      
+            'Content-Type' => 'application/x-www-form-urlencoded',            
+        ])->withBody($data,'application/x-www-form-urlencoded')->post(env('INTUIT_REFRESH_URL'));
+
+        info('--vvvvv-- response from access token request --vvvvv--');
+        info($auth);
+        info($data);
+        info($response->status());
+        info($response->collect());
+
+        if($response->status() === 200){
+            // get access token and refresh token from response.
+            $collection = $response->collect();
+            $tokens = $collection->all();
+            info($tokens['access_token']);
+            info($tokens['expires_in']);
+            info($tokens['refresh_token']);
+            info($tokens['x_refresh_token_expires_in']);
+            info($tokens['token_type']);
+            // set new tokens.
         }
     }
 }

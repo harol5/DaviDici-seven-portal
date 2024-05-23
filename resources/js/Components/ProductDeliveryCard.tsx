@@ -12,7 +12,7 @@ function ProductDeliveryCard({
 }: ProductDeliveryCardProps) {
     console.log(productDeliStatus);
     return (
-        <div className="product-wrapper product-delivery-card">
+        <div className="product-wrapper product-delivery-card shadow-sm shadow-gray-300">
             <header>
                 <h2 className="status">Deliver By:</h2>
                 <h2 className="description">Description:</h2>

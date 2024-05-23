@@ -17,6 +17,7 @@ function OrderDelivery({
     rawProducts,
     deliveryInfoByProd,
 }: OrderDeliveryProps) {
+    console.log(deliveryInfoByProd);
     //--TODO: this could be acustom hook? same logic on orderDetails component
     const formatOrder = () => {
         const subtotal = Number.parseFloat(rawOrder.subtotal as string);
@@ -62,7 +63,7 @@ function OrderDelivery({
     return (
         <UserAuthenticatedLayout crrPage="orders">
             <OrderLayout order={order} crrOrderOption="delivery">
-                <section className="products-delivery-wrapper">
+                <section className="products-delivery-wrapper bg-zinc-50 shadow-inner shadow-gray-300 py-10 px-10 rounded-md">
                     {products.map((product: ProductModel, index: number) => (
                         <ProductDeliveryCard
                             key={product.linenum}

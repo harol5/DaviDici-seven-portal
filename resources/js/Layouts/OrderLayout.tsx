@@ -24,7 +24,7 @@ function OrderLayout({ children, order, crrOrderOption }: OrderLayoutProps) {
     //this changes the query string on reload to make sure it have updated data.
     useEffect(() => {
         const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-            event.preventDefault();
+            // event.preventDefault();
             console.log("before reload");
             console.log(serialize(order));
             location.replace(
@@ -47,7 +47,7 @@ function OrderLayout({ children, order, crrOrderOption }: OrderLayoutProps) {
     };
 
     return (
-        <div className="main-content-wrapper -order">
+        <div className="main-content-wrapper -order text-[0.97em]">
             <div className="order-options-menu-wrapper">
                 <ul>
                     <li
@@ -115,7 +115,7 @@ function OrderLayout({ children, order, crrOrderOption }: OrderLayoutProps) {
                 </ul>
             </div>
             <div className="order-main-content-wrapper">
-                <div className="order-header-wrapper shadow-2xl px-5 bg-zinc-50 rounded-md">
+                <div className="order-header-wrapper shadow-sm shadow-gray-900  px-5 rounded-md">
                     <div className="order-number-wrapper">
                         <h1>Order Number:</h1>
                         <span>{order.ordernum}</span>

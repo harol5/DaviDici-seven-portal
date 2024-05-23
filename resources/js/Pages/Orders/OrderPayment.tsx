@@ -10,18 +10,23 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import BankAccountForm from "../../Components/BankAccountForm";
+import { Product as ProductModel } from "../../Models/Product";
 
 interface OrderPaymentProps {
     order: OrderModel;
     deliveryInfo: DeliveryInfoModel[];
+    depositInfo?: { percdep: number; percos: number; depneeded: number };
 }
 
-function OrderPayment({ order, deliveryInfo }: OrderPaymentProps) {
+function OrderPayment({ order, deliveryInfo, depositInfo }: OrderPaymentProps) {
+    console.log(depositInfo);
     const [crrPaymentMethod, setCrrPaymentMethod] = useState<
         "credit card" | "bank account"
     >("credit card");
-
+    const [isLoading, setIsLoading] = useState(false);
     const [isTransactionApproved, setIsTransactionApproved] = useState(false);
+    const [bankValidationErrors, setBankErrors] = useState({});
+    const [cardValidationErrors, setCardErrors] = useState({});
 
     const deliveryFee = useMemo(() => {
         const crrDeliveryType = deliveryInfo[0].dtype;
@@ -33,21 +38,27 @@ function OrderPayment({ order, deliveryInfo }: OrderPaymentProps) {
     }, []);
 
     const finalTotal = useMemo(() => {
+        // const fee =
+        //     crrPaymentMethod === "credit card"
+        //         ? Math.round((order.total as number) * 0.03)
+        //         : 0;
         const fee =
             crrPaymentMethod === "credit card"
-                ? Math.round((order.total as number) * 0.03)
+                ? Math.round(depositInfo?.depneeded! * 0.03)
                 : 0;
 
-        const grandTotal = Number.parseFloat(order.total as string) + fee;
+        // const grandTotal = Number.parseFloat(order.total as string) + fee;
+        const grandTotal = depositInfo?.depneeded! + fee;
 
         return { fee, grandTotal };
     }, [crrPaymentMethod]);
 
     const handleCardSubmit = async (e: FormEvent, state: CardInfoModel) => {
         e.preventDefault();
-        console.log("onSubmit called!!", state);
+
         try {
-            const res = await axios.post(
+            setIsLoading(true);
+            const getToken = await axios.post(
                 "https://sandbox.api.intuit.com/quickbooks/v4/payments/tokens",
                 { card: state },
                 {
@@ -56,14 +67,14 @@ function OrderPayment({ order, deliveryInfo }: OrderPaymentProps) {
                     },
                 }
             );
-            const token = res.data.value;
-            console.log("token response:", token);
 
-            const res2 = await axios.post(
+            const token = getToken.data.value;
+
+            const response = await axios.post(
                 `/orders/${order.ordernum}/products/payment`,
                 {
                     currency: "USD",
-                    amount: order.total,
+                    amount: finalTotal.grandTotal,
                     context: {
                         mobile: false,
                         isEcommerce: true,
@@ -72,50 +83,134 @@ function OrderPayment({ order, deliveryInfo }: OrderPaymentProps) {
                 }
             );
 
-            console.log("charges response (Intuit):", res2);
-            if (res2.data.intuitRes.status === "CAPTURED") {
+            console.log("charges response (Intuit):", response);
+            if (response.data.status === 400) {
+                const errors = response.data.intuitRes.errors;
+                console.log("invalid information:", errors);
+                setIsLoading(false);
+                return;
+            }
+
+            if (response.data.status === 401) {
+                console.log("token expired!!:", response);
+                setIsLoading(false);
+                return;
+            }
+
+            if (response.data.intuitRes.status === "CAPTURED") {
+                setIsLoading(false);
                 setIsTransactionApproved(true);
                 toast.success("Transaction approved!!");
             }
-        } catch (err) {
-            console.log(err);
+
+            setIsLoading(false);
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                console.log(error.response?.data);
+                if (error.response?.data.errors) {
+                    const errors = error.response.data.errors;
+                    setCardErrors(errors);
+                }
+            } else {
+                console.error(error);
+            }
+            setIsLoading(false);
         }
     };
 
+    const isValidBankInfo = (info: BankInfoModel): boolean => {
+        let crrErrors = { routingNumber: "", phone: "" };
+        if (info.bankAccount.routingNumber.length !== 9) {
+            crrErrors.routingNumber = "routing number must be 9 digits long";
+        }
+        if (info.bankAccount.phone.length !== 10) {
+            crrErrors.phone = "phone number must be 10 digits long";
+        }
+
+        if (crrErrors.phone || crrErrors.routingNumber) {
+            setBankErrors(crrErrors);
+            return false;
+        } else {
+            setBankErrors({ routingNumber: "", phone: "" });
+            return true;
+        }
+    };
     const handleBankSubmit = async (e: FormEvent, state: BankInfoModel) => {
         e.preventDefault();
-        console.log(state);
-        // const info = { ...state, amount: finalTotal.grandTotal };
-        const info = { ...state, amount: 5.55 };
-        console.log(info);
+        const info = { ...state, amount: finalTotal.grandTotal };
+
+        if (!isValidBankInfo(info)) return;
 
         try {
-            const res = await axios.post(
+            setIsLoading(true);
+
+            const { data } = await axios.post(
                 `/orders/${order.ordernum}/products/payment-bank`,
                 info
             );
+            console.log("create charge", data);
 
-            const status = res.data.intuitRes;
-            if (status === "PENDING" || status === "SUCCEEDED") {
-                setIsTransactionApproved(true);
-                toast.success("Transaction approved!!");
+            if (data.status === 400) {
+                setIsLoading(false);
+                const errors = data.intuitRes.errors;
+                console.log(errors);
             }
 
-            if (status === "DECLINED") {
-                toast.error("Transaction declined!!");
+            if (data.status === 401) {
+                setIsLoading(false);
+                console.error(
+                    "there was an error on the server!! access token expired"
+                );
             }
 
-            console.log(res);
+            if (data.intuitRes.status === "PENDING") {
+                console.log("first status pending ran!!");
+                const id = data.intuitRes.id;
+
+                const { data: checkStatus } = await axios.post(
+                    `/orders/${order.ordernum}/products/payment-bank/status`,
+                    { id }
+                );
+
+                if (checkStatus.intuitRes.status === "SUCCEEDED") {
+                    setIsTransactionApproved(true);
+                    toast.success("Transaction approved!!");
+                    console.log("SUCCEEDED", checkStatus);
+                }
+
+                if (checkStatus.intuitRes.status === "PENDING") {
+                    setIsTransactionApproved(true);
+                    toast.success("Transaction approved!!");
+                    console.log("PENDING", checkStatus);
+                }
+
+                if (checkStatus.intuitRes.status === "DECLINED") {
+                    toast.error("Transaction declined!!");
+                    console.log("DECLINED", checkStatus);
+                }
+            }
+            setIsLoading(false);
         } catch (err) {
             console.log(err);
+            setIsLoading(false);
         }
     };
 
     return (
         <UserAuthenticatedLayout crrPage="orders">
             <OrderLayout order={order} crrOrderOption="payment">
-                <section className="flex mt-6 bg-zinc-50 shadow-2xl rounded-md">
-                    <section className="w-[18em] p-10 my-10 ml-10 border-r border-r-black">
+                <section className="flex mt-6 p-5 bg-zinc-50 shadow-inner shadow-gray-200 rounded-md relative">
+                    {isTransactionApproved && (
+                        <div className="absolute bg-gray-200/50 backdrop-blur-sm w-[100%] h-[100%]">
+                            <h1 className="">Payment submitted</h1>
+                        </div>
+                    )}
+                    {isLoading && (
+                        <div className="absolute bg-gray-200/50 backdrop-blur-sm w-[100%] h-[100%]">
+                            <p>loading...</p>
+                        </div>
+                    )}
+                    <section className="w-[18em] p-8 shadow-sm shadow-gray-900 rounded mr-2">
                         <h1 className="text-center font-medium text-lg text-davidiciGold">
                             Charges Breakdown
                         </h1>
@@ -151,6 +246,15 @@ function OrderPayment({ order, deliveryInfo }: OrderPaymentProps) {
                                 </span>
                             </div>
 
+                            <div className="flex justify-between">
+                                <span className="">
+                                    <h2>credit:</h2>
+                                </span>
+                                <span className="">
+                                    <p>-${order.totcredit}</p>
+                                </span>
+                            </div>
+
                             <div
                                 className={
                                     crrPaymentMethod === "bank account"
@@ -159,10 +263,10 @@ function OrderPayment({ order, deliveryInfo }: OrderPaymentProps) {
                                 }
                             >
                                 <span className="">
-                                    <h2>credit:</h2>
+                                    <h2>deposit:</h2>
                                 </span>
                                 <span className="">
-                                    <p>-${order.totcredit}</p>
+                                    <p>${depositInfo?.depneeded}</p>
                                 </span>
                             </div>
 
@@ -182,7 +286,7 @@ function OrderPayment({ order, deliveryInfo }: OrderPaymentProps) {
 
                             <div className="flex justify-between">
                                 <span className="">
-                                    <h2>grand total:</h2>
+                                    <h2>Due Today:</h2>
                                 </span>
                                 <span className="">
                                     <p>${finalTotal.grandTotal}</p>
@@ -190,12 +294,12 @@ function OrderPayment({ order, deliveryInfo }: OrderPaymentProps) {
                             </div>
                         </section>
                     </section>
-                    <section className="grow px-14 py-6 my-10 mr-10">
+                    <section className="grow p-8">
                         <div className="flex gap-4  pb-2 mb-2">
                             <p
                                 className={
                                     crrPaymentMethod === "credit card"
-                                        ? "border-b border-davidiciGold px-5 py-1 cursor-pointer"
+                                        ? "border-b border-davidiciGold px-5 py-1 shadow-sm shadow-davidiciGold transition-shadow hover:shadow-none cursor-pointer"
                                         : "px-5 py-1 cursor-pointer"
                                 }
                                 onClick={() =>
@@ -218,10 +322,16 @@ function OrderPayment({ order, deliveryInfo }: OrderPaymentProps) {
                             </p>
                         </div>
                         {crrPaymentMethod === "credit card" && (
-                            <CreditCardForm handleSubmit={handleCardSubmit} />
+                            <CreditCardForm
+                                handleSubmit={handleCardSubmit}
+                                errors={cardValidationErrors}
+                            />
                         )}
                         {crrPaymentMethod === "bank account" && (
-                            <BankAccountForm handleSubmit={handleBankSubmit} />
+                            <BankAccountForm
+                                handleSubmit={handleBankSubmit}
+                                errors={bankValidationErrors}
+                            />
                         )}
                     </section>
                 </section>
