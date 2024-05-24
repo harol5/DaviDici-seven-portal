@@ -221,7 +221,7 @@ main {
     transition: box-shadow 0.4s ease;
 }
 .order-options-menu-wrapper ul .options:hover {
-    border: #a268d1 0.025em solid;
+    border: #d1aa68 0.025em solid;
     box-shadow: none;
 }
 .order-options-menu-wrapper ul .options > a {
