@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
+use Illuminate\Support\Str;
 use App\FoxproApi\FoxproApi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
 
 class OrdersController extends Controller
 {
@@ -86,14 +87,17 @@ class OrdersController extends Controller
         $product = $request->all();
         $orderNumber = getOrderNumberFromPath($request->path());
 
-        //TODO: log foxpro errors
-
         //"Result": "Can not update -- this Sales Order is in use" | 
         $res = FoxproApi::call([
             'action' => 'ChangeOrderQty',
             'params' => [$orderNumber,$product['uscode'],$product['linenum'],$product['qty']],
             'keep_session' => false, 
         ]);
+
+        if($res['status'] === 500 || $res['Result'] !== 'Updated Info'){
+            Log::error("=VVVVV===ERROR REQUESTING DATA FROM FOXPRO====VVVVV");
+            Log::error($res);
+        }
 
         return response($res)->header('Content-Type', 'application/json');
     }
@@ -159,7 +163,7 @@ class OrdersController extends Controller
 
         $orderNumber = getOrderNumberFromPath($request->path());
         $deliveryInfo = $request->all();
-        info($deliveryInfo);
+        
         $res = FoxproApi::call([
             'action' => 'SaveDeliveryInfo',
             'params' => [
@@ -182,7 +186,7 @@ class OrdersController extends Controller
             ],
             'keep_session' => false,
         ]);
-        info($res);
+        
         if($res['Result'] === 'Info Updated Successfully'){
             return response(['foxproRes' => $res, 'message' => 'delivery information saved!!', 'information' => $deliveryInfo])->header('Content-Type', 'application/json');        
         }
