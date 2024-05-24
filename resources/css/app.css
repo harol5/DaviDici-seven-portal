@@ -4,23 +4,23 @@
 
 @font-face {
     font-family: "leaner";
-    src: url("https://seven.test/fonts/Leaner-Thin.ttf");
+    src: url("https://portal.davidici.com/fonts/Leaner-Thin.ttf");
 }
 @font-face {
     font-family: "Crox-ExtraLight";
-    src: url("https://seven.test/fonts/crox/Crox-ExtraLight.otf");
+    src: url("https://portal.davidici.com/fonts/crox/Crox-ExtraLight.otf");
 }
 @font-face {
     font-family: "Crox-Poster-Italic";
-    src: url("https://seven.test/fonts/crox/Crox-Poster-Italic.otf");
+    src: url("https://portal.davidici.com/fonts/crox/Crox-Poster-Italic.otf");
 }
 @font-face {
     font-family: "DMSans-Italic";
-    src: url("https://seven.test/fonts/DM_Sans/DMSans-Italic-VariableFont_opsz,wght.ttf");
+    src: url("https://portal.davidici.com/fonts/DM_Sans/DMSans-Italic-VariableFont_opsz,wght.ttf");
 }
 @font-face {
     font-family: "DMSans";
-    src: url("https://seven.test/fonts/DM_Sans/DMSans-VariableFont_opsz,wght.ttf");
+    src: url("https://portal.davidici.com/fonts/DM_Sans/DMSans-VariableFont_opsz,wght.ttf");
 }
 
 * {
