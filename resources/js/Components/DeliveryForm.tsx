@@ -122,7 +122,7 @@ function DeliveryForm({
                         id="delivery-date"
                         name="date"
                         min={getDate()}
-                        max="2024-06-20"
+                        max="2025-12-31"
                         value={data.date}
                         onChange={(e) => setData("date", e.currentTarget.value)}
                         readOnly={isDataSaved}
