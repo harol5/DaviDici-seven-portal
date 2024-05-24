@@ -72,7 +72,6 @@ function DeliveryForm({
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log("delivery info sent to api", data);
         const dateAsArray = data.date.split("-");
         const year = dateAsArray.shift()!;
         dateAsArray.push(year);
@@ -98,7 +97,6 @@ function DeliveryForm({
             }
         } catch (error) {
             if (axios.isAxiosError(error)) {
-                console.log(error.response?.data);
                 if (error.response?.data.errors) {
                     const errors = error.response.data.errors;
                     setErrors(errors);

@@ -184,7 +184,7 @@ class OrdersController extends Controller
         ]);
         info($res);
         if($res['Result'] === 'Info Updated Successfully'){
-            return response(['foxproRes' => $res, 'message' => 'dalivery information saved!!', 'information' => $deliveryInfo])->header('Content-Type', 'application/json');        
+            return response(['foxproRes' => $res, 'message' => 'delivery information saved!!', 'information' => $deliveryInfo])->header('Content-Type', 'application/json');        
         }
         
         return response(['foxproRes' => $res, 'message' => 'internal issue', 'information' => $deliveryInfo])->header('Content-Type', 'application/json');
