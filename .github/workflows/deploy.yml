@@ -15,4 +15,6 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           key: ${{ secrets.SSH_KEY }}
           script_stop: true
-          script: whoami
+          script: |
+            cd /var/www/davidici_portal            
+            cat vite.config.js
