@@ -17,4 +17,5 @@ jobs:
           script_stop: true
           script: |
             cd /var/www/davidici_portal            
-            cat vite.config.js
+            git fetch
+            git log --all --graph
