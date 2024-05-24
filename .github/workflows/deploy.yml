@@ -19,3 +19,6 @@ jobs:
             cd /var/www/davidici_portal            
             git fetch            
             git pull
+            composer i
+            npm ci
+            npm run build

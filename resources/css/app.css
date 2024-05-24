@@ -217,11 +217,11 @@ main {
 .order-options-menu-wrapper ul .options {
     border-radius: 5px;
     margin-bottom: 1.3em;
-    box-shadow: 1px -2px 5px rgba(0, 0, 0, 0.43);
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.43);
     transition: box-shadow 0.4s ease;
 }
 .order-options-menu-wrapper ul .options:hover {
-    border: #d1aa68 0.025em solid;
+    border: #a268d1 0.025em solid;
     box-shadow: none;
 }
 .order-options-menu-wrapper ul .options > a {

@@ -13,7 +13,7 @@ function UserAuthenticatedLayout({ children, crrPage }: UserLayoutProps) {
                 <div>
                     <img
                         className="nav-logo"
-                        src="https://seven.test/images/davidici-logo-nav-cropped.png"
+                        src="https://portal.davidici.com/images/davidici-logo-nav-cropped.png"
                     />
                     <ul className="nav-links">
                         <li
