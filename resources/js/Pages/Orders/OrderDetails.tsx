@@ -69,6 +69,8 @@ function OrderDetails({
             axios
                 .post(`/orders/${order.ordernum}/products/update`, updatedQty)
                 .then(({ data }) => {
+                    console.log(updatedQty);
+                    console.log(data);
                     // "Can not update -- this item already on PO"? | "Updated Info" | "Can not update -- this Sales Order is in use"
                     if (data.Result === "Updated Info") {
                         const total = newQty * product.price;

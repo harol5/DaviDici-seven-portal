@@ -85,6 +85,10 @@ class OrdersController extends Controller
     public function updateQuantity(Request $request){
         $product = $request->all();
         $orderNumber = getOrderNumberFromPath($request->path());
+
+        //TODO: log foxpro errors
+
+        //"Result": "Can not update -- this Sales Order is in use" | 
         $res = FoxproApi::call([
             'action' => 'ChangeOrderQty',
             'params' => [$orderNumber,$product['uscode'],$product['linenum'],$product['qty']],
@@ -368,7 +372,7 @@ class OrdersController extends Controller
     public function testApi(){
         $response = FoxproApi::call([
             'action' => 'OrderEnter',
-            'params' => ['HarolE$Davidici_com','HAR000010','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
+            'params' => ['HarolE$Davidici_com','HAR000011','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
             'keep_session' => false, 
         ]);
         
