@@ -4,7 +4,10 @@ import { FormEvent } from "react";
 
 function Register({ message }: { message: string }) {
     const { data, setData, post, errors, reset } = useForm({
-        name: "",
+        firstName: "",
+        lastName: "",
+        phone: "",
+        businessPhone: "",
         email: "",
         username: "",
         role: "user",
@@ -22,20 +25,87 @@ function Register({ message }: { message: string }) {
             <form onSubmit={handleSubmit}>
                 <div className="mb-6">
                     <label htmlFor="name" className="inline-block text-lg mb-2">
-                        {" "}
-                        Name{" "}
+                        First Name
                     </label>
                     <input
                         type="text"
                         className="border border-gray-200 rounded p-2 w-full"
-                        name="name"
-                        value={data.name}
-                        onChange={(e) => setData("name", e.target.value)}
+                        name="firstName"
+                        value={data.firstName}
+                        onChange={(e) => setData("firstName", e.target.value)}
                     />
 
-                    {errors.name && (
+                    {errors.firstName && (
                         <p className="text-red-500 text-xs mt-1">
-                            {errors.name}
+                            {errors.firstName}
+                        </p>
+                    )}
+                </div>
+
+                <div className="mb-6">
+                    <label
+                        htmlFor="last-name"
+                        className="inline-block text-lg mb-2"
+                    >
+                        Last Name
+                    </label>
+                    <input
+                        type="text"
+                        className="border border-gray-200 rounded p-2 w-full"
+                        name="lastName"
+                        value={data.lastName}
+                        onChange={(e) => setData("lastName", e.target.value)}
+                    />
+
+                    {errors.lastName && (
+                        <p className="text-red-500 text-xs mt-1">
+                            {errors.lastName}
+                        </p>
+                    )}
+                </div>
+
+                <div className="mb-6">
+                    <label
+                        htmlFor="phone"
+                        className="inline-block text-lg mb-2"
+                    >
+                        phone
+                    </label>
+                    <input
+                        type="tel"
+                        className="border border-gray-200 rounded p-2 w-full"
+                        name="phone"
+                        value={data.phone}
+                        onChange={(e) => setData("phone", e.target.value)}
+                    />
+
+                    {errors.phone && (
+                        <p className="text-red-500 text-xs mt-1">
+                            {errors.phone}
+                        </p>
+                    )}
+                </div>
+
+                <div className="mb-6">
+                    <label
+                        htmlFor="business-phone"
+                        className="inline-block text-lg mb-2"
+                    >
+                        Business phone
+                    </label>
+                    <input
+                        type="tel"
+                        className="border border-gray-200 rounded p-2 w-full"
+                        name="businessPhone"
+                        value={data.businessPhone}
+                        onChange={(e) =>
+                            setData("businessPhone", e.target.value)
+                        }
+                    />
+
+                    {errors.businessPhone && (
+                        <p className="text-red-500 text-xs mt-1">
+                            {errors.businessPhone}
                         </p>
                     )}
                 </div>

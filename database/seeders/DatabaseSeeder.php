@@ -23,8 +23,10 @@ class DatabaseSeeder extends Seeder
         // ]);
         
         DB::table('users')->insert([
-            'name' => 'harol',
-            'email' => 'hrcode95@gmail.com',
+            'first_name' => 'harol',
+            'last_name' => 'rojas',
+            'phone' => 3219483992,
+            'email' => 'harole@davidici.com',
             'username' => 'HarolE$Davidici_com',
             'role' => 3478,
             'password' => Hash::make(env('FOXPRO_PWD')),

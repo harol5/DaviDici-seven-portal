@@ -223,7 +223,7 @@ class OrdersController extends Controller
     // Creates a transaction.
     public function createCharge(Request $request){
         $info = $request->all();
-        $js_data = json_encode($info);
+        $js_data = json_encode($info['info']);
         $uuidTransaction = (string) Str::uuid();
         $orderNumber = getOrderNumberFromPath($request->path());
 
@@ -240,7 +240,7 @@ class OrdersController extends Controller
             $cashReceiptRes = FoxproApi::call([
                 'action' => 'SaveCR',
                 // get amount without credit card fee.
-                'params' => [$orderNumber,'CC',$info['amount'],'05/22/2024','harol rojas','1234567890000','12/24','123'],
+                'params' => [$orderNumber,'CC',$info['foxproInfo']['amountPaid'],'05/22/2024','harol rojas','1234567890000','12/24','123'],
                 'keep_session' => false,
             ]);
 
@@ -374,6 +374,8 @@ class OrdersController extends Controller
     }
 
     public function testApi(){
+
+        // hershel must include another field for the sales rep.
         $response = FoxproApi::call([
             'action' => 'OrderEnter',
             'params' => ['HarolE$Davidici_com','HAR000011','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
@@ -400,21 +402,15 @@ class OrdersController extends Controller
 
         // $response = FoxproApi::call([
         //     'action' => 'getpercentdeposit',
-        //     'params' => ['harole@davidici.com','HAR000005'],
+        //     'params' => ['harole@davidici.com','HAR000011'],
         //     'keep_session' => false,
-        // ]);
-
-        // $response = FoxproApi::call([
-        //     'action' => 'SaveCR',
-        //     'params' => ['HAR000004','CC','100.23','05/21/2024','harol rojas','1234567890000','12/24','123'],
-        //     'keep_session' => false,
-        // ]);
+        // ]);        
         
-        // $response = FoxproApi::call([
-        //     'action' => 'SaveCR',
-        //     'params' => ['HAR000004','CC','100.23','05/21/2024','harol rojas','1234567890000','12/24','123'],
-        //     'keep_session' => false,
-        // ]);
+        $response = FoxproApi::call([
+            'action' => 'SaveCR',
+            'params' => ['HAR000011','CC','447.07','05/28/2024','harol rojas','1234567890000','12/24','123'],
+            'keep_session' => false,
+        ]);
 
         // return Inertia::render('Test',['response' => $response]);
         return response(['response' => $response])->header('Content-Type', 'application/json');

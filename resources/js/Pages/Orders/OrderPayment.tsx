@@ -15,7 +15,13 @@ import { Product as ProductModel } from "../../Models/Product";
 interface OrderPaymentProps {
     order: OrderModel;
     deliveryInfo: DeliveryInfoModel[];
-    depositInfo?: { percdep: number; percos: number; depneeded: number };
+    depositInfo?: {
+        percdep: number;
+        percos: number;
+        depneeded: number;
+        totcod: number;
+        ccchg: number;
+    };
 }
 
 function OrderPayment({ order, deliveryInfo, depositInfo }: OrderPaymentProps) {
@@ -41,13 +47,16 @@ function OrderPayment({ order, deliveryInfo, depositInfo }: OrderPaymentProps) {
         //     crrPaymentMethod === "credit card"
         //         ? Math.round((order.total as number) * 0.03)
         //         : 0;
-        const fee =
-            crrPaymentMethod === "credit card"
-                ? Math.round(depositInfo?.depneeded! * 0.03)
-                : 0;
+
+        // const fee =
+        //     crrPaymentMethod === "credit card"
+        //         ? Math.round(depositInfo?.depneeded! * 0.03)
+        //         : 0;
 
         // const grandTotal = Number.parseFloat(order.total as string) + fee;
-        const grandTotal = depositInfo?.depneeded! + fee;
+
+        const fee = depositInfo?.ccchg;
+        const grandTotal = depositInfo?.depneeded! + depositInfo?.ccchg!;
 
         return { fee, grandTotal };
     }, [crrPaymentMethod]);
@@ -72,13 +81,19 @@ function OrderPayment({ order, deliveryInfo, depositInfo }: OrderPaymentProps) {
             const response = await axios.post(
                 `/orders/${order.ordernum}/products/payment`,
                 {
-                    currency: "USD",
-                    amount: finalTotal.grandTotal,
-                    context: {
-                        mobile: false,
-                        isEcommerce: true,
+                    info: {
+                        currency: "USD",
+                        amount: finalTotal.grandTotal,
+                        context: {
+                            mobile: false,
+                            isEcommerce: true,
+                        },
+                        token: token,
                     },
-                    token: token,
+
+                    foxproInfo: {
+                        amountPaid: depositInfo?.depneeded,
+                    },
                 }
             );
 
@@ -116,6 +131,7 @@ function OrderPayment({ order, deliveryInfo, depositInfo }: OrderPaymentProps) {
             setIsLoading(false);
         }
     };
+
     const isValidBankInfo = (info: BankInfoModel): boolean => {
         let crrErrors = { routingNumber: "", phone: "" };
         if (info.bankAccount.routingNumber.length !== 9) {
