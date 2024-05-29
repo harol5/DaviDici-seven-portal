@@ -102,6 +102,26 @@ class OrdersController extends Controller
         return response($res)->header('Content-Type', 'application/json');
     }
 
+    // Update product note
+    public function updateProductNote(Request $request){
+        $info = $request->all();
+        $orderNumber = getOrderNumberFromPath($request->path());        
+
+        // "Result": "Updated Info" |
+        $res = FoxproApi::call([
+            'action' => 'ChangeOrderNote',
+            'params' => [$orderNumber,$info['sku'],$info['lineNum'],$info['note']],
+            'keep_session' => false,
+        ]);
+
+        if($res['status'] === 500 || $res['Result'] !== 'Updated Info'){
+            Log::error("=VVVVV===ERROR REQUESTING DATA FROM FOXPRO====VVVVV");
+            Log::error($res);
+        }
+
+        return response($res)->header('Content-Type', 'application/json');
+    } 
+
     // Delete product
     public function deleteProduct(Request $request){
         $req = $request->all();        
@@ -206,13 +226,14 @@ class OrdersController extends Controller
             'params' => [$orderNumber],
             'keep_session' => false,
         ]);
-             
+        
+        // WARNING: sometimes will trow undefined key exception for 'rows'.
         $depositInfo = FoxproApi::call([
             'action' => 'getpercentdeposit',
             'params' => ['harole@davidici.com',$orderNumber],
             'keep_session' => false,
         ]);
-
+        
         return Inertia::render('Orders/OrderPayment',[
             'order' => $order, 
             'deliveryInfo' => $deliveryInfo['rows'],                         
@@ -376,11 +397,11 @@ class OrdersController extends Controller
     public function testApi(){
 
         // hershel must include another field for the sales rep.
-        $response = FoxproApi::call([
-            'action' => 'OrderEnter',
-            'params' => ['HarolE$Davidici_com','HAR000011','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
-            'keep_session' => false, 
-        ]);
+        // $response = FoxproApi::call([
+        //     'action' => 'OrderEnter',
+        //     'params' => ['HarolE$Davidici_com','HAR000012','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
+        //     'keep_session' => false, 
+        // ]);
         
         // $response = FoxproApi::call([
         //     'action' => 'GetProductPrice',
@@ -406,9 +427,16 @@ class OrdersController extends Controller
         //     'keep_session' => false,
         // ]);        
         
+        // $response = FoxproApi::call([
+        //     'action' => 'SaveCR',
+        //     'params' => ['HAR000011','CC','447.07','05/28/2024','harol rojas','1234567890000','12/24','123'],
+        //     'keep_session' => false,
+        // ]);
+
+        // "Result": "Updated Info" |
         $response = FoxproApi::call([
-            'action' => 'SaveCR',
-            'params' => ['HAR000011','CC','447.07','05/28/2024','harol rojas','1234567890000','12/24','123'],
+            'action' => 'ChangeOrderNote',
+            'params' => ['HAR000012','71-VB-024-M03-V03','1','this is anote'],
             'keep_session' => false,
         ]);
 

@@ -119,7 +119,6 @@ function OrderDetails({
                 })
                 .then(({ data }) => {
                     // "Updated Info" | "Can not delete -- already on PO"? | "Line Number does not match item"?
-                    console.log(data);
                     if (data.Result === "Updated Info") {
                         const filteredProducts = products.filter(
                             (p) => p.uscode !== product.uscode
@@ -151,6 +150,31 @@ function OrderDetails({
         }
     };
 
+    const handleNote = (sku: string, lineNum: number, note: string) => {
+        axios
+            .post(`/orders/${order.ordernum}/products/note`, {
+                sku,
+                lineNum,
+                note,
+            })
+            .then(({ data }) => {
+                if (data.Result === "Updated Info") {
+                    const productsCopy = [...products];
+                    for (const product of productsCopy) {
+                        if (
+                            product.linenum === lineNum &&
+                            product.uscode === sku
+                        ) {
+                            product.notes = note;
+                            break;
+                        }
+                    }
+                    setProducts(productsCopy);
+                }
+            })
+            .catch((err) => console.log(err));
+    };
+
     return (
         <UserAuthenticatedLayout crrPage="orders">
             <OrderLayout order={order} crrOrderOption="details">
@@ -161,6 +185,7 @@ function OrderDetails({
                             product={product}
                             numOfProducts={products.length}
                             handleQty={handleQty}
+                            handleNote={handleNote}
                             handleDelete={handleDelete}
                             isPaymentSubmitted={isPaymentSubmitted}
                             isSubmitedDate={order.submitted ? true : false}

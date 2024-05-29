@@ -40,17 +40,17 @@ function Orders({ auth, orders, message = "" }: ordersProp) {
                 <div className="gretting-search-wrapper">
                     {dayTime === "am" && (
                         <h1 className="greeting">
-                            Good Morning {auth?.user.name}
+                            Good Morning {auth?.user.first_name}
                         </h1>
                     )}
                     {dayTime === "pm" && (
                         <h1 className="greeting">
-                            Good Afternoon {auth?.user.name}
+                            Good Afternoon {auth?.user.first_name}
                         </h1>
                     )}
                     {dayTime === "night" && (
                         <h1 className="greeting">
-                            Good Evening {auth?.user.name}
+                            Good Evening {auth?.user.first_name}
                         </h1>
                     )}
 

@@ -4,7 +4,7 @@ export default interface User {
         email: string;
         email_verified_at: string | null;
         is: number;
-        name: string;
+        first_name: string;
         role: number;
         updated_at: string | null;
         username: string;

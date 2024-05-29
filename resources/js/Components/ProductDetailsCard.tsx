@@ -1,11 +1,12 @@
 import Modal from "./Modal";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { Product as ProductModel } from "../Models/Product";
 
 interface ProductDetailsCardProps {
     product: ProductModel;
     numOfProducts: number;
     handleQty: (value: string, product: ProductModel) => void;
+    handleNote: (sku: string, lineNum: number, note: string) => void;
     handleDelete: (product: ProductModel) => void;
     isPaymentSubmitted: boolean;
     isSubmitedDate: boolean;
@@ -15,19 +16,27 @@ function ProductDetailsCard({
     product,
     numOfProducts,
     handleQty,
+    handleNote,
     handleDelete,
     isPaymentSubmitted,
     isSubmitedDate,
 }: ProductDetailsCardProps) {
+    const isPaymentORSubmittedDate = isPaymentSubmitted || isSubmitedDate;
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const [crrModalContent, setCrrModalContent] = useState<
+        "removeModal" | "addNote"
+    >();
+
     const [openModal, setOpenModal] = useState(false);
-    const handleOpenModal = () => {
+    const handleOpenModal = (contentModal: "removeModal" | "addNote") => {
         setOpenModal(true);
+        setCrrModalContent(contentModal);
     };
 
-    const isPaymentORSubmittedDate = isPaymentSubmitted || isSubmitedDate;
     const handleCloseModal = () => {
         setOpenModal(false);
     };
+
     return (
         <>
             <section className="product-wrapper product-details-card shadow-sm shadow-gray-300">
@@ -40,6 +49,7 @@ function ProductDetailsCard({
                 >
                     <header>
                         <h2 className="description">Description:</h2>
+                        <h2 className="color">Color:</h2>
                         <h2 className="size">Size:</h2>
                         <h2 className="model">Model:</h2>
                         <h2 className="sku">Sku:</h2>
@@ -49,6 +59,7 @@ function ProductDetailsCard({
                     </header>
                     <section>
                         <p className="description">{product.item}</p>
+                        <p className="color">{product.color}</p>
                         <p className="size">{product.size}</p>
                         <p className="model">{product.model}</p>
                         <p className="sku">{product.uscode}</p>
@@ -70,10 +81,17 @@ function ProductDetailsCard({
                     </section>
                 </div>
                 {!isPaymentORSubmittedDate && (
-                    <div className="basis-[10%]">
+                    <div className="basis-[10%] flex flex-col gap-2">
+                        <button
+                            className="rounded border shadow-sm shadow-gray-950 px-4 py-1 transition-shadow hover:shadow-none"
+                            onClick={() => handleOpenModal("addNote")}
+                            disabled={isPaymentSubmitted || isSubmitedDate}
+                        >
+                            add/see notes
+                        </button>
                         <button
                             className="rounded border shadow-sm shadow-gray-950 px-4 py-1 transition-shadow hover:shadow-none hover:bg-red-400 hover:text-white"
-                            onClick={handleOpenModal}
+                            onClick={() => handleOpenModal("removeModal")}
                             disabled={isPaymentSubmitted || isSubmitedDate}
                         >
                             remove
@@ -86,31 +104,70 @@ function ProductDetailsCard({
                 maxWidth="w-3/12"
                 onClose={handleCloseModal}
             >
-                <section className="m-8 text-center">
-                    {numOfProducts === 1 && (
-                        <p className="text-orange-300 font-bold">
-                            There is only one product on your order, if you
-                            remove it, your order will be delete.
+                {crrModalContent === "removeModal" && (
+                    <section className="m-8 text-center">
+                        {numOfProducts === 1 && (
+                            <p className="text-orange-300 font-bold">
+                                There is only one product on your order, if you
+                                remove it, your order will be delete.
+                            </p>
+                        )}
+                        <p className=" my-4">
+                            are you sure you want to remove this product?
                         </p>
-                    )}
-                    <p className=" my-4">
-                        are you sure you want to remove this product?
-                    </p>
-                    <section className="flex justify-center my-4 gap-4">
-                        <button
-                            className="rounded border shadow-sm shadow-gray-950 px-4 py-1 transition-shadow hover:shadow-none text-sm"
-                            onClick={handleCloseModal}
-                        >
-                            cancel
-                        </button>
-                        <button
-                            className="rounded border shadow-sm shadow-gray-950 px-4 py-1 transition-shadow hover:shadow-none bg-red-500 hover:text-white text-sm"
-                            onClick={() => handleDelete(product)}
-                        >
-                            confirm
-                        </button>
+                        <section className="flex justify-center my-4 gap-4">
+                            <button
+                                className="rounded border shadow-sm shadow-gray-950 px-4 py-1 transition-shadow hover:shadow-none text-sm"
+                                onClick={handleCloseModal}
+                            >
+                                cancel
+                            </button>
+                            <button
+                                className="rounded border shadow-sm shadow-gray-950 px-4 py-1 transition-shadow hover:shadow-none bg-red-500 hover:text-white text-sm"
+                                onClick={() => handleDelete(product)}
+                            >
+                                confirm
+                            </button>
+                        </section>
                     </section>
-                </section>
+                )}
+
+                {crrModalContent === "addNote" && (
+                    <section className="m-8 text-center">
+                        <p className=" my-4">{product.item}</p>
+                        <textarea
+                            className="border w-[100%] p-1"
+                            name="notes"
+                            id=""
+                            ref={textareaRef}
+                            cols={30}
+                            rows={5}
+                            defaultValue={product.notes}
+                            readOnly={isPaymentSubmitted || isSubmitedDate}
+                        ></textarea>
+                        <section className="flex justify-center my-4 gap-4">
+                            <button
+                                className="rounded border shadow-sm shadow-gray-950 px-4 py-1 transition-shadow hover:shadow-none text-sm"
+                                onClick={handleCloseModal}
+                            >
+                                cancel
+                            </button>
+                            <button
+                                className="rounded border shadow-sm shadow-gray-950 px-4 py-1 transition-shadow hover:shadow-none bg-green-500 hover:text-white text-sm"
+                                onClick={() => {
+                                    handleCloseModal();
+                                    handleNote(
+                                        product.uscode,
+                                        product.linenum,
+                                        textareaRef.current?.value!
+                                    );
+                                }}
+                            >
+                                confirm
+                            </button>
+                        </section>
+                    </section>
+                )}
             </Modal>
         </>
     );

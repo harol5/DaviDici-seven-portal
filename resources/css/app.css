@@ -99,7 +99,7 @@ nav > div {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 82rem;
+    max-width: 90rem;
     margin: 25px auto;
 }
 .nav-logo {
@@ -130,7 +130,7 @@ main {
     min-height: 100vh;
 }
 .main-content-wrapper {
-    max-width: 82rem;
+    max-width: 90rem;
     margin: 0 auto;
 }
 
@@ -324,7 +324,7 @@ main {
     display: block;
 }
 
-.product-status-card .description {
+.description {
     flex-basis: 30%;
 }
 
@@ -334,7 +334,8 @@ main {
 .price,
 .qty,
 .total,
-.status {
+.status,
+.color {
     flex-basis: 10%;
 }
 
