@@ -1,13 +1,21 @@
 import Modal from "./Modal";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { Product as ProductModel } from "../Models/Product";
+import { collections } from "../Models/Collections";
 
 interface ProductDetailsCardProps {
     product: ProductModel;
     numOfProducts: number;
+    modelsAvailable: { set: Set<string>; arr: string[] };
     handleQty: (value: string, product: ProductModel) => void;
-    handleNote: (sku: string, lineNum: number, note: string) => void;
-    handleDelete: (product: ProductModel) => void;
+    handleNote: (
+        sku: string,
+        lineNum: number,
+        note: string,
+        handleCloseModal: () => void
+    ) => void;
+    handleDelete: (product: ProductModel, handleCloseModal: () => void) => void;
+    handleModel: (sku: string, lineNum: number, model: string) => void;
     isPaymentSubmitted: boolean;
     isSubmitedDate: boolean;
 }
@@ -15,24 +23,28 @@ interface ProductDetailsCardProps {
 function ProductDetailsCard({
     product,
     numOfProducts,
+    modelsAvailable,
     handleQty,
     handleNote,
     handleDelete,
+    handleModel,
     isPaymentSubmitted,
     isSubmitedDate,
 }: ProductDetailsCardProps) {
+    const isModelValid = useMemo(
+        () => collections.includes(product.model),
+        [product.model]
+    );
     const isPaymentORSubmittedDate = isPaymentSubmitted || isSubmitedDate;
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [crrModalContent, setCrrModalContent] = useState<
         "removeModal" | "addNote"
     >();
-
     const [openModal, setOpenModal] = useState(false);
     const handleOpenModal = (contentModal: "removeModal" | "addNote") => {
         setOpenModal(true);
         setCrrModalContent(contentModal);
     };
-
     const handleCloseModal = () => {
         setOpenModal(false);
     };
@@ -44,7 +56,7 @@ function ProductDetailsCard({
                     className={
                         isPaymentSubmitted || isSubmitedDate
                             ? "basis-[100%]"
-                            : "basis-[90%]"
+                            : "basis-[90%] mr-1"
                     }
                 >
                     <header>
@@ -61,7 +73,31 @@ function ProductDetailsCard({
                         <p className="description">{product.item}</p>
                         <p className="color">{product.color}</p>
                         <p className="size">{product.size}</p>
-                        <p className="model">{product.model}</p>
+                        <span className="model">
+                            {isModelValid && <p>{product.model}</p>}
+                            {!isModelValid && (
+                                <select
+                                    name="model"
+                                    id=""
+                                    defaultValue="none"
+                                    className="w-24 text-center"
+                                    onChange={(e) =>
+                                        handleModel(
+                                            product.uscode,
+                                            product.linenum,
+                                            e.currentTarget.value
+                                        )
+                                    }
+                                >
+                                    <option value="none"></option>
+                                    {modelsAvailable.arr.map((model, index) => (
+                                        <option key={index} value={model}>
+                                            {model}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
+                        </span>
                         <p className="sku">{product.uscode}</p>
                         <p className="price">${product.price}</p>
                         <span className="qty">
@@ -81,13 +117,13 @@ function ProductDetailsCard({
                     </section>
                 </div>
                 {!isPaymentORSubmittedDate && (
-                    <div className="basis-[10%] flex flex-col gap-2">
+                    <div className="basis-[10%] flex flex-col gap-3 px-1">
                         <button
-                            className="rounded border shadow-sm shadow-gray-950 px-4 py-1 transition-shadow hover:shadow-none"
+                            className="rounded border shadow-sm shadow-gray-950 px-2 py-1 transition-shadow hover:shadow-none"
                             onClick={() => handleOpenModal("addNote")}
                             disabled={isPaymentSubmitted || isSubmitedDate}
                         >
-                            add/see notes
+                            add/see note
                         </button>
                         <button
                             className="rounded border shadow-sm shadow-gray-950 px-4 py-1 transition-shadow hover:shadow-none hover:bg-red-400 hover:text-white"
@@ -124,7 +160,9 @@ function ProductDetailsCard({
                             </button>
                             <button
                                 className="rounded border shadow-sm shadow-gray-950 px-4 py-1 transition-shadow hover:shadow-none bg-red-500 hover:text-white text-sm"
-                                onClick={() => handleDelete(product)}
+                                onClick={() => {
+                                    handleDelete(product, handleCloseModal);
+                                }}
                             >
                                 confirm
                             </button>
@@ -155,11 +193,11 @@ function ProductDetailsCard({
                             <button
                                 className="rounded border shadow-sm shadow-gray-950 px-4 py-1 transition-shadow hover:shadow-none bg-green-500 hover:text-white text-sm"
                                 onClick={() => {
-                                    handleCloseModal();
                                     handleNote(
                                         product.uscode,
                                         product.linenum,
-                                        textareaRef.current?.value!
+                                        textareaRef.current?.value!,
+                                        handleCloseModal
                                     );
                                 }}
                             >

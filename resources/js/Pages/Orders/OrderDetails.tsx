@@ -2,7 +2,7 @@ import OrderLayout from "../../Layouts/OrderLayout";
 import UserAuthenticatedLayout from "../../Layouts/UserAuthenticatedLayout";
 import ProductDetailsCard from "../../Components/ProductDetailsCard";
 import axios from "axios";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { router } from "@inertiajs/react";
@@ -11,6 +11,7 @@ import type {
     Product as ProductModel,
     ProductRecord,
 } from "../../Models/Product";
+import { collections } from "../../Models/Collections";
 
 interface OrderDetailsProps {
     rawOrder: OrderModel;
@@ -38,6 +39,15 @@ function OrderDetails({
 
     const [order, setOrder] = useState(formatOrder);
     const [products, setProducts] = useState(formatProducts);
+    const modelsAvailable = useMemo(() => {
+        const set = new Set<string>();
+        products.forEach((product) => {
+            if (collections.includes(product.model)) set.add(product.model);
+        });
+
+        const arr = Array.from(set.values());
+        return { set, arr };
+    }, [products]);
 
     const handleGrandTotal = (
         outdatedProduct: ProductModel,
@@ -100,7 +110,10 @@ function OrderDetails({
         }
     };
 
-    const handleDelete = (product: ProductModel) => {
+    const handleDelete = (
+        product: ProductModel,
+        handleCloseModal: () => void
+    ) => {
         if (products.length === 1) {
             //specific type just for inertia.
             const productFormatted: ProductRecord = {
@@ -111,6 +124,7 @@ function OrderDetails({
                 product: productFormatted,
                 numOfProduct: products.length,
             });
+            handleCloseModal();
         } else {
             axios
                 .post(`/orders/${order.ordernum}/products/delete`, {
@@ -119,14 +133,13 @@ function OrderDetails({
                 })
                 .then(({ data }) => {
                     // "Updated Info" | "Can not delete -- already on PO"? | "Line Number does not match item"?
-                    if (data.Result === "Updated Info") {
-                        const filteredProducts = products.filter(
-                            (p) => p.uscode !== product.uscode
+                    if (data.status === 201) {
+                        const filteredProducts = data.products.filter(
+                            (product: ProductModel) =>
+                                product.item !== "3% Credit Card Charge"
                         );
-                        const sortedProducts = filteredProducts.sort(
-                            (a, b) => a.linenum - b.linenum
-                        );
-                        setProducts(sortedProducts);
+
+                        setProducts(filteredProducts);
 
                         // ------------ write this as helper func.
                         const subtotal = order.subtotal - product.total;
@@ -144,13 +157,19 @@ function OrderDetails({
                             total: grandTotalFormatted,
                         }));
                         // --------------------------------------
+                        handleCloseModal();
                     }
                 })
                 .catch((err) => console.log(err));
         }
     };
 
-    const handleNote = (sku: string, lineNum: number, note: string) => {
+    const handleNote = (
+        sku: string,
+        lineNum: number,
+        note: string,
+        handleCloseModal: () => void
+    ) => {
         axios
             .post(`/orders/${order.ordernum}/products/note`, {
                 sku,
@@ -173,6 +192,35 @@ function OrderDetails({
                 }
             })
             .catch((err) => console.log(err));
+
+        handleCloseModal();
+    };
+
+    const handleModel = (sku: string, lineNum: number, model: string) => {
+        if (model === "none") return;
+
+        axios
+            .post(`/orders/${order.ordernum}/products/model`, {
+                sku,
+                lineNum,
+                model,
+            })
+            .then(({ data }) => {
+                if (data.status === 201) {
+                    const productsCopy = [...products];
+                    for (const product of productsCopy) {
+                        if (
+                            product.linenum === lineNum &&
+                            product.uscode === sku
+                        ) {
+                            product.model = model;
+                            break;
+                        }
+                    }
+                    setProducts(productsCopy);
+                }
+            })
+            .catch((err) => console.log(err));
     };
 
     return (
@@ -184,9 +232,11 @@ function OrderDetails({
                             key={product.linenum}
                             product={product}
                             numOfProducts={products.length}
+                            modelsAvailable={modelsAvailable}
                             handleQty={handleQty}
                             handleNote={handleNote}
                             handleDelete={handleDelete}
+                            handleModel={handleModel}
                             isPaymentSubmitted={isPaymentSubmitted}
                             isSubmitedDate={order.submitted ? true : false}
                         />

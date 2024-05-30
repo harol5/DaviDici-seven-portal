@@ -22,6 +22,10 @@
     font-family: "DMSans";
     src: url("https://portal.davidici.com/fonts/DM_Sans/DMSans-VariableFont_opsz,wght.ttf");
 }
+/* @font-face {
+    font-family: "DMSans";
+    src: url("https://seven.test/fonts/DM_Sans/DMSans-VariableFont_opsz,wght.ttf");
+} */
 
 * {
     margin: 0;
@@ -324,7 +328,7 @@ main {
     display: block;
 }
 
-.description {
+.product-status-card .description {
     flex-basis: 30%;
     margin-right: 1.2em;
 }
@@ -365,15 +369,24 @@ main {
 
 .product-details-card .description {
     flex-basis: 40%;
+    margin-right: 20px;
 }
 
 .product-details-card .size,
-.model,
-.sku,
-.price,
-.qty,
-.total {
+.product-details-card .total,
+.product-details-card .price,
+.product-details-card .qty {
+    flex-basis: 7%;
+}
+
+.product-details-card .model,
+.product-details-card .color {
     flex-basis: 10%;
+}
+
+.product-details-card .sku {
+    flex-basis: 12%;
+    margin-right: 10px;
 }
 
 .qty input {
@@ -382,6 +395,11 @@ main {
     background-color: #bcbdc135;
     border-radius: 10px;
     text-align: center;
+}
+
+.model input {
+    width: 80px;
+    padding: 2px 5px;
 }
 
 .delete-button {

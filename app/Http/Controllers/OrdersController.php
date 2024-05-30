@@ -115,7 +115,7 @@ class OrdersController extends Controller
         ]);
 
         if($res['status'] === 500 || $res['Result'] !== 'Updated Info'){
-            Log::error("=VVVVV===ERROR REQUESTING DATA FROM FOXPRO====VVVVV");
+            Log::error("=VVVVV=== ERROR REQUESTING DATA FROM FOXPRO. function: ChangeOrderNote ====VVVVV");
             Log::error($res);
         }
 
@@ -135,11 +135,45 @@ class OrdersController extends Controller
             'keep_session' => false, 
         ]);
 
-        if($numOfProducts === 1 ){
-            return redirect('/orders')->with('message', 'Order Number ' . $orderNumber . ' deleted!!');
-        }else{
-            return response($res)->header('Content-Type', 'application/json');        
-        }        
+        if($res['status'] === 201 && $res['Result'] === 'Updated Info'){
+
+            if($numOfProducts === 1 ){
+               return redirect('/orders')->with('message', 'Order Number ' . $orderNumber . ' deleted!!');
+            }
+
+            $products = FoxproApi::call([
+                'action' => 'GetSoStatus',
+                'params' => [$orderNumber],
+                'keep_session' => false,
+            ]);
+
+            return response(['status' => 201, 'products' => $products['rows']])->header('Content-Type', 'application/json'); 
+        }
+
+        Log::error("=VVVVV=== ERROR REQUESTING DATA FROM FOXPRO. function: DeleteLine ====VVVVV");
+        Log::error($res);
+        return response(['status' => 500])->header('Content-Type', 'application/json');
+    }
+
+    // Update product model
+    public function updateProductModel(Request $request){
+        $info = $request->all();
+        $orderNumber = getOrderNumberFromPath($request->path());        
+
+        // "Result": "Updated Info" |
+        $res = FoxproApi::call([
+            'action' => 'ChangeOrderModel',
+            'params' => [$orderNumber, $info['sku'], $info['lineNum'], $info['model']],
+            'keep_session' => false,
+        ]);
+
+        if($res['status'] === 201 && $res['Result'] === 'Updated Model Info'){            
+            return response(['status' => 201])->header('Content-Type', 'application/json');
+        }
+
+        Log::error("=VVVVV=== ERROR REQUESTING DATA FROM FOXPRO. function: ChangeOrderModel ====VVVVV");
+        Log::error($res);
+        return response(['status' => 500])->header('Content-Type', 'application/json');
     }
 
     // Show single order delivery form. 
@@ -162,7 +196,7 @@ class OrdersController extends Controller
         ]);
         
         return Inertia::render('Orders/OrderDelivery', ['rawOrder' => $order, 'rawProducts' => $products['rows'], 'deliveryInfoByProd' => $deliveryInfo['rows']]);
-    }
+    }    
 
     // Save delivery info into foxpro.
     public function saveDeliveryInfo(Request $request){
@@ -335,7 +369,7 @@ class OrdersController extends Controller
         $username = auth()->user()->username;
         $message = $request->session()->get('message');
         $products = $request->all();
-
+        info($products);
         // Get all orders
         $orders = FoxproApi::call([
             'action' => 'getordersbyuser',
@@ -377,7 +411,7 @@ class OrdersController extends Controller
     public function createOrder(Request $request){
         $username = auth()->user()->username;
         $data = $request->all();
-        
+        info($data['skus']);
         // Result: "This sales order already exists" | "All items entered"
         $response = FoxproApi::call([
             'action' => 'OrderEnter',
@@ -385,23 +419,26 @@ class OrdersController extends Controller
             'keep_session' => false, 
         ]);
 
-        if($response['Result'] === 'All items entered'){
+        if($response['status'] === 201 && $response['Result'] === 'All items entered'){
             return redirect('/orders')->with('message', 'Order Number ' . $data['newOrderNum'] . ' created!!');
         }
 
-        // TODO: log error.
-        // something went wrong. display the result from foxpro on a flash message.
-        return redirect('/orders')->with('message', $response['Result']);
+        if($response['status'] === 500 || $response['Result'] !== 'Updated Info'){
+            Log::error("=VVVVV===ERROR REQUESTING DATA FROM FOXPRO====VVVVV");
+            Log::error($response);
+        }
+                
+        return redirect('/orders')->with('message', "something went wrong. Please contact support.");
     }
 
     public function testApi(){
 
         // hershel must include another field for the sales rep.
-        // $response = FoxproApi::call([
-        //     'action' => 'OrderEnter',
-        //     'params' => ['HarolE$Davidici_com','HAR000012','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
-        //     'keep_session' => false, 
-        // ]);
+        $response = FoxproApi::call([
+            'action' => 'OrderEnter',
+            'params' => ['HarolE$Davidici_com','HAR000014','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
+            'keep_session' => false, 
+        ]);        
         
         // $response = FoxproApi::call([
         //     'action' => 'GetProductPrice',
@@ -434,11 +471,11 @@ class OrdersController extends Controller
         // ]);
 
         // "Result": "Updated Info" |
-        $response = FoxproApi::call([
-            'action' => 'ChangeOrderNote',
-            'params' => ['HAR000012','71-VB-024-M03-V03','1','this is anote'],
-            'keep_session' => false,
-        ]);
+        // $response = FoxproApi::call([
+        //     'action' => 'ChangeOrderNote',
+        //     'params' => ['HAR000012','71-VB-024-M03-V03','1','this is anote'],
+        //     'keep_session' => false,
+        // ]);
 
         // return Inertia::render('Test',['response' => $response]);
         return response(['response' => $response])->header('Content-Type', 'application/json');
