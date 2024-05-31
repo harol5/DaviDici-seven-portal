@@ -1,13 +1,32 @@
 import { useForm } from "@inertiajs/react";
 import FlashMessage from "../../Components/FlashMessage";
 import { FormEvent } from "react";
+import type { TwoLetterStateAbbreviations } from "../../Models/UsaStates";
+
+/**
+ * TODO:
+ *
+ * FINISH "ADDRESS INPUT" AND CONTINUE WITH THE LIST.
+ *
+ *
+ */
 
 function Register({ message }: { message: string }) {
+    console.log("Register from rerendered!");
     const { data, setData, post, errors, reset } = useForm({
         firstName: "",
         lastName: "",
+        companyName: "",
         phone: "",
         businessPhone: "",
+        address: "",
+        city: "",
+        state: "", // 2 letters
+        zip: "",
+        isTaxExempt: "no", // will be a radio default to "no"
+        einNumber: "", // if isTaxExempt == "yes", input not needed.
+        ownerType: "", // will be a checkbox.
+        stateIncorporated: "", // 2 letters
         email: "",
         username: "",
         role: "user",
@@ -23,7 +42,7 @@ function Register({ message }: { message: string }) {
     return (
         <div className="main-content-wrapper">
             <form onSubmit={handleSubmit}>
-                <div className="mb-6">
+                <div className="mb-6 first-name">
                     <label htmlFor="name" className="inline-block text-lg mb-2">
                         First Name
                     </label>
@@ -42,7 +61,7 @@ function Register({ message }: { message: string }) {
                     )}
                 </div>
 
-                <div className="mb-6">
+                <div className="mb-6 last-name">
                     <label
                         htmlFor="last-name"
                         className="inline-block text-lg mb-2"
@@ -64,7 +83,29 @@ function Register({ message }: { message: string }) {
                     )}
                 </div>
 
-                <div className="mb-6">
+                <div className="mb-6 company-name">
+                    <label
+                        htmlFor="company-name"
+                        className="inline-block text-lg mb-2"
+                    >
+                        Company Name
+                    </label>
+                    <input
+                        type="text"
+                        className="border border-gray-200 rounded p-2 w-full"
+                        name="companyName"
+                        value={data.companyName}
+                        onChange={(e) => setData("companyName", e.target.value)}
+                    />
+
+                    {errors.companyName && (
+                        <p className="text-red-500 text-xs mt-1">
+                            {errors.companyName}
+                        </p>
+                    )}
+                </div>
+
+                <div className="mb-6 phone">
                     <label
                         htmlFor="phone"
                         className="inline-block text-lg mb-2"
@@ -86,7 +127,7 @@ function Register({ message }: { message: string }) {
                     )}
                 </div>
 
-                <div className="mb-6">
+                <div className="mb-6 business-phone">
                     <label
                         htmlFor="business-phone"
                         className="inline-block text-lg mb-2"
@@ -110,7 +151,29 @@ function Register({ message }: { message: string }) {
                     )}
                 </div>
 
-                <div className="mb-6">
+                <div className="mb-6 address">
+                    <label
+                        htmlFor="address"
+                        className="inline-block text-lg mb-2"
+                    >
+                        Address
+                    </label>
+                    <input
+                        type="text"
+                        className="border border-gray-200 rounded p-2 w-full"
+                        name="address"
+                        value={data.address}
+                        onChange={(e) => setData("address", e.target.value)}
+                    />
+
+                    {errors.address && (
+                        <p className="text-red-500 text-xs mt-1">
+                            {errors.address}
+                        </p>
+                    )}
+                </div>
+
+                <div className="mb-6 email">
                     <label
                         htmlFor="email"
                         className="inline-block text-lg mb-2"
@@ -132,50 +195,7 @@ function Register({ message }: { message: string }) {
                     )}
                 </div>
 
-                <div className="mb-6">
-                    <label
-                        htmlFor="username"
-                        className="inline-block text-lg mb-2"
-                    >
-                        Username
-                    </label>
-                    <input
-                        type="text"
-                        className="border border-gray-200 rounded p-2 w-full"
-                        name="username"
-                        value={data.username}
-                        onChange={(e) => setData("username", e.target.value)}
-                    />
-
-                    {errors.username && (
-                        <p className="text-red-500 text-xs mt-1">
-                            {errors.username}
-                        </p>
-                    )}
-                </div>
-
-                <div className="mb-6">
-                    <label htmlFor="role" className="inline-block text-lg mb-2">
-                        Role
-                    </label>
-                    <select
-                        name="role"
-                        className="border border-gray-200 rounded p-2 w-full"
-                        value={data.role}
-                        onChange={(e) => setData("role", e.target.value)}
-                    >
-                        <option value="user">User</option>
-                        <option value="admin">Admin</option>
-                    </select>
-
-                    {errors.role && (
-                        <p className="text-red-500 text-xs mt-1">
-                            {errors.role}
-                        </p>
-                    )}
-                </div>
-
-                <div className="mb-6">
+                <div className="mb-6 password">
                     <label
                         htmlFor="password"
                         className="inline-block text-lg mb-2"
@@ -197,7 +217,7 @@ function Register({ message }: { message: string }) {
                     )}
                 </div>
 
-                <div className="mb-6">
+                <div className="mb-6 confirm-password">
                     <label
                         htmlFor="password2"
                         className="inline-block text-lg mb-2"
@@ -215,7 +235,7 @@ function Register({ message }: { message: string }) {
                     />
                 </div>
 
-                <div className="mb-6">
+                <div className="mb-6 button">
                     <button
                         type="submit"
                         className="bg-laravel text-black rounded py-2 px-4 hover:bg-black hover:text-white"
