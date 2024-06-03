@@ -14,7 +14,7 @@ class OrdersController extends Controller
     // Show all orders.    
     public function all(Request $request){
         $username = auth()->user()->username;
-        $message = $request->session()->get('message');
+        $message = $request->session()->get('message');        
         $orders = FoxproApi::call([
             'action' => 'getordersbyuser',
             'params' => [$username],
@@ -434,11 +434,17 @@ class OrdersController extends Controller
     public function testApi(){
 
         // hershel must include another field for the sales rep.
-        $response = FoxproApi::call([
-            'action' => 'OrderEnter',
-            'params' => ['HarolE$Davidici_com','HAR000014','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
-            'keep_session' => false, 
-        ]);        
+        // $response = FoxproApi::call([
+        //     'action' => 'OrderEnter',
+        //     'params' => ['HarolE$Davidici_com','HAR000014','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
+        //     'keep_session' => false, 
+        // ]);        
+
+        // $response = FoxproApi::call([
+        //     'action' => 'GETUSERINFO',
+        //     'params' => ['some34%40email.com'],
+        //     'keep_session' => false, 
+        // ]);        
         
         // $response = FoxproApi::call([
         //     'action' => 'GetProductPrice',

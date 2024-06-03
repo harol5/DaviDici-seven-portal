@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Inertia\Inertia;
+use App\FoxproApi\FoxproApi;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Session;
 
@@ -51,7 +53,7 @@ class UserController extends Controller
 
     // Show register form (admin only)------------------
     public function register(Request $request){
-        $message = $request->session()->get('message');
+        $message = $request->session()->get('message');           
 
         if(!Gate::allows('create-user')){
             abort(403);
@@ -64,12 +66,30 @@ class UserController extends Controller
     public function create(Request $request){
         $formFields = $request->validate([
             'firstName' => ['required', 'min:3'],            
+            'companyName' => ['required', 'min:3'],            
             'phone' => ['required', 'min:3'],            
-            'email' => ['required', 'email', Rule::unique('users', 'email')],
-            'username' => ['required', 'min:3', Rule::unique('users', 'username')],
+            'address' => ['required', 'min:3'],
+            'city' => ['required', 'min:3'],
+            'state' => 'required',
+            'zipCode' => ['required', 'min:5'],       
+            'isTaxExempt' => 'required',         
+            'ownerType' => 'required',
+            'stateIncorporated' => 'required',
+            'email' => ['required', 'email', Rule::unique('users', 'email')],            
             'role' => 'required',
             'password' => 'required|confirmed|min:6'
         ]);
+        
+        $formFields['username'] = urlencode($formFields['email']);
+        $formFields['dateStarted'] = date("Y/m/d");            
+        $formFields['lastName'] = $request->all()['lastName'];
+        $formFields['businessPhone'] = $request->all()['businessPhone'];
+        $formFields['einNumber'] = $request->all()['einNumber'];    
+
+        // we will only use this when creating sales people.
+        // $formFields['companyCode'] = 'HAR';
+        $formFields['companyCode'] = '';
+        
 
         // Hash Password
         $formFields['password'] = bcrypt($formFields['password']);
@@ -78,19 +98,54 @@ class UserController extends Controller
         // 1919 = users, admin = 3478
         $formFields['role'] === 'admin' ? $formFields['role'] = 3478 : $formFields['role'] = 1919;
         
-        // Create User
-        $user = User::create([
-            'first_name' => $formFields['firstName'],
-            'last_name' => $request->all()['lastName'],
-            'phone' => $formFields['phone'],
-            'business_phone' => $request->all()['businessPhone'], 
-            'email' => $formFields['email'],
-            'username' => $formFields['username'],
-            'role' => $formFields['role'],
-            'password' => $formFields['password'],
+        // 'Result' => 'New User Added' | 
+        $foxproResponse = FoxproApi::call([
+            'action' => 'SaveUserInfo',
+            'params' => [
+                $formFields['username'],
+                $formFields['password'], 
+                $formFields['email'], 
+                $formFields['phone'],  
+                $formFields['businessPhone'], 
+                $formFields['address'],
+                $formFields['city'],
+                $formFields['state'], // 2 letters
+                $formFields['zipCode'],
+                $formFields['firstName'],
+                $formFields['lastName'],
+                $formFields['companyName'],
+                $formFields['dateStarted'],
+                $formFields['isTaxExempt'], // Y | N
+                $formFields['einNumber'],
+                $formFields['ownerType'], // "PROP" | "PART" | "CORP"
+                $formFields['stateIncorporated'], // 2 letters
+                $formFields['companyCode'], 
+            ],
+            'keep_session' => false,
         ]);
+        
+        info($formFields);
+        info($foxproResponse);
 
-        return redirect('/register')->with('message', 'User created');
+        if($foxproResponse['status'] === 201 && $foxproResponse['Result'] === 'New User Added'){
+            // Create User
+            $user = User::create([
+                'first_name' => $formFields['firstName'],
+                'last_name' => $formFields['lastName'],
+                'companyName' => $formFields['companyName'],
+                'phone' => $formFields['phone'],
+                'business_phone' => $formFields['businessPhone'],
+                'email' => $formFields['email'],
+                'username' => $formFields['username'],
+                'role' => $formFields['role'],
+                'password' => $formFields['password'],
+            ]);
+
+            info('user created');
+        }
+        
+
+        return redirect('/register')->with(['message' => 'User created']);
     }
 
 }

@@ -1,12 +1,16 @@
 import { useForm } from "@inertiajs/react";
 import FlashMessage from "../../Components/FlashMessage";
 import { FormEvent } from "react";
-import type { TwoLetterStateAbbreviations } from "../../Models/UsaStates";
+import { states } from "../../Models/UsaStates";
 
 /**
- * TODO:
+ * TODO
  *
- * FINISH "ADDRESS INPUT" AND CONTINUE WITH THE LIST.
+ * SEND PROPER RESPONSE IF ERROR CALLING FOXPRO.
+ *
+ * REDIRECT USER TO WELCOME PAGE WITH LINK TO LOGIN PAGE.
+ *
+ * STYLING.
  *
  *
  */
@@ -22,17 +26,17 @@ function Register({ message }: { message: string }) {
         address: "",
         city: "",
         state: "", // 2 letters
-        zip: "",
-        isTaxExempt: "no", // will be a radio default to "no"
+        zipCode: "",
+        isTaxExempt: "N", // "yes" | "no"
         einNumber: "", // if isTaxExempt == "yes", input not needed.
-        ownerType: "", // will be a checkbox.
+        ownerType: "", // "PROP"| "PART" | "CORP"
         stateIncorporated: "", // 2 letters
         email: "",
-        username: "",
         role: "user",
         password: "",
         password_confirmation: "",
     });
+
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         post("/users", {
@@ -169,6 +173,179 @@ function Register({ message }: { message: string }) {
                     {errors.address && (
                         <p className="text-red-500 text-xs mt-1">
                             {errors.address}
+                        </p>
+                    )}
+                </div>
+
+                <div className="mb-6 city">
+                    <label htmlFor="city" className="inline-block text-lg mb-2">
+                        City
+                    </label>
+                    <input
+                        type="text"
+                        className="border border-gray-200 rounded p-2 w-full"
+                        name="city"
+                        value={data.city}
+                        onChange={(e) => setData("city", e.target.value)}
+                    />
+
+                    {errors.city && (
+                        <p className="text-red-500 text-xs mt-1">
+                            {errors.city}
+                        </p>
+                    )}
+                </div>
+
+                <div className="mb-6 state">
+                    <label
+                        htmlFor="state"
+                        className="inline-block text-lg mb-2"
+                    >
+                        State
+                    </label>
+                    <select
+                        className="border border-gray-200 rounded p-2 w-full"
+                        name="state"
+                        value={data.state}
+                        onChange={(e) => setData("state", e.target.value)}
+                    >
+                        {states.map((state, index) => (
+                            <option key={index} value={state.abbreviation}>
+                                {state.name}
+                            </option>
+                        ))}
+                    </select>
+
+                    {errors.state && (
+                        <p className="text-red-500 text-xs mt-1">
+                            {errors.state}
+                        </p>
+                    )}
+                </div>
+
+                <div className="mb-6 zip-code">
+                    <label
+                        htmlFor="zipCode"
+                        className="inline-block text-lg mb-2"
+                    >
+                        Zip code
+                    </label>
+                    <input
+                        type="text"
+                        className="border border-gray-200 rounded p-2 w-full"
+                        name="zipCode"
+                        value={data.zipCode}
+                        onChange={(e) => setData("zipCode", e.target.value)}
+                    />
+
+                    {errors.zipCode && (
+                        <p className="text-red-500 text-xs mt-1">
+                            {errors.zipCode}
+                        </p>
+                    )}
+                </div>
+
+                <div className="mb-6 tax-exempt">
+                    <label
+                        htmlFor="tax-exempt"
+                        className="inline-block text-lg mb-2"
+                    >
+                        Tax Exempt?
+                    </label>
+                    <select
+                        className="border border-gray-200 rounded p-2 w-full"
+                        name="isTaxExempt"
+                        value={data.isTaxExempt}
+                        onChange={(e) => setData("isTaxExempt", e.target.value)}
+                    >
+                        <option value="N">NO</option>
+                        <option value="Y">YES</option>
+                    </select>
+
+                    {errors.isTaxExempt && (
+                        <p className="text-red-500 text-xs mt-1">
+                            {errors.isTaxExempt}
+                        </p>
+                    )}
+                </div>
+
+                {data.isTaxExempt === "N" && (
+                    <div className="mb-6 ein-number">
+                        <label
+                            htmlFor="einNumber"
+                            className="inline-block text-lg mb-2"
+                        >
+                            EIN Number
+                        </label>
+                        <input
+                            type="text"
+                            className="border border-gray-200 rounded p-2 w-full"
+                            name="einNumber"
+                            value={data.einNumber}
+                            onChange={(e) =>
+                                setData("einNumber", e.target.value)
+                            }
+                        />
+
+                        {errors.einNumber && (
+                            <p className="text-red-500 text-xs mt-1">
+                                {errors.einNumber}
+                            </p>
+                        )}
+                    </div>
+                )}
+
+                <div className="mb-6 owner-type">
+                    <label
+                        htmlFor="ownerType"
+                        className="inline-block text-lg mb-2"
+                    >
+                        Owner Type
+                    </label>
+                    <select
+                        className="border border-gray-200 rounded p-2 w-full"
+                        name="ownerType"
+                        value={data.ownerType}
+                        onChange={(e) => setData("ownerType", e.target.value)}
+                    >
+                        <option value="">-choose one-</option>
+                        <option value="PROP">proprietorship</option>
+                        <option value="PART">partnership</option>
+                        <option value="CORP">corporation</option>
+                    </select>
+
+                    {errors.ownerType && (
+                        <p className="text-red-500 text-xs mt-1">
+                            {errors.ownerType}
+                        </p>
+                    )}
+                </div>
+
+                <div className="mb-6 state-incorporated">
+                    <label
+                        htmlFor="state"
+                        className="inline-block text-lg mb-2"
+                    >
+                        State Incorporated
+                    </label>
+                    <select
+                        className="border border-gray-200 rounded p-2 w-full"
+                        name="stateIncorporated"
+                        value={data.stateIncorporated}
+                        onChange={(e) =>
+                            setData("stateIncorporated", e.target.value)
+                        }
+                    >
+                        {states.map((state, index) => (
+                            <option key={index} value={state.abbreviation}>
+                                {state.name}
+                            </option>
+                        ))}
+                    </select>
+
+                    {errors.stateIncorporated && (
+                        <p className="text-red-500 text-xs mt-1">
+                            {errors.stateIncorporated}
                         </p>
                     )}
                 </div>
