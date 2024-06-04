@@ -19,20 +19,25 @@ class FoxproApi{
 
         $data = $response->json();
         
-        if(is_array($data) && array_key_exists('Result',$data)){       
-            $data['status'] = 201;   
+        /**
+         * if foxpro func updates, deletes or creates a record,
+         * it will return a 'result' key with a message stating 
+         * if the operation was rejected or fullfilled.
+         * */ 
+        if(is_array($data) && array_key_exists('Result',$data)){                           
+            $data['status'] = 201;            
             return $data;
         }
 
         if(!$data || !array_key_exists('cols',$data) || !array_key_exists('rows',$data) || $data['recordcount'] === 0){
             //TODO: you must log error for debugging.
             return ['status' => 500, 'message' => 'error requesting data from foxpro', 'data' => $data];
-        }
+        }        
 
         return self::formatResponse($data);
     }
 
-    public static function formatResponse($object){
+    public static function formatResponse($object){        
         $cols = $object['cols'];
         $rows = $object['rows'];
         

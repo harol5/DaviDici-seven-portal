@@ -11,11 +11,15 @@ Route::get('/', [UserController::class, 'login'])->name('login');
 
 Route::post('/auth', [UserController::class, 'authenticate']);
 
-Route::middleware(['auth','auth.session'])->group(function () {
-    // Only admin routes.
-    Route::get('/register', [UserController::class, 'register']);
-    Route::post('/users', [UserController::class, 'create']);
+// Only admin routes.
+Route::get('/register', [UserController::class, 'register']);
 
+Route::post('/users', [UserController::class, 'create']);
+
+Route::get('/users/welcome', [UserController::class, 'welcome']);
+
+Route::middleware(['auth','auth.session'])->group(function () {
+    
     // Orders routes - read operations.
     Route::get('/orders', [OrdersController::class, 'all']);
     Route::get('/orders/create-so-num', [OrdersController::class, 'createOrderNumber']); // coming from davidici pricelist.
