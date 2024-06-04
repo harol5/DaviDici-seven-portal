@@ -154,6 +154,8 @@ class UserController extends Controller
             return redirect('/users/welcome')->with(['name' => $formFields['firstName']]);
         }        
 
+        Log::error("=VVVVV===ERROR REQUESTING DATA FROM FOXPRO. function: SaveUserInfo ====VVVVV");
+        Log::error($foxproResponse);
         return redirect('/users/welcome')->with(['error' => 'something went wrong']);
     }
 
