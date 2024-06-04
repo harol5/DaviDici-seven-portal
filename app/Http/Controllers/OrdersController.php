@@ -440,11 +440,11 @@ class OrdersController extends Controller
         //     'keep_session' => false, 
         // ]);        
 
-        // $response = FoxproApi::call([
-        //     'action' => 'GETUSERINFO',
-        //     'params' => ['some34%40email.com'],
-        //     'keep_session' => false, 
-        // ]);        
+        $response = FoxproApi::call([
+            'action' => 'GETUSERINFO',
+            'params' => ['some12%40email.com'],
+            'keep_session' => false, 
+        ]);        
         
         // $response = FoxproApi::call([
         //     'action' => 'GetProductPrice',
