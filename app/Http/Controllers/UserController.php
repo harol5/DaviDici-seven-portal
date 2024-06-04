@@ -112,47 +112,47 @@ class UserController extends Controller
         $formFields['role'] === 'admin' ? $formFields['role'] = 3478 : $formFields['role'] = 1919;
         
         // 'Result' => 'New User Added' | 
-        // $foxproResponse = FoxproApi::call([
-        //     'action' => 'SaveUserInfo',
-        //     'params' => [
-        //         $formFields['username'],
-        //         $formFields['password'], 
-        //         $formFields['email'], 
-        //         $formFields['phone'],  
-        //         $formFields['businessPhone'], 
-        //         $formFields['address'],
-        //         $formFields['city'],
-        //         $formFields['state'], // 2 letters
-        //         $formFields['zipCode'],
-        //         $formFields['firstName'],
-        //         $formFields['lastName'],
-        //         $formFields['companyName'],
-        //         $formFields['dateStarted'],
-        //         $formFields['isTaxExempt'], // Y | N
-        //         $formFields['einNumber'],
-        //         $formFields['ownerType'], // "PROP" | "PART" | "CORP"
-        //         $formFields['stateIncorporated'], // 2 letters
-        //         $formFields['companyCode'], 
-        //     ],
-        //     'keep_session' => false,
-        // ]);                        
+        $foxproResponse = FoxproApi::call([
+            'action' => 'SaveUserInfo',
+            'params' => [
+                $formFields['username'],
+                $formFields['password'], 
+                $formFields['email'], 
+                $formFields['phone'],  
+                $formFields['businessPhone'], 
+                $formFields['address'],
+                $formFields['city'],
+                $formFields['state'], // 2 letters
+                $formFields['zipCode'],
+                $formFields['firstName'],
+                $formFields['lastName'],
+                $formFields['companyName'],
+                $formFields['dateStarted'],
+                $formFields['isTaxExempt'], // Y | N
+                $formFields['einNumber'],
+                $formFields['ownerType'], // "PROP" | "PART" | "CORP"
+                $formFields['stateIncorporated'], // 2 letters
+                $formFields['companyCode'], 
+            ],
+            'keep_session' => false,
+        ]);                        
 
-        // if($foxproResponse['status'] === 201 && $foxproResponse['Result'] === 'New User Added'){
-        //     // Create User
-        //     $user = User::create([
-        //         'first_name' => $formFields['firstName'],
-        //         'last_name' => $formFields['lastName'],
-        //         'companyName' => $formFields['companyName'],
-        //         'phone' => $formFields['phone'],
-        //         'business_phone' => $formFields['businessPhone'],
-        //         'email' => $formFields['email'],
-        //         'username' => $formFields['username'],
-        //         'role' => $formFields['role'],
-        //         'password' => $formFields['password'],
-        //     ]);            
+        if($foxproResponse['status'] === 201 && $foxproResponse['Result'] === 'New User Added'){
+            // Create User
+            $user = User::create([
+                'first_name' => $formFields['firstName'],
+                'last_name' => $formFields['lastName'],
+                'companyName' => $formFields['companyName'],
+                'phone' => $formFields['phone'],
+                'business_phone' => $formFields['businessPhone'],
+                'email' => $formFields['email'],
+                'username' => $formFields['username'],
+                'role' => $formFields['role'],
+                'password' => $formFields['password'],
+            ]);            
 
-        //     return redirect('/users/welcome')->with(['name' => $formFields['firstName']]);
-        // }        
+            return redirect('/users/welcome')->with(['name' => $formFields['firstName']]);
+        }        
 
         return redirect('/users/welcome')->with(['error' => 'something went wrong']);
     }
