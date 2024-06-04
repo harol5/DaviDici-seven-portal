@@ -366,10 +366,9 @@ class OrdersController extends Controller
 
     // Create a order number for new order
     public function createOrderNumber(Request $request){        
-        $username = auth()->user()->username;
-        $message = $request->session()->get('message');
+        $username = auth()->user()->username;        
         $products = $request->all();
-        info($products);
+        
         // Get all orders
         $orders = FoxproApi::call([
             'action' => 'getordersbyuser',
@@ -400,10 +399,24 @@ class OrdersController extends Controller
 
             $newOrderNumber = $charsFromOrderNum . $nextOrderNumber;
 
-            return Inertia::render('Orders/OrderNumber', ['nextOrderNumber' => $newOrderNumber, 'products' => $products, 'orders' => $orders['rows'], 'message' => $message]);             
+            return Inertia::render('Orders/OrderNumber', ['nextOrderNumber' => $newOrderNumber, 'products' => $products, 'orders' => $orders['rows'], 'message' => '']);             
         }else {
-            //TODO: somehow get the first letter for the new customer and start order nums from 1.
-            return Inertia::render('Orders/OrderNumber', ['nextOrderNumber' => 'NEW000001', 'products' => $products, 'orders' => $orders['rows'], 'message' => $message]); 
+            
+            // Gets user info.
+            $response = FoxproApi::call([
+                'action' => 'GETUSERINFO',
+                'params' => [$username],
+                'keep_session' => false, 
+            ]);
+            
+            if($response['status'] === 500 || (array_key_exists('Result',$response) && $response['Result'] === 'no such user name found')){
+                Log::error("=VVVVV===ERROR REQUESTING DATA FROM FOXPRO. function: GETUSERINFO ====VVVVV");
+                Log::error($response);
+                return Inertia::render('Orders/OrderNumber', ['nextOrderNumber' => 'none', 'products' => 'none', 'orders' => 'none', 'message' => 'error']);     
+            }
+            
+            $companyCode = $response['rows'][0]['wholesaler'];            
+            return Inertia::render('Orders/OrderNumber', ['nextOrderNumber' => $companyCode .'000001', 'products' => $products, 'orders' => $orders['rows'], 'message' => '']); 
         }                
     }
 
@@ -438,13 +451,13 @@ class OrdersController extends Controller
         //     'action' => 'OrderEnter',
         //     'params' => ['HarolE$Davidici_com','HAR000014','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
         //     'keep_session' => false, 
-        // ]);        
+        // ]);                
 
-        $response = FoxproApi::call([
-            'action' => 'GETUSERINFO',
-            'params' => ['some12%40email.com'],
-            'keep_session' => false, 
-        ]);        
+        // $response = FoxproApi::call([
+        //     'action' => 'GETUSERINFO',
+        //     'params' => ['HarolE$Davidici_com'],
+        //     'keep_session' => false, 
+        // ]);        
         
         // $response = FoxproApi::call([
         //     'action' => 'GetProductPrice',
