@@ -96,9 +96,9 @@ class UserController extends Controller
         
         $formFields['username'] = urlencode($formFields['email']);
         $formFields['dateStarted'] = date("Y/m/d");            
-        $formFields['lastName'] = $request->all()['lastName'];
-        $formFields['businessPhone'] = $request->all()['businessPhone'];
-        $formFields['einNumber'] = $request->all()['einNumber'];
+        $formFields['lastName'] = $request->all()['lastName'] ?? '';
+        $formFields['businessPhone'] = $request->all()['businessPhone'] ?? '';
+        $formFields['einNumber'] = $request->all()['einNumber'] ?? '';
 
         // we will only use this when creating sales people.
         // $formFields['companyCode'] = 'HAR';
