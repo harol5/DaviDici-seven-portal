@@ -437,7 +437,7 @@ class OrdersController extends Controller
         }
 
         if($response['status'] === 500 || $response['Result'] !== 'Updated Info'){
-            Log::error("=VVVVV===ERROR REQUESTING DATA FROM FOXPRO====VVVVV");
+            Log::error("=VVVVV=== ERROR REQUESTING DATA FROM FOXPRO. function: OrderEnter ====VVVVV");
             Log::error($response);
         }
                 
@@ -455,7 +455,7 @@ class OrdersController extends Controller
 
         $response = FoxproApi::call([
             'action' => 'GETUSERINFO',
-            'params' => ['Miraahi'],
+            'params' => ['sales%40kitchensbykavari.com'],
             'keep_session' => false, 
         ]);
         

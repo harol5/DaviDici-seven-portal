@@ -117,7 +117,7 @@ class UserController extends Controller
             'action' => 'SaveUserInfo',
             'params' => [
                 $formFields['username'],
-                $formFields['password'], 
+                $request->all()['password'], 
                 $formFields['email'], 
                 $formFields['phone'],  
                 $formFields['businessPhone'], 

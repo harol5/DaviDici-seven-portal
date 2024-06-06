@@ -97,6 +97,20 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
                                 </li>
                             </ul>
                         )}
+                        {auth?.user.role === 1950 && (
+                            <ul>
+                                <li>
+                                    <Link
+                                        href="/logout"
+                                        method="post"
+                                        as="button"
+                                        type="button"
+                                    >
+                                        logout
+                                    </Link>
+                                </li>
+                            </ul>
+                        )}
                     </div>
                 </div>
             </nav>
