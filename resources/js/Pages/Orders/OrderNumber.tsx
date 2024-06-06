@@ -2,8 +2,10 @@ import { ChangeEvent, useState } from "react";
 import UserAuthenticatedLayout from "../../Layouts/UserAuthenticatedLayout";
 import type { Order as OrderModel } from "../../Models/Order";
 import { router } from "@inertiajs/react";
+import User from "../../Models/User";
 
 interface OrderNumberProps {
+    auth?: User;
     nextOrderNumber: string;
     products: { SKU: string };
     orders: OrderModel[];
@@ -11,6 +13,7 @@ interface OrderNumberProps {
 }
 
 function OrderNumber({
+    auth,
     nextOrderNumber,
     products,
     orders,
@@ -62,7 +65,7 @@ function OrderNumber({
     };
 
     return (
-        <UserAuthenticatedLayout crrPage="orders">
+        <UserAuthenticatedLayout auth={auth} crrPage="orders">
             {message !== "error" && (
                 <section className="absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] p-7 bg-white border border-davidiciGold text-center">
                     {isLoading && <p>creating your order...</p>}

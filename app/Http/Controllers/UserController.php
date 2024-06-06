@@ -10,6 +10,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\URL;
 
 class UserController extends Controller
 {
@@ -23,7 +24,6 @@ class UserController extends Controller
 
         return Inertia::render('Users/Login',['message' => $message]);
     }
-
 
     // Authenticate user ------------
     public function authenticate(Request $request){
@@ -50,7 +50,6 @@ class UserController extends Controller
         return redirect('/')->with('message', 'You have been logged out!');
     }
 
-
     // Show register form (admin only)------------------
     public function register(Request $request){
         $error = $request->session()->get('error');
@@ -61,6 +60,8 @@ class UserController extends Controller
             $token = $query['token'];
 
             // TODO: check if token is still valid
+            
+
 
             // if token is valid
             $isTokenValid = true;
@@ -108,7 +109,7 @@ class UserController extends Controller
         $formFields['password'] = bcrypt($formFields['password']);
 
         // Assigning role:
-        // 1919 = users, admin = 3478
+        // owner = 1919 , admin = 3478 
         $formFields['role'] === 'admin' ? $formFields['role'] = 3478 : $formFields['role'] = 1919;
         
         // 'Result' => 'New User Added' | 
@@ -137,7 +138,7 @@ class UserController extends Controller
             'keep_session' => false,
         ]);                        
 
-        if($foxproResponse['status'] === 201 && $foxproResponse['Result'] === 'New User Added'){
+        if($foxproResponse['status'] === 201 && $foxproResponse['Result'] === 'New User Added') {
             // Create User
             $user = User::create([
                 'first_name' => $formFields['firstName'],
@@ -164,6 +165,63 @@ class UserController extends Controller
         $name = $request->session()->get('name');
         $error = $request->session()->get('error');
         return Inertia::render('Welcome',['name' => $name, 'error' => $error]);
+    }
+
+    public function sendInvitation(Request $request){
+        $formFields = $request->validate([
+            'name' => ['required', 'min:3'],                      
+            'email' => ['required', 'email'],            
+        ]);
+
+        //generate token        
+        url('/register');
+        route('user.register');
+
+        $url = URL::temporarySignedRoute(
+          'unsubscribe', now()->addMinutes(30), ['user' => 1]
+        );
+
+        //add token to register url
+
+        //send email wit url on the body
+
+        //redirect user to dashboard with flashmessage stating if success or fail
+    }
+
+    public function registerSalesPerson(Request $request){
+        return Inertia::render('Users/SalesPersonRegister');
+    }
+
+    public function createSalesPerson(Request $request){
+        $formFields = $request->validate([
+            'firstName' => ['required', 'min:3'],                        
+            'phone' => ['required', 'min:3'],                        
+            'email' => ['required', 'email', Rule::unique('users', 'email')],
+            'username' => 'required',             
+            'role' => 'required',
+            'password' => 'required|confirmed|min:6'
+        ]);
+
+        $formFields['lastName'] = $request->all()['lastName'] ?? '';
+        $formFields['businessPhone'] = $request->all()['businessPhone'] ?? '';
+        $formFields['password'] = bcrypt($formFields['password']);
+
+        // Assigning role:
+        // owner = 1919 , admin = 3478 
+        $formFields['role'] === 'salesperson' ? $formFields['role'] = 1950 : $formFields['role'] = 1919;
+
+        $user = User::create([
+            'first_name' => $formFields['firstName'],
+            'last_name' => $formFields['lastName'],            
+            'phone' => $formFields['phone'],
+            'business_phone' => $formFields['businessPhone'],
+            'email' => $formFields['email'],
+            'username' => $formFields['username'],
+            'role' => $formFields['role'],
+            'password' => $formFields['password'],
+        ]);            
+
+        return redirect('/register/salesperson');
     }
 
 }

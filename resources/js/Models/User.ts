@@ -10,3 +10,12 @@ export default interface User {
         username: string;
     };
 }
+
+/**
+ * admin = 3478
+ * operations = 3480
+ * owner = 1919
+ * salesperson = 1950
+ */
+
+export type role = "admin" | "salesperson" | "owner" | "operations";

@@ -18,14 +18,14 @@
     font-family: "DMSans-Italic";
     src: url("https://portal.davidici.com/fonts/DM_Sans/DMSans-Italic-VariableFont_opsz,wght.ttf");
 }
-@font-face {
-    font-family: "DMSans";
-    src: url("https://portal.davidici.com/fonts/DM_Sans/DMSans-VariableFont_opsz,wght.ttf");
-}
 /* @font-face {
     font-family: "DMSans";
-    src: url("https://seven.test/fonts/DM_Sans/DMSans-VariableFont_opsz,wght.ttf");
+    src: url("https://portal.davidici.com/fonts/DM_Sans/DMSans-VariableFont_opsz,wght.ttf");
 } */
+@font-face {
+    font-family: "DMSans";
+    src: url("https://seven.test/fonts/DM_Sans/DMSans-VariableFont_opsz,wght.ttf");
+}
 
 * {
     margin: 0;
@@ -127,6 +127,45 @@ nav > div {
 .active {
     border-bottom: 1.5px solid #d1aa68;
 }
+
+/*-dropdown setting menu-*/
+.settings-wrapper {
+    position: relative;
+}
+
+.settings-wrapper h1 {
+    margin-bottom: 5px;
+    cursor: default;
+}
+
+.settings-wrapper ul {
+    display: none;
+    flex-direction: column;
+    align-items: end;
+    font-size: medium;
+    position: absolute;
+    left: -160%;
+    z-index: 2;
+    min-width: 160px;
+    background-color: #ffffff;
+    box-shadow: 0px 4px 4px 1px rgba(0, 0, 0, 0.547);
+    border-radius: 6px;
+}
+
+.settings-wrapper:hover ul {
+    display: flex;
+}
+
+.settings-wrapper li {
+    display: block;
+    flex-basis: 100%;
+    margin: 7px 5px;
+    padding: 2px;
+    cursor: pointer;
+}
+/* .settings-wrapper li:hover {
+    background-color: #7e7e7e5a;
+} */
 
 /*============MAIN STYLING==============*/
 main {

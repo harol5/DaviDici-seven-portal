@@ -11,12 +11,16 @@ Route::get('/', [UserController::class, 'login'])->name('login');
 
 Route::post('/auth', [UserController::class, 'authenticate']);
 
-// Only admin routes.
-Route::get('/register', [UserController::class, 'register']);
-
+// Only admin routes or by token.
+Route::get('/register', [UserController::class, 'register'])->name('user.register');
 Route::post('/users', [UserController::class, 'create']);
-
 Route::get('/users/welcome', [UserController::class, 'welcome']);
+
+// register sales reps
+Route::get('/register/salesperson', [UserController::class, 'registerSalesPerson'])->name('user.register.salesperson');
+Route::post('/users/salesperson', [UserController::class, 'createSalesPerson']);
+
+
 
 Route::middleware(['auth','auth.session'])->group(function () {
     
@@ -41,8 +45,7 @@ Route::middleware(['auth','auth.session'])->group(function () {
     Route::post('/orders/{orderNumber}/products/payment-bank/status', [OrdersController::class, 'getStatusCheck']);
 
     // Inventory routes.
-    Route::get('/inventory', function(){
-        // return view('inventory.inventory');
+    Route::get('/inventory', function(){        
         return Inertia::render("Inventory/Inventory");
     });
 

@@ -424,7 +424,7 @@ class OrdersController extends Controller
     public function createOrder(Request $request){
         $username = auth()->user()->username;
         $data = $request->all();
-        info($data['skus']);
+        
         // Result: "This sales order already exists" | "All items entered"
         $response = FoxproApi::call([
             'action' => 'OrderEnter',
@@ -453,11 +453,11 @@ class OrdersController extends Controller
         //     'keep_session' => false, 
         // ]);                
 
-        // $response = FoxproApi::call([
-        //     'action' => 'GETUSERINFO',
-        //     'params' => ['HarolE$Davidici_com'],
-        //     'keep_session' => false, 
-        // ]);        
+        $response = FoxproApi::call([
+            'action' => 'GETUSERINFO',
+            'params' => ['Miraahi'],
+            'keep_session' => false, 
+        ]);
         
         // $response = FoxproApi::call([
         //     'action' => 'GetProductPrice',

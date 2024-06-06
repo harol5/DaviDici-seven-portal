@@ -19,7 +19,7 @@ function Register({ message }: { message: string }) {
         ownerType: "", // "PROP"| "PART" | "CORP"
         stateIncorporated: "", // 2 letters
         email: "",
-        role: "user",
+        role: "owner",
         password: "",
         password_confirmation: "",
     });

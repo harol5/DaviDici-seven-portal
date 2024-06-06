@@ -35,7 +35,7 @@ function Orders({ auth, orders, message = "" }: ordersProp) {
     }, []);
 
     return (
-        <UserAuthenticatedLayout crrPage="orders">
+        <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <div className="main-content-wrapper">
                 <div className="gretting-search-wrapper">
                     {dayTime === "am" && (

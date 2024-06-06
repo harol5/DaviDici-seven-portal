@@ -11,8 +11,10 @@ import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import BankAccountForm from "../../Components/BankAccountForm";
 import { Product as ProductModel } from "../../Models/Product";
+import User from "../../Models/User";
 
 interface OrderPaymentProps {
+    auth?: User;
     order: OrderModel;
     deliveryInfo: DeliveryInfoModel[];
     depositInfo?: {
@@ -24,7 +26,12 @@ interface OrderPaymentProps {
     };
 }
 
-function OrderPayment({ order, deliveryInfo, depositInfo }: OrderPaymentProps) {
+function OrderPayment({
+    auth,
+    order,
+    deliveryInfo,
+    depositInfo,
+}: OrderPaymentProps) {
     const [crrPaymentMethod, setCrrPaymentMethod] = useState<
         "credit card" | "bank account"
     >("credit card");
@@ -211,7 +218,7 @@ function OrderPayment({ order, deliveryInfo, depositInfo }: OrderPaymentProps) {
     };
 
     return (
-        <UserAuthenticatedLayout crrPage="orders">
+        <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <OrderLayout order={order} crrOrderOption="payment">
                 {isTransactionApproved && (
                     <div className="absolute bg-gray-200/50 backdrop-blur-sm mt-6 p-5">

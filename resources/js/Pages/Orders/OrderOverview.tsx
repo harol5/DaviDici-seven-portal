@@ -5,8 +5,10 @@ import ProductStatusCard from "../../Components/ProductStatusCard";
 import { useState } from "react";
 import type { Order as OrderModel } from "../../Models/Order";
 import type { Product as ProductModel } from "../../Models/Product";
+import User from "../../Models/User";
 
 interface OrderOverviewProps {
+    auth?: User;
     order: OrderModel;
     products: ProductModel[];
     isPaymentSubmitted: boolean;
@@ -14,6 +16,7 @@ interface OrderOverviewProps {
 }
 
 function OrderOverview({
+    auth,
     order,
     products,
     isPaymentSubmitted,
@@ -30,7 +33,7 @@ function OrderOverview({
     };
 
     return (
-        <UserAuthenticatedLayout crrPage="orders">
+        <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <OrderLayout order={order} crrOrderOption="overview">
                 <section className="overview-wrapper mt-6">
                     <section className="order-details-wrapper mr-5 py-5 px-4 bg-zinc-50 shadow-inner shadow-gray-300 rounded-md ">

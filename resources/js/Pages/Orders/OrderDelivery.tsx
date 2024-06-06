@@ -6,13 +6,17 @@ import type { Order as OrderModel } from "../../Models/Order";
 import type { Product as ProductModel } from "../../Models/Product";
 import type { DeliveryFoxpro as DeliveryInfoModel } from "../../Models/Delivery";
 import { useMemo, useState } from "react";
+import User from "../../Models/User";
+
 interface OrderDeliveryProps {
+    auth?: User;
     rawOrder: OrderModel;
     rawProducts: ProductModel[];
     deliveryInfoByProd: DeliveryInfoModel[];
 }
 
 function OrderDelivery({
+    auth,
     rawOrder,
     rawProducts,
     deliveryInfoByProd,
@@ -60,7 +64,7 @@ function OrderDelivery({
     };
 
     return (
-        <UserAuthenticatedLayout crrPage="orders">
+        <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <OrderLayout order={order} crrOrderOption="delivery">
                 <section className="products-delivery-wrapper bg-zinc-50 shadow-inner shadow-gray-300 py-10 px-10 rounded-md">
                     {products.map((product: ProductModel, index: number) => (
