@@ -23,6 +23,8 @@ Route::post('/users/salesperson', [UserController::class, 'createSalesPerson']);
 
 
 Route::middleware(['auth','auth.session'])->group(function () {
+
+    Route::post('/users/invite', [UserController::class, 'sendInvitation']);
     
     // Orders routes - read operations.
     Route::get('/orders', [OrdersController::class, 'all']);

@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\RegisterMail;
 
 class UserController extends Controller
 {
@@ -50,30 +53,124 @@ class UserController extends Controller
         return redirect('/')->with('message', 'You have been logged out!');
     }
 
-    // Show register form (admin only)------------------
-    public function register(Request $request){
-        $error = $request->session()->get('error');
-        $query = $request->all();
-        $isTokenValid = false;
+    // Send invitation with signed url for register form-----------
+    public function sendInvitation(Request $request){
+        $formFields = $request->validate([
+            'name' => ['required', 'min:3'],                      
+            'email' => ['required', 'email'],            
+        ]);
 
-        if(array_key_exists('token',$query)){
-            $token = $query['token'];
+        //generate signed url        
+        $url = URL::temporarySignedRoute(
+          'user.register', now()->addMinutes(2)
+        );
+        
+        //send email wit url on the body
+        $recipient = 'hrcode95@gmail.com';
 
-            // TODO: check if token is still valid
-            
+        // Mail::to($recipient)->send(new RegisterMail());
+        // return redirect('/orders');            
+    
+        // $response = Http::post("https://api.mailgun.net/v3/mg.davidici.com/messages", [
+        //     'auth' => ['api', env('MAILGUN_SECRET')],
+        //     'form_params' => [
+        //         'from' => 'postmaster@mg.davidici.com',
+        //         'to' => $recipient,
+        //         'subject' => 'Sample Email',
+        //         'html' => view('emails.newUserRegistration')->render(),
+        //     ],
+        // ]);
+
+        // $options = [
+        //     [
+        //         'name' => 'from',
+        //         'contents' => 'postmaster@mg.davidici.com'
+        //     ],
+        //     [
+        //         'name' => 'to',
+        //         'contents' => $recipient
+        //     ],
+        //     [
+        //         'name' => 'subject',
+        //         'contents' => 'Sample Email'
+        //     ],
+        //     [
+        //         'name' => 'html',
+        //         'contents' => view('emails.newUserRegistration')->render(),
+        //     ],
+        // ];   
+        
+        // $options = [
+        //     'from' => 'postmaster@mg.davidici.com',
+        //     'to' => $recipient,
+        //     'subject' => 'Sample Email',
+        //     'html' => view('emails.newUserRegistration')->render(),
+        // ];
+
+        // $response = Http::withOptions(['form_params' => $options])->withHeaders([            
+        //     'Authorization' => 'Basic ' . base64_encode('api' . ':' . env('MAILGUN_SECRET')),
+        // ])->post('https://api.mailgun.net/v3/mg.davidici.com/messages');
 
 
-            // if token is valid
-            $isTokenValid = true;
+        // $response = Http::post("https://api.mailgun.net/v3/mg.davidici.com/messages", [
+        //     'auth' => ['api', env('MAILGUN_API_KEY')],
+        //     'form_params' => [
+        //         'from' => 'your-email@example.com',
+        //         'to' => $recipient,
+        //         'subject' => 'Sample Email',
+        //         'html' => (new RegisterMail())->render(),
+        //     ],
+        // ]);
 
-            // else leave $isTokenValid = false
+        $domainName = 'mg.davidici.com';
+        $curl = curl_init();
+
+        $payload = array(
+        "from" => "postmaster@mg.davidici.com",
+        "to" => $recipient,
+        "subject" => "Sample Email",
+        "html" => (new RegisterMail())->render(),
+        );
+
+        curl_setopt_array($curl, [
+        CURLOPT_HTTPHEADER => [
+            "Content-Type: multipart/form-data",
+            "Authorization: Basic " . base64_encode('api' . ':' . env('MAILGUN_SECRET'))
+        ],
+        CURLOPT_POSTFIELDS => $payload,
+        CURLOPT_PORT => "",
+        CURLOPT_URL => "https://api.mailgun.net/v3/" . $domainName . "/messages",
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST => "POST",
+        ]);
+
+        $response = curl_exec($curl);
+        $error = curl_error($curl);
+        curl_close($curl);
+    
+        if ($error) {
+            info($error);
+            return redirect('/orders')->with(['message' => 'error!!']);        
+        } else {
+            info($response);
+            return redirect('/orders')->with(['message' => 'email sent!']);           
         }
         
-        if(Gate::allows('create-user') || $isTokenValid){
-            return Inertia::render('Users/Register',['message' => $error]);
-            
-        }
+        //redirect user to dashboard with flashmessage stating if success or fail
+        // info($response);
+        // if ($response->successful()) {
+        //     return redirect('/orders')->with(['message' => 'email sent!']);            
+        // } else {
+        //     return redirect('/orders')->with(['message' => 'error!!']);            
+        // }        
+        
+    }
 
+    // Show register form (signed url)------------------
+    public function register(Request $request){                        
+        if(Gate::allows('create-user') || $request->hasValidSignature()){
+            return Inertia::render('Users/Register');            
+        }
         abort(403);
     }
 
@@ -165,28 +262,7 @@ class UserController extends Controller
         $name = $request->session()->get('name');
         $error = $request->session()->get('error');
         return Inertia::render('Welcome',['name' => $name, 'error' => $error]);
-    }
-
-    public function sendInvitation(Request $request){
-        $formFields = $request->validate([
-            'name' => ['required', 'min:3'],                      
-            'email' => ['required', 'email'],            
-        ]);
-
-        //generate token        
-        url('/register');
-        route('user.register');
-
-        $url = URL::temporarySignedRoute(
-          'unsubscribe', now()->addMinutes(30), ['user' => 1]
-        );
-
-        //add token to register url
-
-        //send email wit url on the body
-
-        //redirect user to dashboard with flashmessage stating if success or fail
-    }
+    }    
 
     public function registerSalesPerson(Request $request){
         return Inertia::render('Users/SalesPersonRegister');
