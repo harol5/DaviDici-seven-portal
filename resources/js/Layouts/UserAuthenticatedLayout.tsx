@@ -10,7 +10,7 @@ interface UserLayoutProps {
 }
 
 function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
-    // State for invite from modal.
+    // State for invite form modal.
     const [openModal, setOpenModal] = useState(false);
 
     const handleOpenModal = () => {

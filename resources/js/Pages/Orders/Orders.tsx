@@ -80,7 +80,7 @@ function Orders({ auth, orders, message = "" }: ordersProp) {
                     </div>
                 )}
             </div>
-            <FlashMessage message={message} />
+            {message && <FlashMessage message={message} />}
         </UserAuthenticatedLayout>
     );
 }

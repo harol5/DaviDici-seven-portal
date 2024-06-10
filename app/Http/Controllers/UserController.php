@@ -55,115 +55,26 @@ class UserController extends Controller
 
     // Send invitation with signed url for register form-----------
     public function sendInvitation(Request $request){
-        $formFields = $request->validate([
-            'name' => ['required', 'min:3'],                      
-            'email' => ['required', 'email'],            
-        ]);
-
-        //generate signed url        
+        $data = $request->all();
+        
+        //generate signed url.
         $url = URL::temporarySignedRoute(
-          'user.register', now()->addMinutes(2)
+          'user.register', now()->addMinutes(1440)
         );
         
-        //send email wit url on the body
-        $recipient = 'hrcode95@gmail.com';
+        //send email with url on the body.
+        $options = [
+            'from' => 'not-reply@mg.davidici.com',
+            'to' => $data['email'],
+            'subject' => 'Davidici Registration',
+            'html' => view('emails.newUserRegistration', ['name' => $data['name'], 'url' => $url])->render(),
+        ];
 
-        // Mail::to($recipient)->send(new RegisterMail());
-        // return redirect('/orders');            
-    
-        // $response = Http::post("https://api.mailgun.net/v3/mg.davidici.com/messages", [
-        //     'auth' => ['api', env('MAILGUN_SECRET')],
-        //     'form_params' => [
-        //         'from' => 'postmaster@mg.davidici.com',
-        //         'to' => $recipient,
-        //         'subject' => 'Sample Email',
-        //         'html' => view('emails.newUserRegistration')->render(),
-        //     ],
-        // ]);
-
-        // $options = [
-        //     [
-        //         'name' => 'from',
-        //         'contents' => 'postmaster@mg.davidici.com'
-        //     ],
-        //     [
-        //         'name' => 'to',
-        //         'contents' => $recipient
-        //     ],
-        //     [
-        //         'name' => 'subject',
-        //         'contents' => 'Sample Email'
-        //     ],
-        //     [
-        //         'name' => 'html',
-        //         'contents' => view('emails.newUserRegistration')->render(),
-        //     ],
-        // ];   
-        
-        // $options = [
-        //     'from' => 'postmaster@mg.davidici.com',
-        //     'to' => $recipient,
-        //     'subject' => 'Sample Email',
-        //     'html' => view('emails.newUserRegistration')->render(),
-        // ];
-
-        // $response = Http::withOptions(['form_params' => $options])->withHeaders([            
-        //     'Authorization' => 'Basic ' . base64_encode('api' . ':' . env('MAILGUN_SECRET')),
-        // ])->post('https://api.mailgun.net/v3/mg.davidici.com/messages');
-
-
-        // $response = Http::post("https://api.mailgun.net/v3/mg.davidici.com/messages", [
-        //     'auth' => ['api', env('MAILGUN_API_KEY')],
-        //     'form_params' => [
-        //         'from' => 'your-email@example.com',
-        //         'to' => $recipient,
-        //         'subject' => 'Sample Email',
-        //         'html' => (new RegisterMail())->render(),
-        //     ],
-        // ]);
-
-        $domainName = 'mg.davidici.com';
-        $curl = curl_init();
-
-        $payload = array(
-        "from" => "postmaster@mg.davidici.com",
-        "to" => $recipient,
-        "subject" => "Sample Email",
-        "html" => (new RegisterMail())->render(),
-        );
-
-        curl_setopt_array($curl, [
-        CURLOPT_HTTPHEADER => [
-            "Content-Type: multipart/form-data",
-            "Authorization: Basic " . base64_encode('api' . ':' . env('MAILGUN_SECRET'))
-        ],
-        CURLOPT_POSTFIELDS => $payload,
-        CURLOPT_PORT => "",
-        CURLOPT_URL => "https://api.mailgun.net/v3/" . $domainName . "/messages",
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_CUSTOMREQUEST => "POST",
-        ]);
-
-        $response = curl_exec($curl);
-        $error = curl_error($curl);
-        curl_close($curl);
-    
-        if ($error) {
-            info($error);
-            return redirect('/orders')->with(['message' => 'error!!']);        
-        } else {
-            info($response);
-            return redirect('/orders')->with(['message' => 'email sent!']);           
-        }
-        
-        //redirect user to dashboard with flashmessage stating if success or fail
-        // info($response);
-        // if ($response->successful()) {
-        //     return redirect('/orders')->with(['message' => 'email sent!']);            
-        // } else {
-        //     return redirect('/orders')->with(['message' => 'error!!']);            
-        // }        
-        
+        $response = Http::withHeaders([          
+            'Authorization' => 'Basic ' . base64_encode('api' . ':' . env('MAILGUN_SECRET')),
+        ])->asMultipart()->post(env('MAILGUN_ENDPOINT'), $options);
+                
+        return response(['mailgunResponse' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');                            
     }
 
     // Show register form (signed url)------------------

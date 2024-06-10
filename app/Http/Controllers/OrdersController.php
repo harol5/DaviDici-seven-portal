@@ -431,13 +431,15 @@ class OrdersController extends Controller
             'params' => [$username, $data['newOrderNum'], $data['skus']],
             'keep_session' => false, 
         ]);
-
+        
         if($response['status'] === 201 && $response['Result'] === 'All items entered'){
             return redirect('/orders')->with('message', 'Order Number ' . $data['newOrderNum'] . ' created!!');
         }
 
         if($response['status'] === 500 || $response['Result'] !== 'Updated Info'){
             Log::error("=VVVVV=== ERROR REQUESTING DATA FROM FOXPRO. function: OrderEnter ====VVVVV");
+            Log::error('order number: ' . $data['newOrderNum']);
+            Log::error('skus: ' . $data['skus']);
             Log::error($response);
         }
                 
@@ -453,11 +455,11 @@ class OrdersController extends Controller
         //     'keep_session' => false, 
         // ]);                
 
-        $response = FoxproApi::call([
-            'action' => 'GETUSERINFO',
-            'params' => ['sales%40kitchensbykavari.com'],
-            'keep_session' => false, 
-        ]);
+        // $response = FoxproApi::call([
+        //     'action' => 'GETUSERINFO',
+        //     'params' => ['wally%40atozkitchenandbath.com'],
+        //     'keep_session' => false, 
+        // ]);
         
         // $response = FoxproApi::call([
         //     'action' => 'GetProductPrice',
