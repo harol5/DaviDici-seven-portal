@@ -15,7 +15,7 @@
      <h2>Hello {{ $name }}</h2>
      <p>I'm thrilled to extend a warm welcome to you as the newest member of our team at Davidici. 
      We're excited to have you on board and look forward to the contributions we will make together.
-     Could you please fill out the requested information in the following link to get you onboard?</p>
+     Could you please fill out the requested information in the following link to get you onboard? (the link will be only available for 24 hours)</p>
      <a href={{ $url }}>click here to register!!</a>     
      <span>(DO NOT reply to this email. for any inconvenience, please contact support)</span>
      <br>

@@ -53,7 +53,7 @@ class OrdersController extends Controller
         );
     }
 
-    // Get orders products
+    // Get orders products.
     public function getProducts(Request $request){
         $orderNumber = getOrderNumberFromPath($request->path());
         $products = FoxproApi::call([
@@ -82,7 +82,7 @@ class OrdersController extends Controller
         return Inertia::render('Orders/OrderDetails',['rawOrder' => $order, 'rawProducts' => $products['rows'], 'isPaymentSubmitted' => $this->isPaymentSubmitted($orderNumber)]);
     }
 
-    // Update quantity product
+    // Update quantity product.
     public function updateQuantity(Request $request){
         $product = $request->all();
         $orderNumber = getOrderNumberFromPath($request->path());
@@ -102,7 +102,7 @@ class OrdersController extends Controller
         return response($res)->header('Content-Type', 'application/json');
     }
 
-    // Update product note
+    // Update product note.
     public function updateProductNote(Request $request){
         $info = $request->all();
         $orderNumber = getOrderNumberFromPath($request->path());        
@@ -122,7 +122,7 @@ class OrdersController extends Controller
         return response($res)->header('Content-Type', 'application/json');
     } 
 
-    // Delete product
+    // Delete product.
     public function deleteProduct(Request $request){
         $req = $request->all();        
         $product = $req['product'];
@@ -155,7 +155,7 @@ class OrdersController extends Controller
         return response(['status' => 500])->header('Content-Type', 'application/json');
     }
 
-    // Update product model
+    // Update product model.
     public function updateProductModel(Request $request){
         $info = $request->all();
         $orderNumber = getOrderNumberFromPath($request->path());        
@@ -342,7 +342,7 @@ class OrdersController extends Controller
         }
     }
 
-    // get status of a eCheck
+    // get status of a eCheck.
     public function getStatusCheck(Request $request){
         $info = $request->all();        
         $uuidTransaction = (string) Str::uuid();
@@ -364,7 +364,7 @@ class OrdersController extends Controller
         }
     }
 
-    // Create a order number for new order
+    // Create a order number for new order.
     public function createOrderNumber(Request $request){        
         $username = auth()->user()->username;        
         $products = $request->all();

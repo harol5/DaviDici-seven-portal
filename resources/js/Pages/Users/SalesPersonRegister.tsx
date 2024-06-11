@@ -1,6 +1,7 @@
 import { useForm } from "@inertiajs/react";
 import FlashMessage from "../../Components/FlashMessage";
 import { FormEvent } from "react";
+import { Link } from "@inertiajs/react";
 
 function SalesPersonRegister({ message }: { message: string }) {
     const { data, setData, post, errors, reset } = useForm({
@@ -9,16 +10,12 @@ function SalesPersonRegister({ message }: { message: string }) {
         phone: "",
         businessPhone: "",
         email: "",
-        username: "",
-        role: "salesperson",
         password: "",
         password_confirmation: "",
     });
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        console.log(data);
-        // post("/users");
         post("/users/salesperson", {
             onSuccess: () => {
                 reset();
@@ -34,8 +31,11 @@ function SalesPersonRegister({ message }: { message: string }) {
                     src="https://portal.davidici.com/images/davidici-logo-nav-cropped.png"
                 />
             </section>
-            <div className="main-content-wrapper">
-                <section className="flex flex-col items-center my-12">
+            <div className="main-content-wrapper py-4">
+                <Link href="/orders" className="border px-4 py-2 rounded">
+                    Go back to orders
+                </Link>
+                <section className="flex flex-col items-center my-8">
                     <h1 className="text-2xl">Sales person registration</h1>
                     <p className="">please type all information.</p>
                 </section>
@@ -152,30 +152,6 @@ function SalesPersonRegister({ message }: { message: string }) {
                         {errors.email && (
                             <p className="text-red-500 text-xs mt-1">
                                 {errors.email}
-                            </p>
-                        )}
-                    </div>
-
-                    <div className="mb-6 email">
-                        <label
-                            htmlFor="username"
-                            className="inline-block text-lg mb-2"
-                        >
-                            username
-                        </label>
-                        <input
-                            type="text"
-                            className="border border-gray-200 rounded p-2 w-full"
-                            name="username"
-                            value={data.username}
-                            onChange={(e) =>
-                                setData("username", e.target.value)
-                            }
-                        />
-
-                        {errors.username && (
-                            <p className="text-red-500 text-xs mt-1">
-                                {errors.username}
                             </p>
                         )}
                     </div>

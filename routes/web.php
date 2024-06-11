@@ -11,20 +11,19 @@ Route::get('/', [UserController::class, 'login'])->name('login');
 
 Route::post('/auth', [UserController::class, 'authenticate']);
 
-// Only admin routes or by token.
+// Only admin routes or by signed url.
 Route::get('/register', [UserController::class, 'register'])->name('user.register');
 Route::post('/users', [UserController::class, 'create']);
 Route::get('/users/welcome', [UserController::class, 'welcome']);
 
-// register sales reps
-Route::get('/register/salesperson', [UserController::class, 'registerSalesPerson'])->name('user.register.salesperson');
-Route::post('/users/salesperson', [UserController::class, 'createSalesPerson']);
-
-
-
 Route::middleware(['auth','auth.session'])->group(function () {
 
+    // Admin only endpoints.
     Route::post('/users/invite', [UserController::class, 'sendInvitation']);
+
+    // Owner only endpoints.    
+    Route::get('/register/salesperson', [UserController::class, 'registerSalesPerson'])->name('user.register.salesperson');
+    Route::post('/users/salesperson', [UserController::class, 'createSalesPerson']);
     
     // Orders routes - read operations.
     Route::get('/orders', [OrdersController::class, 'all']);

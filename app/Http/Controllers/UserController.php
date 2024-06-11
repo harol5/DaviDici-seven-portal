@@ -53,7 +53,7 @@ class UserController extends Controller
         return redirect('/')->with('message', 'You have been logged out!');
     }
 
-    // Send invitation with signed url for register form-----------
+    // Send invitation with signed url for register form -----------
     public function sendInvitation(Request $request){
         $data = $request->all();
         
@@ -77,7 +77,7 @@ class UserController extends Controller
         return response(['mailgunResponse' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');                            
     }
 
-    // Show register form (signed url)------------------
+    // Show register form (signed url or admins) ------------------
     public function register(Request $request){                        
         if(Gate::allows('create-user') || $request->hasValidSignature()){
             return Inertia::render('Users/Register');            
@@ -85,7 +85,7 @@ class UserController extends Controller
         abort(403);
     }
 
-    // Create user (admin only)----------------------
+    // Create user (admin only) ----------------------
     public function create(Request $request){
         $formFields = $request->validate([
             'firstName' => ['required', 'min:3'],            
@@ -168,47 +168,94 @@ class UserController extends Controller
         return redirect('/users/welcome')->with(['error' => 'something went wrong']);
     }
 
-    // Shows welcome page
+    // Shows welcome page ----------------------
     public function welcome(Request $request){
         $name = $request->session()->get('name');
         $error = $request->session()->get('error');
         return Inertia::render('Welcome',['name' => $name, 'error' => $error]);
-    }    
+    }
 
+    // Show register form for sales person (owner accounts only) ---------
     public function registerSalesPerson(Request $request){
         return Inertia::render('Users/SalesPersonRegister');
     }
 
     public function createSalesPerson(Request $request){
+        //---- Validate data.
         $formFields = $request->validate([
             'firstName' => ['required', 'min:3'],                        
             'phone' => ['required', 'min:3'],                        
-            'email' => ['required', 'email', Rule::unique('users', 'email')],
-            'username' => 'required',             
-            'role' => 'required',
+            'email' => ['required', 'email', Rule::unique('users', 'email')],                                     
             'password' => 'required|confirmed|min:6'
         ]);
 
+        //---- Add additional info.
+        $formFields['username'] = urlencode($formFields['email']);
+        $formFields['dateStarted'] = date("Y/m/d");            
         $formFields['lastName'] = $request->all()['lastName'] ?? '';
         $formFields['businessPhone'] = $request->all()['businessPhone'] ?? '';
-        $formFields['password'] = bcrypt($formFields['password']);
+        $formFields['password'] = bcrypt($formFields['password']);                
+        $formFields['role'] = 1950;
 
-        // Assigning role:
-        // owner = 1919 , admin = 3478 
-        $formFields['role'] === 'salesperson' ? $formFields['role'] = 1950 : $formFields['role'] = 1919;
+        //---- Get company code.
+        $username = auth()->user()->username;
+        $response = FoxproApi::call([
+            'action' => 'GETUSERINFO',
+            'params' => [$username],
+            'keep_session' => false, 
+        ]);
 
-        $user = User::create([
-            'first_name' => $formFields['firstName'],
-            'last_name' => $formFields['lastName'],            
-            'phone' => $formFields['phone'],
-            'business_phone' => $formFields['businessPhone'],
-            'email' => $formFields['email'],
-            'username' => $formFields['username'],
-            'role' => $formFields['role'],
-            'password' => $formFields['password'],
-        ]);            
+        if($response['status'] === 500 || (array_key_exists('Result',$response) && $response['Result'] === 'no such user name found')){
+            Log::error("=VVVVV===ERROR REQUESTING DATA FROM FOXPRO. function: GETUSERINFO ====VVVVV");
+            Log::error($response);
+            return redirect('/orders')->with(['message' => 'something went wrong. Please contact support']);
+        }
 
-        return redirect('/register/salesperson');
+        $formFields['companyCode'] = $response['rows'][0]['wholesaler'];
+
+        //---- Save sales person into foxpro.        
+        $foxproResponse = FoxproApi::call([
+            'action' => 'SaveUserInfo',
+            'params' => [
+                $formFields['username'],
+                $request->all()['password'], 
+                $formFields['email'],
+                $formFields['phone'],
+                $formFields['businessPhone'],
+                '', // address
+                '', // city
+                '', // state - 2 letters
+                '', // zipCode
+                $formFields['firstName'],
+                $formFields['lastName'],
+                '', // companyName
+                $formFields['dateStarted'],
+                '', // isTaxExempt - Y | N
+                '', // einNumber
+                '', // ownerType - "PROP" | "PART" | "CORP"
+                '', // stateIncorporated - 2 letters
+                $formFields['companyCode'], 
+            ],
+            'keep_session' => false,
+        ]);
+        
+        //---- Save user into portal for login if user was created successfully into foxpro.
+        if($foxproResponse['status'] === 201 && $foxproResponse['Result'] === 'New User Added') {            
+            $user = User::create([
+                'first_name' => $formFields['firstName'],
+                'last_name' => $formFields['lastName'],            
+                'phone' => $formFields['phone'],
+                'business_phone' => $formFields['businessPhone'],
+                'email' => $formFields['email'],
+                'username' => $formFields['username'],
+                'role' => $formFields['role'],
+                'password' => $formFields['password'],
+            ]);           
+            return redirect('/orders')->with(['message' => 'Sales person created!!']);
+        }        
+                
+        Log::error("=VVVVV===ERROR REQUESTING DATA FROM FOXPRO. function: SaveUserInfo ====VVVVV");
+        Log::error($foxproResponse);
+        return redirect('/orders')->with(['message' => 'something went wrong. Please contact support']);;            
     }
-
 }
