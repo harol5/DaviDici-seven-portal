@@ -239,7 +239,10 @@ class UserController extends Controller
             'keep_session' => false,
         ]);
         
-        //---- Save user into portal for login if user was created successfully into foxpro.
+        /**
+         * Save user into portal for login if user was created successfully into foxpro.
+         * then sends email confirmation.
+         */
         if($foxproResponse['status'] === 201 && $foxproResponse['Result'] === 'New User Added') {            
             $user = User::create([
                 'first_name' => $formFields['firstName'],
@@ -250,8 +253,60 @@ class UserController extends Controller
                 'username' => $formFields['username'],
                 'role' => $formFields['role'],
                 'password' => $formFields['password'],
-            ]);           
-            return redirect('/orders')->with(['message' => 'Sales person created!!']);
+            ]);
+            
+            //send email to sales person with login info.
+            $options = [
+                'from' => 'not-reply@mg.davidici.com',
+                'to' => $formFields['email'],
+                'subject' => 'Welcome to Davidici',
+                'html' => view(
+                    'emails.salesPersonConfirmation', 
+                    [
+                        'name' => $formFields['firstName'], 
+                        'companyName' => $response['rows'][0]['companynam'],
+                        'admin' => $response['rows'][0]['fname'],
+                        'email' => $formFields['email'],
+                        'pwd' => $request->all()['password'],
+                    ],
+                )->render(),
+            ];
+
+            $MailgunResponse = Http::withHeaders([          
+                'Authorization' => 'Basic ' . base64_encode('api' . ':' . env('MAILGUN_SECRET')),
+            ])->asMultipart()->post(env('MAILGUN_ENDPOINT'), $options);
+
+            if($MailgunResponse->ok()){
+                return redirect('/orders')->with(['message' => 'Sales person created!!']);
+            }else{
+                $options = [
+                    'from' => 'not-reply@mg.davidici.com',
+                    'to' => $response['rows'][0]['email'],
+                    'subject' => 'Welcome to Davidici',
+                    'html' => view(
+                        'emails.salesPersonConfirmation', 
+                        [
+                            'name' => $formFields['firstName'], 
+                            'companyName' => $response['rows'][0]['companynam'],
+                            'admin' => $response['rows'][0]['fname'],
+                            'email' => $formFields['email'],
+                            'pwd' => $request->all()['password'],
+                        ],
+                    )->render(),
+                ];
+
+                $MailgunSecondResponse = Http::withHeaders([          
+                    'Authorization' => 'Basic ' . base64_encode('api' . ':' . env('MAILGUN_SECRET')),
+                ])->asMultipart()->post(env('MAILGUN_ENDPOINT'), $options);
+
+                if($MailgunSecondResponse->ok()){
+                    return redirect('/orders')->with(['message' => 'Sales person created!!']);
+                }
+
+                Log::error("=VVVVV=== MAILGUN ERROR. SALES PERSON EMAIL ===VVVVV=");
+                Log::error($MailgunSecondResponse);                                
+                return redirect('/orders')->with(['message' => 'Sales person created!!']);
+            }             
         }        
                 
         Log::error("=VVVVV===ERROR REQUESTING DATA FROM FOXPRO. function: SaveUserInfo ====VVVVV");

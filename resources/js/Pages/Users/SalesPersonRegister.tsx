@@ -31,13 +31,18 @@ function SalesPersonRegister({ message }: { message: string }) {
                     src="https://portal.davidici.com/images/davidici-logo-nav-cropped.png"
                 />
             </section>
-            <div className="main-content-wrapper py-4">
-                <Link href="/orders" className="border px-4 py-2 rounded">
-                    Go back to orders
-                </Link>
-                <section className="flex flex-col items-center my-8">
-                    <h1 className="text-2xl">Sales person registration</h1>
-                    <p className="">please type all information.</p>
+            <div className="main-content-wrapper">
+                <section className="relative">
+                    <Link
+                        href="/orders"
+                        className="border px-4 py-2 rounded absolute"
+                    >
+                        Go back to orders
+                    </Link>
+                    <section className="flex flex-col items-center my-12">
+                        <h1 className="text-2xl">Sales person registration</h1>
+                        <p className="">please type all information.</p>
+                    </section>
                 </section>
                 <form onSubmit={handleSubmit} className="mb-12">
                     <div className="mb-6 first-name">
