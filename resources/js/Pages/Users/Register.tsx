@@ -7,7 +7,7 @@ import type {
     RegistrationFormTabs,
 } from "../../Models/MultiFormIndicators";
 import MultiFormIndicator from "../../Components/MultiFormIndicator";
-import TermsAndConditions from "../../Components/TermsAndConditions";
+import SignaturePage from "../../Components/SignaturePage";
 
 /**
  * MULTIFORM TODO.
@@ -61,13 +61,23 @@ function Register({ message }: { message: string }) {
     ]);
 
     const handleFormTabCompleted = (tab: RegistrationFormTabs) => {
-        // TODO:
-        // 1. look for that tab on the indicators arrays,
-        //    then update its boolean values.
-        //    setIndicators(UpdatedIndicators).
-        //
-        // 2. get next tab and set it as the current one.
-        //    setCurrentFormTab();
+        let nextTab;
+        const indicatorCopy = [...indicators];
+
+        for (let i = 0; i < indicatorCopy.length; i++) {
+            if (indicatorCopy[i].name === tab) {
+                indicatorCopy[i].isActive = false;
+                indicatorCopy[i].isCompleted = true;
+
+                if (indicatorCopy[i + 1]) {
+                    nextTab = indicatorCopy[i + 1].name;
+                    indicatorCopy[i + 1].isActive = true;
+                }
+            }
+        }
+
+        setCurrentFormTab(nextTab as RegistrationFormTabs);
+        setIndicators(indicatorCopy);
     };
 
     const handleSubmit = (e: FormEvent) => {
@@ -78,219 +88,455 @@ function Register({ message }: { message: string }) {
     return (
         <>
             <section className="py-5 bg-gray-700 w-[100%]">
-                <img
-                    className="w-[220px] mx-auto my-2"
-                    src="https://portal.davidici.com/images/davidici-logo-nav-cropped.png"
-                />
+                <div className="max-w-[90rem] mx-auto">
+                    <img
+                        className="w-[220px]"
+                        src="https://portal.davidici.com/images/davidici-logo-nav-cropped.png"
+                    />
+                </div>
             </section>
-            <div className="main-content-wrapper">
-                <section className="flex flex-col items-center my-12">
-                    <h1 className="text-2xl">Account Package</h1>
+            <div className="max-w-[90em] mx-auto my-16">
+                <section className="flex flex-col items-center">
+                    <h1 className="text-3xl">Account Package</h1>
                 </section>
 
                 <MultiFormIndicator indicators={indicators} />
 
                 {currentFormTab === "Partner Terms & Conditions" && (
-                    <TermsAndConditions
+                    <SignaturePage
                         onFormTabCompleted={handleFormTabCompleted}
-                    />
+                        formTab="Partner Terms & Conditions"
+                    >
+                        <section>
+                            <section className="flex flex-col items-center">
+                                <h3 className="text-2xl">
+                                    Davidici Partner Terms & Conditions
+                                </h3>
+                                <h5>
+                                    As a Davidici Partner, you acknowledge and
+                                    accept the following:
+                                </h5>
+                            </section>
+                            <section className="my-8 flex flex-col gap-5">
+                                <div>
+                                    <p>
+                                        I. Enclosed prices are in USD FOB N.J.{" "}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p>
+                                        II. All orders are to be entered online.
+                                    </p>
+                                    <ul className="ml-6">
+                                        <li>
+                                            a. Orders may not be placed via
+                                            phone.
+                                        </li>
+                                        <li>
+                                            b. Orders may not be placed via a
+                                            Davidici Sales Partner - Sample
+                                            orders are an exception.
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div>
+                                    <p>
+                                        III. Cancellation of orders will be
+                                        accepted only if transmitted within and
+                                        not later than 3 working days from the
+                                        first confirmation.
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p>
+                                        IV. We reserve the right to refuse
+                                        service to anyone, for any reason, at
+                                        any time.
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p>
+                                        V. We will always do our best efforts to
+                                        inform you of any price change however
+                                        pricing is subject to change at any
+                                        given time without notice.
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p>
+                                        VI. All designs, texts, graphics, logos,
+                                        button icons, images, audio and video
+                                        clips, the selection and arrangement
+                                        thereof, and all other articles on
+                                        Davidici.com excluding text fonts
+                                        Copyright (c) 2020-2022 Davidici Inc.
+                                        ALL RIGHTS ARE RESERVED.
+                                    </p>
+
+                                    <ul className="ml-6">
+                                        <li>
+                                            - In addition to other prohibitions,
+                                            as set forth in the Terms of
+                                            Service, you are prohibited from
+                                            using the site or its content o for
+                                            any unlawful purpose.
+                                        </li>
+                                        <li>
+                                            - to solicit or encourage others to
+                                            participate in unlawful acts.
+                                        </li>
+                                        <li>
+                                            - to violate international, federal,
+                                            or state rules, regulations, local
+                                            ordinances, or laws.
+                                        </li>
+                                        <li>
+                                            - to violate or infringe upon on our
+                                            and/or others’ intellectual property
+                                            rights.
+                                        </li>
+                                        <li>
+                                            - to harass, abuse, insult, harm,
+                                            defame, slander, disparage,
+                                            intimidate, or discriminate based on
+                                            gender, sexual orientation,
+                                            religion, ethnicity, race, age,
+                                            national origin, or disability.
+                                        </li>
+                                        <li>
+                                            - to submit false or misleading
+                                            information.
+                                        </li>
+                                        <li>
+                                            - to upload or transmit viruses or
+                                            any other type of malicious code
+                                            that will or may be used in any way
+                                            that will affect the functionality
+                                            or operation of the Services or of
+                                            any related website, other websites,
+                                            or the Internet.
+                                        </li>
+                                        <li>
+                                            - to collect or track the personal
+                                            information of others.
+                                        </li>
+                                        <li>
+                                            - for any other immoral or obscene
+                                            use(s)
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <p>
+                                        VII. The colors of the acrylic, marble,
+                                        and quartz, samples are merely
+                                        indicative, considering a reasonable
+                                        approximation. It is advised not to
+                                        discompose the individual elements of a
+                                        collection. The realization of a new
+                                        combining element with the same color
+                                        tone as the original collection may
+                                        differ and vary. The company is free
+                                        from any responsibility deriving from
+                                        the above-mentioned inconveniences.
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p>
+                                        VIII. Any possible natural mark or
+                                        imperfection, in particular on natural
+                                        materials, is not to be considered as a
+                                        fault or defect but as a natural mark
+                                        emphasizing the genuine aspects of
+                                        natural materials used.
+                                    </p>
+                                </div>
+                                <div>
+                                    <p>
+                                        IX. Davidici keeps the possibility of
+                                        any modification which could improve
+                                        their quality or comfort.
+                                    </p>
+                                </div>
+                            </section>
+                        </section>
+                    </SignaturePage>
                 )}
 
                 {currentFormTab === "MAP Policy" && (
-                    <section>
-                        <section className="flex flex-col items-center my-12">
-                            <h3 className="text-2xl">
-                                Minimum Advertised Price (MAP) Policy
-                            </h3>
-                        </section>
-                        <section className="my-6">
-                            <p>I. Enclosed prices are in USD FOB N.J. </p>
-                            <p>
-                                II. All orders are to be entered online. a.
-                                Orders may not be placed via phone. b. Orders
-                                may not be placed via a Davidici Sales Partner -
-                                Sample orders are an exception.
-                            </p>
-                            <p>
-                                III. Cancellation of orders will be accepted
-                                only if transmitted within and not later than 3
-                                working days from the first confirmation.
-                            </p>
-                            <p>
-                                IV. We reserve the right to refuse service to
-                                anyone, for any reason, at any time.
-                            </p>
-                            <p>
-                                V. We will always do our best efforts to inform
-                                you of any price change however pricing is
-                                subject to change at any given time without
-                                notice.
-                            </p>
-                            <p>
-                                VI. All designs, texts, graphics, logos, button
-                                icons, images, audio and video clips, the
-                                selection and arrangement thereof, and all other
-                                articles on Davidici.com excluding text fonts
-                                Copyright (c) 2020-2022 Davidici Inc. ALL RIGHTS
-                                ARE RESERVED. - In addition to other
-                                prohibitions, as set forth in the Terms of
-                                Service, you are prohibited from using the site
-                                or its content o for any unlawful purpose. • to
-                                solicit or encourage others to participate in
-                                unlawful acts. • to violate international,
-                                federal, or state rules, regulations, local
-                                ordinances, or laws • to violate or infringe
-                                upon on our and/or others’ intellectual property
-                                rights. • to harass, abuse, insult, harm,
-                                defame, slander, disparage, intimidate, or
-                                discriminate based on gender, sexual
-                                orientation, religion, ethnicity, race, age,
-                                national origin, or disability. • to submit
-                                false or misleading information • to upload or
-                                transmit viruses or any other type of malicious
-                                code that will or may be used in any way that
-                                will affect the functionality or operation of
-                                the Services or of any related website, other
-                                websites, or the Internet. • to collect or track
-                                the personal information of others. • for any
-                                other immoral or obscene use(s)
-                            </p>
-                            <p>
-                                VII. The colors of the acrylic, marble, and
-                                quartz, samples are merely indicative,
-                                considering a reasonable approximation. It is
-                                advised not to discompose the individual
-                                elements of a collection. The realization of a
-                                new combining element with the same color tone
-                                as the original collection may differ and vary.
-                                The company is free from any responsibility
-                                deriving from the above-mentioned
-                                inconveniences.
-                            </p>
-                            <p>
-                                VIII. Any possible natural mark or imperfection,
-                                in particular on natural materials, is not to be
-                                considered as a fault or defect but as a natural
-                                mark emphasizing the genuine aspects of natural
-                                materials used.
-                            </p>
-                            <p>
-                                IX. Davidici keeps the possibility of any
-                                modification which could improve their quality
-                                or comfort.
-                            </p>
-                        </section>
+                    <SignaturePage
+                        onFormTabCompleted={handleFormTabCompleted}
+                        formTab="MAP Policy"
+                    >
                         <section>
-                            <label htmlFor="">print full name:</label>
-                            <input
-                                type="text"
-                                name="fullName"
-                                className="border mr-8"
-                            />
-                            <button>next</button>
+                            <section className="flex flex-col items-center">
+                                <h3 className="text-2xl">
+                                    Minimum Advertised Price (MAP) Policy
+                                </h3>
+                            </section>
+                            <section className="my-6">
+                                <section className="mb-4">
+                                    <h4 className="text-xl">Purpose:</h4>
+                                    <p>
+                                        Effective January 1, 2022 as our
+                                        dedicated dealer network, this
+                                        unilateral MAP Policy applies to all
+                                        advertisements of Davidici products and
+                                        is intended to strengthen Davidici’s
+                                        brand, and dealer margins and to insure
+                                        Davidici products are marketed and
+                                        serviced as the luxury level the end
+                                        consumer expects. This Policy applies to
+                                        all U.S. dealers and the advertised
+                                        pricing of all Davidici products.
+                                    </p>
+                                </section>
+
+                                <section className="mb-4">
+                                    <h4 className="text-xl">
+                                        Forms of Advertising:
+                                    </h4>
+                                    <p>
+                                        This MAP Policy applies to all
+                                        advertisements, whether or not an item
+                                        is identified as a Davidici product.
+                                        This Policy covers, but is not limited
+                                        to, the following forms of media:
+                                        Newspapers, inserts, flyers, posters,
+                                        coupons, catalogs, mailers, magazines,
+                                        email and email blasts, internet or
+                                        electronic media content, television,
+                                        radio, public signage, and mail order
+                                        catalogs.
+                                    </p>
+                                </section>
+
+                                <section className="mb-4">
+                                    <h4 className="text-xl">Pricing:</h4>
+                                    <p>
+                                        The MAP of 2.0 times cost, as specified
+                                        in our pricelist, is a minimum
+                                        advertised price. No dealer is required
+                                        to sell Davidici products at a mandated
+                                        price. The MAP pertains to advertised
+                                        prices only. Davidici does not seek
+                                        agreements for the prices you charge the
+                                        consumer for Davidici products.
+                                    </p>
+                                </section>
+
+                                <section className="mb-4">
+                                    <h4 className="text-xl">
+                                        Advertised Pricing:
+                                    </h4>
+                                    <p>
+                                        The advertised price is the price
+                                        charged after all deductions,
+                                        incentives, and rebates are applied to
+                                        Davidici products. They include, but are
+                                        not limited to:
+                                    </p>
+                                    <ul>
+                                        <li>
+                                            Payments of sales or other taxes for
+                                            the consumer.
+                                        </li>
+                                        <li>
+                                            Discounts are given on non-Davidici
+                                            products, which are bundled in any
+                                            way with Davidici products.
+                                        </li>
+                                        <li>
+                                            Gifts, incentives, gratifications,
+                                            or services associated with the
+                                            purchase of Davidici products.
+                                        </li>
+                                        <li>
+                                            Freight and delivery discounts or
+                                            free-shipping advertisements
+                                        </li>
+                                    </ul>
+                                </section>
+
+                                <section className="mb-4">
+                                    <h4 className="text-xl">
+                                        MAP Policy Violations:
+                                    </h4>
+                                    <p>
+                                        Be advised, Davidici at its sole
+                                        discretion, will evaluate each violation
+                                        and determine dealer status for any
+                                        retailers who:
+                                    </p>
+                                    <ul>
+                                        <li>
+                                            Advertise any Davidici product below
+                                            the MAP as specified in our Minimum
+                                            Advertised Pricelist.
+                                        </li>
+                                        <li>
+                                            Resell a Davidici product to any
+                                            reseller which advertises any
+                                            Davidici product below the published
+                                            MAP.
+                                        </li>
+                                    </ul>
+                                </section>
+
+                                <h4 className="text-xl text-gray-700">
+                                    The above sanctions are in place to ensure
+                                    brand and dealer compliance to this policy.
+                                </h4>
+                            </section>
                         </section>
-                    </section>
+                    </SignaturePage>
                 )}
 
                 {currentFormTab === "Warranty / Customer Service" && (
-                    <section>
-                        <section className="flex flex-col items-center my-12">
-                            <h3 className="text-2xl">
-                                Warranty / Customer Service
-                            </h3>
-                        </section>
-                        <section className="my-6">
-                            <p>I. Enclosed prices are in USD FOB N.J. </p>
-                            <p>
-                                II. All orders are to be entered online. a.
-                                Orders may not be placed via phone. b. Orders
-                                may not be placed via a Davidici Sales Partner -
-                                Sample orders are an exception.
-                            </p>
-                            <p>
-                                III. Cancellation of orders will be accepted
-                                only if transmitted within and not later than 3
-                                working days from the first confirmation.
-                            </p>
-                            <p>
-                                IV. We reserve the right to refuse service to
-                                anyone, for any reason, at any time.
-                            </p>
-                            <p>
-                                V. We will always do our best efforts to inform
-                                you of any price change however pricing is
-                                subject to change at any given time without
-                                notice.
-                            </p>
-                            <p>
-                                VI. All designs, texts, graphics, logos, button
-                                icons, images, audio and video clips, the
-                                selection and arrangement thereof, and all other
-                                articles on Davidici.com excluding text fonts
-                                Copyright (c) 2020-2022 Davidici Inc. ALL RIGHTS
-                                ARE RESERVED. - In addition to other
-                                prohibitions, as set forth in the Terms of
-                                Service, you are prohibited from using the site
-                                or its content o for any unlawful purpose. • to
-                                solicit or encourage others to participate in
-                                unlawful acts. • to violate international,
-                                federal, or state rules, regulations, local
-                                ordinances, or laws • to violate or infringe
-                                upon on our and/or others’ intellectual property
-                                rights. • to harass, abuse, insult, harm,
-                                defame, slander, disparage, intimidate, or
-                                discriminate based on gender, sexual
-                                orientation, religion, ethnicity, race, age,
-                                national origin, or disability. • to submit
-                                false or misleading information • to upload or
-                                transmit viruses or any other type of malicious
-                                code that will or may be used in any way that
-                                will affect the functionality or operation of
-                                the Services or of any related website, other
-                                websites, or the Internet. • to collect or track
-                                the personal information of others. • for any
-                                other immoral or obscene use(s)
-                            </p>
-                            <p>
-                                VII. The colors of the acrylic, marble, and
-                                quartz, samples are merely indicative,
-                                considering a reasonable approximation. It is
-                                advised not to discompose the individual
-                                elements of a collection. The realization of a
-                                new combining element with the same color tone
-                                as the original collection may differ and vary.
-                                The company is free from any responsibility
-                                deriving from the above-mentioned
-                                inconveniences.
-                            </p>
-                            <p>
-                                VIII. Any possible natural mark or imperfection,
-                                in particular on natural materials, is not to be
-                                considered as a fault or defect but as a natural
-                                mark emphasizing the genuine aspects of natural
-                                materials used.
-                            </p>
-                            <p>
-                                IX. Davidici keeps the possibility of any
-                                modification which could improve their quality
-                                or comfort.
-                            </p>
-                        </section>
+                    <SignaturePage
+                        onFormTabCompleted={handleFormTabCompleted}
+                        formTab="Warranty / Customer Service"
+                    >
                         <section>
-                            <label htmlFor="">print full name:</label>
-                            <input
-                                type="text"
-                                name="fullName"
-                                className="border mr-8"
-                            />
-                            <button>next</button>
+                            <section className="flex flex-col items-center">
+                                <h3 className="text-2xl">
+                                    Warranty / Customer Service
+                                </h3>
+                            </section>
+                            <section className="my-6 flex flex-col gap-5">
+                                <div>
+                                    <p>
+                                        All Davidici products are made of
+                                        high-quality laboratory-tested materials
+                                        and are compliant with California codes.{" "}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p>
+                                        As protective measures, Davidici offers
+                                        the following LIMITED WARRANTY against
+                                        possible defects in material and
+                                        workmanship, with validity starting from
+                                        the delivery date printed on the
+                                        transport document.
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <h4 className="text-xl">
+                                        1 YEAR ON ALL MODELS:
+                                    </h4>
+                                    <p>
+                                        It is recommended that all goods are
+                                        inspected immediately upon delivery. In
+                                        the case of any damage, a claim should
+                                        be submitted to the transport company
+                                        (which is insured against any damages)
+                                        at the time of delivery and, if
+                                        possible, before the carrier leaves the
+                                        warehouse. After having unpacked the
+                                        goods, any clear damage must be
+                                        immediately communicated to Davidici in
+                                        written form. Any hidden damage must be
+                                        communicated to Davidici no later than 5
+                                        days from the date of delivery.
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p>
+                                        Should a defect emerge during the above
+                                        warranty period, please contact Davidici
+                                        Customer Service/Assistance, and be
+                                        prepared to provide the following
+                                        information:
+                                    </p>
+                                    <ul className="ml-6">
+                                        <li>Date of Delivery.</li>
+                                        <li>Sales Order Number.</li>
+                                        <li>
+                                            Identification Code Number(s) -
+                                            printed on each individual box,
+                                            listed on the packing list.
+                                        </li>
+                                        <li>
+                                            Photos of Damage – must be clear and
+                                            complete.
+                                        </li>
+                                        <li>Description of Damage.</li>
+                                    </ul>
+                                </div>
+
+                                <div>
+                                    <h4 className="text-xl text-gray-700">
+                                        All the above information must be
+                                        provided. Failure to provide the above
+                                        information will result in an automatic
+                                        denial of any claim.
+                                    </h4>
+                                </div>
+
+                                <div>
+                                    <p>
+                                        All repairs and/or replacements must be
+                                        authorized by Davidici in advance. If
+                                        under warranty, Davidici will pay to
+                                        repair or replace the piece at no
+                                        charge. If is the retailer’s
+                                        responsibility to coordinate all repairs
+                                        and communications with the end user.
+                                        Any piece to be returned to Davidici for
+                                        local repairs should be well packed,
+                                        with each article packaged individually
+                                        (the Mini excluded) in order to avoid
+                                        further damage during the return
+                                        transport. Otherwise, the driver can
+                                        refuse to take the piece back.{" "}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p>
+                                        The WARRANTY is limited to the value of
+                                        the product. It does not cover any
+                                        damage caused by misuse or neglect,
+                                        accidents, abrasion, exposure to extreme
+                                        temperatures, solvents, acids, water,
+                                        normal wear, and tear, or damage by a
+                                        common carrier.{" "}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p>
+                                        Goods damaged for the above-indicated
+                                        causes, defects of materials, or
+                                        workmanship registered after expiration
+                                        of the warranty period will typically
+                                        (depending upon parts availability) be
+                                        repaired at the customer’s expense and
+                                        delays in repair depend on the
+                                        availability of parts and labor. Under
+                                        no circumstance does this WARRANTY cover
+                                        damages to third parties or interests or
+                                        claims beyond the value of the product.{" "}
+                                    </p>
+                                </div>
+                            </section>
                         </section>
-                    </section>
+                    </SignaturePage>
                 )}
 
                 {currentFormTab === "Commercial credit application" && (
                     <section>
-                        <section className="flex flex-col items-center my-12">
+                        <section className="flex flex-col items-center">
                             <h3 className="text-2xl">
                                 Commercial credit application
                             </h3>
@@ -710,7 +956,7 @@ function Register({ message }: { message: string }) {
                                     type="submit"
                                     className="bg-laravel text-black rounded py-2 px-4 hover:bg-black hover:text-white"
                                 >
-                                    Sign Up
+                                    Submit
                                 </button>
                             </div>
                         </form>
