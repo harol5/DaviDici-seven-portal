@@ -36,7 +36,7 @@ function Order({ order }: OrderProps) {
 
     return (
         <div
-            className="order-container shadow shadow-gray-300 m-3 text-[0.9em] transition-shadow hover:shadow-davidiciGold/70 hover:shadow-md"
+            className="order-container shadow shadow-gray-300 border border-davidiciGold text-[0.9em] transition-shadow hover:shadow-davidiciGold/70 hover:shadow-md"
             id={order.ordernum}
         >
             <div className="order">
@@ -44,7 +44,7 @@ function Order({ order }: OrderProps) {
                 <div className="order-details-wrapper">
                     <span>
                         <button
-                            className="rounded border shadow-sm shadow-gray-100 px-5 py-2 transition-shadow hover:shadow-gray-700 text-sm"
+                            className="rounded-lg border border-davidiciGold shadow-sm shadow-gray-100 px-5 py-2 transition-shadow hover:shadow-gray-700 text-sm"
                             onClick={handleOpenModal}
                         >
                             check status
@@ -78,7 +78,7 @@ function Order({ order }: OrderProps) {
                 <Link
                     href={`/orders/${order.ordernum}/overview`}
                     data={orderFormatted}
-                    className="rounded border shadow-sm shadow-gray-100 px-5 py-2 transition-shadow hover:shadow-gray-700"
+                    className="rounded-lg border shadow-sm shadow-gray-100 px-5 py-2 transition-shadow hover:shadow-gray-700 bg-davidiciGold text-white w-[50%]"
                 >
                     View Order
                 </Link>

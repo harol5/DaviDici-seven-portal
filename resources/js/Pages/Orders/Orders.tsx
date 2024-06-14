@@ -55,7 +55,7 @@ function Orders({ auth, orders, message = "" }: ordersProp) {
                     )}
 
                     <input
-                        className="search-order-input"
+                        className="search-order-input rounded-xl"
                         type="search"
                         placeholder="Search Order..."
                         onChange={handleSearhInput}

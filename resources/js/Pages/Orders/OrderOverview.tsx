@@ -36,7 +36,16 @@ function OrderOverview({
         <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <OrderLayout order={order} crrOrderOption="overview">
                 <section className="overview-wrapper mt-6">
-                    <section className="order-details-wrapper mr-5 py-5 px-4 bg-zinc-50 shadow-inner shadow-gray-300 rounded-md ">
+                    <section className="actions-pending-wrapper p-3 bg-zinc-50 shadow-inner shadow-gray-300 rounded-md border border-davidiciGold">
+                        <h1>Actions Pending</h1>
+                        <ul>
+                            {!isDeliveryInfoSave && <li>fill out delivery</li>}
+                            {!isPaymentSubmitted && (
+                                <li>fill out payment details</li>
+                            )}
+                        </ul>
+                    </section>
+                    <section className="order-details-wrapper py-5 px-4 bg-zinc-50 shadow-inner shadow-gray-300 rounded-md border border-davidiciGold">
                         <span>
                             <button
                                 className="rounded border shadow-sm shadow-gray-950 px-5 py-2 transition-shadow hover:shadow-none text-sm"
@@ -65,15 +74,6 @@ function OrderOverview({
                             <h2>Total:</h2>
                             <p>${order.total}</p>
                         </span>
-                    </section>
-                    <section className="actions-pending-wrapper p-3 bg-zinc-50 shadow-inner shadow-gray-300 rounded-md ">
-                        <h1>Actions Pending</h1>
-                        <ul>
-                            {!isDeliveryInfoSave && <li>fill out delivery</li>}
-                            {!isPaymentSubmitted && (
-                                <li>fill out payment details</li>
-                            )}
-                        </ul>
                     </section>
                 </section>
             </OrderLayout>

@@ -23,7 +23,7 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
 
     return (
         <>
-            <nav className="shadow-sm shadow-gray-200 py-1 m-1 mb-2">
+            <nav className="shadow-sm shadow-gray-200 py-1 mb-2 border-b border-davidiciGold">
                 <div>
                     <img
                         className="nav-logo"
@@ -33,8 +33,8 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
                         <li
                             className={
                                 crrPage === "orders"
-                                    ? "active rounded hover:border hover:border-davidiciGold"
-                                    : "shadow-sm shadow-gray-200 hover:shadow-gray-500 rounded"
+                                    ? "active border border-davidiciGold rounded-2xl"
+                                    : "shadow-sm shadow-gray-200 hover:shadow-gray-500 rounded-2xl border border-davidiciGold"
                             }
                         >
                             <Link href="/orders">Orders</Link>
@@ -42,15 +42,18 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
                         <li
                             className={
                                 crrPage === "inventory"
-                                    ? "active rounded  hover:border hover:border-davidiciGold"
-                                    : "shadow-sm shadow-gray-200 hover:shadow-gray-500 rounded"
+                                    ? "active rounded-2xl border border-davidiciGold"
+                                    : "shadow-sm shadow-gray-200 hover:shadow-gray-500 rounded-2xl border border-davidiciGold"
                             }
                         >
                             <Link href="/inventory">Inventory</Link>
                         </li>
                     </ul>
                     <div className="settings-wrapper">
-                        <h1>settings</h1>
+                        <img
+                            src="https://portal.davidici.com/images/user-icon.svg"
+                            alt="user icon"
+                        />
                         {auth?.user.role === 3478 && (
                             <ul>
                                 <li>

@@ -37,23 +37,29 @@ class OrdersController extends Controller
         $order = $request->all();
         $orderNumber = getOrderNumberFromPath($request->path());
 
-        $products = FoxproApi::call([
+        $response = FoxproApi::call([
             'action' => 'GetSoStatus',
             'params' => [$orderNumber],
             'keep_session' => false,
         ]);
-   
-        return Inertia::render('Orders/OrderOverview',
-            [
-                'order' => $order, 
-                'products' => $products['rows'], 
-                'isPaymentSubmitted' => $this->isPaymentSubmitted($orderNumber), 
-                'isDeliveryInfoSave' => $this->isDeliveryInfoSave($orderNumber),
-            ]
-        );
+
+        if($response['status'] === 201){
+            return Inertia::render('Orders/OrderOverview',
+                [
+                    'order' => $order, 
+                    'products' => $response['rows'], 
+                    'isPaymentSubmitted' => $this->isPaymentSubmitted($orderNumber), 
+                    'isDeliveryInfoSave' => $this->isDeliveryInfoSave($orderNumber),
+                ]
+            );
+        }
+        
+        $this->logFoxproError('GetSoStatus','orderOverview', [$orderNumber], $response);
+        return back()->with(['message' => 'Something went wrong. please contact support']);
+        
     }
 
-    // Get orders products.
+    // Get orders products. TODO: ADD ERROR LOGGING
     public function getProducts(Request $request){
         $orderNumber = getOrderNumberFromPath($request->path());
         $products = FoxproApi::call([
@@ -65,7 +71,7 @@ class OrdersController extends Controller
         return response(['products' => $products['rows']])->header('Content-Type', 'application/json');
     }
 
-    // Show single order details.
+    // Show single order details. TODO: ADD ERROR LOGGING
     public function orderDetails(Request $request){
         // throw 404 if order number does not exist
         $username = auth()->user()->username;
@@ -82,7 +88,7 @@ class OrdersController extends Controller
         return Inertia::render('Orders/OrderDetails',['rawOrder' => $order, 'rawProducts' => $products['rows'], 'isPaymentSubmitted' => $this->isPaymentSubmitted($orderNumber)]);
     }
 
-    // Update quantity product.
+    // Update quantity product. TODO: ADD ERROR LOGGING
     public function updateQuantity(Request $request){
         $product = $request->all();
         $orderNumber = getOrderNumberFromPath($request->path());
@@ -102,7 +108,7 @@ class OrdersController extends Controller
         return response($res)->header('Content-Type', 'application/json');
     }
 
-    // Update product note.
+    // Update product note. TODO: ADD ERROR LOGGING
     public function updateProductNote(Request $request){
         $info = $request->all();
         $orderNumber = getOrderNumberFromPath($request->path());        
@@ -565,6 +571,14 @@ class OrdersController extends Controller
             info($tokens['token_type']);
             // set new tokens.
         }
+    }
+
+    public function logFoxproError($funcName, $controller, $params, $response ){
+        Log::error("=VVVVV=== ERROR REQUESTING DATA FROM FOXPRO. function: $funcName, controller: $controller ====VVVVV");
+        Log::error("----- params ----");
+        Log::error($params);
+        Log::error("----- response ----");
+        Log::error($response);
     }
 }
 

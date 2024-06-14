@@ -101,7 +101,7 @@ function OrderNumber({
                                 />
                             </div>
                             <button
-                                className="bg-davidiciGold p-2 rounded"
+                                className="bg-davidiciGold p-2 rounded text-white"
                                 onClick={handleCreateOrder}
                             >
                                 confirm order number
