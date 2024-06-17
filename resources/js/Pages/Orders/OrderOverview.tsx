@@ -48,7 +48,7 @@ function OrderOverview({
                     <section className="order-details-wrapper py-5 px-4 bg-zinc-50 shadow-inner shadow-gray-300 rounded-md border border-davidiciGold">
                         <span>
                             <button
-                                className="rounded border shadow-sm shadow-gray-950 px-5 py-2 transition-shadow hover:shadow-none text-sm"
+                                className="rounded border border-davidiciGold shadow-sm  px-5 py-2 transition-shadow text-sm hover:shadow-gray-500"
                                 onClick={handleOpenModal}
                             >
                                 check status
