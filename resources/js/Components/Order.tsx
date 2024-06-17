@@ -4,6 +4,8 @@ import Modal from "./Modal";
 import ProductStatusCard from "./ProductStatusCard";
 import { useState } from "react";
 import type { Product as ProductModel } from "../Models/Product";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 
 interface OrderProps {
@@ -24,6 +26,12 @@ function Order({ order }: OrderProps) {
             const response = await axios.get(
                 `/orders/${order.ordernum}/products`
             );
+
+            if (response.data.status === 500) {
+                toast.error(response.data.products);
+                return;
+            }
+
             setProducts(response.data.products);
         } catch (error) {
             console.log(error);
@@ -100,6 +108,7 @@ function Order({ order }: OrderProps) {
                     Close
                 </button>
             </Modal>
+            <ToastContainer />
         </div>
     );
 }

@@ -59,16 +59,21 @@ class OrdersController extends Controller
         
     }
 
-    // Get orders products. TODO: ADD ERROR LOGGING
+    // Get orders products.
     public function getProducts(Request $request){
         $orderNumber = getOrderNumberFromPath($request->path());
-        $products = FoxproApi::call([
+        $response = FoxproApi::call([
             'action' => 'GetSoStatus',
             'params' => [$orderNumber],
             'keep_session' => false,
         ]);
 
-        return response(['products' => $products['rows']])->header('Content-Type', 'application/json');
+        if($response['status'] === 201){
+            return response(['products' => $response['rows'], 'status' => 201])->header('Content-Type', 'application/json');
+        }
+
+        $this->logFoxproError('GetSoStatus','getProducts', [$orderNumber], $response);
+        return response(['products' => "something went wrong, please contact support", 'status' => 500])->header('Content-Type', 'application/json');
     }
 
     // Show single order details. TODO: ADD ERROR LOGGING
