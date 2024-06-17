@@ -43,6 +43,9 @@
     font-weight: 400;
 }
 
+#flash-message {
+}
+
 /*===========LOGIN STYLING==============*/
 .main-login {
     height: 100vh;
@@ -102,8 +105,10 @@
 }
 
 /*===========NAVBAR STYLING==============*/
-
-nav > div {
+nav {
+    border: 1px solid #d1aa68;
+}
+.nav-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -121,6 +126,8 @@ nav > div {
 .nav-links li {
     margin: 0 10px;
     padding: 0 1.5em 0.2em;
+    border: 1px solid #d1aa68;
+    border-radius: 7px;
 }
 .nav-links li > a {
     text-decoration: none;
@@ -620,7 +627,7 @@ main {
 }
 
 @media (max-width: 1500px) {
-    nav > div {
+    .nav-content {
         margin: 25px 20px;
     }
 
@@ -679,7 +686,7 @@ main {
 
 @media (max-width: 700px) {
     /*== nav bar ==*/
-    nav > div {
+    .nav-content {
         margin: 22px 20px;
     }
     .nav-logo {
@@ -688,13 +695,17 @@ main {
     .nav-links {
         font-size: small;
     }
+    .nav-links li {
+        margin: 4px;
+        padding: 0 13px;
+    }
     .settings-wrapper img {
         width: 30px;
     }
     .settings-wrapper ul {
-        font-size: small;
-        min-width: 130px;
-        left: -320%;
+        font-size: medium;
+        min-width: 180px;
+        left: -500%;
     }
 
     /*== main container ==*/
@@ -713,5 +724,12 @@ main {
     }
     .order-container {
         width: 100%;
+    }
+}
+
+@media (max-width: 500px) {
+    /*== login page ==*/
+    #login-page {
+        width: auto;
     }
 }

@@ -23,29 +23,17 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
 
     return (
         <>
-            <nav className="shadow-sm shadow-gray-200 py-1 mb-2 border-b border-davidiciGold">
-                <div>
+            <nav>
+                <div className="nav-content">
                     <img
                         className="nav-logo"
                         src="https://portal.davidici.com/images/davidici-logo-nav-cropped.png"
                     />
                     <ul className="nav-links">
-                        <li
-                            className={
-                                crrPage === "orders"
-                                    ? "active border border-davidiciGold rounded-2xl"
-                                    : "shadow-sm shadow-gray-200 hover:shadow-gray-500 rounded-2xl border border-davidiciGold"
-                            }
-                        >
+                        <li className={crrPage === "orders" ? "active" : ""}>
                             <Link href="/orders">Orders</Link>
                         </li>
-                        <li
-                            className={
-                                crrPage === "inventory"
-                                    ? "active rounded-2xl border border-davidiciGold"
-                                    : "shadow-sm shadow-gray-200 hover:shadow-gray-500 rounded-2xl border border-davidiciGold"
-                            }
-                        >
+                        <li className={crrPage === "inventory" ? "active" : ""}>
                             <Link href="/inventory">Inventory</Link>
                         </li>
                     </ul>
