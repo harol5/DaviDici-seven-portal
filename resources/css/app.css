@@ -301,13 +301,29 @@ main {
 /*order header with order number and buttons*/
 .order-header-wrapper {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-evenly;
     align-items: center;
-    padding: 1em 3em;
+}
+.charges-wrapper {
+    display: flex;
+    border-left: 1px solid;
+    border-right: 1px solid;
+    column-gap: 100px;
+}
+.charges {
+    padding: 0 1em;
 }
 .order-buttons-wrapper {
     display: flex;
     gap: 1em;
+}
+
+.order-number-wrapper {
+    padding-right: 2em;
+}
+
+.order-buttons-wrapper {
+    padding-left: 2em;
 }
 
 /* ===========Overview Page=============*/
@@ -602,6 +618,13 @@ main {
 /*===========REGISTRATION=============*/
 
 /*============RESPONSIVE STYLING==============*/
+.hamburger-order-number-wrapper {
+    display: flex;
+    align-items: center;
+    /* width: 100%; */
+    /* justify-content: space-between; */
+}
+
 .hamburger {
     width: 2em;
     height: 2em;
@@ -612,8 +635,8 @@ main {
 }
 
 .burger {
-    width: 1.8rem;
-    height: 0.15rem;
+    width: 1.5rem;
+    height: 0.13rem;
     border-radius: 10px;
     background-color: black;
     transform-origin: 1px;
@@ -636,7 +659,7 @@ main {
     }
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1150px) {
     /*== orders page ==*/
     .order-container {
         width: 50%;
@@ -647,7 +670,13 @@ main {
 
     /*order header with order number and buttons*/
     .order-header-wrapper {
-        padding: 1em;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: space-evenly;
+    }
+
+    .order-buttons-wrapper {
+        padding: 0;
     }
 
     /*==== WORK IN PROGRESS -- HAMBURGER MENU ====*/
@@ -684,7 +713,7 @@ main {
     }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 800px) {
     /*== nav bar ==*/
     .nav-content {
         margin: 22px 20px;
@@ -712,8 +741,14 @@ main {
     main {
         height: auto;
     }
+    .-order {
+        padding-top: 1.5em;
+    }
 
     /*== orders page ==*/
+    .order-options-menu-wrapper ul {
+        font-size: small;
+    }
     .gretting-search-wrapper {
         flex-direction: column;
         align-items: center;
@@ -725,9 +760,38 @@ main {
     .order-container {
         width: 100%;
     }
+
+    /*== order layout ==*/
+    .order-header-wrapper {
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+    .charges-wrapper {
+        flex-grow: 1;
+        column-gap: 0;
+        font-size: small;
+        justify-content: center;
+    }
+    .order-buttons-wrapper {
+        font-size: small;
+        flex-grow: 1;
+        justify-content: center;
+    }
+    .hamburger-order-number-wrapper {
+        /* width: 100%; */
+        justify-content: space-between;
+    }
+    .hamburger {
+    }
+    .order-number-wrapper {
+        padding: 0;
+        font-size: small;
+        flex-grow: 1;
+        padding-left: 1em;
+    }
 }
 
-@media (max-width: 500px) {
+@media (max-width: 600px) {
     /*== login page ==*/
     #login-page {
         width: auto;
@@ -738,5 +802,24 @@ main {
     }
     .main-content-wrapper {
         margin: 0 10px;
+    }
+
+    /*== order layout ==*/
+    .hamburger {
+        margin: 0;
+    }
+
+    .order-number-wrapper {
+        /* flex-basis: 80%; */
+        /* padding: 0; */
+    }
+
+    .charges-wrapper {
+    }
+    .hamburger-order-number-wrapper {
+        width: auto;
+    }
+    .charges {
+        padding: 0.4em;
     }
 }

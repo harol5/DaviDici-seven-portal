@@ -139,31 +139,33 @@ function OrderLayout({ children, order, crrOrderOption }: OrderLayoutProps) {
                 </div>
             </div>
             <div className="order-main-content-wrapper">
-                <div className="order-header-wrapper rounded-md border border-davidiciGold">
-                    <div
-                        className="hamburger"
-                        onClick={() =>
-                            setIsOrderOptionsActive(!isOrderOptionsActive)
-                        }
-                    >
-                        <div className="burger"></div>
-                        <div className="burger"></div>
-                        <div className="burger"></div>
+                <div className="order-header-wrapper">
+                    <div className="hamburger-order-number-wrapper">
+                        <div
+                            className="hamburger"
+                            onClick={() =>
+                                setIsOrderOptionsActive(!isOrderOptionsActive)
+                            }
+                        >
+                            <div className="burger"></div>
+                            <div className="burger"></div>
+                            <div className="burger"></div>
+                        </div>
+                        <div className="order-number-wrapper">
+                            <h1>Order Number:</h1>
+                            <span>{order.ordernum}</span>
+                        </div>
                     </div>
-                    <div className="order-number-wrapper">
-                        <h1>Order Number:</h1>
-                        <span>{order.ordernum}</span>
-                    </div>
-                    <section className="grow flex justify-between text-center">
-                        <div className="grow mx-6 border-l border-davidiciGold">
+                    <section className="charges-wrapper">
+                        <div className="charges">
                             <h2>sub-total:</h2>
                             <p>${order.subtotal}</p>
                         </div>
-                        <div className="grow">
+                        <div className="charges">
                             <h2>credit:</h2>
                             <p>${order.totcredit}</p>
                         </div>
-                        <div className="grow mx-6 border-r border-davidiciGold">
+                        <div className="charges">
                             <h2>Total:</h2>
                             <p className="">${order.total}</p>
                         </div>
