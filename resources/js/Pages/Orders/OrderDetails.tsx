@@ -229,7 +229,11 @@ function OrderDetails({
     return (
         <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <OrderLayout order={order} crrOrderOption="details">
-                <section className="products-details-wrapper bg-zinc-50 shadow-inner shadow-gray-300 py-10 px-8 rounded-md">
+                <section className="products-details-wrapper">
+                    <p className="horizontally-message">
+                        *please flip your phone horizontally for a better
+                        experience
+                    </p>
                     {products.map((product) => (
                         <ProductDetailsCard
                             key={product.linenum}

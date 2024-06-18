@@ -51,12 +51,12 @@ function ProductDetailsCard({
 
     return (
         <>
-            <section className="product-wrapper product-details-card shadow-sm shadow-gray-300">
+            <section className="product-wrapper product-details-card">
                 <div
                     className={
                         isPaymentSubmitted || isSubmitedDate
-                            ? "basis-[100%]"
-                            : "basis-[90%] mr-1"
+                            ? "product-info-wrapper basis-[100%]"
+                            : "product-info-wrapper basis-[90%] mr-1"
                     }
                 >
                     <header>
@@ -119,14 +119,14 @@ function ProductDetailsCard({
                 {!isPaymentORSubmittedDate && (
                     <div className="basis-[10%] flex flex-col gap-3 px-1">
                         <button
-                            className="rounded border shadow-sm shadow-gray-950 px-2 py-1 transition-shadow hover:shadow-none"
+                            className="add-note-button rounded border px-2 py-1"
                             onClick={() => handleOpenModal("addNote")}
                             disabled={isPaymentSubmitted || isSubmitedDate}
                         >
                             add/see note
                         </button>
                         <button
-                            className="rounded border shadow-sm shadow-gray-950 px-4 py-1 transition-shadow hover:shadow-none hover:bg-red-400 hover:text-white"
+                            className="remove-product-button rounded border px-4 py-1"
                             onClick={() => handleOpenModal("removeModal")}
                             disabled={isPaymentSubmitted || isSubmitedDate}
                         >
