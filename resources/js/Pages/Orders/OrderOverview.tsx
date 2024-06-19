@@ -48,7 +48,7 @@ function OrderOverview({
                     <section className="order-details-wrapper py-5 px-4 bg-zinc-50 shadow-inner shadow-gray-300 rounded-md border border-davidiciGold">
                         <span>
                             <button
-                                className="rounded border border-davidiciGold shadow-sm  px-5 py-2 transition-shadow hover:shadow-gray-500"
+                                className="common-button"
                                 onClick={handleOpenModal}
                             >
                                 check status
@@ -79,7 +79,7 @@ function OrderOverview({
             </OrderLayout>
             <Modal show={openModal} onClose={handleCloseModal}>
                 <h1 className="order-status-title text-lg">Order Status</h1>
-                <section className="products-status-wrapper bg-zinc-50 shadow-inner shadow-gray-300 rounded-md mx-16">
+                <section className="products-status-wrapper">
                     {products.map((product) => (
                         <ProductStatusCard
                             key={product.linenum}

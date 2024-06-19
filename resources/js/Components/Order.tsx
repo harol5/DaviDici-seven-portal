@@ -91,9 +91,13 @@ function Order({ order }: OrderProps) {
                     View Order
                 </Link>
             </div>
-            <Modal show={openModal} onClose={handleCloseModal}>
+            <Modal
+                show={openModal}
+                onClose={handleCloseModal}
+                customClass="modal-order"
+            >
                 <h1 className="order-status-title text-lg">Order Status</h1>
-                <section className="products-status-wrapper bg-zinc-50 shadow-inner shadow-gray-300 rounded-md mx-16">
+                <section className="products-status-wrapper">
                     {products.map((product) => (
                         <ProductStatusCard
                             key={product.linenum}

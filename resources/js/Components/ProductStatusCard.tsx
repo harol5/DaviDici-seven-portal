@@ -6,7 +6,7 @@ interface ProductStatusProps {
 
 function ProductStatusCard({ product }: ProductStatusProps) {
     return (
-        <div className="product-wrapper product-status-card shadow-sm shadow-gray-300">
+        <div className="product-wrapper product-status-card">
             <header>
                 <h2 className="description">Description:</h2>
                 <h2 className="size">Size:</h2>

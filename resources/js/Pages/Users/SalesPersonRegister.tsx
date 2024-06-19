@@ -32,24 +32,24 @@ function SalesPersonRegister({ message }: { message: string }) {
                 />
             </section>
             <div className="main-content-wrapper">
-                <section className="relative">
+                <section className="goback-heading-wrapper">
                     <Link
                         href="/orders"
-                        className="border px-4 py-2 rounded absolute"
+                        className="go-back-button border px-4 py-2 rounded"
                     >
                         Go back to orders
                     </Link>
-                    <section className="flex flex-col items-center my-12">
-                        <h1 className="text-2xl">Sales person registration</h1>
+                    <section className="flex flex-col items-center">
+                        <h1 className="">Sales person registration</h1>
                         <p className="">please type all information.</p>
                     </section>
                 </section>
-                <form onSubmit={handleSubmit} className="mb-12">
+                <form
+                    onSubmit={handleSubmit}
+                    className="sales-person-form mb-12"
+                >
                     <div className="mb-6 first-name">
-                        <label
-                            htmlFor="name"
-                            className="inline-block text-lg mb-2"
-                        >
+                        <label htmlFor="name" className="inline-block  mb-2">
                             First Name
                         </label>
                         <input
@@ -72,7 +72,7 @@ function SalesPersonRegister({ message }: { message: string }) {
                     <div className="mb-6 last-name">
                         <label
                             htmlFor="last-name"
-                            className="inline-block text-lg mb-2"
+                            className="inline-block  mb-2"
                         >
                             Last Name
                         </label>
@@ -94,10 +94,7 @@ function SalesPersonRegister({ message }: { message: string }) {
                     </div>
 
                     <div className="mb-6 phone">
-                        <label
-                            htmlFor="phone"
-                            className="inline-block text-lg mb-2"
-                        >
+                        <label htmlFor="phone" className="inline-block  mb-2">
                             phone
                         </label>
                         <input
@@ -118,7 +115,7 @@ function SalesPersonRegister({ message }: { message: string }) {
                     <div className="mb-6 business-phone">
                         <label
                             htmlFor="business-phone"
-                            className="inline-block text-lg mb-2"
+                            className="inline-block  mb-2"
                         >
                             Business phone
                         </label>
@@ -140,10 +137,7 @@ function SalesPersonRegister({ message }: { message: string }) {
                     </div>
 
                     <div className="mb-6 email">
-                        <label
-                            htmlFor="email"
-                            className="inline-block text-lg mb-2"
-                        >
+                        <label htmlFor="email" className="inline-block  mb-2">
                             Email
                         </label>
                         <input
@@ -164,7 +158,7 @@ function SalesPersonRegister({ message }: { message: string }) {
                     <div className="mb-6 password">
                         <label
                             htmlFor="password"
-                            className="inline-block text-lg mb-2"
+                            className="inline-block  mb-2"
                         >
                             Password
                         </label>
@@ -188,7 +182,7 @@ function SalesPersonRegister({ message }: { message: string }) {
                     <div className="mb-6 confirm-password">
                         <label
                             htmlFor="password2"
-                            className="inline-block text-lg mb-2"
+                            className="inline-block  mb-2"
                         >
                             Confirm Password
                         </label>

@@ -134,11 +134,7 @@ function ProductDetailsCard({
                     </div>
                 )}
             </section>
-            <Modal
-                show={openModal}
-                maxWidth="w-3/12"
-                onClose={handleCloseModal}
-            >
+            <Modal show={openModal} onClose={handleCloseModal}>
                 {crrModalContent === "removeModal" && (
                     <section className="m-8 text-center">
                         {numOfProducts === 1 && (

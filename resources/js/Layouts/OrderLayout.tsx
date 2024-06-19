@@ -158,11 +158,11 @@ function OrderLayout({ children, order, crrOrderOption }: OrderLayoutProps) {
                     </div>
                     <section className="charges-wrapper">
                         <div className="charges">
-                            <h2>sub-total:</h2>
+                            <h2>Sub-total:</h2>
                             <p>${order.subtotal}</p>
                         </div>
                         <div className="charges">
-                            <h2>credit:</h2>
+                            <h2>Credit:</h2>
                             <p>${order.totcredit}</p>
                         </div>
                         <div className="charges">
@@ -171,12 +171,8 @@ function OrderLayout({ children, order, crrOrderOption }: OrderLayoutProps) {
                         </div>
                     </section>
                     <div className="order-buttons-wrapper">
-                        <button className="rounded shadow-sm  px-4 py-1 transition-shadow hover:shadow-gray-500 border border-davidiciGold">
-                            print order
-                        </button>
-                        <button className="rounded shadow-sm  px-4 py-1 transition-shadow hover:shadow-gray-500 border border-davidiciGold">
-                            approve order
-                        </button>
+                        <button className="common-button">print order</button>
+                        <button className="common-button">approve order</button>
                     </div>
                 </div>
                 <div className="order-body-wrapper">{children}</div>

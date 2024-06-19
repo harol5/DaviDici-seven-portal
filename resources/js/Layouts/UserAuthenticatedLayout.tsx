@@ -30,10 +30,22 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
                         src="https://portal.davidici.com/images/davidici-logo-nav-cropped.png"
                     />
                     <ul className="nav-links">
-                        <li className={crrPage === "orders" ? "active" : ""}>
+                        <li
+                            className={
+                                crrPage === "orders"
+                                    ? "common-button active"
+                                    : "common-button"
+                            }
+                        >
                             <Link href="/orders">Orders</Link>
                         </li>
-                        <li className={crrPage === "inventory" ? "active" : ""}>
+                        <li
+                            className={
+                                crrPage === "inventory"
+                                    ? "common-button active"
+                                    : "common-button"
+                            }
+                        >
                             <Link href="/inventory">Inventory</Link>
                         </li>
                     </ul>
@@ -50,7 +62,7 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
                                         as="button"
                                         type="button"
                                     >
-                                        add sales person
+                                        Add sales person
                                     </Link>
                                 </li>
                                 <li onClick={handleOpenModal}>invite</li>
@@ -60,7 +72,7 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
                                         as="button"
                                         type="button"
                                     >
-                                        register new user
+                                        Register new user
                                     </Link>
                                 </li>
                                 <li>
@@ -70,7 +82,7 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
                                         as="button"
                                         type="button"
                                     >
-                                        logout
+                                        Logout
                                     </Link>
                                 </li>
                             </ul>
@@ -83,7 +95,7 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
                                         as="button"
                                         type="button"
                                     >
-                                        add sales person
+                                        Add sales person
                                     </Link>
                                 </li>
                                 <li>
@@ -93,7 +105,7 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
                                         as="button"
                                         type="button"
                                     >
-                                        logout
+                                        Logout
                                     </Link>
                                 </li>
                             </ul>
@@ -107,7 +119,7 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
                                         as="button"
                                         type="button"
                                     >
-                                        logout
+                                        Logout
                                     </Link>
                                 </li>
                             </ul>

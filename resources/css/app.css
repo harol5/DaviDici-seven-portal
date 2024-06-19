@@ -46,6 +46,12 @@
 #flash-message {
 }
 
+.common-button {
+    padding: 0 1.5em 0.2em;
+    border: 1px solid #d1aa68;
+    border-radius: 7px;
+}
+
 /*===========LOGIN STYLING==============*/
 .main-login {
     height: 100vh;
@@ -125,9 +131,6 @@ nav {
 }
 .nav-links li {
     margin: 0 10px;
-    padding: 0 1.5em 0.2em;
-    border: 1px solid #d1aa68;
-    border-radius: 7px;
 }
 .nav-links li > a {
     text-decoration: none;
@@ -171,13 +174,14 @@ nav {
 .settings-wrapper li {
     display: block;
     flex-basis: 100%;
-    margin: 7px 5px;
-    padding: 2px;
+    padding: 8px;
     cursor: pointer;
+    width: 100%;
 }
-/* .settings-wrapper li:hover {
-    background-color: #7e7e7e5a;
-} */
+
+/*===========MODEL STYLING==============*/
+.modal-order {
+}
 
 /*============MAIN STYLING==============*/
 main {
@@ -195,7 +199,6 @@ main {
     display: flex;
     justify-content: space-between;
     padding: 2em 0;
-    /* border-bottom: 1px solid black; */
 }
 .greeting {
     color: #d1aa68;
@@ -306,29 +309,27 @@ main {
 }
 .charges-wrapper {
     display: flex;
-    border-left: 1px solid;
-    border-right: 1px solid;
+    border-left: 1px solid #d1aa68;
+    border-right: 1px solid #d1aa68;
     column-gap: 100px;
 }
 .charges {
     padding: 0 1em;
 }
+
 .order-buttons-wrapper {
     display: flex;
+
     gap: 1em;
 }
-
 .order-number-wrapper {
     padding-right: 2em;
-}
-
-.order-buttons-wrapper {
-    padding-left: 2em;
 }
 
 /* ===========Overview Page=============*/
 .overview-wrapper {
     display: flex;
+    gap: 1em;
 }
 
 .overview-wrapper .order-details-wrapper {
@@ -353,7 +354,7 @@ main {
 
 .actions-pending-wrapper h1 {
     color: #d1aa68;
-    margin: 1em auto;
+    margin: 1em auto 0 auto;
 }
 
 .actions-pending-wrapper ul {
@@ -388,6 +389,7 @@ main {
     display: flex;
     flex-direction: column;
     gap: 2em 0;
+    margin: 0 4em;
 }
 
 .product-status-card {
@@ -517,8 +519,8 @@ main {
 }
 
 .product-delivery-card .size,
-.model,
-.sku {
+.product-delivery-card .model,
+.product-delivery-card .sku {
     flex-basis: 10%;
     border-right: 1px solid #d1aa68;
 }
@@ -643,6 +645,18 @@ main {
 }
 
 /*===========REGISTRATION=============*/
+.goback-heading-wrapper {
+    position: relative;
+    margin: 2em 0;
+}
+.goback-heading-wrapper > section {
+    color: #d1aa68;
+}
+.go-back-button {
+    position: absolute;
+}
+.sales-person-form {
+}
 
 /*============RESPONSIVE STYLING==============*/
 .hamburger-order-number-wrapper {
@@ -769,6 +783,32 @@ main {
         font-size: 12px;
     }
 
+    /*======= STATUS CONTENT =======*/
+    .products-status-wrapper {
+        margin: 0;
+    }
+
+    .product-status-card {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-status-card .model,
+    .product-status-card .sku,
+    .product-status-card .price,
+    .product-status-card .total {
+        display: none;
+    }
+
+    .product-status-card .description {
+        margin: 0;
+    }
+
+    .product-status-card header,
+    .product-status-card section {
+        justify-content: space-around !important;
+    }
+
     /*======= OVERVIEW PAGE =======*/
     .overview-wrapper {
         font-size: 11px;
@@ -801,6 +841,13 @@ main {
     }
     .product-details-card .qty > input {
         width: 40px;
+    }
+
+    /*===========REGISTRATION=============*/
+    .goback-heading-wrapper,
+    .go-back-button,
+    .sales-person-form {
+        font-size: 13px;
     }
 }
 
@@ -888,6 +935,27 @@ main {
         margin: 10px 0;
         border-color: #d1aa68;
     }
+
+    /*======= DELIVERY PAGE =======*/
+    .delivery-form {
+        flex-direction: column;
+    }
+    .customer-name-wrapper,
+    .telephone-number-wrapper,
+    .wholesaler-email-wrapper,
+    .city-wrapper,
+    .contact-name-wrapper,
+    .cellphone-number-wrapper,
+    .customer-email-wrapper,
+    .zip-code-wrapper {
+        padding: 0;
+    }
+
+    .delivery-form input,
+    .delivery-form select {
+        padding: 0.2em 0.12em;
+        font-size: 12px;
+    }
 }
 
 @media (max-width: 600px) {
@@ -912,5 +980,22 @@ main {
     }
     .charges {
         padding: 0.4em;
+    }
+    /*===========REGISTRATION=============*/
+    .goback-heading-wrapper,
+    .go-back-button,
+    .sales-person-form {
+        font-size: 11px;
+    }
+    .go-back-button {
+        position: relative;
+        margin-bottom: 1.5em;
+        width: 40%;
+    }
+
+    .goback-heading-wrapper {
+        display: flex;
+        flex-direction: column;
+        margin: 2.2em 0;
     }
 }

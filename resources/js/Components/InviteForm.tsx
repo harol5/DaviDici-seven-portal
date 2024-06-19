@@ -54,10 +54,10 @@ function InviteForm({ openModal, handleCloseModal }: InviteFormProps) {
     };
 
     return (
-        <Modal show={openModal} onClose={handleCloseModal} maxWidth="w-3/6">
+        <Modal show={openModal} onClose={handleCloseModal}>
             <h1 className="order-status-title text-lg">Invite New Customers</h1>
 
-            <section className="shadow-gray-300 rounded-md mx-16">
+            <section className="shadow-gray-300 rounded-md mx-12">
                 {response.status === "ok" && <h3>{response.message}</h3>}
                 {response.status === "error" && (
                     <h3 className="text-green-500">{response.message}</h3>
