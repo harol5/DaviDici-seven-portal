@@ -374,7 +374,7 @@ main {
 }
 
 .product-wrapper header h2 {
-    margin-bottom: 10px;
+    color: #d1aa68;
 }
 
 /* ===========Content in status modal=============*/
@@ -438,24 +438,30 @@ main {
 
 .product-details-card .description {
     flex-basis: 40%;
-    margin-right: 20px;
+    border-right: 1px solid #d1aa68;
 }
 
 .product-details-card .size,
-.product-details-card .total,
 .product-details-card .price,
 .product-details-card .qty {
+    flex-basis: 7%;
+    border-right: 1px solid #d1aa68;
+}
+
+.product-details-card .total {
     flex-basis: 7%;
 }
 
 .product-details-card .model,
 .product-details-card .color {
     flex-basis: 10%;
+    border-right: 1px solid #d1aa68;
 }
 
 .product-details-card .sku {
     flex-basis: 12%;
     margin-right: 10px;
+    border-right: 1px solid #d1aa68;
 }
 
 .qty input {
@@ -469,6 +475,12 @@ main {
 .model input {
     width: 80px;
     padding: 2px 5px;
+}
+
+.product-details-card .model > select {
+    width: 70px;
+    border: 1px solid;
+    border-radius: 8px;
 }
 
 .delete-button {
@@ -485,23 +497,32 @@ main {
     margin-bottom: 1.5em;
     display: flex;
     flex-direction: column;
-    gap: 3em 0;
+    border: 1px solid #d1aa68;
+    border-radius: 0.375rem;
 }
 
 .product-delivery-card {
     display: block;
+    border: 1px solid gray;
+    margin: 1em;
 }
 
 .product-delivery-card .description {
     flex-basis: 40%;
+    border-right: 1px solid #d1aa68;
 }
 .product-delivery-card .status {
     flex-basis: 20%;
+    border-right: 1px solid #d1aa68;
 }
 
 .product-delivery-card .size,
 .model,
-.sku,
+.sku {
+    flex-basis: 10%;
+    border-right: 1px solid #d1aa68;
+}
+
 .qty {
     flex-basis: 10%;
 }
@@ -552,18 +573,21 @@ main {
 }
 .delivery-form input {
     padding: 0.3em;
+    border: 1px solid #d1aa68;
     border-radius: 3px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.413);
     transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .delivery-form select {
     padding: 0.3em;
+    border: 1px solid #d1aa68;
     border-radius: 3px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.413);
     transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .delivery-form textarea {
     padding: 0.3em;
+    border: 1px solid #d1aa68;
     border-radius: 3px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.413);
     transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -624,8 +648,6 @@ main {
 .hamburger-order-number-wrapper {
     display: flex;
     align-items: center;
-    /* width: 100%; */
-    /* justify-content: space-between; */
 }
 
 .hamburger {
@@ -743,16 +765,42 @@ main {
     .-order {
         padding-top: 1.5em;
     }
-    /*======= DETAIL PAGE =======*/
+    .order-header-wrapper {
+        font-size: 12px;
+    }
+
+    /*======= OVERVIEW PAGE =======*/
+    .overview-wrapper {
+        font-size: 11px;
+    }
+
+    /*======= MAIN STYLING FOR PRODUCTS CARDS =======*/
     .product-wrapper {
         padding: 1em 0;
+        font-size: 11px;
     }
+    .product-wrapper header,
+    .product-wrapper section {
+        justify-content: center;
+    }
+
+    /*======= DETAIL PAGE =======*/
     .product-details-card {
         margin: 0.4em;
+    }
+    .product-details-card .color {
+        display: none;
     }
     .product-details-card .description,
     .product-details-card .sku {
         margin-right: 0;
+        padding-right: 9px;
+    }
+    .product-details-card .model > select {
+        width: 50px;
+    }
+    .product-details-card .qty > input {
+        width: 40px;
     }
 }
 
@@ -767,7 +815,7 @@ main {
         margin: 22px 20px;
     }
     .nav-logo {
-        width: 100px;
+        width: 130px;
     }
     .nav-links {
         font-size: small;
@@ -817,21 +865,17 @@ main {
     .charges-wrapper {
         flex-grow: 1;
         column-gap: 0;
-        font-size: small;
         justify-content: center;
     }
     .order-buttons-wrapper {
-        font-size: small;
         flex-grow: 1;
         justify-content: center;
     }
     .hamburger-order-number-wrapper {
-        /* width: 100%; */
         justify-content: space-between;
     }
     .order-number-wrapper {
         padding: 0;
-        font-size: small;
         flex-grow: 1;
         padding-left: 1em;
     }
@@ -862,14 +906,6 @@ main {
     /*== order layout ==*/
     .hamburger {
         margin: 0;
-    }
-
-    .order-number-wrapper {
-        /* flex-basis: 80%; */
-        /* padding: 0; */
-    }
-
-    .charges-wrapper {
     }
     .hamburger-order-number-wrapper {
         width: auto;

@@ -80,7 +80,6 @@ function ProductDetailsCard({
                                     name="model"
                                     id=""
                                     defaultValue="none"
-                                    className="w-24 text-center"
                                     onChange={(e) =>
                                         handleModel(
                                             product.uscode,

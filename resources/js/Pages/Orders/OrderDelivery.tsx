@@ -66,7 +66,11 @@ function OrderDelivery({
     return (
         <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <OrderLayout order={order} crrOrderOption="delivery">
-                <section className="products-delivery-wrapper bg-zinc-50 shadow-inner shadow-gray-300 py-10 px-10 rounded-md">
+                <section className="products-delivery-wrapper">
+                    <p className="horizontally-message">
+                        *please flip your phone horizontally for a better
+                        experience
+                    </p>
                     {products.map((product: ProductModel, index: number) => (
                         <ProductDeliveryCard
                             key={product.linenum}
