@@ -111,7 +111,7 @@ function DeliveryForm({
         <>
             <form
                 onSubmit={handleSubmit}
-                className="delivery-form bg-zinc-50 shadow-inner shadow-gray-300 py-10 px-10 rounded-md"
+                className="delivery-form bg-zinc-50 py-10 px-10 rounded-md"
             >
                 <div className="delivery-date">
                     <label htmlFor="delivery-date">Choose delivery date:</label>

@@ -265,7 +265,7 @@ class OrdersController extends Controller
         $order = $request->all();
         $orderNumber = getOrderNumberFromPath($request->path());
         $userEmail = auth()->user()->attributesToArray()['email'];    
-
+        
         $deliveryInfo = FoxproApi::call([
             'action' => 'GetDeliveryInfo',
             'params' => [$orderNumber],
@@ -275,15 +275,27 @@ class OrdersController extends Controller
         // WARNING: sometimes will trow undefined key exception for 'rows'.
         $depositInfo = FoxproApi::call([
             'action' => 'getpercentdeposit',
-            'params' => ['harole@davidici.com',$orderNumber],
+            'params' => [$userEmail,$orderNumber],
             'keep_session' => false,
         ]);
+
+        if($deliveryInfo['status'] === 201 && $depositInfo['status'] === 201) {
+            return Inertia::render('Orders/OrderPayment',[
+                'order' => $order, 
+                'deliveryInfo' => $deliveryInfo['rows'],                         
+                'depositInfo' => $depositInfo['rows'][0],
+            ]);
+        }
+
+        if($deliveryInfo['status'] === 500) {
+            $this->logFoxproError('GetDeliveryInfo','orderPayment', [$orderNumber], $deliveryInfo);
+        }
+        if($depositInfo['status'] === 500) {
+            $this->logFoxproError('getpercentdeposit','orderPayment', [$userEmail,$orderNumber], $depositInfo);
+        }
+
         
-        return Inertia::render('Orders/OrderPayment',[
-            'order' => $order, 
-            'deliveryInfo' => $deliveryInfo['rows'],                         
-            'depositInfo' => $depositInfo['rows'][0],
-        ]);
+        return redirect('/orders')->with(['message' => 'Something went wrong. please contact support']);
     }
 
     // Creates a transaction.
