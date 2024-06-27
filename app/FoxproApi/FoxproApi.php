@@ -16,9 +16,15 @@ class FoxproApi{
             'Origin' => $request_origin,
             'Authorization' => 'Basic ' . base64_encode($api_user . ':' . $api_secret),
         ])->withBody($js_data,'application/json')->get($api_url);
-
-        $data = $response->json();
         
+        // foxpro program 'GETINVSTOCK' does return a malform data json.
+        if($options['action'] === 'GETINVSTOCK') {
+            // info(json_decode(preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $response->body()), true));
+            $data = json_decode(utf8_encode($response->body()), true);                
+        }else {
+            $data = $response->json();
+        }
+                       
         /**
          * if foxpro func updates, deletes or creates a record,
          * it will return a 'result' key with a message stating 

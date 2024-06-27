@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrdersController;
+use App\Http\Controllers\ExpressProgramController;
 
 Route::get('/', [UserController::class, 'login'])->name('login');
 
@@ -44,6 +45,9 @@ Route::middleware(['auth','auth.session'])->group(function () {
     Route::post('/orders/{orderNumber}/products/payment', [OrdersController::class, 'createCharge']);
     Route::post('/orders/{orderNumber}/products/payment-bank', [OrdersController::class, 'createBankCharge']);
     Route::post('/orders/{orderNumber}/products/payment-bank/status', [OrdersController::class, 'getStatusCheck']);
+
+    // Express Program routes
+    Route::get('/express-program', [ExpressProgramController::class, 'all']);
 
     // Inventory routes.
     Route::get('/inventory', function(){        
