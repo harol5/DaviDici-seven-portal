@@ -8,18 +8,18 @@ interface ProductsAvailableProps {
 }
 
 function ProductsAvailable({ auth, products }: ProductsAvailableProps) {
-    const collections = new Map();
-    const sizes = new Map();
+    const sizesMap = new Map();
     products.forEach((product) => {
-        if (!collections.has(product.model)) collections.set(product.model, []);
-        collections.get(product.model).push(product);
-
-        if (!sizes.has(product.size)) sizes.set(product.size, []);
-        sizes.get(product.size).push(product);
+        if (!sizesMap.has(product.size)) sizesMap.set(product.size, new Map());
+        const modelsMap = sizesMap.get(product.size);
+        if (!modelsMap.has(product.model)) modelsMap.set(product.model, []);
+        modelsMap.get(product.model).push(product);
     });
-    console.log(collections);
-    console.log(sizes);
 
+    console.log(sizesMap);
+    console.log(Object.fromEntries(sizesMap.entries()));
+    console.log(Array.from(sizesMap.entries()));
+    console.log(products);
     return (
         <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <div className="main-content-wrapper">
