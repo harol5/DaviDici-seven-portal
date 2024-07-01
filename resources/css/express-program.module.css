@@ -1,0 +1,34 @@
+.allFiltersWrapper {
+    margin-top: 1em;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.titleAndFilterWrapper {
+    display: flex;
+    justify-content: center;
+    gap: 1.5em;
+}
+
+.titleWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.filterWrapper {
+    display: flex;
+    gap: 1em;
+}
+
+.filter {
+    border: 3px solid #d1aa68;
+    border-radius: 50%;
+    height: 4em;
+    width: 4em;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

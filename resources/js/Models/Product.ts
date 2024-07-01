@@ -36,4 +36,5 @@ export type ProductInventory = {
     uscode: string;
     wk: number;
     wp: number;
+    item: string;
 };

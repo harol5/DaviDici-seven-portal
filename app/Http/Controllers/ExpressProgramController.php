@@ -27,7 +27,7 @@ class ExpressProgramController extends Controller
         if($response['status'] === 201){
             return Inertia::render('ExpressProgram/ProductsAvailable',
                 [                    
-                    'products' => $response['rows'],                     
+                    'rawProducts' => $response['rows'],                     
                 ]
             );
         }
