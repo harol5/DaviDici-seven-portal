@@ -15,6 +15,7 @@ function ProductsAvailable({ auth, rawProducts }: ProductsAvailableProps) {
     const testing = useMemo(() => {
         const itemsMap = new Map();
         const validCompositionSizesMap = new Map();
+        const compositions = [];
 
         // Create map hierchy
         rawProducts.forEach((product) => {
@@ -30,6 +31,7 @@ function ProductsAvailable({ auth, rawProducts }: ProductsAvailableProps) {
 
             modelMap.get(product.model).push(product);
 
+            // adds valid sizes composition to the map so we can use later.
             if (product.item === "WASHBASIN/SINK") {
                 if (!validCompositionSizesMap.has(product.size))
                     validCompositionSizesMap.set(product.size, new Map());
@@ -38,42 +40,73 @@ function ProductsAvailable({ auth, rawProducts }: ProductsAvailableProps) {
                     product.size
                 );
 
-                const sinkPosition = product.descw.match(
+                // checks if washbasin must have a side unit included.
+                const sinkBreakdownMeasurement = product.descw.match(
                     /\(\d+(\+\d+)+\)|\bDOUBLE SINK\b/
                 );
 
-                if (sinkPosition) {
-                    if (!sinkPositionsMap.has(sinkPosition[0]))
-                        sinkPositionsMap.set(sinkPosition[0], new Map());
+                if (sinkBreakdownMeasurement) {
+                    if (!sinkPositionsMap.has(sinkBreakdownMeasurement[0]))
+                        sinkPositionsMap.set(
+                            sinkBreakdownMeasurement[0],
+                            new Map()
+                        );
 
-                    const itemsMap = sinkPositionsMap.get(sinkPosition[0]);
-                    if (!itemsMap.has(product.item))
-                        itemsMap.set(product.item, []);
+                    const sinkPosition = sinkPositionsMap.get(
+                        sinkBreakdownMeasurement[0]
+                    );
 
-                    itemsMap.get(product.item).push(product);
+                    const sinkConfig = product.descw.match(
+                        /\bLEFT\b|\bRIGHT\b|\bDOUBLE\b/
+                    );
+                    if (sinkConfig) {
+                        if (!sinkPosition.has(sinkConfig[0]))
+                            sinkPosition.set(sinkConfig[0], []);
+                        sinkPosition.get(sinkConfig[0]).push(product);
+                    }
                 } else {
                     if (!sinkPositionsMap.has("CENTERED"))
-                        sinkPositionsMap.set("CENTERED", new Map());
+                        sinkPositionsMap.set("CENTERED", []);
 
-                    const itemsMap = sinkPositionsMap.get("CENTERED");
-                    if (!itemsMap.has(product.item))
-                        itemsMap.set(product.item, []);
-
-                    itemsMap.get(product.item).push(product);
+                    sinkPositionsMap.get("CENTERED").push(product);
                 }
             }
         });
 
         //travers throght map.
-        // for (const [size, modelMap] of sizesMap) {
-        //     if (size === "24") {
-        //         for (const [model, arr] of modelMap) {
-        //             if (model === "ELORA") console.log(arr);
-        //         }
-        //     }
-        // }
+        for (const [size, sinkPositionsMap] of validCompositionSizesMap) {
+            // this is not a valid size, therefore, we continue. we must fix that in foxpro.
+            if (size === "SINK" || size === "56") continue;
+
+            for (const [sinkPositionMeasure, crrItems] of sinkPositionsMap) {
+                // this is not a valid sink measure (only "centered" or "(size+sieze)"" format), therefore, we continue. we must fix that in foxpro.
+                if (sinkPositionMeasure === "DOUBLE SINK") continue;
+
+                if (sinkPositionMeasure === "CENTERED") {
+                    const modelsMap = itemsMap.get("VANITY").get(size);
+
+                    for (const [model, arr] of modelsMap) {
+                        compositions.push({
+                            name: `${model} ${size}" ${sinkPositionMeasure}`,
+                            size: size,
+                            vanities: arr,
+                            sideUnits: [],
+                            washbasins: crrItems,
+                        });
+                    }
+                } else {
+                    // Get all the sizes from sinkPositionMeasure.
+                    // the smallest size usually corresponse to a side unit.
+                    // Get only models that can be pair with a side unit. (margi, new bali, new york, opera);
+                    // for (const [position, listOfProducts] of crrItems) {}
+                }
+            }
+        }
 
         console.log(validCompositionSizesMap);
+        console.log(itemsMap);
+        console.log(compositions);
+
         return itemsMap;
     }, [rawProducts]);
 
