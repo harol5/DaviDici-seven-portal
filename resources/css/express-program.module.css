@@ -20,6 +20,7 @@
 .filterWrapper {
     display: flex;
     gap: 1em;
+    text-align: center;
 }
 
 .filter {
@@ -27,8 +28,28 @@
     border-radius: 50%;
     height: 4em;
     width: 4em;
+    margin: 0 1em;
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.filterValueSelected {
+    background-color: #d1aa68;
+    color: white;
+}
+
+.expressProgramProductsWrapper {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 1em;
+}
+
+.expressProgramProductCard {
+    width: 50%;
+}
+
+.expressProgramProductCard .productCardcontent {
+    margin: 1em 0;
 }
