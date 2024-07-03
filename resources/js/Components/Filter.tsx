@@ -5,7 +5,7 @@ interface FilterProps {
     contentType: "images" | "sizes";
     values: string[] | { finish: string; url: string }[];
     crrValueSelected: string;
-    onFilter: (value: string) => void;
+    onFilter: (filter: string, value: string) => void;
 }
 
 function Filter({
@@ -29,11 +29,11 @@ function Filter({
                             <span
                                 key={index}
                                 className={
-                                    crrValueSelected === value
-                                        ? `${classes.filter} ${classes.filterValueSelected} `
-                                        : classes.filter
+                                    crrValueSelected === size
+                                        ? `${classes.sizeFilter} ${classes.sizeFilterValueSelected} `
+                                        : classes.sizeFilter
                                 }
-                                onClick={() => handleFilter(size)}
+                                onClick={() => handleFilter(contentType, size)}
                             >
                                 <p>{size}</p>
                             </span>
@@ -52,13 +52,22 @@ function Filter({
                         return (
                             <div key={index}>
                                 <img
-                                    className={classes.filter}
+                                    className={
+                                        crrValueSelected === finishObj.finish
+                                            ? `${classes.finishFilter} ${classes.finishFilterValueSelected} `
+                                            : classes.finishFilter
+                                    }
                                     src={finishObj.url}
                                     onClick={() =>
-                                        handleFilter(finishObj.finish)
+                                        handleFilter(
+                                            contentType,
+                                            finishObj.finish
+                                        )
                                     }
                                 />
-                                <p>{finishObj.finish}</p>
+                                <p className={classes.finishFilterLabel}>
+                                    {finishObj.finish}
+                                </p>
                             </div>
                         );
                     })}

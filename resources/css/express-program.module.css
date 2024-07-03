@@ -21,9 +21,10 @@
     display: flex;
     gap: 1em;
     text-align: center;
+    flex-wrap: wrap;
 }
 
-.filter {
+.sizeFilter {
     border: 3px solid #d1aa68;
     border-radius: 50%;
     height: 4em;
@@ -35,10 +36,32 @@
     align-items: center;
 }
 
-.filterValueSelected {
+.sizeFilterValueSelected {
     background-color: #d1aa68;
     color: white;
 }
+
+.finishFilter {
+    border: 3px solid #d1aa68;
+    border-radius: 50%;
+    height: 2em;
+    width: 2em;
+    margin: 0 1em;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.finishFilterLabel {
+    font-size: small;
+}
+
+.finishFilterValueSelected {
+    border: 3px solid red;
+}
+
+/*== PRODUCTS CARS STYLING ==*/
 
 .expressProgramProductsWrapper {
     display: flex;
@@ -51,5 +74,55 @@
 }
 
 .expressProgramProductCard .productCardcontent {
-    margin: 1em 0;
+    margin: 2em;
+}
+
+/*-- finishes --*/
+.expressProgramProductCard .productCardcontent .finishesContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    margin-top: 1em;
+}
+
+.expressProgramProductCard .productCardcontent .finishesContainer .finish {
+    width: 15%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.expressProgramProductCard .productCardcontent .finishesContainer .finish img {
+    border: 1px solid #d1aa68;
+    border-radius: 50%;
+    height: 2.5em;
+    width: 2.5em;
+    margin: 0 0.5em;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.expressProgramProductCard .productCardcontent .finishesContainer .finish p {
+    font-size: 12px;
+    text-align: center;
+}
+
+/*-- composition name --*/
+.expressProgramProductCard .productCardcontent .compositionName {
+    font-size: xx-large;
+}
+
+/*-- starting price label --*/
+.expressProgramProductCard .productCardcontent .startingPriceLabel {
+    font-size: large;
+    font-weight: 400;
+    color: #d1aa68;
+}
+
+.expressProgramProductCard .productCardcontent .compositionImage {
+    height: 500px;
+    width: auto;
+    overflow: hidden;
 }

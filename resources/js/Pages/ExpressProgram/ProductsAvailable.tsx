@@ -13,19 +13,19 @@ interface ProductsAvailableProps {
 }
 
 type finish = {
-    finish: "matt sand";
-    url: "https://www.davidici.com/wp-content/uploads/2024/01/matt-SAND.png";
+    finish: string;
+    url: string;
 };
 
 function ProductsAvailable({ auth, rawProducts }: ProductsAvailableProps) {
     // this creates all the possible compositions.
-    const { compositions, sizesForFilter } = useMemo(() => {
+    const { compositions, sizesForFilter, finishesForFilter } = useMemo(() => {
         const itemsMap = new Map();
         const validCompositionSizesMap = new Map();
 
         const compositions: Composition[] = [];
         const sizesForFilter: string[] = [];
-        const finishesForFilter = new Map();
+        const finishesForFilterMap = new Map();
 
         // Create map hierchy
         rawProducts.forEach((product) => {
@@ -83,7 +83,8 @@ function ProductsAvailable({ auth, rawProducts }: ProductsAvailableProps) {
             }
         });
 
-        //travers throght map.
+        // Traverse throght validCompositionSizesMap map so we can create all possible compositions.
+        // SIZE -> SINK SET UP -> SINK POSITION.
         for (const [size, sinkPositionsMap] of validCompositionSizesMap) {
             // this is not a valid size, therefore, we continue. we must fix that in foxpro.
             if (size === "SINK" || size === "56") continue;
@@ -98,22 +99,36 @@ function ProductsAvailable({ auth, rawProducts }: ProductsAvailableProps) {
                     const modelsMap = itemsMap.get("VANITY").get(size);
 
                     for (const [model, listOfVanities] of modelsMap) {
-                        // add finish to use in filter.
+                        const listOfFinishesMap = new Map();
+
+                        // add finishes to use in filter and composition.
                         listOfVanities.forEach((vanity: ProductInventory) => {
-                            if (!finishesForFilter.has(vanity.finish))
-                                finishesForFilter.set(vanity.finish, {
-                                    finish: vanity.finish,
-                                    url: `https://www.davidici.com/wp-content/uploads/2024/01/${vanity.finish}.png`,
-                                });
+                            const finishObj = {
+                                finish: vanity.finish,
+                                url: "https://www.davidici.com/wp-content/uploads/2024/01/matt-SAND.png",
+                            };
+
+                            if (!listOfFinishesMap.has(vanity.finish))
+                                listOfFinishesMap.set(vanity.finish, finishObj);
+
+                            if (!finishesForFilterMap.has(vanity.finish))
+                                finishesForFilterMap.set(
+                                    vanity.finish,
+                                    finishObj
+                                );
                         });
 
-                        // Add constructed composotion to array.
+                        // Add constructed composition to array.
                         compositions.push({
                             name: `${model} ${size}" ${sinkPositionMeasure} SINK`,
+                            compositionImage: `https://seven.test/images/express-program/${model}/${size}.jpg`,
                             size: size,
                             vanities: listOfVanities.sort(
                                 (a: ProductInventory, b: ProductInventory) =>
                                     a.msrp - b.msrp
+                            ),
+                            finishes: Object.values(
+                                Object.fromEntries(listOfFinishesMap)
                             ),
                             sideUnits: [],
                             washbasins: crrItems.sort(
@@ -147,8 +162,9 @@ function ProductsAvailable({ auth, rawProducts }: ProductsAvailableProps) {
                             break;
                         }
 
+                        // for side units.
+                        // Checks if it's a side unit size. else should be a vanity size.
                         if (Number.parseInt(size) <= 16) {
-                            // Checks if side unit size. else should be a vaninity size.
                             // As of 07/2/2024, the largest side unit size is 16" inches and the smallest one 8".
                             const modelsMap = itemsMap
                                 .get("SIDE UNIT")
@@ -171,19 +187,53 @@ function ProductsAvailable({ auth, rawProducts }: ProductsAvailableProps) {
                         }
                     }
 
+                    // Iterate over the sink position map to start creating the composition.
                     for (const [position, listOfWasbasins] of crrItems) {
                         for (const [model, itemsMap] of validModels) {
+                            const listOfVanities = itemsMap
+                                .get("VANITY")
+                                .sort(
+                                    (
+                                        a: ProductInventory,
+                                        b: ProductInventory
+                                    ) => a.msrp - b.msrp
+                                );
+
+                            const listOfFinishesMap = new Map();
+
+                            // add finishes to use in filter and composition.
+                            listOfVanities.forEach(
+                                (vanity: ProductInventory) => {
+                                    const finishObj = {
+                                        finish: vanity.finish,
+                                        url: "https://www.davidici.com/wp-content/uploads/2024/01/matt-SAND.png",
+                                    };
+
+                                    if (!listOfFinishesMap.has(vanity.finish))
+                                        listOfFinishesMap.set(
+                                            vanity.finish,
+                                            finishObj
+                                        );
+
+                                    if (
+                                        !finishesForFilterMap.has(vanity.finish)
+                                    )
+                                        finishesForFilterMap.set(
+                                            vanity.finish,
+                                            finishObj
+                                        );
+                                }
+                            );
+
+                            // Add constructed composition to array.
                             compositions.push({
                                 name: `${model} ${size}" ${sinkPositionMeasure} ${position} SINK`,
+                                compositionImage: `https://seven.test/images/express-program/${model}/${sinkPositionMeasure} ${position} SINK.jpg`,
                                 size: size,
-                                vanities: itemsMap
-                                    .get("VANITY")
-                                    .sort(
-                                        (
-                                            a: ProductInventory,
-                                            b: ProductInventory
-                                        ) => a.msrp - b.msrp
-                                    ),
+                                vanities: listOfVanities,
+                                finishes: Object.values(
+                                    Object.fromEntries(listOfFinishesMap)
+                                ),
                                 sideUnits: itemsMap.get("SIDE UNIT") ?? [],
                                 washbasins: listOfWasbasins.sort(
                                     (
@@ -198,19 +248,38 @@ function ProductsAvailable({ auth, rawProducts }: ProductsAvailableProps) {
             }
         }
 
-        return { compositions, sizesForFilter };
-    }, [rawProducts]);
+        // Converts finishesForFilterMap values to and array with such values.
+        const finishesForFilter: finish[] = Object.values(
+            Object.fromEntries(finishesForFilterMap)
+        );
 
+        return { compositions, sizesForFilter, finishesForFilter };
+    }, [rawProducts]);
+    console.log(compositions);
     // this will re render when filter is used.
     const [products, setProducts] = useState(compositions);
 
-    const [crrSizeFiltered, setCrrSizeFiltered] = useState("");
+    const [crrValueFiltered, setCrrValueFiltered] = useState("");
 
-    const handleFilter = (value: string) => {
-        const productsFiltered = compositions.filter((product) => {
-            return product.size === value;
-        });
-        setCrrSizeFiltered(value);
+    const handleFilter = (filter: string, value: string) => {
+        let productsFiltered: Composition[] = [];
+
+        if (filter === "sizes") {
+            productsFiltered = compositions.filter((product) => {
+                return product.size === value;
+            });
+        }
+
+        if (filter === "images") {
+            productsFiltered = compositions.filter((product) => {
+                for (const finishObj of product.finishes) {
+                    if (finishObj.finish === value) return true;
+                }
+                return false;
+            });
+        }
+
+        setCrrValueFiltered(value);
         setProducts(productsFiltered);
     };
 
@@ -222,39 +291,14 @@ function ProductsAvailable({ auth, rawProducts }: ProductsAvailableProps) {
                         filterTitle="Filter By Size"
                         contentType="sizes"
                         values={sizesForFilter}
-                        crrValueSelected={crrSizeFiltered}
+                        crrValueSelected={crrValueFiltered}
                         onFilter={handleFilter}
                     />
                     <Filter
                         filterTitle="Filter By Color"
                         contentType="images"
-                        values={[
-                            {
-                                finish: "matt sand",
-                                url: "https://www.davidici.com/wp-content/uploads/2024/01/matt-SAND.png",
-                            },
-                            {
-                                finish: "PAPRIKA",
-                                url: "https://www.davidici.com/wp-content/uploads/2024/01/matt-PAPRIKA.png",
-                            },
-                            {
-                                finish: "GREEN",
-                                url: "https://www.davidici.com/wp-content/uploads/2024/01/matt-THYME-GREEN.jpg",
-                            },
-                            {
-                                finish: "MUSTARD",
-                                url: "https://www.davidici.com/wp-content/uploads/2024/01/matt-MUSTARD.png",
-                            },
-                            {
-                                finish: "BLUE",
-                                url: "https://www.davidici.com/wp-content/uploads/2024/01/matt-PACIFIC-BLUE.jpg",
-                            },
-                            {
-                                finish: "GREY",
-                                url: "https://www.davidici.com/wp-content/uploads/2024/01/glossy-lacq-CLOUD-GREY.jpg",
-                            },
-                        ]}
-                        crrValueSelected={crrSizeFiltered}
+                        values={finishesForFilter}
+                        crrValueSelected={crrValueFiltered}
                         onFilter={handleFilter}
                     />
                 </section>

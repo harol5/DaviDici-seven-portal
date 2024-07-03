@@ -10,7 +10,7 @@ function ProductExpressProgramCard({
     product,
 }: ProductExpressProgramCardProps) {
     const getStartingPrice = () => {
-        if (product.sideUnits[0]) {
+        if (product.sideUnits.length > 0) {
             product.sideUnits.sort(
                 (a: ProductInventory, b: ProductInventory) => a.msrp - b.msrp
             );
@@ -27,8 +27,30 @@ function ProductExpressProgramCard({
     return (
         <div className={classes.expressProgramProductCard}>
             <div className={classes.productCardcontent}>
-                <h1>{product.name}</h1>
-                <p>Starting at ${getStartingPrice()}</p>
+                <div className={classes.compositionImage}>
+                    <img
+                        src={product.compositionImage}
+                        alt="composition image"
+                    />
+                </div>
+                <h1 className={classes.compositionName}>{product.name}</h1>
+                <p className={classes.startingPriceLabel}>
+                    Starting at ${getStartingPrice()}
+                </p>
+                <div className={classes.finishesContainer}>
+                    {product.finishes.map((value, index) => {
+                        const finishObj = value as {
+                            finish: string;
+                            url: string;
+                        };
+                        return (
+                            <div key={index} className={classes.finish}>
+                                <img src={finishObj.url} />
+                                <p>{finishObj.finish}</p>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );
