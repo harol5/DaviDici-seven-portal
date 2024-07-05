@@ -22,7 +22,7 @@ function Filter({
             </div>
 
             {contentType === "sizes" && (
-                <div className={classes.filterWrapper}>
+                <div className={classes.sizeFilterWrapper}>
                     {values.map((value, index) => {
                         const size = value as string;
                         return (
@@ -43,14 +43,17 @@ function Filter({
             )}
 
             {contentType === "images" && (
-                <div className={classes.filterWrapper}>
+                <div className={classes.finishFilterWrapper}>
                     {values.map((value, index) => {
                         const finishObj = value as {
                             finish: string;
                             url: string;
                         };
                         return (
-                            <div key={index}>
+                            <div
+                                key={index}
+                                className={classes.labelAndFinishWrapper}
+                            >
                                 <img
                                     className={
                                         crrValueSelected === finishObj.finish

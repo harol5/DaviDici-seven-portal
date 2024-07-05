@@ -103,25 +103,28 @@ function ProductsAvailable({ auth, rawProducts }: ProductsAvailableProps) {
 
                         // add finishes to use in filter and composition.
                         listOfVanities.forEach((vanity: ProductInventory) => {
+                            let finish = vanity.finish;
+
+                            if (vanity.finish.includes("/")) {
+                                finish = vanity.finish.replace("/", "-");
+                            }
+
                             const finishObj = {
-                                finish: vanity.finish,
-                                url: "https://www.davidici.com/wp-content/uploads/2024/01/matt-SAND.png",
+                                finish: finish,
+                                url: `https://seven.test/images/express-program/finishes/${finish}.jpg`,
                             };
 
-                            if (!listOfFinishesMap.has(vanity.finish))
-                                listOfFinishesMap.set(vanity.finish, finishObj);
+                            if (!listOfFinishesMap.has(finish))
+                                listOfFinishesMap.set(finish, finishObj);
 
-                            if (!finishesForFilterMap.has(vanity.finish))
-                                finishesForFilterMap.set(
-                                    vanity.finish,
-                                    finishObj
-                                );
+                            if (!finishesForFilterMap.has(finish))
+                                finishesForFilterMap.set(finish, finishObj);
                         });
 
                         // Add constructed composition to array.
                         compositions.push({
                             name: `${model} ${size}" ${sinkPositionMeasure} SINK`,
-                            compositionImage: `https://seven.test/images/express-program/${model}/${size}.jpg`,
+                            compositionImage: `https://seven.test/images/express-program/${model}/${size}.webp`,
                             size: size,
                             vanities: listOfVanities.sort(
                                 (a: ProductInventory, b: ProductInventory) =>
@@ -204,22 +207,29 @@ function ProductsAvailable({ auth, rawProducts }: ProductsAvailableProps) {
                             // add finishes to use in filter and composition.
                             listOfVanities.forEach(
                                 (vanity: ProductInventory) => {
+                                    let finish = vanity.finish;
+
+                                    if (vanity.finish.includes("/")) {
+                                        finish = vanity.finish.replace(
+                                            "/",
+                                            "-"
+                                        );
+                                    }
+
                                     const finishObj = {
-                                        finish: vanity.finish,
-                                        url: "https://www.davidici.com/wp-content/uploads/2024/01/matt-SAND.png",
+                                        finish: finish,
+                                        url: `https://seven.test/images/express-program/finishes/${finish}.jpg`,
                                     };
 
-                                    if (!listOfFinishesMap.has(vanity.finish))
+                                    if (!listOfFinishesMap.has(finish))
                                         listOfFinishesMap.set(
-                                            vanity.finish,
+                                            finish,
                                             finishObj
                                         );
 
-                                    if (
-                                        !finishesForFilterMap.has(vanity.finish)
-                                    )
+                                    if (!finishesForFilterMap.has(finish))
                                         finishesForFilterMap.set(
-                                            vanity.finish,
+                                            finish,
                                             finishObj
                                         );
                                 }
@@ -255,7 +265,7 @@ function ProductsAvailable({ auth, rawProducts }: ProductsAvailableProps) {
 
         return { compositions, sizesForFilter, finishesForFilter };
     }, [rawProducts]);
-    console.log(compositions);
+
     // this will re render when filter is used.
     const [products, setProducts] = useState(compositions);
 

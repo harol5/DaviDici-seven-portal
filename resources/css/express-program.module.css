@@ -2,7 +2,7 @@
     margin-top: 1em;
     display: flex;
     flex-direction: column;
-    gap: 1em;
+    gap: 3em;
 }
 
 .titleAndFilterWrapper {
@@ -17,7 +17,7 @@
     align-items: center;
 }
 
-.filterWrapper {
+.sizeFilterWrapper {
     display: flex;
     gap: 1em;
     text-align: center;
@@ -41,11 +41,18 @@
     color: white;
 }
 
+.labelAndFinishWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 10%;
+}
+
 .finishFilter {
     border: 3px solid #d1aa68;
     border-radius: 50%;
-    height: 2em;
-    width: 2em;
+    height: 2.8em;
+    width: 2.8em;
     margin: 0 1em;
     cursor: pointer;
     display: flex;
@@ -53,8 +60,16 @@
     align-items: center;
 }
 
+.finishFilterWrapper {
+    display: flex;
+    gap: 1em;
+    text-align: center;
+    flex-wrap: wrap;
+    flex-basis: 90%;
+}
+
 .finishFilterLabel {
-    font-size: small;
+    font-size: 12px;
 }
 
 .finishFilterValueSelected {
@@ -121,8 +136,8 @@
     color: #d1aa68;
 }
 
-.expressProgramProductCard .productCardcontent .compositionImage {
+/* .expressProgramProductCard .productCardcontent .compositionImage {
     height: 500px;
     width: auto;
     overflow: hidden;
-}
+} */
