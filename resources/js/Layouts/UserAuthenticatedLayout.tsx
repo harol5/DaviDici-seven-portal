@@ -77,6 +77,15 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
                                 </li>
                                 <li>
                                     <Link
+                                        href="/users/change-password"
+                                        as="button"
+                                        type="button"
+                                    >
+                                        Change Password
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
                                         href="/logout"
                                         method="post"
                                         as="button"

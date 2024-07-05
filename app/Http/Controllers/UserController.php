@@ -168,6 +168,20 @@ class UserController extends Controller
         return redirect('/users/welcome')->with(['error' => 'something went wrong']);
     }
 
+    // show change password form ------------
+    public function showFormChangePassword(){
+        return Inertia::render('Users/ChangePassword');
+    }
+
+    // Change user password (admin only) ----------------------
+    public function ChangePassword(Request $request){
+        $data = $request->all();
+
+        User::where('email',$data['email'])->update(['password' => bcrypt($data['password'])]);
+
+        back()->with('message', "done");
+    }
+
     // Shows welcome page ----------------------
     public function welcome(Request $request){
         $name = $request->session()->get('name');
