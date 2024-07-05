@@ -24,13 +24,27 @@ function ProductExpressProgramCard({
         return product.vanities[0].msrp + product.washbasins[0].msrp;
     };
 
+    const handleProduct = () => {
+        console.log("sending products select to post endpoint");
+        console.log(product);
+    };
+
     return (
-        <div className={classes.expressProgramProductCard}>
+        <div
+            className={classes.expressProgramProductCard}
+            onClick={handleProduct}
+        >
             <div className={classes.productCardcontent}>
                 <div className={classes.compositionImage}>
                     <img
                         src={product.compositionImage}
                         alt="composition image"
+                        loading="lazy"
+                        onError={(e) => {
+                            (e.target as HTMLImageElement).onerror = null;
+                            (e.target as HTMLImageElement).src =
+                                "https://seven.test/images/express-program/not-image.jpg";
+                        }}
                     />
                 </div>
                 <h1 className={classes.compositionName}>{product.name}</h1>

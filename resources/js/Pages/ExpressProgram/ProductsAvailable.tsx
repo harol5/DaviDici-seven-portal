@@ -238,7 +238,7 @@ function ProductsAvailable({ auth, rawProducts }: ProductsAvailableProps) {
                             // Add constructed composition to array.
                             compositions.push({
                                 name: `${model} ${size}" ${sinkPositionMeasure} ${position} SINK`,
-                                compositionImage: `https://seven.test/images/express-program/${model}/${sinkPositionMeasure} ${position} SINK.jpg`,
+                                compositionImage: `https://seven.test/images/express-program/${model}/${sinkPositionMeasure} ${position} SINK.webp`,
                                 size: size,
                                 vanities: listOfVanities,
                                 finishes: Object.values(
@@ -266,7 +266,7 @@ function ProductsAvailable({ auth, rawProducts }: ProductsAvailableProps) {
         return { compositions, sizesForFilter, finishesForFilter };
     }, [rawProducts]);
 
-    // this will re render when filter is used.
+    // this will re-render when filter is used.
     const [products, setProducts] = useState(compositions);
 
     const [crrValueFiltered, setCrrValueFiltered] = useState("");

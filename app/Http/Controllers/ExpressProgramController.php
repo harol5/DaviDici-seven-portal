@@ -36,4 +36,6 @@ class ExpressProgramController extends Controller
         return back()->with(['message' => 'Something went wrong. please contact support']);
                 
     }
+
+    public function setProduct(Request $request){}
 }
