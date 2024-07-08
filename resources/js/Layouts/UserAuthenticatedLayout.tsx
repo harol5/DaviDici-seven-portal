@@ -48,6 +48,15 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
                         >
                             <Link href="/inventory">Inventory</Link>
                         </li>
+                        <li
+                            className={
+                                crrPage === "inventory"
+                                    ? "common-button active"
+                                    : "common-button"
+                            }
+                        >
+                            <Link href="/express-program">Express Program</Link>
+                        </li>
                     </ul>
                     <div className="settings-wrapper">
                         <img

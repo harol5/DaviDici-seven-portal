@@ -1,0 +1,142 @@
+.allFiltersWrapper {
+    margin-top: 1em;
+    display: flex;
+    flex-direction: column;
+    gap: 3em;
+}
+
+.titleAndFilterWrapper {
+    display: flex;
+    justify-content: center;
+    gap: 1.5em;
+}
+
+.titleWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sizeFilterWrapper {
+    display: flex;
+    gap: 1em;
+    text-align: center;
+    flex-wrap: wrap;
+}
+
+.sizeFilter {
+    border: 3px solid #d1aa68;
+    border-radius: 50%;
+    height: 4em;
+    width: 4em;
+    margin: 0 1em;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sizeFilterValueSelected {
+    background-color: #d1aa68;
+    color: white;
+}
+
+.labelAndFinishWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 10%;
+}
+
+.finishFilter {
+    border: 3px solid #d1aa68;
+    border-radius: 50%;
+    height: 2.8em;
+    width: 2.8em;
+    margin: 0 1em;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.finishFilterWrapper {
+    display: flex;
+    gap: 1em;
+    text-align: center;
+    flex-wrap: wrap;
+    flex-basis: 90%;
+}
+
+.finishFilterLabel {
+    font-size: 12px;
+}
+
+.finishFilterValueSelected {
+    border: 3px solid red;
+}
+
+/*== PRODUCTS CARS STYLING ==*/
+
+.expressProgramProductsWrapper {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 1em;
+}
+
+.expressProgramProductCard {
+    width: 50%;
+    transition: all 0.2s ease-in;
+}
+
+.expressProgramProductCard:hover {
+    box-shadow: 1px 5px 25px #d1ab68a1;
+}
+
+.expressProgramProductCard .productCardcontent {
+    margin: 2em;
+    cursor: pointer;
+}
+
+/*-- finishes --*/
+.expressProgramProductCard .productCardcontent .finishesContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    margin-top: 1em;
+}
+
+.expressProgramProductCard .productCardcontent .finishesContainer .finish {
+    width: 15%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.expressProgramProductCard .productCardcontent .finishesContainer .finish img {
+    border: 1px solid #d1aa68;
+    border-radius: 50%;
+    height: 2.5em;
+    width: 2.5em;
+    margin: 0 0.5em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.expressProgramProductCard .productCardcontent .finishesContainer .finish p {
+    font-size: 12px;
+    text-align: center;
+}
+
+/*-- composition name --*/
+.expressProgramProductCard .productCardcontent .compositionName {
+    font-size: xx-large;
+}
+
+/*-- starting price label --*/
+.expressProgramProductCard .productCardcontent .startingPriceLabel {
+    font-size: large;
+    font-weight: 400;
+    color: #d1aa68;
+}

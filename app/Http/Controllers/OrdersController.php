@@ -43,7 +43,7 @@ class OrdersController extends Controller
             'keep_session' => false,
         ]);
 
-        if($response['status'] === 201){
+        if($response['status'] === 201){            
             return Inertia::render('Orders/OrderOverview',
                 [
                     'order' => $order, 
@@ -54,7 +54,7 @@ class OrdersController extends Controller
             );
         }
         
-        $this->logFoxproError('GetSoStatus','orderOverview', [$orderNumber], $response);
+        logFoxproError('GetSoStatus','orderOverview', [$orderNumber], $response);
         return back()->with(['message' => 'Something went wrong. please contact support']);
         
     }
@@ -72,7 +72,7 @@ class OrdersController extends Controller
             return response(['products' => $response['rows'], 'status' => 201])->header('Content-Type', 'application/json');
         }
 
-        $this->logFoxproError('GetSoStatus','getProducts', [$orderNumber], $response);
+        logFoxproError('GetSoStatus','getProducts', [$orderNumber], $response);
         return response(['products' => "something went wrong, please contact support", 'status' => 500])->header('Content-Type', 'application/json');
     }
 
@@ -288,10 +288,10 @@ class OrdersController extends Controller
         }
 
         if($deliveryInfo['status'] === 500) {
-            $this->logFoxproError('GetDeliveryInfo','orderPayment', [$orderNumber], $deliveryInfo);
+            logFoxproError('GetDeliveryInfo','orderPayment', [$orderNumber], $deliveryInfo);
         }
         if($depositInfo['status'] === 500) {
-            $this->logFoxproError('getpercentdeposit','orderPayment', [$userEmail,$orderNumber], $depositInfo);
+            logFoxproError('getpercentdeposit','orderPayment', [$userEmail,$orderNumber], $depositInfo);
         }
 
         
@@ -588,14 +588,6 @@ class OrdersController extends Controller
             info($tokens['token_type']);
             // set new tokens.
         }
-    }
-
-    public function logFoxproError($funcName, $controller, $params, $response ){
-        Log::error("=VVVVV=== ERROR REQUESTING DATA FROM FOXPRO. function: $funcName, controller: $controller ====VVVVV");
-        Log::error("----- params ----");
-        Log::error($params);
-        Log::error("----- response ----");
-        Log::error($response);
-    }
+    }    
 }
 
