@@ -76,7 +76,7 @@ function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
                                 onClick={() => history.back()}
                             >
                                 <img
-                                    src="https://seven.test/images/back-triangle.svg"
+                                    src="https://portal.davidici.com/images/back-triangle.svg"
                                     alt="golden triangle"
                                 />
                                 <p>BACK</p>
