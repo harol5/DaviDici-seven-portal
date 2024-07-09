@@ -1,0 +1,73 @@
+.compositionConfiguratorWrapper {
+    display: flex;
+    margin-top: 30px;
+}
+
+.leftSideConfiguratorWrapper {
+    flex-basis: 60%;
+}
+
+.rightSideConfiguratorWrapper {
+    flex-basis: 40%;
+}
+
+.leftSideConfiguratorWrapper .backButtonAndNameWrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.leftSideConfiguratorWrapper .backButtonAndNameWrapper h1 {
+    font-size: xx-large;
+    color: #d1aa68;
+}
+
+.leftSideConfiguratorWrapper .backButtonWrapper {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.leftSideConfiguratorWrapper .backButtonWrapper img {
+    width: 40px;
+}
+
+.titleAndFinishesWrapper {
+    margin-top: 13px;
+}
+
+.title {
+    font-size: 26px;
+    color: #d1aa68;
+}
+
+.finishesWrapper {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.leftSideConfiguratorWrapper .finish {
+    width: 15%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+}
+
+.leftSideConfiguratorWrapper .finish img {
+    border: 1px solid #d1aa68;
+    border-radius: 50%;
+    height: 4em;
+    width: 4em;
+    margin: 0 0.5em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.leftSideConfiguratorWrapper .finish p {
+    font-size: 13px;
+    text-align: center;
+}

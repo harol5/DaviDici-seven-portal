@@ -27,7 +27,8 @@ class ExpressProgramController extends Controller
         if($response['status'] === 201){
             return Inertia::render('ExpressProgram/ProductsAvailable',
                 [                    
-                    'rawProducts' => $response['rows'],                     
+                    'rawProducts' => $response['rows'],
+                    'message' => $message                   
                 ]
             );
         }
@@ -37,5 +38,22 @@ class ExpressProgramController extends Controller
                 
     }
 
-    public function setProduct(Request $request){}
+    public function setProduct(Request $request){
+        $composition = $request->all();        
+        return redirect()->route('expressProgram.product', ['product' => $composition['name']])->with(['data' => $composition]);
+    }
+
+    public function productConfigurator(Request $request){
+        $composition = $request->session()->get('data');   
+        
+        if(!$composition) {
+            return redirect('/express-program')->with('message', 'Product expired!!!');
+        }
+
+        return Inertia::render('ExpressProgram/ProductConfigurator',
+            [                    
+                'composition' => $composition,                     
+            ]
+        );
+    }
 }

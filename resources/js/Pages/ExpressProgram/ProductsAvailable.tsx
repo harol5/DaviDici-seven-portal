@@ -11,9 +11,14 @@ import classes from "../../../css/express-program.module.css";
 interface ProductsAvailableProps {
     auth: User;
     rawProducts: ProductInventory[];
+    message?: string;
 }
 
-function ProductsAvailable({ auth, rawProducts }: ProductsAvailableProps) {
+function ProductsAvailable({
+    auth,
+    rawProducts,
+    message,
+}: ProductsAvailableProps) {
     // this creates all the possible compositions.
     const { compositions, sizesForFilter, finishesForFilter } =
         useExpressProgramProducts(rawProducts);

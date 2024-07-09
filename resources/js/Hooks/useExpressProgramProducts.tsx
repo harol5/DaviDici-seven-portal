@@ -20,7 +20,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                 sizesMap.set(product.size, new Map());
 
             const modelMap = sizesMap.get(product.size);
-            if (product.model === "MARGI") {
+            if (product.model === "MARGI" && product.item === "VANITY") {
                 // MARGI needs to be narrow down further because of variations of door style.
                 if (!modelMap.has(product.model))
                     modelMap.set(product.model, new Map());
@@ -220,6 +220,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         washbasingAvailable: ProductInventory[]
     ) => {
         const doorStylesMap = itemsMap.get("VANITY");
+        const sideUnits = itemsMap.get("SIDE UNIT") ?? [];
 
         for (const [doorStyle, margiVanitiesList] of doorStylesMap) {
             const listOfVanities = margiVanitiesList.sort(
@@ -238,7 +239,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                 size: size,
                 vanities: listOfVanities,
                 finishes: finishes,
-                sideUnits: itemsMap.get("SIDE UNIT") ?? [],
+                sideUnits: sideUnits,
                 washbasins: washbasingAvailable.sort(
                     (a: ProductInventory, b: ProductInventory) =>
                         a.msrp - b.msrp

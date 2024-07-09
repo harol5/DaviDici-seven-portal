@@ -50,6 +50,8 @@ Route::middleware(['auth','auth.session'])->group(function () {
 
     // Express Program routes
     Route::get('/express-program', [ExpressProgramController::class, 'all']);
+    Route::post('/express-program/set-product', [ExpressProgramController::class, 'setProduct']);
+    Route::get('/express-program/{product}', [ExpressProgramController::class, 'productConfigurator'])->name('expressProgram.product');
 
     // Inventory routes.
     Route::get('/inventory', function(){        

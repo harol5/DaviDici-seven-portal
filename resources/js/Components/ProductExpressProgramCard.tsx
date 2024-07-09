@@ -1,6 +1,7 @@
 import type { Composition } from "../Models/Composition";
 import classes from "../../css/express-program.module.css";
 import type { ProductInventory } from "../Models/Product";
+import { router } from "@inertiajs/react";
 
 interface ProductExpressProgramCardProps {
     product: Composition;
@@ -25,8 +26,7 @@ function ProductExpressProgramCard({
     };
 
     const handleProduct = () => {
-        console.log("sending products select to post endpoint");
-        console.log(product);
+        router.post("/express-program/set-product", product);
     };
 
     return (
