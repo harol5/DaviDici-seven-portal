@@ -9,37 +9,49 @@ type finish = {
 
 function useExpressProgramProducts(rawProducts: ProductInventory[]) {
     const createProductsTree = () => {
-        const itemsMap = new Map();
+        const vanitiesAndSideUnitsMap = new Map();
+        const otherProductsMap = new Map();
         const validCompositionSizesMap = new Map();
+
         rawProducts.forEach((product) => {
-            if (!itemsMap.has(product.item))
-                itemsMap.set(product.item, new Map());
+            if (product.item === "VANITY" || product.item === "SIDE UNIT") {
+                if (!vanitiesAndSideUnitsMap.has(product.item))
+                    vanitiesAndSideUnitsMap.set(product.item, new Map());
 
-            const sizesMap = itemsMap.get(product.item);
-            if (!sizesMap.has(product.size))
-                sizesMap.set(product.size, new Map());
+                const sizesMap = vanitiesAndSideUnitsMap.get(product.item);
+                if (!sizesMap.has(product.size))
+                    sizesMap.set(product.size, new Map());
 
-            const modelMap = sizesMap.get(product.size);
-            if (product.model === "MARGI" && product.item === "VANITY") {
-                // MARGI needs to be narrow down further because of variations of door style.
-                if (!modelMap.has(product.model))
-                    modelMap.set(product.model, new Map());
+                const modelMap = sizesMap.get(product.size);
+                if (product.model === "MARGI" && product.item === "VANITY") {
+                    // MARGI needs to be narrow down further because of variations of door style.
+                    if (!modelMap.has(product.model))
+                        modelMap.set(product.model, new Map());
 
-                const doorStyleMap = modelMap.get(product.model);
-                const doorStyle = product.descw.match(
-                    /\bGRID\b|\bPLAIN\b|\bFRAME\b|\bSTRIPES\b/
-                );
+                    const doorStyleMap = modelMap.get(product.model);
+                    const doorStyle = product.descw.match(
+                        /\bGRID\b|\bPLAIN\b|\bFRAME\b|\bSTRIPES\b/
+                    );
 
-                if (doorStyle) {
-                    if (!doorStyleMap.has(doorStyle[0]))
-                        doorStyleMap.set(doorStyle[0], []);
-                    doorStyleMap.get(doorStyle[0]).push(product);
+                    if (doorStyle) {
+                        if (!doorStyleMap.has(doorStyle[0]))
+                            doorStyleMap.set(doorStyle[0], []);
+                        doorStyleMap.get(doorStyle[0]).push(product);
+                    }
+                } else {
+                    if (!modelMap.has(product.model))
+                        modelMap.set(product.model, []);
+
+                    modelMap.get(product.model).push(product);
                 }
             } else {
-                if (!modelMap.has(product.model))
-                    modelMap.set(product.model, []);
+                if (!otherProductsMap.has(product.model))
+                    otherProductsMap.set(product.model, new Map());
 
-                modelMap.get(product.model).push(product);
+                const itemsMap = otherProductsMap.get(product.model);
+                if (!itemsMap.has(product.item)) itemsMap.set(product.item, []);
+
+                itemsMap.get(product.item).push(product);
             }
 
             // adds valid sizes composition to the map so we can use later.
@@ -84,7 +96,11 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
             }
         });
 
-        return { itemsMap, validCompositionSizesMap };
+        return {
+            vanitiesAndSideUnitsMap,
+            validCompositionSizesMap,
+            otherProductsMap,
+        };
     };
 
     const generateFinishes = (
@@ -116,6 +132,19 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         return Object.values(Object.fromEntries(listOfFinishesMap));
     };
 
+    const generateOtherProductsObj = (
+        otherProducts: Map<string, Map<string, ProductInventory[]>>,
+        model: string
+    ) => {
+        if (otherProducts.get(model)) {
+            return Object.fromEntries(
+                otherProducts.get(model) as Map<string, ProductInventory[]>
+            );
+        }
+
+        return null;
+    };
+
     const generateCenteredSinkCompositions = (
         listOfVanities: ProductInventory[],
         finishesForFilterMap: Map<string, finish>,
@@ -123,12 +152,14 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         model: string,
         size: string,
         sinkPositionMeasure: string,
-        washbasingAvailable: ProductInventory[]
+        washbasingAvailable: ProductInventory[],
+        otherProducts: Map<string, Map<string, ProductInventory[]>>
     ) => {
         const finishes = generateFinishes(listOfVanities, finishesForFilterMap);
 
         // Add constructed composition to array.
         compositions.push({
+            model: model,
             name: `${model} ${size}" - ${sinkPositionMeasure} SINK`,
             compositionImage: `https://portal.davidici.com/images/express-program/${model}/${size}.webp`,
             size: size,
@@ -140,6 +171,10 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
             washbasins: washbasingAvailable.sort(
                 (a: ProductInventory, b: ProductInventory) => a.msrp - b.msrp
             ),
+            otherProductsAvailable: generateOtherProductsObj(
+                otherProducts,
+                model
+            ),
         });
     };
 
@@ -150,7 +185,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         model: string,
         size: string,
         sinkPositionMeasure: string,
-        washbasingAvailable: ProductInventory[]
+        washbasingAvailable: ProductInventory[],
+        otherProducts: Map<string, Map<string, []>>
     ) => {
         for (const [doorStyle, margiVanityList] of doorStylesMap) {
             const finishes = generateFinishes(
@@ -160,6 +196,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
 
             // Add constructed composition to array.
             compositions.push({
+                model: model,
                 name: `${model} ${size}" - ${sinkPositionMeasure} SINK - ${doorStyle} DOOR`,
                 compositionImage: `https://portal.davidici.com/images/express-program/${model}/${size}-${doorStyle}.webp`,
                 size: size,
@@ -173,6 +210,10 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                     (a: ProductInventory, b: ProductInventory) =>
                         a.msrp - b.msrp
                 ),
+                otherProductsAvailable: generateOtherProductsObj(
+                    otherProducts,
+                    model
+                ),
             });
         }
     };
@@ -185,7 +226,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         size: string,
         sinkPositionMeasure: string,
         position: string,
-        washbasingAvailable: ProductInventory[]
+        washbasingAvailable: ProductInventory[],
+        otherProducts: Map<string, Map<string, []>>
     ) => {
         const listOfVanities = itemsMap
             .get("VANITY")
@@ -197,6 +239,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
 
         // Add constructed composition to array.
         compositions.push({
+            model: model,
             name: `${model} ${size}" ${sinkPositionMeasure} - ${position} SINK`,
             compositionImage: `https://portal.davidici.com/images/express-program/${model}/${sinkPositionMeasure} ${position} SINK.webp`,
             size: size,
@@ -205,6 +248,10 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
             sideUnits: itemsMap.get("SIDE UNIT") ?? [],
             washbasins: washbasingAvailable.sort(
                 (a: ProductInventory, b: ProductInventory) => a.msrp - b.msrp
+            ),
+            otherProductsAvailable: generateOtherProductsObj(
+                otherProducts,
+                model
             ),
         });
     };
@@ -217,7 +264,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         size: string,
         sinkPositionMeasure: string,
         position: string,
-        washbasingAvailable: ProductInventory[]
+        washbasingAvailable: ProductInventory[],
+        otherProducts: Map<string, Map<string, []>>
     ) => {
         const doorStylesMap = itemsMap.get("VANITY");
         const sideUnits = itemsMap.get("SIDE UNIT") ?? [];
@@ -234,6 +282,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
 
             // Add constructed composition to array.
             compositions.push({
+                model: model,
                 name: `${model} ${size}" ${sinkPositionMeasure} - ${position} SINK - ${doorStyle} DOOR`,
                 compositionImage: `https://portal.davidici.com/images/express-program/${model}/${sinkPositionMeasure} ${position} SINK-${doorStyle}.webp`,
                 size: size,
@@ -244,14 +293,23 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                     (a: ProductInventory, b: ProductInventory) =>
                         a.msrp - b.msrp
                 ),
+                otherProductsAvailable: generateOtherProductsObj(
+                    otherProducts,
+                    model
+                ),
             });
         }
     };
 
     return useMemo(() => {
         // Create map hierchy
-        const { itemsMap, validCompositionSizesMap } = createProductsTree();
+        const {
+            vanitiesAndSideUnitsMap,
+            validCompositionSizesMap,
+            otherProductsMap,
+        } = createProductsTree();
 
+        console.log(otherProductsMap);
         const compositions: Composition[] = [];
         const sizesForFilter: string[] = [];
         const finishesForFilterMap = new Map();
@@ -269,7 +327,9 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                 if (sinkPositionMeasure === "DOUBLE SINK") continue;
 
                 if (sinkPositionMeasure === "CENTERED") {
-                    const modelsMap = itemsMap.get("VANITY").get(size);
+                    const modelsMap = vanitiesAndSideUnitsMap
+                        .get("VANITY")
+                        .get(size);
                     for (const [model, listOfVanities] of modelsMap) {
                         // MARGI is a special case because it's also classified by door style. this means,
                         // there is an extra Map we have to go through
@@ -281,7 +341,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                                 model,
                                 size,
                                 sinkPositionMeasure,
-                                crrItems
+                                crrItems,
+                                otherProductsMap
                             );
                         else
                             generateCenteredSinkCompositions(
@@ -291,7 +352,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                                 model,
                                 size,
                                 sinkPositionMeasure,
-                                crrItems
+                                crrItems,
+                                otherProductsMap
                             );
                     }
                 } else {
@@ -308,7 +370,9 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
 
                         // for double sinks.
                         if (i === 0 && Number.parseInt(size) > 16) {
-                            const modelsMap = itemsMap.get("VANITY").get(size);
+                            const modelsMap = vanitiesAndSideUnitsMap
+                                .get("VANITY")
+                                .get(size);
 
                             for (const [model, arr] of modelsMap) {
                                 if (!validModels.has(model))
@@ -323,7 +387,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                         // Checks if it's a side unit size. else should be a vanity size.
                         if (Number.parseInt(size) <= 16) {
                             // As of 07/2/2024, the largest side unit size is 16" inches and the smallest one 8".
-                            const modelsMap = itemsMap
+                            const modelsMap = vanitiesAndSideUnitsMap
                                 .get("SIDE UNIT")
                                 .get(size);
 
@@ -334,7 +398,9 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                             }
                         } else {
                             // Once we got the valid model from the side units,
-                            const modelsMap = itemsMap.get("VANITY").get(size);
+                            const modelsMap = vanitiesAndSideUnitsMap
+                                .get("VANITY")
+                                .get(size);
 
                             for (const [model, arr] of modelsMap) {
                                 //we can get only vanities that can be pair with a side unit.
@@ -356,7 +422,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                                     size,
                                     sinkPositionMeasure,
                                     position,
-                                    listOfWasbasins
+                                    listOfWasbasins,
+                                    otherProductsMap
                                 );
                             else
                                 generateComplexCompositions(
@@ -367,7 +434,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                                     size,
                                     sinkPositionMeasure,
                                     position,
-                                    listOfWasbasins
+                                    listOfWasbasins,
+                                    otherProductsMap
                                 );
                         }
                     }

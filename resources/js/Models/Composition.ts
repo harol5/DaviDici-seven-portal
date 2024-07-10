@@ -1,6 +1,7 @@
 import type { ProductInventory } from "./Product";
 
 export type Composition = {
+    model: string;
     name: string;
     compositionImage: string;
     size: string;
@@ -11,4 +12,5 @@ export type Composition = {
     }[];
     sideUnits: ProductInventory[];
     washbasins: ProductInventory[];
+    otherProductsAvailable: {} | null;
 };

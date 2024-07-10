@@ -43,7 +43,7 @@ function ProductExpressProgramCard({
                         onError={(e) => {
                             (e.target as HTMLImageElement).onerror = null;
                             (e.target as HTMLImageElement).src =
-                                "https://seven.test/images/express-program/not-image.jpg";
+                                "https://portal.davidici.com/images/express-program/not-image.jpg";
                         }}
                     />
                 </div>

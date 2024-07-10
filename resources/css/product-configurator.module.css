@@ -33,7 +33,7 @@
     width: 40px;
 }
 
-.titleAndFinishesWrapper {
+.titleAndOptionsWrapper {
     margin-top: 13px;
 }
 
@@ -42,13 +42,14 @@
     color: #d1aa68;
 }
 
-.finishesWrapper {
+.OptionsWrapper {
     display: flex;
     gap: 10px;
     margin-top: 10px;
+    flex-wrap: wrap;
 }
 
-.leftSideConfiguratorWrapper .finish {
+.option {
     width: 15%;
     display: flex;
     flex-direction: column;
@@ -56,7 +57,11 @@
     cursor: pointer;
 }
 
-.leftSideConfiguratorWrapper .finish img {
+.option .imageAndOverlayWrapper {
+    position: relative;
+}
+
+.option .imageAndOverlayWrapper img {
     border: 1px solid #d1aa68;
     border-radius: 50%;
     height: 4em;
@@ -67,7 +72,20 @@
     align-items: center;
 }
 
-.leftSideConfiguratorWrapper .finish p {
+.option .imageAndOverlayWrapper .imageOverlay {
+    position: absolute;
+    top: 0;
+    left: 9%;
+    height: 4em;
+    width: 4em;
+    border-radius: 50%;
+}
+
+.option p {
     font-size: 13px;
     text-align: center;
+}
+
+.optionSelected .imageAndOverlayWrapper .imageOverlay {
+    background-color: #d1ab68c8;
 }

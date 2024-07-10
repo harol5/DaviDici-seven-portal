@@ -5,6 +5,7 @@ import { Composition } from "../../Models/Composition";
 import classes from "../../../css/product-configurator.module.css";
 import FinishesOptionsConfigurator from "../../Components/ExpressProgramConfigurator/FinishesOptionsConfigurator";
 import { ProductInventory } from "../../Models/Product";
+import MargiConfigurator from "../../Components/ExpressProgramConfigurator/MargiConfigurator";
 
 interface ProductConfiguratorProps {
     auth: User;
@@ -12,6 +13,7 @@ interface ProductConfiguratorProps {
 }
 
 function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
+    console.log(composition);
     const sideUnitFinishes: { finish: string; url: string }[] = useMemo(() => {
         // if there is any side unit, get finishes available
         if (composition.sideUnits.length > 0) {
@@ -53,6 +55,7 @@ function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
         items.forEach((item) =>
             item.finish === finishCopy ? matches.push(item) : null
         );
+        console.log(matches);
     };
 
     useEffect(() => {
@@ -68,51 +71,62 @@ function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
     return (
         <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <div className="main-content-wrapper">
-                <div className={classes.compositionConfiguratorWrapper}>
-                    <section className={classes.leftSideConfiguratorWrapper}>
-                        <section className={classes.backButtonAndNameWrapper}>
-                            <span
-                                className={classes.backButtonWrapper}
-                                onClick={() => history.back()}
+                {composition.model === "MARGI" && (
+                    <MargiConfigurator composition={composition} />
+                )}
+                {composition.model !== "MARGI" && (
+                    <div className={classes.compositionConfiguratorWrapper}>
+                        <section
+                            className={classes.leftSideConfiguratorWrapper}
+                        >
+                            <section
+                                className={classes.backButtonAndNameWrapper}
+                            >
+                                <span
+                                    className={classes.backButtonWrapper}
+                                    onClick={() => history.back()}
+                                >
+                                    <img
+                                        src="https://portal.davidici.com/images/back-triangle.svg"
+                                        alt="golden triangle"
+                                    />
+                                    <p>BACK</p>
+                                </span>
+                                <h1>{composition.name}</h1>
+                            </section>
+                            <section
+                                className={classes.compositionImageWrapper}
                             >
                                 <img
-                                    src="https://portal.davidici.com/images/back-triangle.svg"
-                                    alt="golden triangle"
+                                    src={composition.compositionImage}
+                                    alt="product images"
                                 />
-                                <p>BACK</p>
-                            </span>
-                            <h1>{composition.name}</h1>
-                        </section>
-                        <section className={classes.compositionImageWrapper}>
-                            <img
-                                src={composition.compositionImage}
-                                alt="product images"
-                            />
-                        </section>
-                        <section
-                            className={classes.vanitiesAndSideUnitFinishes}
-                        >
-                            <FinishesOptionsConfigurator
-                                item="vanities"
-                                title="CHOOSE YOUR VANITY FINISH"
-                                finishes={composition.finishes}
-                                onSelectedFinish={handleSelectedFinish}
-                            />
-
-                            {sideUnitFinishes.length > 0 && (
+                            </section>
+                            <section
+                                className={classes.vanitiesAndSideUnitFinishes}
+                            >
                                 <FinishesOptionsConfigurator
-                                    item="sideUnits"
-                                    title="CHOOSE YOUR SIDE UNIT FINISH"
-                                    finishes={sideUnitFinishes}
+                                    item="vanities"
+                                    title="CHOOSE YOUR VANITY FINISH"
+                                    finishes={composition.finishes}
                                     onSelectedFinish={handleSelectedFinish}
                                 />
-                            )}
+
+                                {sideUnitFinishes.length > 0 && (
+                                    <FinishesOptionsConfigurator
+                                        item="sideUnits"
+                                        title="CHOOSE YOUR SIDE UNIT FINISH"
+                                        finishes={sideUnitFinishes}
+                                        onSelectedFinish={handleSelectedFinish}
+                                    />
+                                )}
+                            </section>
                         </section>
-                    </section>
-                    <section
-                        className={classes.rightSideConfiguratorWrapper}
-                    ></section>
-                </div>
+                        <section
+                            className={classes.rightSideConfiguratorWrapper}
+                        ></section>
+                    </div>
+                )}
             </div>
         </UserAuthenticatedLayout>
     );
