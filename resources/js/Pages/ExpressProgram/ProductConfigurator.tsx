@@ -13,7 +13,6 @@ interface ProductConfiguratorProps {
 }
 
 function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
-    console.log(composition);
     const sideUnitFinishes: { finish: string; url: string }[] = useMemo(() => {
         // if there is any side unit, get finishes available
         if (composition.sideUnits.length > 0) {

@@ -29,15 +29,19 @@ function Options({
                             className={
                                 crrOptionSelected === option.code
                                     ? `${classes.optionSelected} ${classes.option}`
-                                    : `${classes.option}`
+                                    : option.isDisabled
+                                    ? `${classes.optionDisabled} ${classes.option}`
+                                    : classes.option
                             }
-                            onClick={() =>
-                                handleOptionSelected(
-                                    item,
-                                    property,
-                                    option.code
-                                )
-                            }
+                            onClick={() => {
+                                !option.isDisabled
+                                    ? handleOptionSelected(
+                                          item,
+                                          property,
+                                          option.code
+                                      )
+                                    : null;
+                            }}
                         >
                             <div className={classes.imageAndOverlayWrapper}>
                                 <div className={classes.imageOverlay}></div>
