@@ -26,10 +26,10 @@
     font-family: "DMSans";
     src: url("https://seven.test/fonts/DM_Sans/DMSans-VariableFont_opsz,wght.ttf");
 }
-/* @font-face {
+@font-face {
     font-family: "DMSans";
     src: url("https://davidici-seven-portal.test/fonts/DM_Sans/DMSans-VariableFont_opsz,wght.ttf");
-} */
+}
 
 * {
     margin: 0;

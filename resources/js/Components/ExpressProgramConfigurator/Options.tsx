@@ -18,6 +18,25 @@ function Options({
     crrOptionSelected,
     onOptionSelected: handleOptionSelected,
 }: OptionsProps) {
+    const getClassName = (option: Option): string => {
+        let finalClasses = "";
+
+        if (
+            property === "finish" ||
+            property === "mattFinish" ||
+            property === "glassFinish"
+        )
+            finalClasses += `${classes.finishOption} ${classes.option}`;
+        else finalClasses += `${classes.option}`;
+
+        if (option.code === crrOptionSelected)
+            finalClasses += ` ${classes.optionSelected}`;
+
+        if (option.isDisabled) finalClasses += ` ${classes.optionDisabled}`;
+
+        return finalClasses;
+    };
+
     return (
         <section className={classes.titleAndOptionsWrapper}>
             <h1 className={classes.title}>{title}</h1>
@@ -26,13 +45,7 @@ function Options({
                     return (
                         <div
                             key={index}
-                            className={
-                                crrOptionSelected === option.code
-                                    ? `${classes.optionSelected} ${classes.option}`
-                                    : option.isDisabled
-                                    ? `${classes.optionDisabled} ${classes.option}`
-                                    : classes.option
-                            }
+                            className={getClassName(option)}
                             onClick={() => {
                                 !option.isDisabled
                                     ? handleOptionSelected(

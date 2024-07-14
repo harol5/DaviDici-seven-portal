@@ -431,7 +431,7 @@ function Register({ message }: { message: string }) {
 
                                 <div>
                                     <h4 className="text-xl">
-                                        1 YEAR ON ALL MODELS:
+                                        LIFETIME ON ALL MODELS:
                                     </h4>
                                     <p>
                                         It is recommended that all goods are

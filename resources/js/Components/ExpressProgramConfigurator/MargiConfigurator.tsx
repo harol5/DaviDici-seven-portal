@@ -3,19 +3,31 @@ import classes from "../../../css/product-configurator.module.css";
 import { useEffect, useMemo, useReducer, useState } from "react";
 import type { Option } from "../../Models/ExpressProgramModels";
 import Options from "./Options";
-import { ProductInventory } from "../../Models/Product";
 
 /**
  * TODO;
- * MUST CREATE A RESET BUTTON FOR EACH OPTION.
+ * 1. logic for "order now" button.
+ * 2. add other products options.
  */
 
 interface MargiConfiguratorProps {
     composition: Composition;
 }
 
+interface margiOpenUnit {
+    baseSku: string;
+    finish: string;
+}
+
+interface margiSideCabinet {
+    baseSku: string;
+    doorStyleAndHandle: string;
+    finish: string;
+}
+
 interface CurrentConfiguration {
     vanity: { baseSku: string; drawer: string; handle: string; finish: string };
+    sideUnit: margiOpenUnit | margiSideCabinet | null;
     washbasin: string;
 }
 
@@ -23,6 +35,15 @@ interface vanityOptions {
     baseSku: string;
     drawerOptions: Option[];
     handleOptions: Option[];
+    finishOptions: Option[];
+}
+interface margiOpenUnitOptions {
+    baseSku: string;
+    finishOptions: Option[];
+}
+interface margiSideCabinetOptions {
+    baseSku: string;
+    doorStyleAndHandleOptions: Option[];
     finishOptions: Option[];
 }
 
@@ -48,7 +69,7 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
             if (!drawerOptionsMap.has(`${codes[2]}`))
                 drawerOptionsMap.set(`${codes[2]}`, {
                     code: codes[2],
-                    imgUrl: "https://seven.test/images/express-program/not-image.jpg",
+                    imgUrl: "https://portal.davidici.com/images/express-program/not-image.jpg",
                     title: codes[2].includes("D") ? "2 DRAWERS" : "1 DRAWER",
                     validSkus: [],
                     isDisabled: false,
@@ -59,7 +80,7 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
             if (!handleOptionsMap.has(`${codes[3]}`))
                 handleOptionsMap.set(`${codes[3]}`, {
                     code: codes[3],
-                    imgUrl: "https://seven.test/images/express-program/not-image.jpg",
+                    imgUrl: "https://portal.davidici.com/images/express-program/not-image.jpg",
                     title: codes[3].includes("1")
                         ? "BLACK HANDLE"
                         : "POLISH HANLDE",
@@ -72,7 +93,7 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
             if (!finishOptionsMap.has(`${codes[4]}`))
                 finishOptionsMap.set(`${codes[4]}`, {
                     code: codes[4],
-                    imgUrl: "https://seven.test/images/express-program/not-image.jpg",
+                    imgUrl: `https://portal.davidici.com/images/express-program/finishes/${vanity.finish}.jpg`,
                     title: vanity.finish,
                     validSkus: [],
                     isDisabled: false,
@@ -94,10 +115,10 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
     // iterate over washbasin array and created Options array. ----------------------|
     const washbasinOptions: Option[] = useMemo(() => {
         const all: Option[] = [];
-        composition.washbasins.forEach((washbasin, index) => {
+        composition.washbasins.forEach((washbasin) => {
             all.push({
                 code: washbasin.uscode,
-                imgUrl: "https://seven.test/images/express-program/not-image.jpg",
+                imgUrl: "https://portal.davidici.com/images/express-program/not-image.jpg",
                 title: `${washbasin.model} ${washbasin.finish}`,
                 validSkus: [washbasin.uscode],
                 isDisabled: false,
@@ -107,25 +128,179 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
         return all;
     }, []);
 
-    // create objetct that will hold current configuration. if only one option, make default. --------------|
-    const initialConfiguration: CurrentConfiguration = {
-        vanity: {
-            baseSku: vanityOptions.baseSku,
-            drawer:
-                vanityOptions.drawerOptions.length === 1
-                    ? vanityOptions.drawerOptions[0].code
-                    : "",
-            handle:
-                vanityOptions.handleOptions.length === 1
-                    ? vanityOptions.handleOptions[0].code
-                    : "",
-            finish:
-                vanityOptions.finishOptions.length === 1
-                    ? vanityOptions.finishOptions[0].code
-                    : "",
-        },
-        washbasin: composition.washbasins[0].uscode,
-    };
+    // if sideUnits array is not empty
+    const initialSideUnitOptions:
+        | margiOpenUnitOptions
+        | margiSideCabinetOptions
+        | null = useMemo(() => {
+        if (composition.sideUnits.length === 0) return null;
+
+        if (composition.sideUnits[0].descw.includes("16")) {
+            let baseSku: string = "";
+            const finishOptionsMap = new Map();
+            const doorStyleAndHandleOptionsMap = new Map();
+
+            composition.sideUnits.forEach((sideUnit, index) => {
+                const codes = sideUnit.uscode.split("-");
+                // the following logic is only for margi because each model has a different sku number order.
+                // EX: 68 - SC - 016 -   F1    -   M23
+                //       base sku    door-style   finish
+
+                // only get base sku from first vanity.
+                if (index === 0) {
+                    baseSku = `${codes[0]}-${codes[1]}-${codes[2]}`;
+                }
+
+                if (!doorStyleAndHandleOptionsMap.has(`${codes[3]}`)) {
+                    let iniTitle = codes[3].includes("F")
+                        ? "FRAME"
+                        : codes[3].includes("S")
+                        ? "STRIPES"
+                        : codes[3].includes("G")
+                        ? "GRID"
+                        : codes[3].includes("P")
+                        ? "PLAIN"
+                        : "";
+                    iniTitle += codes[3].includes("1")
+                        ? " W/ BLACK HANDLE"
+                        : " W/ POLISH HANDLE";
+
+                    doorStyleAndHandleOptionsMap.set(`${codes[3]}`, {
+                        code: codes[3],
+                        imgUrl: "https://portal.davidici.com/images/express-program/not-image.jpg",
+                        title: iniTitle,
+                        validSkus: [],
+                        isDisabled: false,
+                    });
+                }
+                doorStyleAndHandleOptionsMap
+                    .get(`${codes[3]}`)
+                    .validSkus.push(sideUnit.uscode);
+
+                if (!finishOptionsMap.has(`${codes[4]}`))
+                    finishOptionsMap.set(`${codes[4]}`, {
+                        code: codes[4],
+                        imgUrl: `https://portal.davidici.com/images/express-program/finishes/${sideUnit.finish}.jpg`,
+                        title: sideUnit.finish,
+                        validSkus: [],
+                        isDisabled: false,
+                    });
+
+                finishOptionsMap
+                    .get(`${codes[4]}`)
+                    .validSkus.push(sideUnit.uscode);
+            });
+
+            return {
+                baseSku,
+                doorStyleAndHandleOptions: Object.values(
+                    Object.fromEntries(doorStyleAndHandleOptionsMap)
+                ),
+                finishOptions: Object.values(
+                    Object.fromEntries(finishOptionsMap)
+                ),
+            };
+        }
+
+        if (composition.sideUnits[0].descw.includes("8")) {
+            let baseSku: string = "";
+            const finishOptionsMap = new Map();
+
+            composition.sideUnits.forEach((sideUnit, index) => {
+                const codes = sideUnit.uscode.split("-");
+                // the following logic is only for margi because each model has a different sku number order.
+                // EX: 68 - SO - 08  - M23
+                //       base sku     finish
+
+                // only get base sku from first vanity.
+                if (index === 0) {
+                    baseSku = `${codes[0]}-${codes[1]}-${codes[2]}`;
+                }
+
+                if (!finishOptionsMap.has(`${codes[3]}`))
+                    finishOptionsMap.set(`${codes[3]}`, {
+                        code: codes[3],
+                        imgUrl: `https://portal.davidici.com/images/express-program/finishes/${sideUnit.finish}.jpg`,
+                        title: sideUnit.finish,
+                        validSkus: [],
+                        isDisabled: false,
+                    });
+
+                finishOptionsMap
+                    .get(`${codes[3]}`)
+                    .validSkus.push(sideUnit.uscode);
+            });
+
+            return {
+                baseSku,
+                finishOptions: Object.values(
+                    Object.fromEntries(finishOptionsMap)
+                ),
+            };
+        }
+
+        return null;
+    }, []);
+
+    const [sideUnitOptions, setSideUnitOptions] = useState(
+        initialSideUnitOptions
+    );
+
+    // create objetct that will hold current configuration. if only one option, make it default. --------------|
+    const initialConfiguration: CurrentConfiguration = useMemo(() => {
+        let sideUnit: margiOpenUnit | margiSideCabinet | null = null;
+        if (sideUnitOptions) {
+            if (composition.sideUnits[0].descw.includes("8")) {
+                const margiOpenUnitOptions =
+                    sideUnitOptions as margiOpenUnitOptions;
+                sideUnit = {
+                    baseSku: margiOpenUnitOptions.baseSku,
+                    finish:
+                        margiOpenUnitOptions.finishOptions.length === 1
+                            ? margiOpenUnitOptions.finishOptions[0].code
+                            : "",
+                };
+            }
+
+            if (composition.sideUnits[0].descw.includes("16")) {
+                const margiSideCabinetOptions =
+                    sideUnitOptions as margiSideCabinetOptions;
+                sideUnit = {
+                    baseSku: margiSideCabinetOptions.baseSku,
+                    doorStyleAndHandle:
+                        margiSideCabinetOptions.doorStyleAndHandleOptions
+                            .length === 1
+                            ? margiSideCabinetOptions
+                                  .doorStyleAndHandleOptions[0].code
+                            : "",
+                    finish:
+                        margiSideCabinetOptions.finishOptions.length === 1
+                            ? margiSideCabinetOptions.finishOptions[0].code
+                            : "",
+                };
+            }
+        }
+
+        return {
+            vanity: {
+                baseSku: vanityOptions.baseSku,
+                drawer:
+                    vanityOptions.drawerOptions.length === 1
+                        ? vanityOptions.drawerOptions[0].code
+                        : "",
+                handle:
+                    vanityOptions.handleOptions.length === 1
+                        ? vanityOptions.handleOptions[0].code
+                        : "",
+                finish:
+                    vanityOptions.finishOptions.length === 1
+                        ? vanityOptions.finishOptions[0].code
+                        : "",
+            },
+            sideUnit: sideUnit,
+            washbasin: composition.washbasins[0].uscode,
+        };
+    }, []);
 
     const reducer = (
         state: CurrentConfiguration,
@@ -165,6 +340,24 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
                     washbasin: action.payload,
                 };
 
+            case "set-sideUnit-finish":
+                return {
+                    ...state,
+                    sideUnit: {
+                        ...state.sideUnit,
+                        finish: action.payload,
+                    } as margiOpenUnit,
+                };
+
+            case "set-sideUnit-doorStyleAndHandle":
+                return {
+                    ...state,
+                    sideUnit: {
+                        ...state.sideUnit,
+                        doorStyleAndHandle: action.payload,
+                    } as margiSideCabinet,
+                };
+
             default:
                 throw new Error();
         }
@@ -175,7 +368,7 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
         initialConfiguration
     );
 
-    // Events ---------------------|
+    // |====== Events ======|
     const handleOptionSelected = (
         item: string,
         property: string,
@@ -228,47 +421,142 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
 
             setVanityOptions(copyOptions);
         }
+
+        if (item === "sideUnit") {
+            if (composition.sideUnits[0].descw.includes("8")) {
+                const copyOptions = {
+                    ...sideUnitOptions,
+                } as margiOpenUnitOptions;
+
+                for (const finishOption of copyOptions.finishOptions as Option[]) {
+                    if (property === "finish") break;
+                    for (let i = 0; i < finishOption.validSkus.length; i++) {
+                        const validSku = finishOption.validSkus[i];
+                        if (validSku.includes(option)) {
+                            finishOption.isDisabled = false;
+                            break;
+                        }
+
+                        if (i === finishOption.validSkus.length - 1)
+                            finishOption.isDisabled = true;
+                    }
+                }
+
+                setSideUnitOptions(copyOptions);
+            }
+
+            if (composition.sideUnits[0].descw.includes("16")) {
+                const copyOptions = {
+                    ...sideUnitOptions,
+                } as margiSideCabinetOptions;
+
+                for (const doorStyleAndHandleOption of copyOptions.doorStyleAndHandleOptions as Option[]) {
+                    if (property === "doorStyleAndHandle") break;
+                    for (
+                        let i = 0;
+                        i < doorStyleAndHandleOption.validSkus.length;
+                        i++
+                    ) {
+                        const validSku = doorStyleAndHandleOption.validSkus[i];
+                        if (validSku.includes(option)) {
+                            doorStyleAndHandleOption.isDisabled = false;
+                            break;
+                        }
+
+                        if (i === doorStyleAndHandleOption.validSkus.length - 1)
+                            doorStyleAndHandleOption.isDisabled = true;
+                    }
+                }
+
+                for (const finishOption of copyOptions.finishOptions as Option[]) {
+                    if (property === "finish") break;
+                    for (let i = 0; i < finishOption.validSkus.length; i++) {
+                        const validSku = finishOption.validSkus[i];
+                        if (validSku.includes(option)) {
+                            finishOption.isDisabled = false;
+                            break;
+                        }
+
+                        if (i === finishOption.validSkus.length - 1)
+                            finishOption.isDisabled = true;
+                    }
+                }
+
+                setSideUnitOptions(copyOptions);
+            }
+        }
+
         dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
     };
 
-    // Manage grand total ------------|
+    // Manage grand total
     const [grandTotal, setGrandTotal] = useState(0);
 
     useEffect(() => {
-        const codesArray = [];
+        const vanityCodesArray = [];
         for (const key in currentConfiguration.vanity) {
             const value =
                 currentConfiguration.vanity[
                     key as "baseSku" | "drawer" | "handle" | "finish"
                 ];
 
-            if (value) codesArray.push(value);
+            if (value) vanityCodesArray.push(value);
         }
 
-        // this means we have a valid sku number;
-        if (codesArray.length === 4) {
-            const vanitySku = codesArray.join("-");
+        const sideUnitCodesArray = [];
+        if (currentConfiguration.sideUnit) {
+            for (const key in currentConfiguration.sideUnit) {
+                const value =
+                    currentConfiguration.sideUnit[key as "baseSku" | "finish"];
+
+                if (value) sideUnitCodesArray.push(value);
+            }
+        }
+
+        // this means we have a valid vanity sku number;
+        if (
+            vanityCodesArray.length === 4 &&
+            (sideUnitCodesArray.length === 2 || !currentConfiguration.sideUnit)
+        ) {
+            const vanitySku = vanityCodesArray.join("-");
+            const sideUnitSku = sideUnitCodesArray.join("-");
+
+            let vanityMsrp = 0;
+            let washbasinMsrp = 0;
+            let sideUnitMsrp = 0;
 
             for (const crrVanity of composition.vanities) {
                 if (crrVanity.uscode === vanitySku) {
-                    for (const washbasin of composition.washbasins) {
-                        if (
-                            washbasin.uscode === currentConfiguration.washbasin
-                        ) {
-                            setGrandTotal(crrVanity.msrp + washbasin.msrp);
-                            break;
-                        }
-                    }
+                    vanityMsrp = crrVanity.msrp;
                     break;
                 }
             }
+
+            for (const washbasin of composition.washbasins) {
+                if (washbasin.uscode === currentConfiguration.washbasin) {
+                    washbasinMsrp = washbasin.msrp;
+                    break;
+                }
+            }
+
+            for (const sideUnit of composition.sideUnits) {
+                if (sideUnit.uscode === sideUnitSku) {
+                    sideUnitMsrp = sideUnit.msrp;
+                    break;
+                }
+            }
+
+            setGrandTotal(vanityMsrp + washbasinMsrp + sideUnitMsrp);
         }
     }, [currentConfiguration]);
 
+    // Manage order now.
+    const handleOrderNow = () => {
+        console.log(currentConfiguration);
+    };
     console.log(composition);
     console.log(currentConfiguration);
-    console.log(vanityOptions);
-
+    console.log(sideUnitOptions);
     return (
         <div className={classes.compositionConfiguratorWrapper}>
             <section className={classes.leftSideConfiguratorWrapper}>
@@ -288,7 +576,12 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
                 <section className={classes.compositionImageWrapper}>
                     <img
                         src={composition.compositionImage}
-                        alt="product images"
+                        alt="product image"
+                        onError={(e) => {
+                            (e.target as HTMLImageElement).onerror = null;
+                            (e.target as HTMLImageElement).src =
+                                "https://portal.davidici.com/images/express-program/not-image.jpg";
+                        }}
                     />
                 </section>
                 <section className={classes.vanitiesAndSideUnitFinishes}>
@@ -300,6 +593,18 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
                         crrOptionSelected={currentConfiguration.vanity.finish}
                         onOptionSelected={handleOptionSelected}
                     />
+                    {sideUnitOptions && (
+                        <Options
+                            item="sideUnit"
+                            property="finish"
+                            title="SELECT SIDE UNIT FINISH"
+                            options={sideUnitOptions.finishOptions}
+                            crrOptionSelected={
+                                currentConfiguration.sideUnit?.finish as string
+                            }
+                            onOptionSelected={handleOptionSelected}
+                        />
+                    )}
                 </section>
             </section>
             <section className={classes.rightSideConfiguratorWrapper}>
@@ -327,12 +632,17 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
                     crrOptionSelected={currentConfiguration.washbasin}
                     onOptionSelected={handleOptionSelected}
                 />
-                <div>
-                    <div>
-                        <h1>Grand Total:</h1>
-                        <span>${grandTotal}</span>
+                <div className={classes.grandTotalAndOrderNowButtonWrapper}>
+                    <div className={classes.grandTotalWrapper}>
+                        <h1 className={classes.label}>Grand Total:</h1>
+                        <span className={classes.amount}>${grandTotal}</span>
                     </div>
-                    <button>ORDER NOW</button>
+                    <button
+                        disabled={!grandTotal ? true : false}
+                        onClick={handleOrderNow}
+                    >
+                        ORDER NOW
+                    </button>
                 </div>
             </section>
         </div>

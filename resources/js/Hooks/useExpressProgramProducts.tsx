@@ -23,7 +23,26 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                     sizesMap.set(product.size, new Map());
 
                 const modelMap = sizesMap.get(product.size);
-                if (product.model === "MARGI" && product.item === "VANITY") {
+
+                if (
+                    product.model === "NEW YORK" &&
+                    product.item === "SIDE UNIT"
+                ) {
+                    if (!modelMap.has(product.model))
+                        modelMap.set(product.model, new Map());
+
+                    const sideUnitPositionMap = modelMap.get(product.model);
+                    const position = product.descw.match(/\bLEFT\b|\bRIGHT\b/);
+
+                    if (position) {
+                        if (!sideUnitPositionMap.has(position[0]))
+                            sideUnitPositionMap.set(position[0], []);
+                        sideUnitPositionMap.get(position[0]).push(product);
+                    }
+                } else if (
+                    product.model === "MARGI" &&
+                    product.item === "VANITY"
+                ) {
                     // MARGI needs to be narrow down further because of variations of door style.
                     if (!modelMap.has(product.model))
                         modelMap.set(product.model, new Map());
@@ -237,6 +256,18 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
 
         const finishes = generateFinishes(listOfVanities, finishesForFilterMap);
 
+        let sideUnits = [];
+        if (itemsMap.get("SIDE UNIT")) sideUnits = itemsMap.get("SIDE UNIT");
+        if (model === "NEW YORK" && itemsMap.get("SIDE UNIT")) {
+            const actualPosition =
+                position === "LEFT"
+                    ? "RIGHT"
+                    : position === "RIGHT"
+                    ? "LEFT"
+                    : "";
+            sideUnits = itemsMap.get("SIDE UNIT").get(actualPosition);
+        }
+
         // Add constructed composition to array.
         compositions.push({
             model: model,
@@ -245,7 +276,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
             size: size,
             vanities: listOfVanities,
             finishes: finishes,
-            sideUnits: itemsMap.get("SIDE UNIT") ?? [],
+            sideUnits: sideUnits ?? [],
             washbasins: washbasingAvailable.sort(
                 (a: ProductInventory, b: ProductInventory) => a.msrp - b.msrp
             ),
@@ -309,7 +340,6 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
             otherProductsMap,
         } = createProductsTree();
 
-        console.log(otherProductsMap);
         const compositions: Composition[] = [];
         const sizesForFilter: string[] = [];
         const finishesForFilterMap = new Map();
@@ -384,17 +414,19 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                         }
 
                         // for side units.
-                        // Checks if it's a side unit size. else should be a vanity size.
+                        // Checks IF it's a side unit size. ELSE should be a vanity size.
                         if (Number.parseInt(size) <= 16) {
                             // As of 07/2/2024, the largest side unit size is 16" inches and the smallest one 8".
                             const modelsMap = vanitiesAndSideUnitsMap
                                 .get("SIDE UNIT")
                                 .get(size);
 
-                            for (const [model, arr] of modelsMap) {
+                            // IMPORTANT!! - "value" could be an array or a map(NEW YORK <position, arr>).
+                            for (const [model, value] of modelsMap) {
                                 if (!validModels.has(model))
                                     validModels.set(model, new Map());
-                                validModels.get(model).set("SIDE UNIT", arr);
+
+                                validModels.get(model).set("SIDE UNIT", value);
                             }
                         } else {
                             // Once we got the valid model from the side units,
@@ -402,6 +434,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                                 .get("VANITY")
                                 .get(size);
 
+                            // IMPORTANT!! - "value" could be an array or a map(MARGI <door style, arr>).
                             for (const [model, arr] of modelsMap) {
                                 //we can get only vanities that can be pair with a side unit.
                                 if (!validModels.has(model)) continue;

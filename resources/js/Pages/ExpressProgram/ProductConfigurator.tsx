@@ -2,10 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import UserAuthenticatedLayout from "../../Layouts/UserAuthenticatedLayout";
 import User from "../../Models/User";
 import { Composition } from "../../Models/Composition";
-import classes from "../../../css/product-configurator.module.css";
-import FinishesOptionsConfigurator from "../../Components/ExpressProgramConfigurator/FinishesOptionsConfigurator";
-import { ProductInventory } from "../../Models/Product";
 import MargiConfigurator from "../../Components/ExpressProgramConfigurator/MargiConfigurator";
+import NewBaliConfigurator from "../../Components/ExpressProgramConfigurator/NewBaliConfigurator";
+import NewYorkConfigurator from "../../Components/ExpressProgramConfigurator/NewYorkConfigurator";
+import EloraConfigurator from "../../Components/ExpressProgramConfigurator/EloraConfigurator";
+import OtherModelsConfigurator from "../../Components/ExpressProgramConfigurator/OtherModelsConfigurator";
 
 interface ProductConfiguratorProps {
     auth: User;
@@ -39,24 +40,6 @@ function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
         return [];
     }, []);
 
-    const handleSelectedFinish = (
-        item: "vanities" | "sideUnits",
-        finish: string
-    ) => {
-        let finishCopy = finish;
-        if (finish.includes("-")) {
-            finishCopy = finish.replace("-", "/");
-        }
-
-        const matches: ProductInventory[] = [];
-        const items = composition[item];
-
-        items.forEach((item) =>
-            item.finish === finishCopy ? matches.push(item) : null
-        );
-        console.log(matches);
-    };
-
     useEffect(() => {
         const handleBeforeUnload = (event: BeforeUnloadEvent) => {
             event.preventDefault();
@@ -70,61 +53,16 @@ function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
     return (
         <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <div className="main-content-wrapper">
-                {composition.model === "MARGI" && (
+                {composition.model === "MARGI" ? (
                     <MargiConfigurator composition={composition} />
-                )}
-                {composition.model !== "MARGI" && (
-                    <div className={classes.compositionConfiguratorWrapper}>
-                        <section
-                            className={classes.leftSideConfiguratorWrapper}
-                        >
-                            <section
-                                className={classes.backButtonAndNameWrapper}
-                            >
-                                <span
-                                    className={classes.backButtonWrapper}
-                                    onClick={() => history.back()}
-                                >
-                                    <img
-                                        src="https://portal.davidici.com/images/back-triangle.svg"
-                                        alt="golden triangle"
-                                    />
-                                    <p>BACK</p>
-                                </span>
-                                <h1>{composition.name}</h1>
-                            </section>
-                            <section
-                                className={classes.compositionImageWrapper}
-                            >
-                                <img
-                                    src={composition.compositionImage}
-                                    alt="product images"
-                                />
-                            </section>
-                            <section
-                                className={classes.vanitiesAndSideUnitFinishes}
-                            >
-                                <FinishesOptionsConfigurator
-                                    item="vanities"
-                                    title="CHOOSE YOUR VANITY FINISH"
-                                    finishes={composition.finishes}
-                                    onSelectedFinish={handleSelectedFinish}
-                                />
-
-                                {sideUnitFinishes.length > 0 && (
-                                    <FinishesOptionsConfigurator
-                                        item="sideUnits"
-                                        title="CHOOSE YOUR SIDE UNIT FINISH"
-                                        finishes={sideUnitFinishes}
-                                        onSelectedFinish={handleSelectedFinish}
-                                    />
-                                )}
-                            </section>
-                        </section>
-                        <section
-                            className={classes.rightSideConfiguratorWrapper}
-                        ></section>
-                    </div>
+                ) : composition.model === "NEW BALI" ? (
+                    <NewBaliConfigurator composition={composition} />
+                ) : composition.model === "NEW YORK" ? (
+                    <NewYorkConfigurator composition={composition} />
+                ) : composition.model === "ELORA" ? (
+                    <EloraConfigurator composition={composition} />
+                ) : (
+                    <OtherModelsConfigurator composition={composition} />
                 )}
             </div>
         </UserAuthenticatedLayout>
