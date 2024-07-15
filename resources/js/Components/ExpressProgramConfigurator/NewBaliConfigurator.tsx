@@ -21,7 +21,8 @@ interface CurrentConfiguration {
         vanityBase: string;
         finish: string;
     };
-    sideUnit: string | null;
+    isDoubleSink: boolean;
+    sideUnit: { baseSku: string; finish: string } | null;
     washbasin: string;
 }
 
@@ -29,6 +30,11 @@ interface vanityOptions {
     baseSku: string;
     drawerOptions: Option[];
     vanityBaseOptions: Option[];
+    finishOptions: Option[];
+}
+
+interface sideUnitOptions {
+    baseSku: string;
     finishOptions: Option[];
 }
 
@@ -116,21 +122,39 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
     }, []);
 
     // if sideUnits array is not empty
-    const sideUnitOptions: Option[] = useMemo(() => {
-        const all: Option[] = [];
-        if (composition.sideUnits.length === 0) return all;
+    const sideUnitOptions: sideUnitOptions | null = useMemo(() => {
+        if (composition.sideUnits.length === 0) return null;
 
-        composition.sideUnits.forEach((sideUnit) => {
-            all.push({
-                code: sideUnit.uscode,
-                imgUrl: "https://portal.davidici.com/images/express-program/not-image.jpg",
-                title: `${sideUnit.descw}`,
-                validSkus: [sideUnit.uscode],
-                isDisabled: false,
-            });
+        let baseSku: string = "";
+        const finishOptionsMap = new Map();
+
+        composition.sideUnits.forEach((sideUnit, index) => {
+            const codes = sideUnit.uscode.split("-");
+            // the following logic is only for margi because each model has a different sku number order.
+            // EX:      73    -   SO   -  012  -  M98
+            //       base sku    type     size   finish
+
+            // only get base sku from first vanity.
+            if (index === 0) {
+                baseSku = `${codes[0]}-${codes[1]}-${codes[2]}`;
+            }
+
+            if (!finishOptionsMap.has(`${codes[3]}`))
+                finishOptionsMap.set(`${codes[3]}`, {
+                    code: codes[3],
+                    imgUrl: `https://portal.davidici.com/images/express-program/finishes/${sideUnit.finish}.jpg`,
+                    title: sideUnit.finish,
+                    validSkus: [],
+                    isDisabled: false,
+                });
+
+            finishOptionsMap.get(`${codes[3]}`).validSkus.push(sideUnit.uscode);
         });
 
-        return all;
+        return {
+            baseSku,
+            finishOptions: Object.values(Object.fromEntries(finishOptionsMap)),
+        };
     }, []);
 
     // create objetct that will hold current configuration. if only one option, make it default. --------------|
@@ -150,10 +174,16 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
                     ? vanityOptions.finishOptions[0].code
                     : "",
         },
-        sideUnit:
-            composition.sideUnits.length > 0
-                ? composition.sideUnits[0].uscode
-                : null,
+        isDoubleSink: composition.name.includes("DOUBLE"),
+        sideUnit: sideUnitOptions
+            ? {
+                  baseSku: sideUnitOptions.baseSku,
+                  finish:
+                      sideUnitOptions.finishOptions.length === 1
+                          ? sideUnitOptions.finishOptions[0].code
+                          : "",
+              }
+            : null,
         washbasin: composition.washbasins[0].uscode,
     };
 
@@ -195,10 +225,13 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
                     washbasin: action.payload,
                 };
 
-            case "set-sideUnit-type":
+            case "set-sideUnit-finish":
                 return {
                     ...state,
-                    sideUnit: action.payload,
+                    sideUnit: {
+                        ...state.sideUnit,
+                        finish: action.payload,
+                    } as { baseSku: string; finish: string },
                 };
 
             default:
@@ -264,6 +297,7 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
 
             setVanityOptions(copyOptions);
         }
+
         dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
     };
 
@@ -281,9 +315,23 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
             if (value) codesArray.push(value);
         }
 
+        const sideUnitCodesArray = [];
+        if (currentConfiguration.sideUnit) {
+            for (const key in currentConfiguration.sideUnit) {
+                const value =
+                    currentConfiguration.sideUnit[key as "baseSku" | "finish"];
+
+                if (value) sideUnitCodesArray.push(value);
+            }
+        }
+
         // this means we have a valid vanity sku number;
-        if (codesArray.length === 4) {
+        if (
+            codesArray.length === 4 &&
+            (sideUnitCodesArray.length === 2 || !currentConfiguration.sideUnit)
+        ) {
             const vanitySku = codesArray.join("-");
+            const sideUnitSku = sideUnitCodesArray.join("-");
 
             let vanityMsrp = 0;
             let washbasinMsrp = 0;
@@ -303,14 +351,14 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
                 }
             }
 
-            if (sideUnitOptions.length !== 0) {
-                for (const sideUnit of composition.sideUnits) {
-                    if (sideUnit.uscode === currentConfiguration.sideUnit) {
-                        sideUnitMsrp = sideUnit.msrp;
-                        break;
-                    }
+            for (const sideUnit of composition.sideUnits) {
+                if (sideUnit.uscode === sideUnitSku) {
+                    sideUnitMsrp = sideUnit.msrp;
+                    break;
                 }
             }
+
+            if (currentConfiguration.isDoubleSink) vanityMsrp *= 2;
 
             setGrandTotal(vanityMsrp + washbasinMsrp + sideUnitMsrp);
         }
@@ -318,6 +366,7 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
 
     // Manage order now.
     const handleOrderNow = () => {
+        console.log(composition);
         console.log(currentConfiguration);
     };
 
@@ -352,7 +401,7 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
                     <Options
                         item="vanity"
                         property="finish"
-                        title="SELECT FINISH"
+                        title="SELECT VANITY FINISH"
                         options={vanityOptions.finishOptions}
                         crrOptionSelected={currentConfiguration.vanity.finish}
                         onOptionSelected={handleOptionSelected}
@@ -363,19 +412,19 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
                 <Options
                     item="vanity"
                     property="drawer"
-                    title="SELECT DRAWERS"
+                    title="SELECT VANITY DRAWERS"
                     options={vanityOptions.drawerOptions}
                     crrOptionSelected={currentConfiguration.vanity.drawer}
                     onOptionSelected={handleOptionSelected}
                 />
-                {sideUnitOptions.length !== 0 && (
+                {sideUnitOptions && (
                     <Options
                         item="sideUnit"
-                        property="type"
-                        title="SELECT SIDE UNIT"
-                        options={sideUnitOptions}
+                        property="finish"
+                        title="SELECT SIDE UNIT FINISH"
+                        options={sideUnitOptions.finishOptions}
                         crrOptionSelected={
-                            currentConfiguration.sideUnit as string
+                            currentConfiguration.sideUnit?.finish as string
                         }
                         onOptionSelected={handleOptionSelected}
                     />
@@ -388,6 +437,7 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
                     crrOptionSelected={currentConfiguration.washbasin}
                     onOptionSelected={handleOptionSelected}
                 />
+
                 <div className={classes.grandTotalAndOrderNowButtonWrapper}>
                     <div className={classes.grandTotalWrapper}>
                         <h1 className={classes.label}>Grand Total:</h1>

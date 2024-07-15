@@ -14,14 +14,29 @@ interface OtherModelsConfiguratorProps {
     composition: Composition;
 }
 
+interface SideUnit {
+    baseSku: string;
+    type: string;
+    size: string;
+    finish: string;
+}
+
 interface CurrentConfiguration {
     vanity: { baseSku: string; finish: string };
-    sideUnit: string | null;
+    isDoubleSink: boolean;
+    sideUnit: SideUnit | null;
     washbasin: string;
 }
 
 interface vanityOptions {
     baseSku: string;
+    finishOptions: Option[];
+}
+
+interface sideUnitOptions {
+    baseSku: string;
+    typeOptions: Option[];
+    size: string;
     finishOptions: Option[];
 }
 
@@ -81,22 +96,63 @@ function OtherModelsConfigurator({
     }, []);
 
     // if sideUnits array is not empty
-    const sideUnitOptions: Option[] = useMemo(() => {
-        const all: Option[] = [];
-        if (composition.sideUnits.length === 0) return all;
+    const initialSideUnitOptions: sideUnitOptions | null = useMemo(() => {
+        if (composition.sideUnits.length === 0) return null;
 
-        composition.sideUnits.forEach((sideUnit) => {
-            all.push({
-                code: sideUnit.uscode,
-                imgUrl: "https://portal.davidici.com/images/express-program/not-image.jpg",
-                title: `${sideUnit.descw}`,
-                validSkus: [sideUnit.uscode],
-                isDisabled: false,
-            });
+        let baseSku: string = "";
+        let size: string = "";
+        const typeOptionsMap = new Map();
+        const finishOptionsMap = new Map();
+
+        composition.sideUnits.forEach((sideUnit, index) => {
+            const codes = sideUnit.uscode.split("-");
+            // the following logic is only for margi because each model has a different sku number order.
+            // EX:      73    -   SO   -  012  -  M98
+            //       base sku    type     size   finish
+
+            // only get base sku from first vanity.
+            if (index === 0) {
+                baseSku = `${codes[0]}`;
+                size = `${codes[2]}`;
+            }
+
+            if (!typeOptionsMap.has(`${codes[1]}`)) {
+                typeOptionsMap.set(`${codes[1]}`, {
+                    code: codes[1],
+                    imgUrl: "https://portal.davidici.com/images/express-program/not-image.jpg",
+                    title:
+                        codes[1] === "SO"
+                            ? "SIDE OPEN CABINET"
+                            : "SIDE BASE UNIT",
+                    validSkus: [],
+                    isDisabled: false,
+                });
+            }
+            typeOptionsMap.get(`${codes[1]}`).validSkus.push(sideUnit.uscode);
+
+            if (!finishOptionsMap.has(`${codes[3]}`))
+                finishOptionsMap.set(`${codes[3]}`, {
+                    code: codes[3],
+                    imgUrl: `https://portal.davidici.com/images/express-program/finishes/${sideUnit.finish}.jpg`,
+                    title: sideUnit.finish,
+                    validSkus: [],
+                    isDisabled: false,
+                });
+
+            finishOptionsMap.get(`${codes[3]}`).validSkus.push(sideUnit.uscode);
         });
 
-        return all;
+        return {
+            baseSku,
+            typeOptions: Object.values(Object.fromEntries(typeOptionsMap)),
+            size,
+            finishOptions: Object.values(Object.fromEntries(finishOptionsMap)),
+        };
     }, []);
+
+    const [sideUnitOptions, setSideUnitOptions] = useState(
+        initialSideUnitOptions
+    );
 
     // create objetct that will hold current configuration. if only one option, make it default. --------------|
     const initialConfiguration: CurrentConfiguration = {
@@ -107,10 +163,21 @@ function OtherModelsConfigurator({
                     ? vanityOptions.finishOptions[0].code
                     : "",
         },
-        sideUnit:
-            composition.sideUnits.length > 0
-                ? composition.sideUnits[0].uscode
-                : null,
+        isDoubleSink: composition.name.includes("DOUBLE"),
+        sideUnit: sideUnitOptions
+            ? {
+                  baseSku: sideUnitOptions.baseSku,
+                  type:
+                      sideUnitOptions.typeOptions.length === 1
+                          ? sideUnitOptions.typeOptions[0].code
+                          : "",
+                  size: sideUnitOptions.size,
+                  finish:
+                      sideUnitOptions.finishOptions.length === 1
+                          ? sideUnitOptions.finishOptions[0].code
+                          : "",
+              }
+            : null,
         washbasin: composition.washbasins[0].uscode,
     };
 
@@ -137,7 +204,19 @@ function OtherModelsConfigurator({
             case "set-sideUnit-type":
                 return {
                     ...state,
-                    sideUnit: action.payload,
+                    sideUnit: {
+                        ...state.sideUnit,
+                        type: action.payload,
+                    } as SideUnit,
+                };
+
+            case "set-sideUnit-finish":
+                return {
+                    ...state,
+                    sideUnit: {
+                        ...state.sideUnit,
+                        finish: action.payload,
+                    } as SideUnit,
                 };
 
             default:
@@ -176,10 +255,46 @@ function OtherModelsConfigurator({
 
             setVanityOptions(copyOptions);
         }
+
+        if (item === "sideUnit") {
+            const copyOptions = { ...sideUnitOptions } as sideUnitOptions;
+
+            // because this models dont have other option, this logic is useless but i lkept it for maybe future updates
+            for (const finishOption of copyOptions.finishOptions) {
+                if (property === "finish") break;
+                for (let i = 0; i < finishOption.validSkus.length; i++) {
+                    const validSku = finishOption.validSkus[i];
+                    if (validSku.includes(option)) {
+                        finishOption.isDisabled = false;
+                        break;
+                    }
+
+                    if (i === finishOption.validSkus.length - 1)
+                        finishOption.isDisabled = true;
+                }
+            }
+
+            for (const typeOption of copyOptions.typeOptions) {
+                if (property === "type") break;
+                for (let i = 0; i < typeOption.validSkus.length; i++) {
+                    const validSku = typeOption.validSkus[i];
+                    if (validSku.includes(option)) {
+                        typeOption.isDisabled = false;
+                        break;
+                    }
+
+                    if (i === typeOption.validSkus.length - 1)
+                        typeOption.isDisabled = true;
+                }
+            }
+
+            setSideUnitOptions(copyOptions);
+        }
+
         dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
     };
 
-    // Manage grand total
+    // Manage grand total.
     const [grandTotal, setGrandTotal] = useState(0);
 
     useEffect(() => {
@@ -191,9 +306,25 @@ function OtherModelsConfigurator({
             if (value) codesArray.push(value);
         }
 
+        const sideUnitCodesArray = [];
+        if (currentConfiguration.sideUnit) {
+            for (const key in currentConfiguration.sideUnit) {
+                const value =
+                    currentConfiguration.sideUnit[
+                        key as "baseSku" | "finish" | "type" | "size"
+                    ];
+
+                if (value) sideUnitCodesArray.push(value);
+            }
+        }
+
         // this means we have a valid vanity sku number;
-        if (codesArray.length === 2) {
+        if (
+            codesArray.length === 2 &&
+            (sideUnitCodesArray.length === 4 || !currentConfiguration.sideUnit)
+        ) {
             const vanitySku = codesArray.join("-");
+            const sideUnitSku = sideUnitCodesArray.join("-");
 
             let vanityMsrp = 0;
             let washbasinMsrp = 0;
@@ -213,14 +344,14 @@ function OtherModelsConfigurator({
                 }
             }
 
-            if (sideUnitOptions.length !== 0) {
-                for (const sideUnit of composition.sideUnits) {
-                    if (sideUnit.uscode === currentConfiguration.sideUnit) {
-                        sideUnitMsrp = sideUnit.msrp;
-                        break;
-                    }
+            for (const sideUnit of composition.sideUnits) {
+                if (sideUnit.uscode === sideUnitSku) {
+                    sideUnitMsrp = sideUnit.msrp;
+                    break;
                 }
             }
+
+            if (currentConfiguration.isDoubleSink) vanityMsrp *= 2;
 
             setGrandTotal(vanityMsrp + washbasinMsrp + sideUnitMsrp);
         }
@@ -229,9 +360,6 @@ function OtherModelsConfigurator({
     // Manage order now.
     const handleOrderNow = () => {
         console.log(composition);
-        console.log(vanityOptions);
-        console.log(sideUnitOptions);
-        console.log(washbasinOptions);
         console.log(currentConfiguration);
     };
 
@@ -266,7 +394,7 @@ function OtherModelsConfigurator({
                     <Options
                         item="vanity"
                         property="finish"
-                        title="SELECT FINISH"
+                        title="SELECT VANITY FINISH"
                         options={vanityOptions.finishOptions}
                         crrOptionSelected={currentConfiguration.vanity.finish}
                         onOptionSelected={handleOptionSelected}
@@ -274,14 +402,26 @@ function OtherModelsConfigurator({
                 </section>
             </section>
             <section className={classes.rightSideConfiguratorWrapper}>
-                {sideUnitOptions.length !== 0 && (
+                {sideUnitOptions && (
                     <Options
                         item="sideUnit"
                         property="type"
-                        title="SELECT SIDE UNIT"
-                        options={sideUnitOptions}
+                        title="SELECT SIDE UNIT TYPE"
+                        options={sideUnitOptions.typeOptions}
                         crrOptionSelected={
-                            currentConfiguration.sideUnit as string
+                            currentConfiguration.sideUnit?.type as string
+                        }
+                        onOptionSelected={handleOptionSelected}
+                    />
+                )}
+                {sideUnitOptions && (
+                    <Options
+                        item="sideUnit"
+                        property="finish"
+                        title="SELECT SIDE UNIT FINISH"
+                        options={sideUnitOptions.finishOptions}
+                        crrOptionSelected={
+                            currentConfiguration.sideUnit?.finish as string
                         }
                         onOptionSelected={handleOptionSelected}
                     />

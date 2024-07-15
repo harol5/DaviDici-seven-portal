@@ -16,6 +16,7 @@ interface EloraConfiguratorProps {
 
 interface CurrentConfiguration {
     vanity: { baseSku: string; mattFinish: string; glassFinish: string };
+    isDoubleSink: boolean;
     washbasin: string;
 }
 
@@ -117,6 +118,7 @@ function EloraConfigurator({ composition }: EloraConfiguratorProps) {
                     ? vanityOptions.glassFinishOptions[0].code
                     : "",
         },
+        isDoubleSink: composition.name.includes("DOUBLE"),
         washbasin: composition.washbasins[0].uscode,
     };
 
@@ -222,24 +224,32 @@ function EloraConfigurator({ composition }: EloraConfiguratorProps) {
         if (codesArray.length === 3) {
             const vanitySku = codesArray.join("-");
 
+            let vanityMsrp = 0;
+            let washbasinMsrp = 0;
+
             for (const crrVanity of composition.vanities) {
                 if (crrVanity.uscode === vanitySku) {
-                    for (const washbasin of composition.washbasins) {
-                        if (
-                            washbasin.uscode === currentConfiguration.washbasin
-                        ) {
-                            setGrandTotal(crrVanity.msrp + washbasin.msrp);
-                            break;
-                        }
-                    }
+                    vanityMsrp = crrVanity.msrp;
                     break;
                 }
             }
+
+            for (const washbasin of composition.washbasins) {
+                if (washbasin.uscode === currentConfiguration.washbasin) {
+                    washbasinMsrp = washbasin.msrp;
+                    break;
+                }
+            }
+
+            if (currentConfiguration.isDoubleSink) vanityMsrp *= 2;
+
+            setGrandTotal(vanityMsrp + washbasinMsrp);
         }
     }, [currentConfiguration]);
 
     // Manage order now.
     const handleOrderNow = () => {
+        console.log(composition);
         console.log(currentConfiguration);
     };
 

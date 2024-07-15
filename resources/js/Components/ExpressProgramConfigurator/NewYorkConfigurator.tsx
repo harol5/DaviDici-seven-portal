@@ -14,15 +14,30 @@ interface NewYorkConfiguratorProps {
     composition: Composition;
 }
 
+interface SideUnit {
+    baseSku: string;
+    handle: string;
+    position: string;
+    finish: string;
+}
+
 interface CurrentConfiguration {
     vanity: { baseSku: string; handle: string; finish: string };
-    sideUnit: string | null;
+    isDoubleSink: boolean;
+    sideUnit: SideUnit | null;
     washbasin: string;
 }
 
 interface vanityOptions {
     baseSku: string;
     handleOptions: Option[];
+    finishOptions: Option[];
+}
+
+interface sideUnitOptions {
+    baseSku: string;
+    handleOptions: Option[];
+    position: string;
     finishOptions: Option[];
 }
 
@@ -94,22 +109,61 @@ function NewYorkConfigurator({ composition }: NewYorkConfiguratorProps) {
     }, []);
 
     // if sideUnits array is not empty
-    const sideUnitOptions: Option[] = useMemo(() => {
-        const all: Option[] = [];
-        if (composition.sideUnits.length === 0) return all;
+    const initialSideUnitOptions: sideUnitOptions | null = useMemo(() => {
+        if (composition.sideUnits.length === 0) return null;
 
-        composition.sideUnits.forEach((sideUnit) => {
-            all.push({
-                code: sideUnit.uscode,
-                imgUrl: "https://portal.davidici.com/images/express-program/not-image.jpg",
-                title: `${sideUnit.descw}`,
-                validSkus: [sideUnit.uscode],
-                isDisabled: false,
-            });
+        let baseSku: string = "";
+        let position: string = "";
+        const handleOptionsMap = new Map();
+        const finishOptionsMap = new Map();
+
+        composition.sideUnits.forEach((sideUnit, index) => {
+            const codes = sideUnit.uscode.split("-");
+            // the following logic is only for NEW YORK because each model has a different sku number order.
+            // EX:   65 - 012  -  SCB   -    LX   -    BI
+            //       base sku    handle   position   finish
+
+            // only get base sku from first vanity.
+            if (index === 0) {
+                baseSku = `${codes[0]}-${codes[1]}`;
+                position = `${codes[3]}`;
+            }
+
+            if (!handleOptionsMap.has(`${codes[2]}`)) {
+                handleOptionsMap.set(`${codes[2]}`, {
+                    code: codes[2],
+                    imgUrl: "https://portal.davidici.com/images/express-program/not-image.jpg",
+                    title:
+                        codes[2] === "SCB" ? "BLACK HANDLE" : "CHROMED HANDLE",
+                    validSkus: [],
+                    isDisabled: false,
+                });
+            }
+            handleOptionsMap.get(`${codes[2]}`).validSkus.push(sideUnit.uscode);
+
+            if (!finishOptionsMap.has(`${codes[4]}`))
+                finishOptionsMap.set(`${codes[4]}`, {
+                    code: codes[4],
+                    imgUrl: `https://portal.davidici.com/images/express-program/finishes/${sideUnit.finish}.jpg`,
+                    title: sideUnit.finish,
+                    validSkus: [],
+                    isDisabled: false,
+                });
+
+            finishOptionsMap.get(`${codes[4]}`).validSkus.push(sideUnit.uscode);
         });
 
-        return all;
+        return {
+            baseSku,
+            handleOptions: Object.values(Object.fromEntries(handleOptionsMap)),
+            position,
+            finishOptions: Object.values(Object.fromEntries(finishOptionsMap)),
+        };
     }, []);
+
+    const [sideUnitOptions, setSideUnitOptions] = useState(
+        initialSideUnitOptions
+    );
 
     // create objetct that will hold current configuration. if only one option, make it default. --------------|
     const initialConfiguration: CurrentConfiguration = {
@@ -124,10 +178,21 @@ function NewYorkConfigurator({ composition }: NewYorkConfiguratorProps) {
                     ? vanityOptions.finishOptions[0].code
                     : "",
         },
-        sideUnit:
-            composition.sideUnits.length > 0
-                ? composition.sideUnits[0].uscode
-                : null,
+        isDoubleSink: composition.name.includes("DOUBLE"),
+        sideUnit: sideUnitOptions
+            ? {
+                  baseSku: sideUnitOptions.baseSku,
+                  handle:
+                      sideUnitOptions.handleOptions.length === 1
+                          ? sideUnitOptions.handleOptions[0].code
+                          : "",
+                  position: sideUnitOptions.position,
+                  finish:
+                      sideUnitOptions.finishOptions.length === 1
+                          ? sideUnitOptions.finishOptions[0].code
+                          : "",
+              }
+            : null,
         washbasin: composition.washbasins[0].uscode,
     };
 
@@ -160,10 +225,22 @@ function NewYorkConfigurator({ composition }: NewYorkConfiguratorProps) {
                     washbasin: action.payload,
                 };
 
-            case "set-sideUnit-type":
+            case "set-sideUnit-handle":
                 return {
                     ...state,
-                    sideUnit: action.payload,
+                    sideUnit: {
+                        ...state.sideUnit,
+                        handle: action.payload,
+                    } as SideUnit,
+                };
+
+            case "set-sideUnit-finish":
+                return {
+                    ...state,
+                    sideUnit: {
+                        ...state.sideUnit,
+                        finish: action.payload,
+                    } as SideUnit,
                 };
 
             default:
@@ -217,6 +294,42 @@ function NewYorkConfigurator({ composition }: NewYorkConfiguratorProps) {
 
             setVanityOptions(copyOptions);
         }
+
+        if (item === "sideUnit") {
+            const copyOptions = { ...sideUnitOptions } as sideUnitOptions;
+
+            // because this models dont have other option, this logic is useless but i lkept it for maybe future updates
+            for (const finishOption of copyOptions.finishOptions) {
+                if (property === "finish") break;
+                for (let i = 0; i < finishOption.validSkus.length; i++) {
+                    const validSku = finishOption.validSkus[i];
+                    if (validSku.includes(option)) {
+                        finishOption.isDisabled = false;
+                        break;
+                    }
+
+                    if (i === finishOption.validSkus.length - 1)
+                        finishOption.isDisabled = true;
+                }
+            }
+
+            for (const handleOption of copyOptions.handleOptions) {
+                if (property === "handle") break;
+                for (let i = 0; i < handleOption.validSkus.length; i++) {
+                    const validSku = handleOption.validSkus[i];
+                    if (validSku.includes(option)) {
+                        handleOption.isDisabled = false;
+                        break;
+                    }
+
+                    if (i === handleOption.validSkus.length - 1)
+                        handleOption.isDisabled = true;
+                }
+            }
+
+            setSideUnitOptions(copyOptions);
+        }
+
         dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
     };
 
@@ -234,9 +347,25 @@ function NewYorkConfigurator({ composition }: NewYorkConfiguratorProps) {
             if (value) codesArray.push(value);
         }
 
+        const sideUnitCodesArray = [];
+        if (currentConfiguration.sideUnit) {
+            for (const key in currentConfiguration.sideUnit) {
+                const value =
+                    currentConfiguration.sideUnit[
+                        key as "baseSku" | "finish" | "handle" | "position"
+                    ];
+
+                if (value) sideUnitCodesArray.push(value);
+            }
+        }
+
         // this means we have a valid vanity sku number;
-        if (codesArray.length === 3) {
+        if (
+            codesArray.length === 3 &&
+            (sideUnitCodesArray.length === 4 || !currentConfiguration.sideUnit)
+        ) {
             const vanitySku = codesArray.join("-");
+            const sideUnitSku = sideUnitCodesArray.join("-");
 
             let vanityMsrp = 0;
             let washbasinMsrp = 0;
@@ -256,14 +385,14 @@ function NewYorkConfigurator({ composition }: NewYorkConfiguratorProps) {
                 }
             }
 
-            if (sideUnitOptions.length !== 0) {
-                for (const sideUnit of composition.sideUnits) {
-                    if (sideUnit.uscode === currentConfiguration.sideUnit) {
-                        sideUnitMsrp = sideUnit.msrp;
-                        break;
-                    }
+            for (const sideUnit of composition.sideUnits) {
+                if (sideUnit.uscode === sideUnitSku) {
+                    sideUnitMsrp = sideUnit.msrp;
+                    break;
                 }
             }
+
+            if (currentConfiguration.isDoubleSink) vanityMsrp *= 2;
 
             setGrandTotal(vanityMsrp + washbasinMsrp + sideUnitMsrp);
         }
@@ -271,6 +400,7 @@ function NewYorkConfigurator({ composition }: NewYorkConfiguratorProps) {
 
     // Manage order now.
     const handleOrderNow = () => {
+        console.log(composition);
         console.log(currentConfiguration);
     };
 
@@ -305,7 +435,7 @@ function NewYorkConfigurator({ composition }: NewYorkConfiguratorProps) {
                     <Options
                         item="vanity"
                         property="finish"
-                        title="SELECT FINISH"
+                        title="SELECT VANITY FINISH"
                         options={vanityOptions.finishOptions}
                         crrOptionSelected={currentConfiguration.vanity.finish}
                         onOptionSelected={handleOptionSelected}
@@ -316,19 +446,31 @@ function NewYorkConfigurator({ composition }: NewYorkConfiguratorProps) {
                 <Options
                     item="vanity"
                     property="handle"
-                    title="SELECT HANDLES"
+                    title="SELECT VANITY HANDLES"
                     options={vanityOptions.handleOptions}
                     crrOptionSelected={currentConfiguration.vanity.handle}
                     onOptionSelected={handleOptionSelected}
                 />
-                {sideUnitOptions.length !== 0 && (
+                {sideUnitOptions && (
                     <Options
                         item="sideUnit"
-                        property="type"
-                        title="SELECT SIDE UNIT"
-                        options={sideUnitOptions}
+                        property="handle"
+                        title="SELECT SIDE UNIT HANDLE"
+                        options={sideUnitOptions.handleOptions}
                         crrOptionSelected={
-                            currentConfiguration.sideUnit as string
+                            currentConfiguration.sideUnit?.handle as string
+                        }
+                        onOptionSelected={handleOptionSelected}
+                    />
+                )}
+                {sideUnitOptions && (
+                    <Options
+                        item="sideUnit"
+                        property="finish"
+                        title="SELECT SIDE UNIT FINISH"
+                        options={sideUnitOptions.finishOptions}
+                        crrOptionSelected={
+                            currentConfiguration.sideUnit?.finish as string
                         }
                         onOptionSelected={handleOptionSelected}
                     />

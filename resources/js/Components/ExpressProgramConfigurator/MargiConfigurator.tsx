@@ -27,6 +27,7 @@ interface margiSideCabinet {
 
 interface CurrentConfiguration {
     vanity: { baseSku: string; drawer: string; handle: string; finish: string };
+    isDoubleSink: boolean;
     sideUnit: margiOpenUnit | margiSideCabinet | null;
     washbasin: string;
 }
@@ -130,8 +131,8 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
 
     // if sideUnits array is not empty
     const initialSideUnitOptions:
-        | margiOpenUnitOptions
         | margiSideCabinetOptions
+        | margiOpenUnitOptions
         | null = useMemo(() => {
         if (composition.sideUnits.length === 0) return null;
 
@@ -297,6 +298,7 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
                         ? vanityOptions.finishOptions[0].code
                         : "",
             },
+            isDoubleSink: composition.name.includes("DOUBLE"),
             sideUnit: sideUnit,
             washbasin: composition.washbasins[0].uscode,
         };
@@ -346,7 +348,7 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
                     sideUnit: {
                         ...state.sideUnit,
                         finish: action.payload,
-                    } as margiOpenUnit,
+                    } as margiOpenUnit | margiSideCabinet,
                 };
 
             case "set-sideUnit-doorStyleAndHandle":
@@ -516,7 +518,9 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
         // this means we have a valid vanity sku number;
         if (
             vanityCodesArray.length === 4 &&
-            (sideUnitCodesArray.length === 2 || !currentConfiguration.sideUnit)
+            (sideUnitCodesArray.length === 2 ||
+                sideUnitCodesArray.length === 3 ||
+                !currentConfiguration.sideUnit)
         ) {
             const vanitySku = vanityCodesArray.join("-");
             const sideUnitSku = sideUnitCodesArray.join("-");
@@ -546,17 +550,18 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
                 }
             }
 
+            if (currentConfiguration.isDoubleSink) vanityMsrp *= 2;
+
             setGrandTotal(vanityMsrp + washbasinMsrp + sideUnitMsrp);
         }
     }, [currentConfiguration]);
 
     // Manage order now.
     const handleOrderNow = () => {
+        console.log(composition);
         console.log(currentConfiguration);
     };
-    console.log(composition);
-    console.log(currentConfiguration);
-    console.log(sideUnitOptions);
+
     return (
         <div className={classes.compositionConfiguratorWrapper}>
             <section className={classes.leftSideConfiguratorWrapper}>
@@ -588,30 +593,18 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
                     <Options
                         item="vanity"
                         property="finish"
-                        title="SELECT FINISH"
+                        title="SELECT VANITY FINISH"
                         options={vanityOptions.finishOptions}
                         crrOptionSelected={currentConfiguration.vanity.finish}
                         onOptionSelected={handleOptionSelected}
                     />
-                    {sideUnitOptions && (
-                        <Options
-                            item="sideUnit"
-                            property="finish"
-                            title="SELECT SIDE UNIT FINISH"
-                            options={sideUnitOptions.finishOptions}
-                            crrOptionSelected={
-                                currentConfiguration.sideUnit?.finish as string
-                            }
-                            onOptionSelected={handleOptionSelected}
-                        />
-                    )}
                 </section>
             </section>
             <section className={classes.rightSideConfiguratorWrapper}>
                 <Options
                     item="vanity"
                     property="handle"
-                    title="SELECT HANDLES"
+                    title="SELECT VANITY HANDLES"
                     options={vanityOptions.handleOptions}
                     crrOptionSelected={currentConfiguration.vanity.handle}
                     onOptionSelected={handleOptionSelected}
@@ -619,10 +612,16 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
                 <Options
                     item="vanity"
                     property="drawer"
-                    title="SELECT DRAWERS"
+                    title="SELECT VANITY DRAWERS"
                     options={vanityOptions.drawerOptions}
                     crrOptionSelected={currentConfiguration.vanity.drawer}
                     onOptionSelected={handleOptionSelected}
+                />
+                <SizeUnit
+                    composition={composition}
+                    currentConfiguration={currentConfiguration}
+                    handleOptionSelected={handleOptionSelected}
+                    sideUnitOptions={sideUnitOptions}
                 />
                 <Options
                     item="washbasin"
@@ -650,3 +649,69 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
 }
 
 export default MargiConfigurator;
+
+interface SizeUnitProps {
+    composition: Composition;
+    currentConfiguration: CurrentConfiguration;
+    handleOptionSelected: (
+        item: string,
+        property: string,
+        option: string
+    ) => void;
+    sideUnitOptions: margiSideCabinetOptions | margiOpenUnitOptions | null;
+}
+
+function SizeUnit({
+    composition,
+    currentConfiguration,
+    handleOptionSelected,
+    sideUnitOptions,
+}: SizeUnitProps) {
+    if (composition.sideUnits.length === 0) return;
+
+    if (composition.sideUnits[0].descw.includes("8")) {
+        const options = sideUnitOptions as margiOpenUnitOptions;
+        const sideUnitCurrentConfi =
+            currentConfiguration.sideUnit as margiOpenUnit;
+
+        return (
+            <Options
+                item="sideUnit"
+                property="finish"
+                title="SELECT SIDE UNIT FINISH"
+                options={options.finishOptions}
+                crrOptionSelected={sideUnitCurrentConfi?.finish as string}
+                onOptionSelected={handleOptionSelected}
+            />
+        );
+    }
+
+    if (composition.sideUnits[0].descw.includes("16")) {
+        const options = sideUnitOptions as margiSideCabinetOptions;
+        const sideUnitCurrentConfi =
+            currentConfiguration.sideUnit as margiSideCabinet;
+
+        return (
+            <>
+                <Options
+                    item="sideUnit"
+                    property="finish"
+                    title="SELECT SIDE UNIT FINISH"
+                    options={options.finishOptions}
+                    crrOptionSelected={sideUnitCurrentConfi?.finish as string}
+                    onOptionSelected={handleOptionSelected}
+                />
+                <Options
+                    item="sideUnit"
+                    property="doorStyleAndHandle"
+                    title="SELECT SIDE UNIT DOOR STYLE"
+                    options={options.doorStyleAndHandleOptions}
+                    crrOptionSelected={
+                        sideUnitCurrentConfi?.doorStyleAndHandle as string
+                    }
+                    onOptionSelected={handleOptionSelected}
+                />
+            </>
+        );
+    }
+}
