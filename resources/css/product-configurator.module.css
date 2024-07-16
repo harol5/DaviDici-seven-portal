@@ -30,8 +30,16 @@
 }
 
 .leftSideConfiguratorWrapper .backButtonAndNameWrapper h1 {
-    font-size: xx-large;
+    font-size: x-large;
     color: #d1aa68;
+}
+
+.leftSideConfiguratorWrapper .backButtonAndNameWrapper .resetButton {
+    font-size: small;
+    background-color: #d1aa68;
+    color: white;
+    padding: 0.5rem 2rem;
+    border-radius: 4px;
 }
 
 .leftSideConfiguratorWrapper .compositionImageWrapper {

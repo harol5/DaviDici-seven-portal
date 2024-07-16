@@ -86,6 +86,8 @@
 
 .expressProgramProductCard {
     width: 50%;
+    cursor: pointer;
+    border: solid 1px #d1ab68a1;
     transition: all 0.2s ease-in;
 }
 
@@ -95,7 +97,6 @@
 
 .expressProgramProductCard .productCardcontent {
     margin: 2em;
-    cursor: pointer;
 }
 
 /*-- finishes --*/
@@ -107,7 +108,7 @@
 }
 
 .expressProgramProductCard .productCardcontent .finishesContainer .finish {
-    width: 15%;
+    width: 22%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -116,8 +117,8 @@
 .expressProgramProductCard .productCardcontent .finishesContainer .finish img {
     border: 1px solid #d1aa68;
     border-radius: 50%;
-    height: 2.5em;
-    width: 2.5em;
+    height: 4.5em;
+    width: 4.5em;
     margin: 0 0.5em;
     display: flex;
     justify-content: center;
@@ -131,12 +132,13 @@
 
 /*-- composition name --*/
 .expressProgramProductCard .productCardcontent .compositionName {
-    font-size: xx-large;
+    margin-top: 1em;
+    font-size: x-large;
 }
 
 /*-- starting price label --*/
 .expressProgramProductCard .productCardcontent .startingPriceLabel {
-    font-size: large;
+    font-size: x-large;
     font-weight: 400;
     color: #d1aa68;
 }

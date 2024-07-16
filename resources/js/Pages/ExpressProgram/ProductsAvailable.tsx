@@ -8,6 +8,14 @@ import type { ProductInventory } from "../../Models/Product";
 import type { Composition } from "../../Models/Composition";
 import classes from "../../../css/express-program.module.css";
 
+/**
+ * TODO:
+ *
+ * 1. filter compotiions by price.
+ * 2. kepp filtered size.
+ * 3. change finish filter.
+ */
+
 interface ProductsAvailableProps {
     auth: User;
     rawProducts: ProductInventory[];
@@ -23,6 +31,7 @@ function ProductsAvailable({
     const { compositions, sizesForFilter, finishesForFilter } =
         useExpressProgramProducts(rawProducts);
 
+    console.log(rawProducts);
     // this will re-render when filter is used.
     const [products, setProducts] = useState(compositions);
 

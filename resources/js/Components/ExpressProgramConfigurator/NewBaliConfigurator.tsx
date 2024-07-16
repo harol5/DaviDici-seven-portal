@@ -3,10 +3,10 @@ import classes from "../../../css/product-configurator.module.css";
 import { useEffect, useMemo, useReducer, useState } from "react";
 import type { Option } from "../../Models/ExpressProgramModels";
 import Options from "./Options";
+import { router } from "@inertiajs/react";
 
 /**
  * TODO;
- * 1. logic for "order now" button.
  * 2. add other products options.
  */
 
@@ -234,6 +234,11 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
                     } as { baseSku: string; finish: string },
                 };
 
+            case "reset-configurator":
+                return {
+                    ...initialConfiguration,
+                };
+
             default:
                 throw new Error();
         }
@@ -251,7 +256,8 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
         option: string
     ) => {
         if (item === "vanity") {
-            const copyOptions = { ...vanityOptions };
+            // const copyOptions = { ...vanityOptions };
+            const copyOptions = structuredClone(vanityOptions);
 
             for (const drawersOption of copyOptions.drawerOptions) {
                 if (property === "drawer") break;
@@ -360,7 +366,8 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
 
             if (currentConfiguration.isDoubleSink) vanityMsrp *= 2;
 
-            setGrandTotal(vanityMsrp + washbasinMsrp + sideUnitMsrp);
+            if (vanityMsrp === 0) setGrandTotal(0);
+            else setGrandTotal(vanityMsrp + washbasinMsrp + sideUnitMsrp);
         }
     }, [currentConfiguration]);
 
@@ -368,6 +375,33 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
     const handleOrderNow = () => {
         console.log(composition);
         console.log(currentConfiguration);
+
+        const vanitySku = Object.values(currentConfiguration.vanity).join("-");
+        const sideUnitSku = currentConfiguration.sideUnit
+            ? Object.values(currentConfiguration.sideUnit).join("-")
+            : "";
+        const washbasinSku = currentConfiguration.washbasin;
+
+        let SKU;
+        if (sideUnitSku) {
+            SKU = `${vanitySku}${
+                currentConfiguration.isDoubleSink ? "--2" : "--1"
+            }~${washbasinSku}--1~${sideUnitSku}--1`;
+        } else {
+            SKU = `${vanitySku}${
+                currentConfiguration.isDoubleSink ? "--2" : "--1"
+            }~${washbasinSku}--1`;
+        }
+
+        console.log(SKU);
+
+        router.get("/orders/create-so-num", { SKU });
+    };
+
+    const handleResetConfigurator = () => {
+        setVanityOptions(initialVanityOptions);
+        setGrandTotal(0);
+        dispatch({ type: "reset-configurator", payload: "" });
     };
 
     return (
@@ -385,6 +419,12 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
                         <p>BACK</p>
                     </span>
                     <h1>{composition.name}</h1>
+                    <button
+                        className={classes.resetButton}
+                        onClick={handleResetConfigurator}
+                    >
+                        RESET
+                    </button>
                 </section>
                 <section className={classes.compositionImageWrapper}>
                     <img

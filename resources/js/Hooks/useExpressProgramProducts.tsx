@@ -175,11 +175,14 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         otherProducts: Map<string, Map<string, ProductInventory[]>>
     ) => {
         const finishes = generateFinishes(listOfVanities, finishesForFilterMap);
+        const washbasins = washbasingAvailable.sort(
+            (a: ProductInventory, b: ProductInventory) => a.msrp - b.msrp
+        );
 
         // Add constructed composition to array.
         compositions.push({
             model: model,
-            name: `${model} ${size}" - ${sinkPositionMeasure} SINK`,
+            name: `${model} ${size}" - ${washbasins[0].model} ${sinkPositionMeasure} SINK`,
             compositionImage: `https://portal.davidici.com/images/express-program/${model}/${size}.webp`,
             size: size,
             vanities: listOfVanities.sort(
@@ -187,9 +190,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
             ),
             finishes: finishes,
             sideUnits: [],
-            washbasins: washbasingAvailable.sort(
-                (a: ProductInventory, b: ProductInventory) => a.msrp - b.msrp
-            ),
+            washbasins,
             otherProductsAvailable: generateOtherProductsObj(
                 otherProducts,
                 model
@@ -212,11 +213,14 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                 margiVanityList,
                 finishesForFilterMap
             );
+            const washbasins = washbasingAvailable.sort(
+                (a: ProductInventory, b: ProductInventory) => a.msrp - b.msrp
+            );
 
             // Add constructed composition to array.
             compositions.push({
                 model: model,
-                name: `${model} ${size}" - ${sinkPositionMeasure} SINK - ${doorStyle} DOOR`,
+                name: `${model} ${size}" - ${washbasins[0].model} ${sinkPositionMeasure} SINK - ${doorStyle} DOOR`,
                 compositionImage: `https://portal.davidici.com/images/express-program/${model}/${size}-${doorStyle}.webp`,
                 size: size,
                 vanities: margiVanityList.sort(
@@ -225,10 +229,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                 ),
                 finishes: finishes,
                 sideUnits: [],
-                washbasins: washbasingAvailable.sort(
-                    (a: ProductInventory, b: ProductInventory) =>
-                        a.msrp - b.msrp
-                ),
+                washbasins,
                 otherProductsAvailable: generateOtherProductsObj(
                     otherProducts,
                     model
@@ -255,6 +256,9 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
             );
 
         const finishes = generateFinishes(listOfVanities, finishesForFilterMap);
+        const washbasins = washbasingAvailable.sort(
+            (a: ProductInventory, b: ProductInventory) => a.msrp - b.msrp
+        );
 
         let sideUnits = [];
         if (itemsMap.get("SIDE UNIT")) sideUnits = itemsMap.get("SIDE UNIT");
@@ -271,15 +275,13 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         // Add constructed composition to array.
         compositions.push({
             model: model,
-            name: `${model} ${size}" ${sinkPositionMeasure} - ${position} SINK`,
+            name: `${model} ${size}" ${sinkPositionMeasure} - ${washbasins[0].model} ${position} SINK`,
             compositionImage: `https://portal.davidici.com/images/express-program/${model}/${sinkPositionMeasure} ${position} SINK.webp`,
             size: size,
             vanities: listOfVanities,
             finishes: finishes,
             sideUnits: sideUnits ?? [],
-            washbasins: washbasingAvailable.sort(
-                (a: ProductInventory, b: ProductInventory) => a.msrp - b.msrp
-            ),
+            washbasins,
             otherProductsAvailable: generateOtherProductsObj(
                 otherProducts,
                 model
@@ -311,19 +313,20 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                 finishesForFilterMap
             );
 
+            const washbasins = washbasingAvailable.sort(
+                (a: ProductInventory, b: ProductInventory) => a.msrp - b.msrp
+            );
+
             // Add constructed composition to array.
             compositions.push({
                 model: model,
-                name: `${model} ${size}" ${sinkPositionMeasure} - ${position} SINK - ${doorStyle} DOOR`,
+                name: `${model} ${size}" ${sinkPositionMeasure} - ${washbasins[0].model} ${position} SINK - ${doorStyle} DOOR`,
                 compositionImage: `https://portal.davidici.com/images/express-program/${model}/${sinkPositionMeasure} ${position} SINK-${doorStyle}.webp`,
                 size: size,
                 vanities: listOfVanities,
                 finishes: finishes,
                 sideUnits: sideUnits,
-                washbasins: washbasingAvailable.sort(
-                    (a: ProductInventory, b: ProductInventory) =>
-                        a.msrp - b.msrp
-                ),
+                washbasins,
                 otherProductsAvailable: generateOtherProductsObj(
                     otherProducts,
                     model

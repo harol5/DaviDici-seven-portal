@@ -3,10 +3,10 @@ import classes from "../../../css/product-configurator.module.css";
 import { useEffect, useMemo, useReducer, useState } from "react";
 import type { Option } from "../../Models/ExpressProgramModels";
 import Options from "./Options";
+import { router } from "@inertiajs/react";
 
 /**
  * TODO;
- * 1. logic for "order now" button.
  * 2. add other products options.
  */
 
@@ -360,6 +360,11 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
                     } as margiSideCabinet,
                 };
 
+            case "reset-configurator":
+                return {
+                    ...initialConfiguration,
+                };
+
             default:
                 throw new Error();
         }
@@ -377,7 +382,8 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
         option: string
     ) => {
         if (item === "vanity") {
-            const copyOptions = { ...vanityOptions };
+            // const copyOptions = { ...vanityOptions };
+            const copyOptions = structuredClone(vanityOptions);
 
             for (const drawersOption of copyOptions.drawerOptions) {
                 if (property === "drawer") break;
@@ -426,9 +432,13 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
 
         if (item === "sideUnit") {
             if (composition.sideUnits[0].descw.includes("8")) {
-                const copyOptions = {
-                    ...sideUnitOptions,
-                } as margiOpenUnitOptions;
+                // const copyOptions = {
+                //     ...sideUnitOptions,
+                // } as margiOpenUnitOptions;
+
+                const copyOptions = structuredClone(
+                    sideUnitOptions
+                ) as margiOpenUnitOptions;
 
                 for (const finishOption of copyOptions.finishOptions as Option[]) {
                     if (property === "finish") break;
@@ -448,9 +458,13 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
             }
 
             if (composition.sideUnits[0].descw.includes("16")) {
-                const copyOptions = {
-                    ...sideUnitOptions,
-                } as margiSideCabinetOptions;
+                // const copyOptions = {
+                //     ...sideUnitOptions,
+                // } as margiSideCabinetOptions;
+
+                const copyOptions = structuredClone(
+                    sideUnitOptions
+                ) as margiSideCabinetOptions;
 
                 for (const doorStyleAndHandleOption of copyOptions.doorStyleAndHandleOptions as Option[]) {
                     if (property === "doorStyleAndHandle") break;
@@ -552,7 +566,8 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
 
             if (currentConfiguration.isDoubleSink) vanityMsrp *= 2;
 
-            setGrandTotal(vanityMsrp + washbasinMsrp + sideUnitMsrp);
+            if (vanityMsrp === 0) setGrandTotal(0);
+            else setGrandTotal(vanityMsrp + washbasinMsrp + sideUnitMsrp);
         }
     }, [currentConfiguration]);
 
@@ -560,6 +575,34 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
     const handleOrderNow = () => {
         console.log(composition);
         console.log(currentConfiguration);
+
+        const vanitySku = Object.values(currentConfiguration.vanity).join("-");
+        const sideUnitSku = currentConfiguration.sideUnit
+            ? Object.values(currentConfiguration.sideUnit).join("-")
+            : "";
+        const washbasinSku = currentConfiguration.washbasin;
+
+        let SKU;
+        if (sideUnitSku) {
+            SKU = `${vanitySku}${
+                currentConfiguration.isDoubleSink ? "--2" : "--1"
+            }~${washbasinSku}--1~${sideUnitSku}--1`;
+        } else {
+            SKU = `${vanitySku}${
+                currentConfiguration.isDoubleSink ? "--2" : "--1"
+            }~${washbasinSku}--1`;
+        }
+
+        console.log(SKU);
+
+        router.get("/orders/create-so-num", { SKU });
+    };
+
+    const handleResetConfigurator = () => {
+        setVanityOptions(initialVanityOptions);
+        setSideUnitOptions(initialSideUnitOptions);
+        setGrandTotal(0);
+        dispatch({ type: "reset-configurator", payload: "" });
     };
 
     return (
@@ -577,6 +620,12 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
                         <p>BACK</p>
                     </span>
                     <h1>{composition.name}</h1>
+                    <button
+                        className={classes.resetButton}
+                        onClick={handleResetConfigurator}
+                    >
+                        RESET
+                    </button>
                 </section>
                 <section className={classes.compositionImageWrapper}>
                     <img

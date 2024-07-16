@@ -47,10 +47,6 @@ function ProductExpressProgramCard({
                         }}
                     />
                 </div>
-                <h1 className={classes.compositionName}>{product.name}</h1>
-                <p className={classes.startingPriceLabel}>
-                    Starting at ${getStartingPrice()}
-                </p>
                 <div className={classes.finishesContainer}>
                     {product.finishes.map((value, index) => {
                         const finishObj = value as {
@@ -65,6 +61,10 @@ function ProductExpressProgramCard({
                         );
                     })}
                 </div>
+                <h1 className={classes.compositionName}>{product.name}</h1>
+                <p className={classes.startingPriceLabel}>
+                    Starting at ${getStartingPrice()} MSRP
+                </p>
             </div>
         </div>
     );

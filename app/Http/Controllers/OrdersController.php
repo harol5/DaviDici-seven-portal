@@ -391,7 +391,7 @@ class OrdersController extends Controller
     public function createOrderNumber(Request $request){        
         $username = auth()->user()->username;        
         $products = $request->all();
-        
+        info($products);
         // Get all orders
         $orders = FoxproApi::call([
             'action' => 'getordersbyuser',

@@ -3,10 +3,10 @@ import classes from "../../../css/product-configurator.module.css";
 import { useEffect, useMemo, useReducer, useState } from "react";
 import type { Option } from "../../Models/ExpressProgramModels";
 import Options from "./Options";
+import { router } from "@inertiajs/react";
 
 /**
  * TODO;
- * 1. logic for "order now" button.
  * 2. add other products options.
  */
 
@@ -151,6 +151,11 @@ function EloraConfigurator({ composition }: EloraConfiguratorProps) {
                     washbasin: action.payload,
                 };
 
+            case "reset-configurator":
+                return {
+                    ...initialConfiguration,
+                };
+
             default:
                 throw new Error();
         }
@@ -168,7 +173,8 @@ function EloraConfigurator({ composition }: EloraConfiguratorProps) {
         option: string
     ) => {
         if (item === "vanity") {
-            const copyOptions = { ...vanityOptions };
+            // const copyOptions = { ...vanityOptions };
+            const copyOptions = structuredClone(vanityOptions);
 
             // Checks if any matt option should be disabled.
             for (const mattFinishOption of copyOptions.mattFinishOptions) {
@@ -243,7 +249,8 @@ function EloraConfigurator({ composition }: EloraConfiguratorProps) {
 
             if (currentConfiguration.isDoubleSink) vanityMsrp *= 2;
 
-            setGrandTotal(vanityMsrp + washbasinMsrp);
+            if (vanityMsrp === 0) setGrandTotal(0);
+            else setGrandTotal(vanityMsrp + washbasinMsrp);
         }
     }, [currentConfiguration]);
 
@@ -251,6 +258,23 @@ function EloraConfigurator({ composition }: EloraConfiguratorProps) {
     const handleOrderNow = () => {
         console.log(composition);
         console.log(currentConfiguration);
+
+        const vanitySku = Object.values(currentConfiguration.vanity).join("-");
+        const washbasinSku = currentConfiguration.washbasin;
+
+        let SKU = `${vanitySku}${
+            currentConfiguration.isDoubleSink ? "--2" : "--1"
+        }~${washbasinSku}--1`;
+
+        console.log(SKU);
+
+        router.get("/orders/create-so-num", { SKU });
+    };
+
+    const handleResetConfigurator = () => {
+        setVanityOptions(initialVanityOptions);
+        setGrandTotal(0);
+        dispatch({ type: "reset-configurator", payload: "" });
     };
 
     return (
@@ -268,6 +292,12 @@ function EloraConfigurator({ composition }: EloraConfiguratorProps) {
                         <p>BACK</p>
                     </span>
                     <h1>{composition.name}</h1>
+                    <button
+                        className={classes.resetButton}
+                        onClick={handleResetConfigurator}
+                    >
+                        RESET
+                    </button>
                 </section>
                 <section className={classes.compositionImageWrapper}>
                     <img
