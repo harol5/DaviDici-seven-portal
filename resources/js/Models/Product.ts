@@ -23,6 +23,7 @@ export type ProductInventory = {
     di: number;
     eanc: string;
     finish: string;
+    fintype: string;
     hc: number;
     hi: number;
     lc: number;

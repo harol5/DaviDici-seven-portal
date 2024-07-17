@@ -1,4 +1,5 @@
 import classes from "../../css/express-program.module.css";
+import type { finish } from "../Models/ExpressProgramModels";
 
 interface FilterProps {
     filterTitle: string;
@@ -37,41 +38,6 @@ function Filter({
                             >
                                 <p>{size}</p>
                             </span>
-                        );
-                    })}
-                </div>
-            )}
-
-            {contentType === "images" && (
-                <div className={classes.finishFilterWrapper}>
-                    {values.map((value, index) => {
-                        const finishObj = value as {
-                            finish: string;
-                            url: string;
-                        };
-                        return (
-                            <div
-                                key={index}
-                                className={classes.labelAndFinishWrapper}
-                            >
-                                <img
-                                    className={
-                                        crrValueSelected === finishObj.finish
-                                            ? `${classes.finishFilter} ${classes.finishFilterValueSelected} `
-                                            : classes.finishFilter
-                                    }
-                                    src={finishObj.url}
-                                    onClick={() =>
-                                        handleFilter(
-                                            contentType,
-                                            finishObj.finish
-                                        )
-                                    }
-                                />
-                                <p className={classes.finishFilterLabel}>
-                                    {finishObj.finish}
-                                </p>
-                            </div>
                         );
                     })}
                 </div>

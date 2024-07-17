@@ -5,6 +5,7 @@ export type Composition = {
     name: string;
     compositionImage: string;
     size: string;
+    startingPrice: number;
     vanities: ProductInventory[];
     finishes: {
         finish: string;

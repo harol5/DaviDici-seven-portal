@@ -5,3 +5,9 @@ export type Option = {
     validSkus: string[];
     isDisabled: boolean;
 };
+
+export type finish = {
+    type: string;
+    finish: string;
+    url: string;
+};

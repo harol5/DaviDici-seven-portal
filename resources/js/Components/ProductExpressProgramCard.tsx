@@ -4,29 +4,14 @@ import type { ProductInventory } from "../Models/Product";
 import { router } from "@inertiajs/react";
 
 interface ProductExpressProgramCardProps {
-    product: Composition;
+    composition: Composition;
 }
 
 function ProductExpressProgramCard({
-    product,
+    composition,
 }: ProductExpressProgramCardProps) {
-    const getStartingPrice = () => {
-        if (product.sideUnits.length > 0) {
-            product.sideUnits.sort(
-                (a: ProductInventory, b: ProductInventory) => a.msrp - b.msrp
-            );
-            return (
-                product.vanities[0].msrp +
-                product.washbasins[0].msrp +
-                product.sideUnits[0].msrp
-            );
-        }
-
-        return product.vanities[0].msrp + product.washbasins[0].msrp;
-    };
-
     const handleProduct = () => {
-        router.post("/express-program/set-product", product);
+        router.post("/express-program/set-product", composition);
     };
 
     return (
@@ -37,7 +22,7 @@ function ProductExpressProgramCard({
             <div className={classes.productCardcontent}>
                 <div className={classes.compositionImage}>
                     <img
-                        src={product.compositionImage}
+                        src={composition.compositionImage}
                         alt="composition image"
                         loading="lazy"
                         onError={(e) => {
@@ -48,7 +33,7 @@ function ProductExpressProgramCard({
                     />
                 </div>
                 <div className={classes.finishesContainer}>
-                    {product.finishes.map((value, index) => {
+                    {composition.finishes.map((value, index) => {
                         const finishObj = value as {
                             finish: string;
                             url: string;
@@ -61,9 +46,9 @@ function ProductExpressProgramCard({
                         );
                     })}
                 </div>
-                <h1 className={classes.compositionName}>{product.name}</h1>
+                <h1 className={classes.compositionName}>{composition.name}</h1>
                 <p className={classes.startingPriceLabel}>
-                    Starting at ${getStartingPrice()} MSRP
+                    Starting at ${composition.startingPrice} MSRP
                 </p>
             </div>
         </div>
