@@ -14,6 +14,10 @@ function ProductExpressProgramCard({
         router.post("/express-program/set-product", composition);
     };
 
+    console.log(composition.name.split("Incl"));
+
+    const splitedCompositionName = composition.name.split("Incl");
+
     return (
         <div
             className={classes.expressProgramProductCard}
@@ -46,9 +50,12 @@ function ProductExpressProgramCard({
                         );
                     })}
                 </div>
-                <h1 className={classes.compositionName}>{composition.name}</h1>
+                <h1 className={classes.compositionName}>
+                    {splitedCompositionName[0]} <br />
+                    Incl{splitedCompositionName[1]}
+                </h1>
                 <p className={classes.startingPriceLabel}>
-                    Starting at ${composition.startingPrice} MSRP
+                    Starting at ${composition.startingPrice}
                 </p>
             </div>
         </div>

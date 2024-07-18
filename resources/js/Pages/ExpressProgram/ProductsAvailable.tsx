@@ -229,7 +229,6 @@ function ProductsAvailable({
         <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <div className="main-content-wrapper">
                 <section className={classes.allFiltersWrapper}>
-                    <button onClick={handleResetFilters}>reset filters</button>
                     <Filter
                         filterTitle="Filter By Size"
                         contentType="sizes"
@@ -244,6 +243,12 @@ function ProductsAvailable({
                         crrValueSelected={crrFilteredFinish}
                         onFilter={handleFilter}
                     />
+                    <button
+                        className={classes.resetFiltersButton}
+                        onClick={handleResetFilters}
+                    >
+                        reset filters
+                    </button>
                 </section>
                 <section className={classes.expressProgramProductsWrapper}>
                     {compositions.map((composition, index) => (

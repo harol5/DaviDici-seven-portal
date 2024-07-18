@@ -1,7 +1,7 @@
 .compositionConfiguratorWrapper {
     display: flex;
     margin: 40px 0;
-    gap: 13px;
+    gap: 25px;
 }
 
 .leftSideConfiguratorWrapper {
@@ -15,6 +15,7 @@
 .leftSideConfiguratorWrapper .backButtonAndNameWrapper {
     display: flex;
     gap: 1.5em;
+    justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
 }
@@ -43,7 +44,7 @@
 }
 
 .leftSideConfiguratorWrapper .compositionImageWrapper {
-    width: 95%;
+    width: 100%;
 }
 
 /*=== OPTIONS STYLING =====*/
@@ -164,4 +165,29 @@
 /*state of button*/
 .grandTotalAndOrderNowButtonWrapper button:disabled {
     background-color: #d1ab68ae;
+}
+
+@media (max-width: 600px) {
+    .compositionConfiguratorWrapper {
+        flex-direction: column;
+    }
+
+    .leftSideConfiguratorWrapper {
+        flex-basis: 100%;
+    }
+
+    .rightSideConfiguratorWrapper {
+        flex-basis: 100%;
+    }
+
+    .leftSideConfiguratorWrapper
+        .backButtonAndNameWrapper
+        .backButtonWrapper
+        img {
+        width: 40%;
+    }
+
+    .leftSideConfiguratorWrapper .backButtonAndNameWrapper h1 {
+        font-size: medium;
+    }
 }

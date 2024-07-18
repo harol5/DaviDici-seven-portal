@@ -2,23 +2,29 @@
     margin-top: 1em;
     display: flex;
     flex-direction: column;
-    gap: 3em;
 }
 
 .titleAndFilterWrapper {
-    display: flex;
-    justify-content: center;
-    gap: 1.5em;
+    padding: 1em 0;
+    box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.388);
+}
+
+.titleAndFinishesFilterWrapper {
+    padding: 1em 0.9em;
+    box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.388);
+    margin: 1em 0;
 }
 
 .titleWrapper {
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-bottom: 10px;
 }
 
 .sizeFilterWrapper {
     display: flex;
+    justify-content: center;
     gap: 1em;
     text-align: center;
     flex-wrap: wrap;
@@ -41,18 +47,44 @@
     color: white;
 }
 
+.allFinishTypesWrapper {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.finishTypeWrapper {
+    flex-basis: 33.333%;
+    border: 1px solid rgba(0, 0, 0, 0.214);
+    border-radius: 5px;
+    padding: 1em;
+}
+
+.finishTypeWrapper .finishTypeLabel {
+    color: #d1aa68;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.finishFilterWrapper {
+    display: flex;
+    text-align: center;
+    flex-wrap: wrap;
+}
+
 .labelAndFinishWrapper {
+    width: 25%;
+    padding: 0.5em;
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 10%;
 }
 
 .finishFilter {
     border: 3px solid #d1aa68;
     border-radius: 50%;
-    height: 2.8em;
-    width: 2.8em;
+    height: 4em;
+    width: 4em;
     margin: 0 1em;
     cursor: pointer;
     display: flex;
@@ -60,20 +92,19 @@
     align-items: center;
 }
 
-.finishFilterWrapper {
-    display: flex;
-    gap: 1em;
-    text-align: center;
-    flex-wrap: wrap;
-    flex-basis: 90%;
-}
-
 .finishFilterLabel {
     font-size: 12px;
 }
 
 .finishFilterValueSelected {
-    border: 3px solid red;
+    box-shadow: 0px 0px 9px 2px #d1aa68;
+}
+
+.resetFiltersButton {
+    background-color: #d1aa68;
+    color: white;
+    padding: 0.5em 4em;
+    border-radius: 5px;
 }
 
 /*== PRODUCTS CARS STYLING ==*/
@@ -141,4 +172,39 @@
     font-size: x-large;
     font-weight: 400;
     color: #d1aa68;
+}
+
+@media (max-width: 600px) {
+    .sizeFilterWrapper {
+        gap: 0.5em;
+    }
+
+    .sizeFilter {
+        height: 2.5em;
+        width: 2.5em;
+        margin: 0 0.25em;
+        border: 2px solid #d1aa68;
+    }
+
+    .allFinishTypesWrapper {
+        flex-direction: column;
+    }
+
+    .labelAndFinishWrapper {
+        width: 25%;
+    }
+
+    .finishFilter {
+        height: 2.5em;
+        width: 2.5em;
+        margin: 0;
+    }
+
+    .finishFilterLabel {
+        font-size: 9px;
+    }
+
+    .expressProgramProductCard {
+        width: 100%;
+    }
 }

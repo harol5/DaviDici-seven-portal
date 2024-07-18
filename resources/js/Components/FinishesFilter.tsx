@@ -34,108 +34,137 @@ function FinishesFilter({
     }, [values]);
 
     return (
-        <section className={classes.titleAndFilterWrapper}>
+        <section className={classes.titleAndFinishesFilterWrapper}>
             <div className={classes.titleWrapper}>
                 <h1>{filterTitle}</h1>
             </div>
 
-            <div>
-                <h1>MELAMINE</h1>
-                <div className={classes.finishFilterWrapper}>
-                    {finishTypes.melamine.map((value, index) => {
-                        const finishObj = value as finish;
-                        return (
-                            <div
-                                key={index}
-                                className={classes.labelAndFinishWrapper}
-                            >
-                                <img
-                                    className={
-                                        crrValueSelected === finishObj.finish
-                                            ? `${classes.finishFilter} ${classes.finishFilterValueSelected} `
-                                            : classes.finishFilter
-                                    }
-                                    src={finishObj.url}
-                                    onClick={() =>
-                                        handleFilter(
-                                            contentType,
-                                            finishObj.finish
-                                        )
-                                    }
-                                />
-                                <p className={classes.finishFilterLabel}>
-                                    {finishObj.finish}
-                                </p>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
+            <div className={classes.allFinishTypesWrapper}>
+                {finishTypes.melamine.length !== 0 && (
+                    <div className={classes.finishTypeWrapper}>
+                        <h1 className={classes.finishTypeLabel}>MELAMINE</h1>
+                        <div className={classes.finishFilterWrapper}>
+                            {finishTypes.melamine.map((value, index) => {
+                                const finishObj = value as finish;
+                                return (
+                                    <div
+                                        key={index}
+                                        className={
+                                            classes.labelAndFinishWrapper
+                                        }
+                                    >
+                                        <img
+                                            className={
+                                                crrValueSelected ===
+                                                finishObj.finish
+                                                    ? `${classes.finishFilter} ${classes.finishFilterValueSelected} `
+                                                    : classes.finishFilter
+                                            }
+                                            src={finishObj.url}
+                                            onClick={() =>
+                                                handleFilter(
+                                                    contentType,
+                                                    finishObj.finish
+                                                )
+                                            }
+                                        />
+                                        <p
+                                            className={
+                                                classes.finishFilterLabel
+                                            }
+                                        >
+                                            {finishObj.finish}
+                                        </p>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
 
-            <div>
-                <h1>LACQUERED</h1>
-                <div className={classes.finishFilterWrapper}>
-                    {finishTypes.lacquered.map((value, index) => {
-                        const finishObj = value as finish;
-                        return (
-                            <div
-                                key={index}
-                                className={classes.labelAndFinishWrapper}
-                            >
-                                <img
-                                    className={
-                                        crrValueSelected === finishObj.finish
-                                            ? `${classes.finishFilter} ${classes.finishFilterValueSelected} `
-                                            : classes.finishFilter
-                                    }
-                                    src={finishObj.url}
-                                    onClick={() =>
-                                        handleFilter(
-                                            contentType,
-                                            finishObj.finish
-                                        )
-                                    }
-                                />
-                                <p className={classes.finishFilterLabel}>
-                                    {finishObj.finish}
-                                </p>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
+                {finishTypes.lacquered.length !== 0 && (
+                    <div className={classes.finishTypeWrapper}>
+                        <h1 className={classes.finishTypeLabel}>LACQUERED</h1>
+                        <div className={classes.finishFilterWrapper}>
+                            {finishTypes.lacquered.map((value, index) => {
+                                const finishObj = value as finish;
+                                return (
+                                    <div
+                                        key={index}
+                                        className={
+                                            classes.labelAndFinishWrapper
+                                        }
+                                    >
+                                        <img
+                                            className={
+                                                crrValueSelected ===
+                                                finishObj.finish
+                                                    ? `${classes.finishFilter} ${classes.finishFilterValueSelected} `
+                                                    : classes.finishFilter
+                                            }
+                                            src={finishObj.url}
+                                            onClick={() =>
+                                                handleFilter(
+                                                    contentType,
+                                                    finishObj.finish
+                                                )
+                                            }
+                                        />
+                                        <p
+                                            className={
+                                                classes.finishFilterLabel
+                                            }
+                                        >
+                                            {finishObj.finish}
+                                        </p>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
 
-            <div>
-                <h1>GLASS</h1>
-                <div className={classes.finishFilterWrapper}>
-                    {finishTypes.glass.map((value, index) => {
-                        const finishObj = value as finish;
-                        return (
-                            <div
-                                key={index}
-                                className={classes.labelAndFinishWrapper}
-                            >
-                                <img
-                                    className={
-                                        crrValueSelected === finishObj.finish
-                                            ? `${classes.finishFilter} ${classes.finishFilterValueSelected} `
-                                            : classes.finishFilter
-                                    }
-                                    src={finishObj.url}
-                                    onClick={() =>
-                                        handleFilter(
-                                            contentType,
-                                            finishObj.finish
-                                        )
-                                    }
-                                />
-                                <p className={classes.finishFilterLabel}>
-                                    {finishObj.finish}
-                                </p>
-                            </div>
-                        );
-                    })}
-                </div>
+                {finishTypes.glass.length !== 0 && (
+                    <div className={classes.finishTypeWrapper}>
+                        <h1 className={classes.finishTypeLabel}>GLASS</h1>
+                        <div className={classes.finishFilterWrapper}>
+                            {finishTypes.glass.map((value, index) => {
+                                const finishObj = value as finish;
+                                return (
+                                    <div
+                                        key={index}
+                                        className={
+                                            classes.labelAndFinishWrapper
+                                        }
+                                    >
+                                        <img
+                                            className={
+                                                crrValueSelected ===
+                                                finishObj.finish
+                                                    ? `${classes.finishFilter} ${classes.finishFilterValueSelected} `
+                                                    : classes.finishFilter
+                                            }
+                                            src={finishObj.url}
+                                            onClick={() =>
+                                                handleFilter(
+                                                    contentType,
+                                                    finishObj.finish
+                                                )
+                                            }
+                                        />
+                                        <p
+                                            className={
+                                                classes.finishFilterLabel
+                                            }
+                                        >
+                                            {finishObj.finish}
+                                        </p>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
             </div>
         </section>
     );
