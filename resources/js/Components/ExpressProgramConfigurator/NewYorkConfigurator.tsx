@@ -62,9 +62,11 @@ function NewYorkConfigurator({ composition }: NewYorkConfiguratorProps) {
             if (!handleOptionsMap.has(`${codes[2]}`))
                 handleOptionsMap.set(`${codes[2]}`, {
                     code: codes[2],
-                    imgUrl: "https://portal.davidici.com/images/express-program/not-image.jpg",
+                    imgUrl: `https://portal.davidici.com/images/express-program/NEW YORK/options/${
+                        codes[2] === "VBB" ? "BLACK HANDLE" : "CHROMED HANDLE"
+                    }.webp`,
                     title:
-                        codes[2] === "VBB" ? "BLACK HANDLE" : "CHROMED HANLDE",
+                        codes[2] === "VBB" ? "BLACK HANDLE" : "CHROMED HANDLE",
                     validSkus: [],
                     isDisabled: false,
                 });
@@ -132,7 +134,9 @@ function NewYorkConfigurator({ composition }: NewYorkConfiguratorProps) {
             if (!handleOptionsMap.has(`${codes[2]}`)) {
                 handleOptionsMap.set(`${codes[2]}`, {
                     code: codes[2],
-                    imgUrl: "https://portal.davidici.com/images/express-program/not-image.jpg",
+                    imgUrl: `https://portal.davidici.com/images/express-program/NEW YORK/options/${
+                        codes[2] === "SCB" ? "BLACK HANDLE" : "CHROMED HANDLE"
+                    }.webp`,
                     title:
                         codes[2] === "SCB" ? "BLACK HANDLE" : "CHROMED HANDLE",
                     validSkus: [],

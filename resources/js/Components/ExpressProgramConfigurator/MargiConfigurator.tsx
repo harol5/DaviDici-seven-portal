@@ -70,7 +70,9 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
             if (!drawerOptionsMap.has(`${codes[2]}`))
                 drawerOptionsMap.set(`${codes[2]}`, {
                     code: codes[2],
-                    imgUrl: "https://portal.davidici.com/images/express-program/not-image.jpg",
+                    imgUrl: `https://portal.davidici.com/images/express-program/MARGI/options/${
+                        codes[2].includes("D") ? "2 DRAWERS" : "1 DRAWER"
+                    }.webp`,
                     title: codes[2].includes("D") ? "2 DRAWERS" : "1 DRAWER",
                     validSkus: [],
                     isDisabled: false,
@@ -81,7 +83,11 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
             if (!handleOptionsMap.has(`${codes[3]}`))
                 handleOptionsMap.set(`${codes[3]}`, {
                     code: codes[3],
-                    imgUrl: "https://portal.davidici.com/images/express-program/not-image.jpg",
+                    imgUrl: `https://portal.davidici.com/images/express-program/MARGI/options/${
+                        codes[3].includes("1")
+                            ? "BLACK HANDLE"
+                            : "POLISHED HANDLE"
+                    }.webp`,
                     title: codes[3].includes("1")
                         ? "BLACK HANDLE"
                         : "POLISH HANLDE",
@@ -119,7 +125,7 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
         composition.washbasins.forEach((washbasin) => {
             all.push({
                 code: washbasin.uscode,
-                imgUrl: "https://portal.davidici.com/images/express-program/not-image.jpg",
+                imgUrl: `https://seven.test/images/express-program/washbasins/${washbasin.uscode}.webp`,
                 title: `${washbasin.model} ${washbasin.finish}`,
                 validSkus: [washbasin.uscode],
                 isDisabled: false,

@@ -14,8 +14,6 @@ function ProductExpressProgramCard({
         router.post("/express-program/set-product", composition);
     };
 
-    console.log(composition.name.split("Incl"));
-
     const splitedCompositionName = composition.name.split("Incl");
 
     return (

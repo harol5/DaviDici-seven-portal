@@ -247,7 +247,7 @@ function ProductsAvailable({
                         className={classes.resetFiltersButton}
                         onClick={handleResetFilters}
                     >
-                        reset filters
+                        RESET FILTERS
                     </button>
                 </section>
                 <section className={classes.expressProgramProductsWrapper}>
