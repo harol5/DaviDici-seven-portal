@@ -125,7 +125,7 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
         composition.washbasins.forEach((washbasin) => {
             all.push({
                 code: washbasin.uscode,
-                imgUrl: `https://seven.test/images/express-program/washbasins/${washbasin.uscode}.webp`,
+                imgUrl: `https://portal.davidici.com/images/express-program/washbasins/${washbasin.uscode}.webp`,
                 title: `${washbasin.model} ${washbasin.finish}`,
                 validSkus: [washbasin.uscode],
                 isDisabled: false,
