@@ -24,6 +24,7 @@ interface SideUnit {
 interface CurrentConfiguration {
     vanity: { baseSku: string; finish: string };
     isDoubleSink: boolean;
+    isDoubleSideUnit: boolean;
     sideUnit: SideUnit | null;
     washbasin: string;
 }
@@ -164,6 +165,7 @@ function OtherModelsConfigurator({
                     : "",
         },
         isDoubleSink: composition.name.includes("DOUBLE"),
+        isDoubleSideUnit: composition.name.includes("(12+24+12)"),
         sideUnit: sideUnitOptions
             ? {
                   baseSku: sideUnitOptions.baseSku,
@@ -361,6 +363,7 @@ function OtherModelsConfigurator({
             }
 
             if (currentConfiguration.isDoubleSink) vanityMsrp *= 2;
+            if (currentConfiguration.isDoubleSideUnit) sideUnitMsrp *= 2;
 
             if (vanityMsrp === 0) setGrandTotal(0);
             else setGrandTotal(vanityMsrp + washbasinMsrp + sideUnitMsrp);
@@ -382,7 +385,9 @@ function OtherModelsConfigurator({
         if (sideUnitSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }~${washbasinSku}--1~${sideUnitSku}--1`;
+            }~${washbasinSku}--1~${sideUnitSku}${
+                currentConfiguration.isDoubleSideUnit ? "--2" : "--1"
+            }`;
         } else {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"

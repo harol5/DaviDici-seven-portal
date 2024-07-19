@@ -95,8 +95,9 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                     );
 
                     const sinkConfig = product.descw.match(
-                        /\bLEFT\b|\bRIGHT\b|\bDOUBLE\b/
+                        /\bLEFT\b|\bRIGHT\b|\bDOUBLE\b|\bCENTERED\b/
                     );
+
                     if (sinkConfig) {
                         if (!sinkPosition.has(sinkConfig[0]))
                             sinkPosition.set(sinkConfig[0], []);
@@ -294,7 +295,12 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                         a.msrp - b.msrp
                 );
 
-                return vanityMsrp + washbasins[0].msrp + sideUnits[0].msrp;
+                const sideUnitMsrp =
+                    sinkPositionMeasure === "(12+24+12)"
+                        ? sideUnits[0].msrp * 2
+                        : sideUnits[0].msrp;
+
+                return vanityMsrp + washbasins[0].msrp + sideUnitMsrp;
             }
 
             return vanityMsrp + washbasins[0].msrp;
@@ -470,6 +476,13 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
 
                             // IMPORTANT!! - "value" could be an array or a map(NEW YORK <position, arr>).
                             for (const [model, value] of modelsMap) {
+                                if (
+                                    model === "NEW YORK" &&
+                                    (sinkPositionMeasure === "(12+24+12)" ||
+                                        sinkPositionMeasure === "(24+12+24)")
+                                )
+                                    continue;
+
                                 if (!validModels.has(model))
                                     validModels.set(model, new Map());
 
@@ -483,6 +496,13 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
 
                             // IMPORTANT!! - "value" could be an array or a map(MARGI <door style, arr>).
                             for (const [model, arr] of modelsMap) {
+                                if (
+                                    model === "NEW YORK" &&
+                                    (sinkPositionMeasure === "(12+24+12)" ||
+                                        sinkPositionMeasure === "(24+12+24)")
+                                )
+                                    continue;
+
                                 //we can get only vanities that can be pair with a side unit.
                                 if (!validModels.has(model)) continue;
                                 validModels.get(model).set("VANITY", arr);
