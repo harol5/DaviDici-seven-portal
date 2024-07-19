@@ -128,7 +128,25 @@
 /*states of options*/
 
 .optionSelected .imageAndOverlayWrapper .imageOverlay {
-    background-color: #d1ab68cb;
+    background-color: #d1ab68b4;
+    box-shadow: 0px 0px 3px 3px #d1aa68;
+}
+
+.optionSelected .imageAndOverlayWrapper .imageOverlay::after {
+    content: "SELECTED";
+    color: white;
+    font-weight: 300;
+    position: absolute;
+    transform: translate(25%, 100%);
+}
+
+.finishOption.optionSelected .imageAndOverlayWrapper .imageOverlay::after {
+    content: "SELECTED";
+    color: white;
+    font-size: x-small;
+    font-weight: 300;
+    position: absolute;
+    transform: translate(15%, 100%);
 }
 
 .optionDisabled {

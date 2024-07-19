@@ -177,10 +177,7 @@ function NewYorkConfigurator({ composition }: NewYorkConfiguratorProps) {
                 vanityOptions.handleOptions.length === 1
                     ? vanityOptions.handleOptions[0].code
                     : "",
-            finish:
-                vanityOptions.finishOptions.length === 1
-                    ? vanityOptions.finishOptions[0].code
-                    : "",
+            finish: vanityOptions.finishOptions[0].code,
         },
         isDoubleSink: composition.name.includes("DOUBLE"),
         sideUnit: sideUnitOptions

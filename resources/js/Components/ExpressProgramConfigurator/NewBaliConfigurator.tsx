@@ -169,10 +169,7 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
                 vanityOptions.vanityBaseOptions.length === 1
                     ? vanityOptions.vanityBaseOptions[0].code
                     : "",
-            finish:
-                vanityOptions.finishOptions.length === 1
-                    ? vanityOptions.finishOptions[0].code
-                    : "",
+            finish: vanityOptions.finishOptions[0].code,
         },
         isDoubleSink: composition.name.includes("DOUBLE"),
         sideUnit: sideUnitOptions

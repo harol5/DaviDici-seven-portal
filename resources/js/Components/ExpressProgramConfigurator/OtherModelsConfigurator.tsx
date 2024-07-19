@@ -159,10 +159,7 @@ function OtherModelsConfigurator({
     const initialConfiguration: CurrentConfiguration = {
         vanity: {
             baseSku: vanityOptions.baseSku,
-            finish:
-                vanityOptions.finishOptions.length === 1
-                    ? vanityOptions.finishOptions[0].code
-                    : "",
+            finish: vanityOptions.finishOptions[0].code,
         },
         isDoubleSink: composition.name.includes("DOUBLE"),
         isDoubleSideUnit: composition.name.includes("(12+24+12)"),
