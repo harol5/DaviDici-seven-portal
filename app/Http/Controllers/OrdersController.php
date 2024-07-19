@@ -522,11 +522,11 @@ class OrdersController extends Controller
         // ]);
 
         
-        $response = FoxproApi::call([
-            'action' => 'GETCOMMINFO',
-            'params' => ['info%40Kitchencabsdirect.com'],
-            'keep_session' => false,
-        ]);
+        // $response = FoxproApi::call([
+        //     'action' => 'GETCOMMINFO',
+        //     'params' => ['mia.ruzzo@alliedkitchenandbath.com'],
+        //     'keep_session' => false,
+        // ]);
 
         // return Inertia::render('Test',['response' => $response]);
         return response(['response' => $response])->header('Content-Type', 'application/json');
