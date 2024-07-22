@@ -1,3 +1,53 @@
 .loyaltyProgramAndOrderWrapper {
     display: flex;
+    gap: 1em;
+}
+
+.allGauges {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+/*===================================*/
+
+.loyaltyProgramGaugeWrapper {
+    /*this must be set dynamically*/
+    height: calc(430px / 2);
+    overflow: hidden;
+    position: relative;
+}
+
+.loyaltyProgramGaugeWrapper .gaugeGoalAmount {
+    position: absolute;
+    right: 2%;
+    bottom: 0;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.loyaltyProgramGaugeWrapper .gaugeMainInfo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-90%, -10%);
+    text-align: center;
+}
+
+.loyaltyProgramGaugeWrapper .gaugeMainInfo h1 {
+    color: #d1aa68;
+    font-size: 1.7rem;
+    font-weight: 600;
+}
+
+.gaugeFiller {
+    transform-origin: center;
+    /*this must be set dynamically*/
+    transform: rotate(100deg);
+}
+
+/*===================================*/
+
+.ordersMainContainer {
+    flex-grow: 1;
 }
