@@ -20,13 +20,19 @@ class OrdersController extends Controller
             'params' => [$username],
             'keep_session' => false,
         ]);
+
+        $commissionInfo = FoxproApi::call([
+            'action' => 'GETCOMMINFO',
+            'params' => ['sales@meghatile.com'],
+            'keep_session' => false,
+        ]);
         
         if($orders['status'] === 500){
             // assings an empty array so template can display proper message.
             $orders['rows'] = []; 
         }
 
-        return Inertia::render('Orders/Orders',['orders' => $orders['rows'], 'message' => $message]);
+        return Inertia::render('Orders/Orders',['orders' => $orders['rows'], 'message' => $message, 'commissionInfo' => $commissionInfo]);
     }
 
     // Show single order overview.
