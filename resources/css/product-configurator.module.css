@@ -154,20 +154,22 @@
 }
 
 .optionDisabled .imageAndOverlayWrapper .imageOverlay {
-    background-color: #0000004a;
+    background-color: #00000094;
 }
 
 .optionDisabled .imageAndOverlayWrapper .imageOverlay::after {
     content: "OUT OF STOCK";
+    color: #f1f1f1;
     position: absolute;
     transform: translate(25%, 60%);
 }
 
 .finishOption.optionDisabled .imageAndOverlayWrapper .imageOverlay::after {
     content: "OUT OF STOCK";
-    font-size: small;
+    font-size: 0.7rem;
+    color: #f1f1f1;
     position: absolute;
-    transform: translate(15%, 30%);
+    transform: translate(20%, 40%);
 }
 
 /*=====grand total and order now button=======*/
