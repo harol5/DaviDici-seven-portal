@@ -23,7 +23,7 @@ class OrdersController extends Controller
 
         $commissionInfo = FoxproApi::call([
             'action' => 'GETCOMMINFO',
-            'params' => ['jmo%40Kitchencabsdirect.com'],
+            'params' => [$username],
             'keep_session' => false,
         ]);
         
