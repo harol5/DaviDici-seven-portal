@@ -23,7 +23,7 @@ class OrdersController extends Controller
 
         $commissionInfo = FoxproApi::call([
             'action' => 'GETCOMMINFO',
-            'params' => ['sales@meghatile.com'],
+            'params' => ['jmo%40Kitchencabsdirect.com'],
             'keep_session' => false,
         ]);
         
@@ -32,7 +32,7 @@ class OrdersController extends Controller
             $orders['rows'] = []; 
         }
 
-        return Inertia::render('Orders/Orders',['orders' => $orders['rows'], 'message' => $message, 'commissionInfo' => $commissionInfo]);
+        return Inertia::render('Orders/Orders',['orders' => $orders['rows'], 'message' => $message, 'commissionInfo' => $commissionInfo['rows']]);
     }
 
     // Show single order overview.
