@@ -1,0 +1,133 @@
+:root {
+    --current-sales-gauge-deg: 0deg;
+    --current-comm-gauge-deg: 0deg;
+}
+
+.allGauges {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem 2.5rem;
+    border: 1px solid #d1aa68;
+}
+
+.loyaltyProgramHeader {
+    display: flex;
+    justify-content: space-between;
+}
+
+.loyaltyProgramHeader .currentMonth {
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.loyaltyProgramHeader .loyaltyProgramTitle {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #d1aa68;
+}
+
+.titleAndGaugeWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.titleAndGaugeWrapper > h1 {
+    color: #d1aa68;
+    margin: 0 4rem 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #d1aa68;
+}
+
+/*===================================*/
+
+.titleAndGaugeWrapper .loyaltyProgramGaugeWrapper {
+    /*this must be set dynamically*/
+    height: calc(360px / 2);
+    max-width: 360px;
+
+    overflow: hidden;
+    position: relative;
+}
+
+.titleAndGaugeWrapper .loyaltyProgramGaugeWrapper svg {
+    width: 360px;
+}
+
+.titleAndGaugeWrapper .loyaltyProgramGaugeWrapper .gaugeGoalAmount {
+    position: absolute;
+    right: 1%;
+    bottom: 0;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.titleAndGaugeWrapper .loyaltyProgramGaugeWrapper .gaugeMainInfo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform-origin: center center;
+    transform: translate(-70%, -20%);
+    text-align: center;
+}
+
+.titleAndGaugeWrapper .loyaltyProgramGaugeWrapper .gaugeMainInfo h1 {
+    color: #d1aa68;
+    font-size: 1.7rem;
+    font-weight: 600;
+}
+
+.currentSalesGaugeFiller {
+    transform-origin: center;
+    animation: fillingSalesGauge 2s forwards;
+}
+
+.currentCommGaugeFiller {
+    transform-origin: center;
+    animation: fillingCommGauge 2s forwards;
+}
+
+/*===================================*/
+
+@keyframes fillingSalesGauge {
+    0% {
+        transform: rotate(0);
+    }
+
+    100% {
+        transform: rotate(var(--current-sales-gauge-deg));
+    }
+}
+
+@keyframes fillingCommGauge {
+    0% {
+        transform: rotate(0);
+    }
+
+    100% {
+        transform: rotate(var(--current-comm-gauge-deg));
+    }
+}
+
+@media (max-width: 650px) {
+    .allGauges {
+        padding: 1rem 1.5rem;
+    }
+
+    .titleAndGaugeWrapper .loyaltyProgramGaugeWrapper {
+        /*this must be set dynamically*/
+        height: calc(270px / 2);
+        max-width: 270px;
+    }
+
+    .titleAndGaugeWrapper .loyaltyProgramGaugeWrapper svg {
+        width: 270px;
+    }
+
+    .titleAndGaugeWrapper .loyaltyProgramGaugeWrapper .gaugeGoalAmount {
+        font-size: 0.65rem;
+        font-weight: 500;
+    }
+}

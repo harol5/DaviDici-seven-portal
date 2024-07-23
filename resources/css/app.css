@@ -128,6 +128,7 @@ nav {
     list-style: none;
     display: flex;
     padding: 0;
+    overflow: hidden;
 }
 .nav-links li {
     margin: 0 10px;
@@ -223,12 +224,14 @@ main {
 #empty-orders-message {
     text-align: center;
     margin: 3em 0;
+    flex-grow: 1;
 }
 
 #empty-orders-message.search-result {
     display: none;
     text-align: center;
     margin: 3em 0;
+    flex-grow: 1;
 }
 
 .orders-wrapper {
@@ -238,7 +241,8 @@ main {
 
 /*individual orders*/
 .order-container {
-    width: 33.33333%;
+    /* width: 33.33333%; */
+    width: 50%;
 }
 .order {
     display: flex;

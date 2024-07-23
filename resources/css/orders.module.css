@@ -1,0 +1,14 @@
+.loyaltyProgramAndOrderWrapper {
+    display: flex;
+    gap: 1em;
+}
+
+.ordersMainContainer {
+    flex-grow: 1;
+}
+
+@media (max-width: 1150px) {
+    .loyaltyProgramAndOrderWrapper {
+        flex-direction: column;
+    }
+}

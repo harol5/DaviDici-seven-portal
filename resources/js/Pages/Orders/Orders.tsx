@@ -4,14 +4,17 @@ import FlashMessage from "../../Components/FlashMessage";
 import { ChangeEvent, useMemo, useState } from "react";
 import User from "../../Models/User";
 import type { Order as OrderModel } from "../../Models/Order";
+import classes from "../../../css/orders.module.css";
+import LoyaltyProgramGauges from "../../Components/LoyaltyProgramGauges";
 
 interface ordersProp {
     auth: User;
     orders: OrderModel[];
     message: string;
+    commissionInfo: any;
 }
 
-function Orders({ auth, orders, message = "" }: ordersProp) {
+function Orders({ auth, orders, message = "", commissionInfo }: ordersProp) {
     const [userOrders, setUserOrders] = useState(orders);
 
     const handleSearhInput = (e: ChangeEvent<HTMLInputElement>) => {
@@ -53,7 +56,6 @@ function Orders({ auth, orders, message = "" }: ordersProp) {
                             Good Evening {auth?.user.first_name}
                         </h1>
                     )}
-
                     <input
                         className="search-order-input rounded-xl"
                         type="search"
@@ -61,24 +63,29 @@ function Orders({ auth, orders, message = "" }: ordersProp) {
                         onChange={handleSearhInput}
                     />
                 </div>
-
-                {userOrders.length === 0 ? (
-                    <p id="empty-orders-message">
-                        orders not found!. To report any issues, please contact
-                        support
-                    </p>
-                ) : (
-                    <div>
-                        <p id="empty-orders-message" className="search-result">
-                            orders not found!
+                <section className={classes.loyaltyProgramAndOrderWrapper}>
+                    <LoyaltyProgramGauges commissionInfo={commissionInfo} />
+                    {userOrders.length === 0 ? (
+                        <p id="empty-orders-message">
+                            orders not found!. To report any issues, please
+                            contact support
                         </p>
-                        <div className="orders-wrapper">
-                            {userOrders.map((order) => (
-                                <Order key={order.ordernum} order={order} />
-                            ))}
+                    ) : (
+                        <div className={classes.ordersMainContainer}>
+                            <p
+                                id="empty-orders-message"
+                                className="search-result"
+                            >
+                                orders not found!
+                            </p>
+                            <div className="orders-wrapper">
+                                {userOrders.map((order) => (
+                                    <Order key={order.ordernum} order={order} />
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
+                </section>
             </div>
             {message && <FlashMessage message={message} />}
         </UserAuthenticatedLayout>
