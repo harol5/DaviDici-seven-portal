@@ -120,6 +120,7 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
     const [vanityOptions, setVanityOptions] = useState(initialVanityOptions);
 
     // iterate over washbasin array and created Options array. ----------------------|
+    // this logic is the same for the other collection. mMUST CREATE A FUNTION THAT WRAPS TO AVOID REPETICION.
     const washbasinOptions: Option[] = useMemo(() => {
         const all: Option[] = [];
         composition.washbasins.forEach((washbasin) => {
@@ -130,6 +131,15 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
                 validSkus: [washbasin.uscode],
                 isDisabled: false,
             });
+        });
+
+        // adds option to remove washbasin.
+        all.push({
+            code: "",
+            imgUrl: `https://portal.davidici.com/images/express-program/washbasins/no-sink.webp`,
+            title: "NO WASHBASIN",
+            validSkus: [""],
+            isDisabled: false,
         });
 
         return all;
@@ -586,14 +596,28 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
         const washbasinSku = currentConfiguration.washbasin;
 
         let SKU;
-        if (sideUnitSku) {
+        if (sideUnitSku && washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
             }~${washbasinSku}--1~${sideUnitSku}--1`;
-        } else {
+        }
+
+        if (sideUnitSku && !washbasinSku) {
+            SKU = `${vanitySku}${
+                currentConfiguration.isDoubleSink ? "--2" : "--1"
+            }~${sideUnitSku}--1`;
+        }
+
+        if (!sideUnitSku && washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
             }~${washbasinSku}--1`;
+        }
+
+        if (!sideUnitSku && !washbasinSku) {
+            SKU = `${vanitySku}${
+                currentConfiguration.isDoubleSink ? "--2" : "--1"
+            }`;
         }
 
         console.log(SKU);
@@ -641,18 +665,16 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
                         }}
                     />
                 </section>
-                <section className={classes.vanitiesAndSideUnitFinishes}>
-                    <Options
-                        item="vanity"
-                        property="finish"
-                        title="SELECT VANITY FINISH"
-                        options={vanityOptions.finishOptions}
-                        crrOptionSelected={currentConfiguration.vanity.finish}
-                        onOptionSelected={handleOptionSelected}
-                    />
-                </section>
             </section>
             <section className={classes.rightSideConfiguratorWrapper}>
+                <Options
+                    item="vanity"
+                    property="finish"
+                    title="SELECT VANITY FINISH"
+                    options={vanityOptions.finishOptions}
+                    crrOptionSelected={currentConfiguration.vanity.finish}
+                    onOptionSelected={handleOptionSelected}
+                />
                 <Options
                     item="vanity"
                     property="handle"

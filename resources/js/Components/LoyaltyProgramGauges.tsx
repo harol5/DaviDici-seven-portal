@@ -31,8 +31,8 @@ function LoyaltyProgramGauges({ commissionInfo }: LoyaltyProgramGaugesProps) {
                 const valueA = a.monyear.toUpperCase();
                 const valueB = b.monyear.toUpperCase();
 
-                if (valueA < valueB) return -1;
-                if (valueA > valueB) return 1;
+                if (valueA < valueB) return 1;
+                if (valueA > valueB) return -1;
                 return 0;
             }
         );

@@ -101,8 +101,9 @@ function ProductsAvailable({
             );
 
             filteredComposition = compositions.filter((product) => {
+                console.log(product);
                 for (const finishObj of product.finishes) {
-                    if (finishObj.finish === finishValue) return true;
+                    if (finishObj.finish.includes(finishValue)) return true;
                 }
                 return false;
             });

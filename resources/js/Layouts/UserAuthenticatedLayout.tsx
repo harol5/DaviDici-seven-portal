@@ -25,11 +25,21 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
         <>
             <nav>
                 <div className="nav-content">
-                    <img
-                        className="nav-logo"
-                        src="https://portal.davidici.com/images/davidici-logo-nav-cropped.png"
-                    />
-
+                    <a
+                        className="homeAndNavLogoWrapper"
+                        href="https://www.davidici.com/"
+                        target="_blank"
+                    >
+                        <img
+                            className="nav-logo"
+                            src="https://portal.davidici.com/images/davidici-logo-nav-cropped.png"
+                        />
+                        <img
+                            className="home-logo"
+                            src="https://portal.davidici.com/images/home.svg"
+                            alt="home icon"
+                        />
+                    </a>
                     <ul className={auth?.user ? "nav-links" : "guess-links"}>
                         {auth?.user ? (
                             <>
@@ -79,7 +89,6 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
                             </>
                         )}
                     </ul>
-
                     {auth?.user && (
                         <div className="settings-wrapper">
                             <img

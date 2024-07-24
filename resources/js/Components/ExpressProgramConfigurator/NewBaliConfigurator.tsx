@@ -118,6 +118,15 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
             });
         });
 
+        // adds option to remove washbasin.
+        all.push({
+            code: "",
+            imgUrl: `https://portal.davidici.com/images/express-program/washbasins/no-sink.webp`,
+            title: "NO WASHBASIN",
+            validSkus: [""],
+            isDisabled: false,
+        });
+
         return all;
     }, []);
 
@@ -252,6 +261,7 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
         property: string,
         option: string
     ) => {
+        // checks if any options might be set as disable depending on current option selected and configuration.
         if (item === "vanity") {
             // const copyOptions = { ...vanityOptions };
             const copyOptions = structuredClone(vanityOptions);
@@ -380,14 +390,28 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
         const washbasinSku = currentConfiguration.washbasin;
 
         let SKU;
-        if (sideUnitSku) {
+        if (sideUnitSku && washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
             }~${washbasinSku}--1~${sideUnitSku}--1`;
-        } else {
+        }
+
+        if (sideUnitSku && !washbasinSku) {
+            SKU = `${vanitySku}${
+                currentConfiguration.isDoubleSink ? "--2" : "--1"
+            }~${sideUnitSku}--1`;
+        }
+
+        if (!sideUnitSku && washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
             }~${washbasinSku}--1`;
+        }
+
+        if (!sideUnitSku && !washbasinSku) {
+            SKU = `${vanitySku}${
+                currentConfiguration.isDoubleSink ? "--2" : "--1"
+            }`;
         }
 
         console.log(SKU);
@@ -434,18 +458,16 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
                         }}
                     />
                 </section>
-                <section className={classes.vanitiesAndSideUnitFinishes}>
-                    <Options
-                        item="vanity"
-                        property="finish"
-                        title="SELECT VANITY FINISH"
-                        options={vanityOptions.finishOptions}
-                        crrOptionSelected={currentConfiguration.vanity.finish}
-                        onOptionSelected={handleOptionSelected}
-                    />
-                </section>
             </section>
             <section className={classes.rightSideConfiguratorWrapper}>
+                <Options
+                    item="vanity"
+                    property="finish"
+                    title="SELECT VANITY FINISH"
+                    options={vanityOptions.finishOptions}
+                    crrOptionSelected={currentConfiguration.vanity.finish}
+                    onOptionSelected={handleOptionSelected}
+                />
                 <Options
                     item="vanity"
                     property="drawer"
@@ -474,7 +496,6 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
                     crrOptionSelected={currentConfiguration.washbasin}
                     onOptionSelected={handleOptionSelected}
                 />
-
                 <div className={classes.grandTotalAndOrderNowButtonWrapper}>
                     <div className={classes.grandTotalWrapper}>
                         <h1 className={classes.label}>Grand Total:</h1>

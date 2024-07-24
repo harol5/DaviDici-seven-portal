@@ -14,32 +14,6 @@ interface ProductConfiguratorProps {
 }
 
 function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
-    const sideUnitFinishes: { finish: string; url: string }[] = useMemo(() => {
-        // if there is any side unit, get finishes available
-        if (composition.sideUnits.length > 0) {
-            const listOfFinishesMap = new Map();
-
-            composition.sideUnits.forEach((sideUnit) => {
-                let finish = sideUnit.finish;
-
-                if (finish.includes("/"))
-                    finish = sideUnit.finish.replace("/", "-");
-
-                const finishObj = {
-                    finish: finish,
-                    url: `https://portal.davidici.com/images/express-program/finishes/${finish}.jpg`,
-                };
-
-                if (!listOfFinishesMap.has(finish))
-                    listOfFinishesMap.set(finish, finishObj);
-            });
-
-            return Object.values(Object.fromEntries(listOfFinishesMap));
-        }
-
-        return [];
-    }, []);
-
     useEffect(() => {
         const handleBeforeUnload = (event: BeforeUnloadEvent) => {
             event.preventDefault();

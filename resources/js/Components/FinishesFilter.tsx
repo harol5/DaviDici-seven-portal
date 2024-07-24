@@ -28,9 +28,9 @@ function FinishesFilter({
             if (value.type === "LACQUERED") obj.lacquered.push(value);
             if (value.type === "MELAMINE") obj.melamine.push(value);
             if (value.type === "LACQUERED / GLASS") {
-                value.finish = value.finish
-                    .replace("MATT LACQ. ", "")
-                    .split("-")[0];
+                // value.finish = value.finish
+                //     .replace("MATT LACQ. ", "")
+                //     .split("-")[0];
 
                 obj.glass.push(value);
             }
@@ -163,7 +163,11 @@ function FinishesFilter({
                                                 classes.finishFilterLabel
                                             }
                                         >
-                                            {finishObj.finish}
+                                            {
+                                                finishObj.finish
+                                                    .replace("MATT LACQ. ", "")
+                                                    .split("-")[0]
+                                            }
                                         </p>
                                     </div>
                                 );

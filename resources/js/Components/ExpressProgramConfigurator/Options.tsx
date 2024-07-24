@@ -29,7 +29,7 @@ function Options({
             finalClasses += `${classes.finishOption} ${classes.option}`;
         else finalClasses += `${classes.option}`;
 
-        if (option.code === crrOptionSelected)
+        if (option.code === crrOptionSelected && !option.isDisabled)
             finalClasses += ` ${classes.optionSelected}`;
 
         if (option.isDisabled) finalClasses += ` ${classes.optionDisabled}`;

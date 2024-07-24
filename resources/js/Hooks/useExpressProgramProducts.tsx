@@ -189,7 +189,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         // Add constructed composition to array.
         compositions.push({
             model: model,
-            name: `Model ${model} ${size}" Incl a ${washbasins[0].model} SINK`,
+            name: `${model} ${size}" Incl a ${washbasins[0].model} SINK`,
             compositionImage: `https://portal.davidici.com/images/express-program/${model}/${size}.webp`,
             size: size,
             startingPrice: getStartingPrice(),
@@ -235,7 +235,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
             // Add constructed composition to array.
             compositions.push({
                 model: model,
-                name: `Model ${model} ${size}" - ${doorStyle} DOOR Incl a ${washbasins[0].model} SINK`,
+                name: `${model} ${size}" - ${doorStyle} DOOR Incl a ${washbasins[0].model} SINK`,
                 compositionImage: `https://portal.davidici.com/images/express-program/${model}/${size}-${doorStyle}.webp`,
                 size: size,
                 startingPrice: getStartingPrice(),
@@ -309,7 +309,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         // Add constructed composition to array.
         compositions.push({
             model: model,
-            name: `Model ${model} ${size}" ${sinkPositionMeasure} Incl a ${washbasins[0].model} ${position} SINK`,
+            name: `${model} ${size}" ${sinkPositionMeasure} Incl a ${washbasins[0].model} ${position} SINK`,
             compositionImage: `https://portal.davidici.com/images/express-program/${model}/${sinkPositionMeasure} ${position} SINK.webp`,
             size: size,
             startingPrice: getStartingPrice(),

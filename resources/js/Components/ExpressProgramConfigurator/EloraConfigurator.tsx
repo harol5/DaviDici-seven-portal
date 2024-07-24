@@ -102,6 +102,15 @@ function EloraConfigurator({ composition }: EloraConfiguratorProps) {
             });
         });
 
+        // adds option to remove washbasin.
+        all.push({
+            code: "",
+            imgUrl: `https://portal.davidici.com/images/express-program/washbasins/no-sink.webp`,
+            title: "NO WASHBASIN",
+            validSkus: [""],
+            isDisabled: false,
+        });
+
         return all;
     }, []);
 
@@ -262,9 +271,16 @@ function EloraConfigurator({ composition }: EloraConfiguratorProps) {
         const vanitySku = Object.values(currentConfiguration.vanity).join("-");
         const washbasinSku = currentConfiguration.washbasin;
 
-        let SKU = `${vanitySku}${
-            currentConfiguration.isDoubleSink ? "--2" : "--1"
-        }~${washbasinSku}--1`;
+        let SKU;
+        if (!washbasinSku) {
+            SKU = `${vanitySku}${
+                currentConfiguration.isDoubleSink ? "--2" : "--1"
+            }`;
+        } else {
+            SKU = `${vanitySku}${
+                currentConfiguration.isDoubleSink ? "--2" : "--1"
+            }~${washbasinSku}--1`;
+        }
 
         console.log(SKU);
 
@@ -310,30 +326,24 @@ function EloraConfigurator({ composition }: EloraConfiguratorProps) {
                         }}
                     />
                 </section>
-                <section className={classes.vanitiesAndSideUnitFinishes}>
-                    <Options
-                        item="vanity"
-                        property="mattFinish"
-                        title="SELECT MATT FINISH"
-                        options={vanityOptions.mattFinishOptions}
-                        crrOptionSelected={
-                            currentConfiguration.vanity.mattFinish
-                        }
-                        onOptionSelected={handleOptionSelected}
-                    />
-                    <Options
-                        item="vanity"
-                        property="glassFinish"
-                        title="SELECT GLASS FINISH"
-                        options={vanityOptions.glassFinishOptions}
-                        crrOptionSelected={
-                            currentConfiguration.vanity.glassFinish
-                        }
-                        onOptionSelected={handleOptionSelected}
-                    />
-                </section>
             </section>
             <section className={classes.rightSideConfiguratorWrapper}>
+                <Options
+                    item="vanity"
+                    property="mattFinish"
+                    title="SELECT MATT FINISH"
+                    options={vanityOptions.mattFinishOptions}
+                    crrOptionSelected={currentConfiguration.vanity.mattFinish}
+                    onOptionSelected={handleOptionSelected}
+                />
+                <Options
+                    item="vanity"
+                    property="glassFinish"
+                    title="SELECT GLASS FINISH"
+                    options={vanityOptions.glassFinishOptions}
+                    crrOptionSelected={currentConfiguration.vanity.glassFinish}
+                    onOptionSelected={handleOptionSelected}
+                />
                 <Options
                     item="washbasin"
                     property="type"

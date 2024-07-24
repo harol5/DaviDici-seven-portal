@@ -121,8 +121,17 @@ nav {
     max-width: 90rem;
     margin: 25px auto;
 }
+.homeAndNavLogoWrapper {
+    display: flex;
+    /* flex-direction: column; */
+    align-items: center;
+    gap: 0.5rem;
+}
 .nav-logo {
     width: 150px;
+}
+.home-logo {
+    width: 23px;
 }
 .nav-links {
     list-style: none;
@@ -872,6 +881,9 @@ main {
     /*== nav bar ==*/
     .nav-content {
         margin: 22px 20px;
+    }
+    .homeAndNavLogoWrapper {
+        flex-direction: column;
     }
     .nav-logo {
         width: 130px;
