@@ -38,7 +38,6 @@ function OrderNumber({
         // copy current orderNum so we're able to append 0s at the beggining if needed.
         let crrOrderNum = orderNum;
         while (crrOrderNum.length < 6) {
-            console.log(crrOrderNum.length);
             crrOrderNum = "0" + crrOrderNum;
         }
         const newOrderNum = companyIdentifier + crrOrderNum;

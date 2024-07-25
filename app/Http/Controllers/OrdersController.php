@@ -451,59 +451,88 @@ class OrdersController extends Controller
     }
 
     // Create new order.
-    public function createOrder(Request $request){
-        $username = auth()->user()->username;
-        $data = $request->all();
-        
-        // Result: "This sales order already exists" | "All items entered"
-        $response = FoxproApi::call([
-            'action' => 'OrderEnter',
-            'params' => [$username, $data['newOrderNum'], $data['skus']],
-            'keep_session' => false, 
-        ]);
-    
-        if($response['status'] === 201 && $response['Result'] === 'All items entered'){
-            return redirect('/orders')->with('message', 'Order Number ' . $data['newOrderNum'] . ' created!!');
-        }
-
-        if($response['status'] === 500 || $response['Result'] !== 'Updated Info'){
-            Log::error("=VVVVV=== ERROR REQUESTING DATA FROM FOXPRO. function: OrderEnter ====VVVVV");
-            Log::error('order number: ' . $data['newOrderNum']);
-            Log::error('skus: ' . $data['skus']);
-            Log::error($response);
-        }
-                
-        return redirect('/orders')->with('message', "something went wrong. Please contact support.");
-
+    public function createOrder(Request $request){        
         /**
          * The "OrderEnter" only can handle max 200 characters for the SKU param,
          * if the skus string is larger than that, we will have to make a call to
          * "addtoorder" to provide the rest of the skus.
          */
-        // if (strlen($data['skus']) <= 200) {
-        //     // Result: "This sales order already exists" | "All items entered"
-        //     $response = FoxproApi::call([
-        //         'action' => 'OrderEnter',
-        //         'params' => [$username, $data['newOrderNum'], $data['skus']],
-        //         'keep_session' => false, 
-        //     ]);
+        $username = auth()->user()->username;
+        $data = $request->all();              
         
-        //     if($response['status'] === 201 && $response['Result'] === 'All items entered'){
-        //         return redirect('/orders')->with('message', 'Order Number ' . $data['newOrderNum'] . ' created!!');
-        //     }
+        if (strlen($data['skus']) <= 200) {
+            // Result: "This sales order already exists" | "All items entered"
+            $response = FoxproApi::call([
+                'action' => 'OrderEnter',
+                'params' => [$username, $data['newOrderNum'], $data['skus']],
+                'keep_session' => false, 
+            ]);
+        
+            if($response['status'] === 201 && $response['Result'] === 'All items entered'){
+                return redirect('/orders')->with('message', 'Order Number ' . $data['newOrderNum'] . ' created!!');
+            }
 
-        //     if($response['status'] === 500 || $response['Result'] !== 'Updated Info'){
-        //         Log::error("=VVVVV=== ERROR REQUESTING DATA FROM FOXPRO. function: OrderEnter ====VVVVV");
-        //         Log::error('order number: ' . $data['newOrderNum']);
-        //         Log::error('skus: ' . $data['skus']);
-        //         Log::error($response);
-        //     }
+            if($response['status'] === 500 || $response['Result'] !== 'Updated Info'){
+                Log::error("=VVVVV=== ERROR REQUESTING DATA FROM FOXPRO. function: OrderEnter ====VVVVV");
+                Log::error('order number: ' . $data['newOrderNum']);
+                Log::error('skus: ' . $data['skus']);
+                Log::error($response);
+            }
                     
-        //     return redirect('/orders')->with('message', "something went wrong. Please contact support.");
-        // } else {
-        //     // get the number of calls we will have to make to the "addtoorder", depending on the size of the sku string;
-        //     $numberOfCalls = floor(strlen($data['skus']) / 200);
-        // }                
+            return redirect('/orders')->with('message', "something went wrong. Please contact support.");
+
+        } else {
+            // get the number of calls we will have to make to the "addtoorder", depending on the size of the sku string;
+            $numberOfCalls = floor(strlen($data['skus']) / 200);
+            $skusArr = explode('~',$data['skus']);
+
+            $numOfArrays = count($skusArr) / ($numberOfCalls + 1);
+            $splittedArray = array_chunk($skusArr, ceil($numOfArrays));
+                        
+            for ($i = 0; $i < count($splittedArray); $i++) {
+                $skus = implode('~',$splittedArray[$i]);
+
+                if($i === 0) {
+                    $response = FoxproApi::call([
+                        'action' => 'OrderEnter',
+                        'params' => [$username, $data['newOrderNum'], $skus],
+                        'keep_session' => false, 
+                    ]);                    
+
+                    if($response['status'] === 500 || $response['Result'] !== 'All items entered'){
+                        Log::error("=VVVVV=== ERROR REQUESTING DATA FROM FOXPRO. function: OrderEnter ====VVVVV");
+                        Log::error('order number: ' . $data['newOrderNum']);
+                        Log::error('number of addtoorder calls: ' . $numberOfCalls);
+                        Log::error('skus array:');
+                        Log::error($splittedArray);
+                        Log::error('skus sent to this call: ' . $skus);
+                        Log::error($response);
+
+                        return redirect('/orders')->with('message', "something went wrong. Please contact support.");
+                    }                                                
+                }
+
+                $response = FoxproApi::call([
+                    'action' => 'addtoorder',
+                    'params' => [$username, $data['newOrderNum'], $skus],
+                    'keep_session' => false, 
+                ]);
+
+                if($response['status'] === 500 || $response['Result'] !== 'All items entered'){
+                    Log::error("=VVVVV=== ERROR REQUESTING DATA FROM FOXPRO. function: addtoorder ====VVVVV");
+                    Log::error('order number: ' . $data['newOrderNum']);
+                    Log::error('number of addtoorder call: ' . $i);
+                    Log::error('skus array:');
+                    Log::error($splittedArray);
+                    Log::error('skus sent to this call: ' . $skus);
+                    Log::error($response);
+
+                    return redirect('/orders')->with('message', "something went wrong. Please contact support.");
+                }                                                                
+            }
+
+            return redirect('/orders')->with('message', 'Order Number ' . $data['newOrderNum'] . ' created!!');
+        }                
     }
 
     public function testApi(){

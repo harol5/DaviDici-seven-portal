@@ -39,7 +39,26 @@ function LoyaltyProgramGauges({ commissionInfo }: LoyaltyProgramGaugesProps) {
 
         const latestMonth = commissionInfo[0];
 
+        const months = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+        ];
+
+        const arr = latestMonth.monyear.split("-");
+        const selectedMonthName = months[Number.parseInt(arr[0]) - 1];
+
         const obj = {
+            month: `${selectedMonthName} ${arr[1]}`,
             currentSales: {
                 dollarAmountToTarget: 0,
                 dollarAmountGoal: 0,
@@ -99,7 +118,7 @@ function LoyaltyProgramGauges({ commissionInfo }: LoyaltyProgramGaugesProps) {
     return (
         <section className={classes.allGauges}>
             <div className={classes.loyaltyProgramHeader}>
-                <h1 className={classes.currentMonth}>July 2024</h1>
+                <h1 className={classes.currentMonth}>{currentMonth.month}</h1>
                 <h1 className={classes.loyaltyProgramTitle}>Loyalty Program</h1>
             </div>
             <div className={classes.titleAndGaugeWrapper}>
@@ -109,7 +128,12 @@ function LoyaltyProgramGauges({ commissionInfo }: LoyaltyProgramGaugesProps) {
                         <h1>
                             ${currentMonth.currentSales.dollarAmountToTarget}
                         </h1>
-                        <p>To Target</p>
+                        <p>
+                            {currentMonth.currentSales.dollarAmountToTarget ===
+                            0
+                                ? "YEAHH!! TARGET REACHED!!"
+                                : "To Target"}
+                        </p>
                     </div>
                     <h1 className={classes.gaugeGoalAmount}>
                         ${currentMonth.currentSales.dollarAmountGoal}
@@ -187,6 +211,10 @@ function LoyaltyProgramGauges({ commissionInfo }: LoyaltyProgramGaugesProps) {
                             </clipPath>
                         </defs>
                     </svg>
+                </div>
+                <div className={classes.dollarAmountSoldWrapper}>
+                    <h1>SOLD:</h1>
+                    <p>${currentMonth.currentSales.dollarAmountSold}</p>
                 </div>
             </div>
             <div className={classes.titleAndGaugeWrapper}>

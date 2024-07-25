@@ -32,13 +32,29 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    border-top: #d1aa68 1px solid;
 }
 
 .titleAndGaugeWrapper > h1 {
     color: #d1aa68;
-    margin: 0 4rem 1rem;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #d1aa68;
+    margin: 1rem 4rem;
+}
+
+.titleAndGaugeWrapper .dollarAmountSoldWrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.titleAndGaugeWrapper .dollarAmountSoldWrapper h1 {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #d1aa68;
+}
+
+.titleAndGaugeWrapper .dollarAmountSoldWrapper p {
+    font-weight: 400;
 }
 
 /*===================================*/
@@ -77,6 +93,10 @@
     color: #d1aa68;
     font-size: 1.7rem;
     font-weight: 600;
+}
+
+.titleAndGaugeWrapper .loyaltyProgramGaugeWrapper .gaugeMainInfo p {
+    font-size: 0.8rem;
 }
 
 .currentSalesGaugeFiller {
