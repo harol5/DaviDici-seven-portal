@@ -4,7 +4,7 @@ import type { finish } from "../Models/ExpressProgramModels";
 
 interface FinishesFilterProps {
     filterTitle: string;
-    contentType: "images" | "sizes";
+    contentType: "finishes" | "sizes";
     values: finish[];
     crrValueSelected: string;
     onFilter: (filter: string, value: string) => void;

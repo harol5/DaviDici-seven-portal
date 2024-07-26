@@ -11,3 +11,8 @@ export type finish = {
     finish: string;
     url: string;
 };
+
+export type model = {
+    name: string;
+    url: string;
+};

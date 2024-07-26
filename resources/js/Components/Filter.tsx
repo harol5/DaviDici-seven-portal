@@ -3,7 +3,7 @@ import type { finish } from "../Models/ExpressProgramModels";
 
 interface FilterProps {
     filterTitle: string;
-    contentType: "images" | "sizes";
+    contentType: "sizes" | "sink position";
     values: string[] | { finish: string; url: string }[];
     crrValueSelected: string;
     onFilter: (filter: string, value: string) => void;
@@ -37,6 +37,29 @@ function Filter({
                                 onClick={() => handleFilter(contentType, size)}
                             >
                                 <p>{size}</p>
+                            </span>
+                        );
+                    })}
+                </div>
+            )}
+
+            {contentType === "sink position" && (
+                <div className={classes.sizeFilterWrapper}>
+                    {values.map((value, index) => {
+                        const sinkPosition = value as string;
+                        return (
+                            <span
+                                key={index}
+                                className={
+                                    crrValueSelected === sinkPosition
+                                        ? `${classes.sizeFilter} ${classes.sizeFilterValueSelected} `
+                                        : classes.sizeFilter
+                                }
+                                onClick={() =>
+                                    handleFilter(contentType, sinkPosition)
+                                }
+                            >
+                                <p>{sinkPosition}</p>
                             </span>
                         );
                     })}

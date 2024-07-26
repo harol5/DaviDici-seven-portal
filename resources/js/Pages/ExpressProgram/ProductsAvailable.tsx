@@ -27,6 +27,8 @@ interface ProductsAvailableProps {
 interface StatefulFilterObj {
     crrFilteredFinish: string;
     crrFilteredSize: string;
+    crrFilteredSinkPosition: string;
+    crrFilteredModel: string;
 }
 
 function ProductsAvailable({
@@ -39,20 +41,34 @@ function ProductsAvailable({
         initialCompositions,
         initialSizesForFilter,
         initialFinishesForFilter,
+        initialSinkPositionsForFilter,
+        initialModelsForFilter,
     } = useExpressProgramProducts(rawProducts);
 
     // this will re-render when filter is used.
     const [compositions, setCompositions] = useState(initialCompositions);
-    console.log(compositions);
-    // Manage size filter
+
+    // --- Manage size filter.
     const [sizesForFilter, setSizesForFilter] = useState(initialSizesForFilter);
     const [crrFilteredSize, setCrrFilteredSize] = useState("");
 
-    // Manage finishes filter
+    // --- Manage model filter.
+    const [modelsForFilter, setModelsForFilter] = useState(
+        initialModelsForFilter
+    );
+    const [crrFilteredModel, setCrrFilteredModel] = useState("");
+
+    // --- Manage finishes filter.
     const [finishesForFilter, setFinishesForFilter] = useState(
         initialFinishesForFilter
     );
     const [crrFilteredFinish, setCrrFilteredFinish] = useState("");
+
+    // --- Manage sink position filter.
+    const [sinkPositionsForFilter, setSinkPositionsForFilter] = useState(
+        initialSinkPositionsForFilter
+    );
+    const [crrFilteredSinkPosition, setCrrFilteredSinkPosition] = useState("");
 
     const handleFilter = (
         filter: string,
@@ -61,37 +77,134 @@ function ProductsAvailable({
         let filteredComposition: Composition[] = [];
         const statefulFilters = {
             crrFilteredSize,
+            crrFilteredSinkPosition,
             crrFilteredFinish,
+            crrFilteredModel,
         };
 
         if (filter === "sizes") {
             const sizeValue = value as string;
 
+            // Updates local storage object for stateful filters.
             statefulFilters.crrFilteredSize = sizeValue;
             localStorage.setItem(
                 "statefulFilters",
                 JSON.stringify(statefulFilters)
             );
 
-            filteredComposition = compositions.filter((product) => {
-                return product.size === sizeValue;
+            // Filter composition by current selected size.
+            filteredComposition = compositions.filter((composition) => {
+                return composition.size === sizeValue;
             });
 
-            const finishesForFilterMap = new Map();
-            filteredComposition.forEach((composition) => {
-                composition.finishes.forEach((finishObj) =>
-                    finishesForFilterMap.set(finishObj.finish, finishObj)
-                );
-            });
+            // Based on filtered composition, create new avaibla values for other filters.
+            let finishesForFilter: finish[] | null = crrFilteredFinish
+                ? [
+                      initialFinishesForFilter.find(
+                          (finish) => finish.finish === crrFilteredFinish
+                      )!,
+                  ]
+                : null;
 
+            let sinkPositionsForFilter: string[] | null =
+                crrFilteredSinkPosition ? [crrFilteredSinkPosition] : null;
+
+            if (!finishesForFilter || !sinkPositionsForFilter) {
+                const finishesForFilterMap = new Map();
+                const sinkPositionsForFilterSet = new Set<string>();
+
+                filteredComposition.forEach((composition) => {
+                    sinkPositionsForFilterSet.add(composition.sinkPosition);
+
+                    if (!finishesForFilter) {
+                        composition.finishes.forEach((finishObj) =>
+                            finishesForFilterMap.set(
+                                finishObj.finish,
+                                finishObj
+                            )
+                        );
+                    }
+                });
+
+                finishesForFilter =
+                    finishesForFilter ??
+                    Object.values(Object.fromEntries(finishesForFilterMap));
+                sinkPositionsForFilter =
+                    sinkPositionsForFilter ??
+                    Array.from(sinkPositionsForFilterSet);
+            }
+
+            // Set current selected size.
             setSizesForFilter([sizeValue]);
-            setFinishesForFilter(
-                Object.values(Object.fromEntries(finishesForFilterMap))
-            );
             setCrrFilteredSize(sizeValue);
+
+            // Set available values for the other filters based on current selected size.
+            setFinishesForFilter(finishesForFilter);
+            setSinkPositionsForFilter(sinkPositionsForFilter);
         }
 
-        if (filter === "images") {
+        if (filter === "sink position") {
+            const sinkPositionValue = value as string;
+
+            // Updates local storage object for stateful filters.
+            statefulFilters.crrFilteredSinkPosition = sinkPositionValue;
+            localStorage.setItem(
+                "statefulFilters",
+                JSON.stringify(statefulFilters)
+            );
+
+            // Filter compositions by current selected size.
+            filteredComposition = compositions.filter((product) => {
+                return product.sinkPosition === sinkPositionValue;
+            });
+
+            // Based on filtered compositions, create new available values for other filters.
+            let finishesForFilter: finish[] | null = crrFilteredFinish
+                ? [
+                      initialFinishesForFilter.find(
+                          (finish) => finish.finish === crrFilteredFinish
+                      )!,
+                  ]
+                : null;
+
+            let sizesForFilter: string[] | null = crrFilteredSinkPosition
+                ? [crrFilteredSinkPosition]
+                : null;
+
+            if (!finishesForFilter || !sizesForFilter) {
+                const sizesForFilterSet = new Set<string>();
+                const finishesForFilterMap = new Map();
+
+                filteredComposition.forEach((composition) => {
+                    sizesForFilterSet.add(composition.size);
+                    if (!finishesForFilter) {
+                        composition.finishes.forEach((finishObj) =>
+                            finishesForFilterMap.set(
+                                finishObj.finish,
+                                finishObj
+                            )
+                        );
+                    }
+                });
+
+                finishesForFilter =
+                    finishesForFilter ??
+                    Object.values(Object.fromEntries(finishesForFilterMap));
+
+                sizesForFilter =
+                    sizesForFilter ?? Array.from(sizesForFilterSet);
+            }
+
+            // Set current selected sink position.
+            setSinkPositionsForFilter([sinkPositionValue]);
+            setCrrFilteredSinkPosition(sinkPositionValue);
+
+            // Set available values for the other filters based on current selected size.
+            setFinishesForFilter(finishesForFilter);
+            setSizesForFilter(sizesForFilter);
+        }
+
+        if (filter === "finishes") {
             const finishValue = value as string;
 
             statefulFilters.crrFilteredFinish = finishValue;
@@ -100,101 +213,116 @@ function ProductsAvailable({
                 JSON.stringify(statefulFilters)
             );
 
-            filteredComposition = compositions.filter((product) => {
-                console.log(product);
-                for (const finishObj of product.finishes) {
+            filteredComposition = compositions.filter((composition) => {
+                for (const finishObj of composition.finishes) {
                     if (finishObj.finish.includes(finishValue)) return true;
                 }
                 return false;
             });
 
             const sizesForFilter = new Set<string>();
+            const sinkPositionsForFilterSet = new Set<string>();
             filteredComposition.forEach((composition) => {
                 sizesForFilter.add(composition.size);
+                sinkPositionsForFilterSet.add(composition.sinkPosition);
             });
 
             const crrFinishObj = initialFinishesForFilter.find(
                 (finish) => finish.finish === finishValue
             );
 
-            setSizesForFilter(Array.from(sizesForFilter));
             setFinishesForFilter([crrFinishObj!]);
             setCrrFilteredFinish(finishValue);
+
+            setSizesForFilter(Array.from(sizesForFilter));
+            setSinkPositionsForFilter(Array.from(sinkPositionsForFilterSet));
         }
 
-        if (filter === "both") {
-            const { crrFilteredSize, crrFilteredFinish } =
-                value as StatefulFilterObj;
+        if (filter === "models") {
+            const modelValue = value as string;
 
-            if (crrFilteredSize && !crrFilteredFinish) {
-                const sizeValue = crrFilteredSize;
+            statefulFilters.crrFilteredModel = modelValue;
+            localStorage.setItem(
+                "statefulFilters",
+                JSON.stringify(statefulFilters)
+            );
 
-                filteredComposition = compositions.filter((product) => {
-                    return product.size === sizeValue;
-                });
+            filteredComposition = compositions.filter((composition) => {
+                return composition.model === modelValue;
+            });
 
-                const finishesForFilterMap = new Map();
-                filteredComposition.forEach((composition) => {
-                    composition.finishes.forEach((finishObj) =>
-                        finishesForFilterMap.set(finishObj.finish, finishObj)
+            let finishesForFilter: finish[] | null = crrFilteredFinish
+                ? [
+                      initialFinishesForFilter.find(
+                          (finish) => finish.finish === crrFilteredFinish
+                      )!,
+                  ]
+                : null;
+            let sinkPositionsForFilter: string[] | null =
+                crrFilteredSinkPosition ? [crrFilteredSinkPosition] : null;
+
+            const sizesForFilter = new Set<string>();
+            const sinkPositionsForFilterSet = new Set<string>();
+            filteredComposition.forEach((composition) => {
+                sizesForFilter.add(composition.size);
+                sinkPositionsForFilterSet.add(composition.sinkPosition);
+            });
+
+            const crrModelObj = initialModelsForFilter.find(
+                (model) => model.name === modelValue
+            );
+
+            setModelsForFilter([crrModelObj!]);
+            setCrrFilteredModel(modelValue);
+
+            setSizesForFilter(Array.from(sizesForFilter));
+            setSinkPositionsForFilter(Array.from(sinkPositionsForFilterSet));
+        }
+
+        if (filter === "stateful filters") {
+            const {
+                crrFilteredSize,
+                crrFilteredFinish,
+                crrFilteredSinkPosition,
+            } = value as StatefulFilterObj;
+
+            filteredComposition = compositions.filter((composition) => {
+                const hasSize =
+                    !crrFilteredSize || composition.size === crrFilteredSize;
+
+                const hasSinkPosition =
+                    !crrFilteredSinkPosition ||
+                    composition.sinkPosition === crrFilteredSinkPosition;
+
+                const hasFinish =
+                    !crrFilteredFinish ||
+                    composition.finishes.some(
+                        (finish) => finish.finish === crrFilteredFinish
                     );
-                });
 
-                setSizesForFilter([sizeValue]);
-                setFinishesForFilter(
-                    Object.values(Object.fromEntries(finishesForFilterMap))
+                return hasSize && hasSinkPosition && hasFinish;
+            });
+
+            const finishesForFilterMap = new Map();
+            const sinkPositionsForFilterSet = new Set<string>();
+            const sizesForFilterSet = new Set<string>();
+            filteredComposition.forEach((composition) => {
+                sizesForFilterSet.add(composition.size);
+                sinkPositionsForFilterSet.add(composition.sinkPosition);
+                composition.finishes.forEach((finishObj) =>
+                    finishesForFilterMap.set(finishObj.finish, finishObj)
                 );
-                setCrrFilteredSize(sizeValue);
-            }
+            });
 
-            if (crrFilteredFinish && !crrFilteredSize) {
-                const finishValue = crrFilteredFinish;
+            setCrrFilteredFinish(crrFilteredFinish);
+            setCrrFilteredSinkPosition(crrFilteredSinkPosition);
+            setCrrFilteredSize(crrFilteredSize);
 
-                filteredComposition = compositions.filter((product) => {
-                    for (const finishObj of product.finishes) {
-                        if (finishObj.finish === finishValue) return true;
-                    }
-                    return false;
-                });
-
-                const sizesForFilter = new Set<string>();
-                filteredComposition.forEach((composition) => {
-                    sizesForFilter.add(composition.size);
-                });
-
-                const crrFinishObj = initialFinishesForFilter.find(
-                    (finish) => finish.finish === finishValue
-                );
-
-                setSizesForFilter(Array.from(sizesForFilter));
-                setFinishesForFilter([crrFinishObj!]);
-                setCrrFilteredFinish(finishValue);
-            }
-
-            if (crrFilteredFinish && crrFilteredSize) {
-                const sizeValue = crrFilteredSize;
-                const finishValue = crrFilteredFinish;
-
-                filteredComposition = compositions.filter((product) => {
-                    for (const finishObj of product.finishes) {
-                        if (
-                            finishObj.finish === finishValue &&
-                            product.size === sizeValue
-                        )
-                            return true;
-                    }
-                    return false;
-                });
-
-                const crrFinishObj = initialFinishesForFilter.find(
-                    (finish) => finish.finish === finishValue
-                );
-
-                setSizesForFilter([sizeValue]);
-                setFinishesForFilter([crrFinishObj!]);
-                setCrrFilteredFinish(finishValue);
-                setCrrFilteredSize(sizeValue);
-            }
+            setFinishesForFilter(
+                Object.values(Object.fromEntries(finishesForFilterMap))
+            );
+            setSinkPositionsForFilter(Array.from(sinkPositionsForFilterSet));
+            setSizesForFilter(Array.from(sizesForFilterSet));
         }
 
         setCompositions(filteredComposition);
@@ -204,11 +332,19 @@ function ProductsAvailable({
         setCompositions(structuredClone(initialCompositions));
         setFinishesForFilter(structuredClone(initialFinishesForFilter));
         setSizesForFilter(structuredClone(initialSizesForFilter));
+        setSinkPositionsForFilter(
+            structuredClone(initialSinkPositionsForFilter)
+        );
         setCrrFilteredFinish("");
         setCrrFilteredSize("");
+        setCrrFilteredSinkPosition("");
         localStorage.setItem(
             "statefulFilters",
-            JSON.stringify({ crrFilteredSize: "", crrFilteredFinish: "" })
+            JSON.stringify({
+                crrFilteredSize: "",
+                crrFilteredSinkPosition: "",
+                crrFilteredFinish: "",
+            })
         );
     };
 
@@ -220,12 +356,14 @@ function ProductsAvailable({
 
             if (
                 statefulFilters.crrFilteredFinish ||
-                statefulFilters.crrFilteredSize
+                statefulFilters.crrFilteredSize ||
+                statefulFilters.crrFilteredSinkPosition
             )
-                handleFilter("both", statefulFilters);
+                handleFilter("stateful filters", statefulFilters);
         }
     }, []);
-
+    console.log(initialCompositions);
+    console.log(compositions);
     return (
         <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <div className="main-content-wrapper">
@@ -237,9 +375,16 @@ function ProductsAvailable({
                         crrValueSelected={crrFilteredSize}
                         onFilter={handleFilter}
                     />
+                    <Filter
+                        filterTitle="Filter By Sink Position"
+                        contentType="sink position"
+                        values={sinkPositionsForFilter}
+                        crrValueSelected={crrFilteredSinkPosition}
+                        onFilter={handleFilter}
+                    />
                     <FinishesFilter
                         filterTitle="Filter By Color"
-                        contentType="images"
+                        contentType="finishes"
                         values={finishesForFilter}
                         crrValueSelected={crrFilteredFinish}
                         onFilter={handleFilter}
