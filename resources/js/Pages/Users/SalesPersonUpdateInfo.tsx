@@ -4,7 +4,7 @@ import { FormEvent } from "react";
 import { Link } from "@inertiajs/react";
 import { states } from "../../Models/UsaStates";
 
-function SalesPersonRegister({ message }: { message: string }) {
+function SalesPersonUpdateInfo({ message }: { message: string }) {
     const { data, setData, post, errors, reset } = useForm({
         firstName: "",
         lastName: "",
@@ -333,4 +333,4 @@ function SalesPersonRegister({ message }: { message: string }) {
     );
 }
 
-export default SalesPersonRegister;
+export default SalesPersonUpdateInfo;

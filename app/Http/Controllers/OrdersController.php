@@ -546,7 +546,19 @@ class OrdersController extends Controller
 
         // $response = FoxproApi::call([
         //     'action' => 'GETUSERINFO',
-        //     'params' => ['wally%40atozkitchenandbath.com'],
+        //     'params' => ['zaid$goldensourceki'],
+        //     'keep_session' => false, 
+        // ]);
+
+        // $response = FoxproApi::call([
+        //     'action' => 'GETSLMNINFO',
+        //     'params' => ['GS','GSK'],
+        //     'keep_session' => false, 
+        // ]);
+
+        // $response = FoxproApi::call([
+        //     'action' => 'SAVESLMNINFO',
+        //     'params' => ['HE','HAR',' ',' ',' ',' ',' ','123456789',' ',' ',' '],
         //     'keep_session' => false, 
         // ]);
         
