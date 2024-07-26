@@ -43,7 +43,7 @@ function ProductsAvailable({
 
     // this will re-render when filter is used.
     const [compositions, setCompositions] = useState(initialCompositions);
-
+    console.log(compositions);
     // Manage size filter
     const [sizesForFilter, setSizesForFilter] = useState(initialSizesForFilter);
     const [crrFilteredSize, setCrrFilteredSize] = useState("");
