@@ -1,7 +1,11 @@
 import { useMemo } from "react";
 import { ProductInventory } from "../Models/Product";
 import { Composition } from "../Models/Composition";
-import type { finish, model } from "../Models/ExpressProgramModels";
+import type {
+    finish,
+    model,
+    sinkPosition,
+} from "../Models/ExpressProgramModels";
 
 function useExpressProgramProducts(rawProducts: ProductInventory[]) {
     const createProductsTree = () => {
@@ -165,7 +169,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
     const generateCenteredSinkCompositions = (
         listOfVanities: ProductInventory[],
         finishesForFilterMap: Map<string, finish>,
-        sinkPositionsForFilterSet: Set<string>,
+        sinkPositionsForFilterMap: Map<string, sinkPosition>,
         compositions: Composition[],
         model: string,
         size: string,
@@ -183,7 +187,10 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
 
         const finishes = generateFinishes(listOfVanities, finishesForFilterMap);
 
-        sinkPositionsForFilterSet.add(sinkPositionMeasure);
+        sinkPositionsForFilterMap.set(sinkPositionMeasure, {
+            name: sinkPositionMeasure,
+            url: `https://seven.test/images/express-program/sink-position/${sinkPositionMeasure}.webp`,
+        });
 
         const getStartingPrice = () => {
             return vanities[0].msrp + washbasins[0].msrp;
@@ -211,7 +218,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
     const generateCenteredSinkMargiCompositions = (
         doorStylesMap: Map<string, ProductInventory[]>,
         finishesForFilterMap: Map<string, finish>,
-        sinkPositionsForFilterSet: Set<string>,
+        sinkPositionsForFilterMap: Map<string, sinkPosition>,
         compositions: Composition[],
         model: string,
         size: string,
@@ -229,7 +236,10 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                 (a: ProductInventory, b: ProductInventory) => a.msrp - b.msrp
             );
 
-            sinkPositionsForFilterSet.add(sinkPositionMeasure);
+            sinkPositionsForFilterMap.set(sinkPositionMeasure, {
+                name: sinkPositionMeasure,
+                url: `https://seven.test/images/express-program/sink-position/${sinkPositionMeasure}.webp`,
+            });
 
             const vanities = margiVanityList.sort(
                 (a: ProductInventory, b: ProductInventory) => a.msrp - b.msrp
@@ -262,7 +272,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
     const generateComplexCompositions = (
         itemsMap: Map<string, any>,
         finishesForFilterMap: Map<string, finish>,
-        sinkPositionsForFilterSet: Set<string>,
+        sinkPositionsForFilterMap: Map<string, sinkPosition>,
         compositions: Composition[],
         model: string,
         size: string,
@@ -279,7 +289,10 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
 
         const finishes = generateFinishes(vanities, finishesForFilterMap);
 
-        sinkPositionsForFilterSet.add(position);
+        sinkPositionsForFilterMap.set(position, {
+            name: position,
+            url: `https://seven.test/images/express-program/sink-position/${position}.webp`,
+        });
 
         const washbasins = washbasingAvailable.sort(
             (a: ProductInventory, b: ProductInventory) => a.msrp - b.msrp
@@ -340,7 +353,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
     const generateComplexMargiCompositions = (
         itemsMap: Map<string, any>,
         finishesForFilterMap: Map<string, finish>,
-        sinkPositionsForFilterSet: Set<string>,
+        sinkPositionsForFilterMap: Map<string, sinkPosition>,
         compositions: Composition[],
         model: string,
         size: string,
@@ -359,7 +372,10 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
 
             const finishes = generateFinishes(vanities, finishesForFilterMap);
 
-            sinkPositionsForFilterSet.add(position);
+            sinkPositionsForFilterMap.set(position, {
+                name: position,
+                url: `https://seven.test/images/express-program/sink-position/${position}.webp`,
+            });
 
             const washbasins = washbasingAvailable.sort(
                 (a: ProductInventory, b: ProductInventory) => a.msrp - b.msrp
@@ -413,7 +429,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         const initialCompositions: Composition[] = [];
         const initialSizesForFilter: string[] = [];
         const finishesForFilterMap = new Map();
-        const sinkPositionsForFilterSet = new Set<string>();
+        const sinkPositionsForFilterMap = new Map<string, sinkPosition>();
         const modelsForFilterMap = new Map<string, model>();
 
         // Traverse throght validCompositionSizesMap map so we can create all possible compositions.
@@ -435,7 +451,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                     for (const [model, listOfVanities] of modelsMap) {
                         modelsForFilterMap.set(model, {
                             name: model,
-                            url: `https://portal.davidici.com/images/express-program/${model}/${model}.webp`,
+                            url: `https://seven.test/images/express-program/${model}/${model}.webp`,
                         });
 
                         // MARGI is a special case because it's also classified by door style. this means,
@@ -444,7 +460,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                             generateCenteredSinkMargiCompositions(
                                 listOfVanities,
                                 finishesForFilterMap,
-                                sinkPositionsForFilterSet,
+                                sinkPositionsForFilterMap,
                                 initialCompositions,
                                 model,
                                 size,
@@ -456,7 +472,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                             generateCenteredSinkCompositions(
                                 listOfVanities,
                                 finishesForFilterMap,
-                                sinkPositionsForFilterSet,
+                                sinkPositionsForFilterMap,
                                 initialCompositions,
                                 model,
                                 size,
@@ -541,14 +557,14 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                         for (const [model, itemsMap] of validModels) {
                             modelsForFilterMap.set(model, {
                                 name: model,
-                                url: `https://portal.davidici.com/images/express-program/${model}/${model}.webp`,
+                                url: `https://seven.test/images/express-program/${model}/${model}.webp`,
                             });
 
                             if (model === "MARGI")
                                 generateComplexMargiCompositions(
                                     itemsMap,
                                     finishesForFilterMap,
-                                    sinkPositionsForFilterSet,
+                                    sinkPositionsForFilterMap,
                                     initialCompositions,
                                     model,
                                     size,
@@ -561,7 +577,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                                 generateComplexCompositions(
                                     itemsMap,
                                     finishesForFilterMap,
-                                    sinkPositionsForFilterSet,
+                                    sinkPositionsForFilterMap,
                                     initialCompositions,
                                     model,
                                     size,
@@ -599,8 +615,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         );
 
         // Converts sink potision set into an array.
-        const initialSinkPositionsForFilter = Array.from(
-            sinkPositionsForFilterSet
+        const initialSinkPositionsForFilter: sinkPosition[] = Object.values(
+            Object.fromEntries(sinkPositionsForFilterMap)
         );
 
         return {

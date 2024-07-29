@@ -9,12 +9,6 @@
     box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.388);
 }
 
-.titleAndFinishesFilterWrapper {
-    padding: 1em 0.9em;
-    box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.388);
-    margin: 1em 0;
-}
-
 .titleWrapper {
     display: flex;
     justify-content: center;
@@ -22,13 +16,15 @@
     margin-bottom: 10px;
 }
 
-.sizeFilterWrapper {
+.filterWrapper {
     display: flex;
     justify-content: center;
     gap: 1em;
     text-align: center;
     flex-wrap: wrap;
 }
+
+/*==== SIZE FILTER STYLING =====*/
 
 .sizeFilter {
     border: 3px solid #d1aa68;
@@ -45,6 +41,53 @@
 .sizeFilterValueSelected {
     background-color: #d1aa68;
     color: white;
+}
+
+/*==== SINK POSITION FILTER STYLING=====*/
+
+.sinkPositionFilter {
+    /* height: 7em; */
+    /* width: 7em; */
+    flex-basis: 8%;
+    margin: 0 1em;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    /* justify-content: center; */
+    align-items: center;
+}
+
+.sinkPositionFilter .imageAndOverlayWrapper img {
+    border: 2px solid #d1aa68;
+}
+
+.sinkPositionFilterSelected .imageAndOverlayWrapper {
+    position: relative;
+}
+
+.sinkPositionFilterSelected .imageAndOverlayWrapper .filterOverlay {
+    background-color: #00000075;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.sinkPositionFilterSelected .imageAndOverlayWrapper .filterOverlay::before {
+    content: "SELECTED";
+    color: #d1aa68;
+    position: absolute;
+    left: 20%;
+    top: 40%;
+}
+
+/*==== FINISHES FILTER STYLING=====*/
+
+.titleAndFinishesFilterWrapper {
+    padding: 1em 0.9em;
+    box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.388);
+    margin: 1em 0;
 }
 
 .allFinishTypesWrapper {
@@ -175,7 +218,7 @@
 }
 
 @media (max-width: 600px) {
-    .sizeFilterWrapper {
+    .filterWrapper {
         gap: 0.5em;
     }
 

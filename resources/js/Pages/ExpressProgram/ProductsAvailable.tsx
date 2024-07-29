@@ -8,7 +8,11 @@ import useExpressProgramProducts from "../../Hooks/useExpressProgramProducts";
 import type { ProductInventory } from "../../Models/Product";
 import type { Composition } from "../../Models/Composition";
 import classes from "../../../css/express-program.module.css";
-import type { finish } from "../../Models/ExpressProgramModels";
+import type {
+    finish,
+    sinkPosition,
+    model,
+} from "../../Models/ExpressProgramModels";
 
 /**
  * TODO:
@@ -106,15 +110,46 @@ function ProductsAvailable({
                   ]
                 : null;
 
-            let sinkPositionsForFilter: string[] | null =
-                crrFilteredSinkPosition ? [crrFilteredSinkPosition] : null;
+            let sinkPositionsForFilter: sinkPosition[] | null =
+                crrFilteredSinkPosition
+                    ? [
+                          initialSinkPositionsForFilter.find(
+                              (sinkPosition) =>
+                                  sinkPosition.name === crrFilteredSinkPosition
+                          )!,
+                      ]
+                    : null;
 
-            if (!finishesForFilter || !sinkPositionsForFilter) {
-                const finishesForFilterMap = new Map();
-                const sinkPositionsForFilterSet = new Set<string>();
+            let modelsForFilter: model[] | null = crrFilteredModel
+                ? [
+                      initialModelsForFilter.find(
+                          (model) => model.name === crrFilteredModel
+                      )!,
+                  ]
+                : null;
+
+            if (
+                !finishesForFilter ||
+                !sinkPositionsForFilter ||
+                !modelsForFilter
+            ) {
+                const finishesForFilterMap = new Map<string, finish>();
+                const sinkPositionsForFilterMap = new Map<
+                    string,
+                    sinkPosition
+                >();
+                const modelsForFilterMap = new Map<string, model>();
 
                 filteredComposition.forEach((composition) => {
-                    sinkPositionsForFilterSet.add(composition.sinkPosition);
+                    sinkPositionsForFilterMap.set(composition.sinkPosition, {
+                        name: composition.sinkPosition,
+                        url: `https://portal.davidici.com/images/express-program/sink-position/${composition.sinkPosition}.webp`,
+                    });
+
+                    modelsForFilterMap.set(composition.model, {
+                        name: composition.model,
+                        url: `https://portal.davidici.com/images/express-program/${composition.model}/${composition.model}.webp`,
+                    });
 
                     if (!finishesForFilter) {
                         composition.finishes.forEach((finishObj) =>
@@ -129,9 +164,16 @@ function ProductsAvailable({
                 finishesForFilter =
                     finishesForFilter ??
                     Object.values(Object.fromEntries(finishesForFilterMap));
+
                 sinkPositionsForFilter =
                     sinkPositionsForFilter ??
-                    Array.from(sinkPositionsForFilterSet);
+                    Object.values(
+                        Object.fromEntries(sinkPositionsForFilterMap)
+                    );
+
+                modelsForFilter =
+                    modelsForFilter ??
+                    Object.values(Object.fromEntries(modelsForFilterMap));
             }
 
             // Set current selected size.
@@ -141,6 +183,7 @@ function ProductsAvailable({
             // Set available values for the other filters based on current selected size.
             setFinishesForFilter(finishesForFilter);
             setSinkPositionsForFilter(sinkPositionsForFilter);
+            setModelsForFilter(modelsForFilter);
         }
 
         if (filter === "sink position") {
@@ -171,12 +214,25 @@ function ProductsAvailable({
                 ? [crrFilteredSinkPosition]
                 : null;
 
-            if (!finishesForFilter || !sizesForFilter) {
+            let modelsForFilter: model[] | null = crrFilteredModel
+                ? [
+                      initialModelsForFilter.find(
+                          (model) => model.name === crrFilteredModel
+                      )!,
+                  ]
+                : null;
+
+            if (!finishesForFilter || !sizesForFilter || !modelsForFilter) {
                 const sizesForFilterSet = new Set<string>();
-                const finishesForFilterMap = new Map();
+                const finishesForFilterMap = new Map<string, finish>();
+                const modelsForFilterMap = new Map<string, model>();
 
                 filteredComposition.forEach((composition) => {
                     sizesForFilterSet.add(composition.size);
+                    modelsForFilterMap.set(composition.model, {
+                        name: composition.model,
+                        url: `https://portal.davidici.com/images/express-program/${composition.model}/${composition.model}.webp`,
+                    });
                     if (!finishesForFilter) {
                         composition.finishes.forEach((finishObj) =>
                             finishesForFilterMap.set(
@@ -193,15 +249,24 @@ function ProductsAvailable({
 
                 sizesForFilter =
                     sizesForFilter ?? Array.from(sizesForFilterSet);
+
+                modelsForFilter =
+                    modelsForFilter ??
+                    Object.values(Object.fromEntries(modelsForFilterMap));
             }
 
             // Set current selected sink position.
-            setSinkPositionsForFilter([sinkPositionValue]);
+            setSinkPositionsForFilter([
+                initialSinkPositionsForFilter.find(
+                    (sinkPosition) => sinkPosition.name === sinkPositionValue
+                )!,
+            ]);
             setCrrFilteredSinkPosition(sinkPositionValue);
 
             // Set available values for the other filters based on current selected size.
             setFinishesForFilter(finishesForFilter);
             setSizesForFilter(sizesForFilter);
+            setModelsForFilter(modelsForFilter);
         }
 
         if (filter === "finishes") {
@@ -220,11 +285,20 @@ function ProductsAvailable({
                 return false;
             });
 
-            const sizesForFilter = new Set<string>();
-            const sinkPositionsForFilterSet = new Set<string>();
+            const sizesForFilterSet = new Set<string>();
+            const sinkPositionsForFilterMap = new Map<string, sinkPosition>();
+            const modelsForFilterMap = new Map<string, model>();
+
             filteredComposition.forEach((composition) => {
-                sizesForFilter.add(composition.size);
-                sinkPositionsForFilterSet.add(composition.sinkPosition);
+                sizesForFilterSet.add(composition.size);
+                sinkPositionsForFilterMap.set(composition.sinkPosition, {
+                    name: composition.sinkPosition,
+                    url: `https://portal.davidici.com/images/express-program/sink-position/${composition.sinkPosition}.webp`,
+                });
+                modelsForFilterMap.set(composition.model, {
+                    name: composition.model,
+                    url: `https://portal.davidici.com/images/express-program/${composition.model}/${composition.model}.webp`,
+                });
             });
 
             const crrFinishObj = initialFinishesForFilter.find(
@@ -234,8 +308,10 @@ function ProductsAvailable({
             setFinishesForFilter([crrFinishObj!]);
             setCrrFilteredFinish(finishValue);
 
-            setSizesForFilter(Array.from(sizesForFilter));
-            setSinkPositionsForFilter(Array.from(sinkPositionsForFilterSet));
+            setSizesForFilter(Array.from(sizesForFilterSet));
+            setSinkPositionsForFilter(
+                Object.values(Object.fromEntries(sinkPositionsForFilterMap))
+            );
         }
 
         if (filter === "models") {
@@ -258,15 +334,26 @@ function ProductsAvailable({
                       )!,
                   ]
                 : null;
-            let sinkPositionsForFilter: string[] | null =
-                crrFilteredSinkPosition ? [crrFilteredSinkPosition] : null;
 
-            const sizesForFilter = new Set<string>();
-            const sinkPositionsForFilterSet = new Set<string>();
+            const finishesForFilterMap = new Map<string, finish>();
+            const sizesForFilterSet = new Set<string>();
+            const sinkPositionsForFilterMap = new Map<string, sinkPosition>();
             filteredComposition.forEach((composition) => {
-                sizesForFilter.add(composition.size);
-                sinkPositionsForFilterSet.add(composition.sinkPosition);
+                sizesForFilterSet.add(composition.size);
+                sinkPositionsForFilterMap.set(composition.sinkPosition, {
+                    name: composition.sinkPosition,
+                    url: `https://portal.davidici.com/images/express-program/${composition.model}/${composition.model}.webp`,
+                });
+                if (!finishesForFilter) {
+                    composition.finishes.forEach((finishObj) =>
+                        finishesForFilterMap.set(finishObj.finish, finishObj)
+                    );
+                }
             });
+
+            finishesForFilter =
+                finishesForFilter ??
+                Object.values(Object.fromEntries(finishesForFilterMap));
 
             const crrModelObj = initialModelsForFilter.find(
                 (model) => model.name === modelValue
@@ -275,8 +362,11 @@ function ProductsAvailable({
             setModelsForFilter([crrModelObj!]);
             setCrrFilteredModel(modelValue);
 
-            setSizesForFilter(Array.from(sizesForFilter));
-            setSinkPositionsForFilter(Array.from(sinkPositionsForFilterSet));
+            setSizesForFilter(Array.from(sizesForFilterSet));
+            setFinishesForFilter(finishesForFilter);
+            setSinkPositionsForFilter(
+                Object.values(Object.fromEntries(sinkPositionsForFilterMap))
+            );
         }
 
         if (filter === "stateful filters") {
@@ -284,6 +374,7 @@ function ProductsAvailable({
                 crrFilteredSize,
                 crrFilteredFinish,
                 crrFilteredSinkPosition,
+                crrFilteredModel,
             } = value as StatefulFilterObj;
 
             filteredComposition = compositions.filter((composition) => {
@@ -300,15 +391,26 @@ function ProductsAvailable({
                         (finish) => finish.finish === crrFilteredFinish
                     );
 
-                return hasSize && hasSinkPosition && hasFinish;
+                const hasModel =
+                    !crrFilteredModel || composition.model === crrFilteredModel;
+
+                return hasSize && hasSinkPosition && hasFinish && hasModel;
             });
 
-            const finishesForFilterMap = new Map();
-            const sinkPositionsForFilterSet = new Set<string>();
+            const finishesForFilterMap = new Map<string, finish>();
+            const modelsForFilterMap = new Map<string, model>();
+            const sinkPositionsForFilterMap = new Map<string, sinkPosition>();
             const sizesForFilterSet = new Set<string>();
             filteredComposition.forEach((composition) => {
                 sizesForFilterSet.add(composition.size);
-                sinkPositionsForFilterSet.add(composition.sinkPosition);
+                sinkPositionsForFilterMap.set(composition.sinkPosition, {
+                    name: composition.sinkPosition,
+                    url: `https://portal.davidici.com/images/express-program/sink-position/${composition.sinkPosition}.webp`,
+                });
+                modelsForFilterMap.set(composition.model, {
+                    name: composition.model,
+                    url: `https://portal.davidici.com/images/express-program/${composition.model}/${composition.model}.webp`,
+                });
                 composition.finishes.forEach((finishObj) =>
                     finishesForFilterMap.set(finishObj.finish, finishObj)
                 );
@@ -317,11 +419,17 @@ function ProductsAvailable({
             setCrrFilteredFinish(crrFilteredFinish);
             setCrrFilteredSinkPosition(crrFilteredSinkPosition);
             setCrrFilteredSize(crrFilteredSize);
+            setCrrFilteredModel(crrFilteredModel);
 
             setFinishesForFilter(
                 Object.values(Object.fromEntries(finishesForFilterMap))
             );
-            setSinkPositionsForFilter(Array.from(sinkPositionsForFilterSet));
+            setSinkPositionsForFilter(
+                Object.values(Object.fromEntries(sinkPositionsForFilterMap))
+            );
+            setModelsForFilter(
+                Object.values(Object.fromEntries(modelsForFilterMap))
+            );
             setSizesForFilter(Array.from(sizesForFilterSet));
         }
 
@@ -335,15 +443,19 @@ function ProductsAvailable({
         setSinkPositionsForFilter(
             structuredClone(initialSinkPositionsForFilter)
         );
+        setModelsForFilter(structuredClone(initialModelsForFilter));
+
         setCrrFilteredFinish("");
         setCrrFilteredSize("");
         setCrrFilteredSinkPosition("");
+        setCrrFilteredModel("");
         localStorage.setItem(
             "statefulFilters",
             JSON.stringify({
                 crrFilteredSize: "",
                 crrFilteredSinkPosition: "",
                 crrFilteredFinish: "",
+                crrFilteredModel: "",
             })
         );
     };
@@ -357,13 +469,13 @@ function ProductsAvailable({
             if (
                 statefulFilters.crrFilteredFinish ||
                 statefulFilters.crrFilteredSize ||
-                statefulFilters.crrFilteredSinkPosition
+                statefulFilters.crrFilteredSinkPosition ||
+                statefulFilters.crrFilteredModel
             )
                 handleFilter("stateful filters", statefulFilters);
         }
     }, []);
-    console.log(initialCompositions);
-    console.log(compositions);
+
     return (
         <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <div className="main-content-wrapper">
@@ -380,6 +492,13 @@ function ProductsAvailable({
                         contentType="sink position"
                         values={sinkPositionsForFilter}
                         crrValueSelected={crrFilteredSinkPosition}
+                        onFilter={handleFilter}
+                    />
+                    <Filter
+                        filterTitle="Filter By Model"
+                        contentType="models"
+                        values={modelsForFilter}
+                        crrValueSelected={crrFilteredModel}
                         onFilter={handleFilter}
                     />
                     <FinishesFilter

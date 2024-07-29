@@ -112,9 +112,6 @@ function LoyaltyProgramGauges({ commissionInfo }: LoyaltyProgramGaugesProps) {
         return obj;
     }, []);
 
-    console.log(commissionInfo);
-    console.log(currentMonth);
-
     return (
         <section className={classes.allGauges}>
             <div className={classes.loyaltyProgramHeader}>
@@ -230,12 +227,22 @@ function LoyaltyProgramGauges({ commissionInfo }: LoyaltyProgramGaugesProps) {
                         </h1>
                         <p>
                             {currentMonth.currentCommission.currentCommPercent}%
-                            Commission
+                            Current Commission
                         </p>
                     </div>
-                    <h1 className={classes.gaugeGoalAmount}>
-                        {currentMonth.currentCommission.goalCommPercent}%
-                    </h1>
+                    <div className={classes.gaugeCommGoalAmount}>
+                        <h1>
+                            {currentMonth.currentCommission.goalCommPercent}%
+                        </h1>
+                        <h1>Goal:</h1>
+                        <p>
+                            $
+                            {
+                                currentMonth.currentCommission
+                                    .goalDollarAmountCommission
+                            }
+                        </p>
+                    </div>
                     <svg
                         // width="410"
                         viewBox="0 0 644 644"

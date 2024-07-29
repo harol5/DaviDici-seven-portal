@@ -12,6 +12,11 @@ export type finish = {
     url: string;
 };
 
+export type sinkPosition = {
+    name: string;
+    url: string;
+};
+
 export type model = {
     name: string;
     url: string;
