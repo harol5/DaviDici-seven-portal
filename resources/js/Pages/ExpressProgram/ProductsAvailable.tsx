@@ -5,6 +5,7 @@ import FinishesFilter from "../../Components/FinishesFilter";
 import ProductExpressProgramCard from "../../Components/ProductExpressProgramCard";
 import User from "../../Models/User";
 import useExpressProgramProducts from "../../Hooks/useExpressProgramProducts";
+import Modal from "../../Components/Modal";
 import type { ProductInventory } from "../../Models/Product";
 import type { Composition } from "../../Models/Composition";
 import classes from "../../../css/express-program.module.css";
@@ -342,7 +343,7 @@ function ProductsAvailable({
                 sizesForFilterSet.add(composition.size);
                 sinkPositionsForFilterMap.set(composition.sinkPosition, {
                     name: composition.sinkPosition,
-                    url: `https://portal.davidici.com/images/express-program/${composition.model}/${composition.model}.webp`,
+                    url: `https://portal.davidici.com/images/express-program/sink-position/${composition.sinkPosition}.webp`,
                 });
                 if (!finishesForFilter) {
                     composition.finishes.forEach((finishObj) =>
@@ -476,10 +477,97 @@ function ProductsAvailable({
         }
     }, []);
 
+    const [openModal, setOpenModal] = useState(false);
+    const handleOpenModal = async () => {
+        setOpenModal(true);
+    };
+    const handleCloseModal = () => {
+        setOpenModal(false);
+    };
+
     return (
         <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <div className="main-content-wrapper">
+                <section className={classes.filterIconAndValuesSelectedWrapper}>
+                    <button
+                        onClick={handleOpenModal}
+                        className={classes.filterIconButton}
+                    >
+                        <img
+                            src={`${location.origin}/images/filters-icon.svg`}
+                            alt="filter icon"
+                        />
+                    </button>
+                    <div className={classes.valuesSelectedAndTitleWrapper}>
+                        <h1>Products Filtered By:</h1>
+                        <section className={classes.valuesSelectedWrapper}>
+                            {crrFilteredModel && (
+                                <div>
+                                    <h1>Model:</h1>
+                                    <p>{crrFilteredModel}</p>
+                                </div>
+                            )}
+                            {crrFilteredSize && (
+                                <div>
+                                    <h1>Size:</h1>
+                                    <p>{crrFilteredSize}"</p>
+                                </div>
+                            )}
+                            {crrFilteredSinkPosition && (
+                                <div>
+                                    <h1>Sink Position:</h1>
+                                    <p>{crrFilteredSinkPosition}</p>
+                                </div>
+                            )}
+                            {crrFilteredFinish && (
+                                <div>
+                                    <h1>Finish:</h1>
+                                    <p>{crrFilteredFinish}</p>
+                                </div>
+                            )}
+
+                            {!crrFilteredModel &&
+                            !crrFilteredSize &&
+                            !crrFilteredSinkPosition &&
+                            !crrFilteredFinish ? (
+                                <h1>No Filters Selected</h1>
+                            ) : null}
+                        </section>
+                    </div>
+                </section>
+                <section className={classes.expressProgramProductsWrapper}>
+                    {compositions.map((composition, index) => (
+                        <ProductExpressProgramCard
+                            composition={composition}
+                            key={index}
+                        />
+                    ))}
+                </section>
+            </div>
+            <Modal
+                show={openModal}
+                onClose={handleCloseModal}
+                customClass={classes.filtersModal}
+            >
                 <section className={classes.allFiltersWrapper}>
+                    <div
+                        className={
+                            classes.resetFiltersAndCloseFilterButtonsWrapper
+                        }
+                    >
+                        <button
+                            className={classes.resetFiltersButton}
+                            onClick={handleResetFilters}
+                        >
+                            RESET FILTERS
+                        </button>
+                        <button
+                            className={classes.closeFilterModalButton}
+                            onClick={handleCloseModal}
+                        >
+                            CLOSE
+                        </button>
+                    </div>
                     <Filter
                         filterTitle="Filter By Size"
                         contentType="sizes"
@@ -508,22 +596,8 @@ function ProductsAvailable({
                         crrValueSelected={crrFilteredFinish}
                         onFilter={handleFilter}
                     />
-                    <button
-                        className={classes.resetFiltersButton}
-                        onClick={handleResetFilters}
-                    >
-                        RESET FILTERS
-                    </button>
                 </section>
-                <section className={classes.expressProgramProductsWrapper}>
-                    {compositions.map((composition, index) => (
-                        <ProductExpressProgramCard
-                            composition={composition}
-                            key={index}
-                        />
-                    ))}
-                </section>
-            </div>
+            </Modal>
         </UserAuthenticatedLayout>
     );
 }

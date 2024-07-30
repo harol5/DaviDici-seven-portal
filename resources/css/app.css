@@ -34,13 +34,9 @@
 * {
     margin: 0;
     box-sizing: border-box;
-    /* font-family: Arial, Helvetica, sans-serif; */
-    /* font-family: Cambria, Cochin, Georgia, Times, "Times New Roman", serif; */
-    /* font-family: leaner; */
-    /* font-family: Crox-Poster-Italic; */
     font-family: DMSans;
-    /* font-family: DMSans-Italic; */
     font-weight: 400;
+    /* font-size: 0.9rem; */
 }
 
 #flash-message {
@@ -199,6 +195,7 @@ nav {
 
 /*===========MODEL STYLING==============*/
 .modal-order {
+    padding: 4rem;
 }
 
 /*============MAIN STYLING==============*/

@@ -189,7 +189,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
 
         sinkPositionsForFilterMap.set(sinkPositionMeasure, {
             name: sinkPositionMeasure,
-            url: `https://seven.test/images/express-program/sink-position/${sinkPositionMeasure}.webp`,
+            url: `https://portal.davidici.com/images/express-program/sink-position/${sinkPositionMeasure}.webp`,
         });
 
         const getStartingPrice = () => {
@@ -238,7 +238,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
 
             sinkPositionsForFilterMap.set(sinkPositionMeasure, {
                 name: sinkPositionMeasure,
-                url: `https://seven.test/images/express-program/sink-position/${sinkPositionMeasure}.webp`,
+                url: `https://portal.davidici.com/images/express-program/sink-position/${sinkPositionMeasure}.webp`,
             });
 
             const vanities = margiVanityList.sort(
@@ -291,7 +291,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
 
         sinkPositionsForFilterMap.set(position, {
             name: position,
-            url: `https://seven.test/images/express-program/sink-position/${position}.webp`,
+            url: `https://portal.davidici.com/images/express-program/sink-position/${position}.webp`,
         });
 
         const washbasins = washbasingAvailable.sort(
@@ -451,7 +451,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                     for (const [model, listOfVanities] of modelsMap) {
                         modelsForFilterMap.set(model, {
                             name: model,
-                            url: `https://seven.test/images/express-program/${model}/${model}.webp`,
+                            url: `https://portal.davidici.com/images/express-program/${model}/${model}.webp`,
                         });
 
                         // MARGI is a special case because it's also classified by door style. this means,
@@ -557,7 +557,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                         for (const [model, itemsMap] of validModels) {
                             modelsForFilterMap.set(model, {
                                 name: model,
-                                url: `https://seven.test/images/express-program/${model}/${model}.webp`,
+                                url: `https://portal.davidici.com/images/express-program/${model}/${model}.webp`,
                             });
 
                             if (model === "MARGI")
