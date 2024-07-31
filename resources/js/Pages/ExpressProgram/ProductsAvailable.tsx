@@ -565,7 +565,7 @@ function ProductsAvailable({
                             className={classes.closeFilterModalButton}
                             onClick={handleCloseModal}
                         >
-                            CLOSE
+                            SHOW RESULTS
                         </button>
                     </div>
                     <Filter

@@ -4,6 +4,7 @@ import FlashMessage from "../../Components/FlashMessage";
 import { ChangeEvent, useMemo, useState } from "react";
 import User from "../../Models/User";
 import type { Order as OrderModel } from "../../Models/Order";
+import type { monthCommissionInfo } from "../../Models/LoyaltyProgram";
 import classes from "../../../css/orders.module.css";
 import LoyaltyProgramGauges from "../../Components/LoyaltyProgramGauges";
 
@@ -11,7 +12,7 @@ interface ordersProp {
     auth: User;
     orders: OrderModel[];
     message: string;
-    commissionInfo: any;
+    commissionInfo: monthCommissionInfo[];
 }
 
 function Orders({ auth, orders, message = "", commissionInfo }: ordersProp) {

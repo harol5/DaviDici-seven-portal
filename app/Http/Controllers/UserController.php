@@ -191,7 +191,10 @@ class UserController extends Controller
 
     // Show register form for sales person (owner accounts only) ---------
     public function registerSalesPerson(Request $request){
-        return Inertia::render('Users/SalesPersonRegister');
+        if(Gate::allows('create-salesperson')){
+            return Inertia::render('Users/SalesPersonRegister');
+        }
+        abort(403);
     }
 
     public function createSalesPerson(Request $request){
@@ -404,6 +407,13 @@ class UserController extends Controller
         $registrationNumberArray = explode('-', $getCompanyInforesponse['rows'][0]['regno']);            
         $formFields['salesmanCode'] =  $registrationNumberArray[count($registrationNumberArray) - 1];
         $formFields['companyCode'] = $getCompanyInforesponse['rows'][0]['wholesaler'];
+        $formFields['firstName'] = $request->all()['firstName'] ?? ' ';           
+        $formFields['address'] = $request->all()['address'] ?? ' ';
+        $formFields['city'] = $request->all()['city'] ?? ' ';
+        $formFields['state'] = $request->all()['state'] ?? ' ';
+        $formFields['zipCode'] = $request->all()['zipCode'] ?? ' ';
+        $formFields['phone'] = $request->all()['phone'] ?? ' ';
+        $formFields['businessPhone'] = $request->all()['businessPhone'] ?? ' ';
 
         //---- Save sales person into foxpro.
         $saveSalepersonInfoResponse = FoxproApi::call([
@@ -411,15 +421,15 @@ class UserController extends Controller
             'params' => [
                 $formFields['salesmanCode'],
                 $formFields['companyCode'],
-                ' ', // firstName.
-                ' ', // address.
-                ' ', // city
-                ' ', // state
-                ' ', // zipCode.
+                $formFields['firstName'], // firstName.
+                $formFields['address'], // address.
+                $formFields['city'], // city
+                $formFields['state'], // state
+                $formFields['zipCode'], // zipCode.
                 $formFields['ssn'],
-                ' ', // phone
+                $formFields['phone'], // phone
                 ' ', // faxnumber.
-                ' ', // businessPhone                
+                $formFields['businessPhone'], // businessPhone                
             ],
             'keep_session' => false,
         ]);

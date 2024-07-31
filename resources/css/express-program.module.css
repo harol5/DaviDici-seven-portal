@@ -215,11 +215,16 @@
 .expressProgramProductsWrapper {
     display: flex;
     flex-wrap: wrap;
-    margin-top: 1em;
+}
+
+.expressProgramProductCardLayout {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    padding: 3.9rem;
 }
 
 .expressProgramProductCard {
-    width: 50%;
     cursor: pointer;
     border: solid 1px #d1ab68a1;
     transition: all 0.2s ease-in;

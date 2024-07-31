@@ -2,9 +2,15 @@ import { useForm } from "@inertiajs/react";
 import FlashMessage from "../../Components/FlashMessage";
 import { FormEvent } from "react";
 import { Link } from "@inertiajs/react";
+import { states } from "../../Models/UsaStates";
 
 function SalesPersonUpdateInfo({ message }: { message: string }) {
     const { data, setData, post, errors, reset } = useForm({
+        firstName: "",
+        address: "",
+        city: "",
+        state: "",
+        zipCode: "",
         ssn: "",
         phone: "",
         businessPhone: "",
@@ -38,7 +44,7 @@ function SalesPersonUpdateInfo({ message }: { message: string }) {
                     <section className="flex flex-col items-center">
                         <h1 className="">Sales person registration</h1>
                         <p className="">
-                            please type your social security number.
+                            please fill out the following information.
                         </p>
                     </section>
                 </section>
@@ -46,6 +52,120 @@ function SalesPersonUpdateInfo({ message }: { message: string }) {
                     onSubmit={handleSubmit}
                     className="sales-person-form mb-12"
                 >
+                    <div className="mb-6 first-name">
+                        <label htmlFor="name" className="inline-block  mb-2">
+                            First Name
+                        </label>
+                        <input
+                            type="text"
+                            className="border border-gray-200 rounded p-2 w-full"
+                            name="firstName"
+                            value={data.firstName}
+                            onChange={(e) =>
+                                setData("firstName", e.target.value)
+                            }
+                        />
+
+                        {errors.firstName && (
+                            <p className="text-red-500 text-xs mt-1">
+                                {errors.firstName}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="mb-6 address">
+                        <label
+                            htmlFor="address"
+                            className="inline-block text-lg mb-2"
+                        >
+                            Address
+                        </label>
+                        <input
+                            type="text"
+                            className="border border-gray-200 rounded p-2 w-full"
+                            name="address"
+                            value={data.address}
+                            onChange={(e) => setData("address", e.target.value)}
+                        />
+
+                        {errors.address && (
+                            <p className="text-red-500 text-xs mt-1">
+                                {errors.address}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="mb-6 city">
+                        <label
+                            htmlFor="city"
+                            className="inline-block text-lg mb-2"
+                        >
+                            City
+                        </label>
+                        <input
+                            type="text"
+                            className="border border-gray-200 rounded p-2 w-full"
+                            name="city"
+                            value={data.city}
+                            onChange={(e) => setData("city", e.target.value)}
+                        />
+
+                        {errors.city && (
+                            <p className="text-red-500 text-xs mt-1">
+                                {errors.city}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="mb-6 state">
+                        <label
+                            htmlFor="state"
+                            className="inline-block text-lg mb-2"
+                        >
+                            State
+                        </label>
+                        <select
+                            className="border border-gray-200 rounded p-2 w-full"
+                            name="state"
+                            value={data.state}
+                            onChange={(e) => setData("state", e.target.value)}
+                        >
+                            {states.map((state, index) => (
+                                <option key={index} value={state.abbreviation}>
+                                    {state.name}
+                                </option>
+                            ))}
+                        </select>
+
+                        {errors.state && (
+                            <p className="text-red-500 text-xs mt-1">
+                                {errors.state}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="mb-6 zip-code">
+                        <label
+                            htmlFor="zipCode"
+                            className="inline-block text-lg mb-2"
+                        >
+                            Zip code
+                        </label>
+                        <input
+                            type="text"
+                            className="border border-gray-200 rounded p-2 w-full"
+                            name="zipCode"
+                            value={data.zipCode}
+                            onChange={(e) => setData("zipCode", e.target.value)}
+                        />
+
+                        {errors.zipCode && (
+                            <p className="text-red-500 text-xs mt-1">
+                                {errors.zipCode}
+                            </p>
+                        )}
+                    </div>
+
                     <div className="mb-6 ssn">
                         <label
                             htmlFor="ssn"
@@ -116,7 +236,7 @@ function SalesPersonUpdateInfo({ message }: { message: string }) {
                             type="submit"
                             className="bg-laravel text-black rounded py-2 px-4 hover:bg-black hover:text-white"
                         >
-                            Sign Up
+                            Submit
                         </button>
                     </div>
                 </form>

@@ -28,10 +28,8 @@ class OrdersController extends Controller
             'keep_session' => false,
         ]);
         
-        if($orders['status'] === 500){
-            // assings an empty array so template can display proper message.
-            $orders['rows'] = []; 
-        }
+        // assings an empty array so template can display proper message.
+        if($orders['status'] === 500) $orders['rows'] = []; 
 
         if(array_key_exists('Result', $commissionInfo) && $commissionInfo['Result'] === 'there are no sales orders for this wholesaler') {
             $commissionInfo['rows'] = [];
@@ -539,108 +537,7 @@ class OrdersController extends Controller
         }                
     }
 
-    public function testApi(){
-
-        // hershel must include another field for the sales rep.
-        // $response = FoxproApi::call([
-        //     'action' => 'OrderEnter',
-        //     'params' => ['HarolE$Davidici_com','HAR000014','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
-        //     'keep_session' => false, 
-        // ]);      
-        
-        // $response = FoxproApi::call([
-        //     'action' => 'SaveUserInfo',
-        //     'params' => [
-        //         'hrcode95%40gmail.com',
-        //         '', 
-        //         '', // email
-        //         '44444444444', // phone
-        //         '', // businessPhone
-        //         '', // address
-        //         '', // city
-        //         '', // state - 2 letters
-        //         '', // zipCode
-        //         '', // firstName
-        //         '', // lastName
-        //         '', // companyName
-        //         '', // dateStarted
-        //         '', // isTaxExempt - Y | N
-        //         '', // einNumber
-        //         '', // ownerType - "PROP" | "PART" | "CORP"
-        //         '', // stateIncorporated - 2 letters
-        //         'HAR', // company code. 
-        //     ],
-        //     'keep_session' => false,
-        // ]);
-
-        // $response = FoxproApi::call([
-        //     'action' => 'GETUSERINFO',
-        //     'params' => ['mmanicone$njwps_com'],
-        //     'keep_session' => false, 
-        // ]);
-
-        // $response = FoxproApi::call([
-        //     'action' => 'getordersbyuser',
-        //     'params' => ['mmanicone$njwps_com'],
-        //     'keep_session' => false, 
-        // ]);
-
-        // $response = FoxproApi::call([
-        //     'action' => 'GETSLMNINFO',
-        //     'params' => [' ','HAR'],
-        //     'keep_session' => false, 
-        // ]);
-
-        // $response = FoxproApi::call([
-        //     'action' => 'SAVESLMNINFO',
-        //     'params' => ['DC','HAR',' ',' ',' ','NY',' ','432156789',' ',' ',' '],
-        //     'keep_session' => false, 
-        // ]);
-        
-        // $response = FoxproApi::call([
-        //     'action' => 'GetProductPrice',
-        //     'params' => ['HarolE$Davidici_com','18-048-2S-T2'],
-        //     'keep_session' => false, 
-        // ]);
-
-        // $response = FoxproApi::call([
-        //     'action' => 'SaveDeliveryInfo',
-        //     'params' => ['HAR000001','05/20/2024','my vanities','john doe','1234567890','1234567890','wholesaler@email.com','customer@email.com','123 main st','brooklyn','ny','11223','pick up','','ALL'],
-        //     'keep_session' => false, 
-        // ]);
-
-        // $response = FoxproApi::call([
-        //     'action' => 'GetDeliveryInfo',
-        //     'params' => ['HAR000001'],
-        //     'keep_session' => false, 
-        // ]);
-
-        // $response = FoxproApi::call([
-        //     'action' => 'getpercentdeposit',
-        //     'params' => ['harole@davidici.com','HAR000011'],
-        //     'keep_session' => false,
-        // ]);        
-        
-        // $response = FoxproApi::call([
-        //     'action' => 'SaveCR',
-        //     'params' => ['HAR000011','CC','447.07','05/28/2024','harol rojas','1234567890000','12/24','123'],
-        //     'keep_session' => false,
-        // ]);
-
-        // "Result": "Updated Info" |
-        // $response = FoxproApi::call([
-        //     'action' => 'ChangeOrderNote',
-        //     'params' => ['HAR000012','71-VB-024-M03-V03','1','this is anote'],
-        //     'keep_session' => false,
-        // ]);
-
-        
-        // $response = FoxproApi::call([
-        //     'action' => 'GETCOMMINFO',
-        //     'params' => ['mmanicone$njwps_com'],
-        //     'keep_session' => false,
-        // ]);
-
+    public function testApi(){        
         // return Inertia::render('Test',['response' => $response]);
         return response(['response' => $response])->header('Content-Type', 'application/json');
     }
