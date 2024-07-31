@@ -484,7 +484,7 @@ function ProductsAvailable({
     const handleCloseModal = () => {
         setOpenModal(false);
     };
-
+    console.log(compositions);
     return (
         <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <div className="main-content-wrapper">
