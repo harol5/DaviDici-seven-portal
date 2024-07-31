@@ -22,6 +22,50 @@ interface LoyaltyProgramGaugesProps {
 
 function LoyaltyProgramGauges({ commissionInfo }: LoyaltyProgramGaugesProps) {
     const currentMonth = useMemo(() => {
+        const months = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+        ];
+
+        const obj = {
+            month: "",
+            currentSales: {
+                dollarAmountToTarget: 0,
+                dollarAmountGoal: 0,
+                dollarAmountSold: 0,
+                currentSalesGaugeFillerDeg: 0,
+            },
+            currentCommission: {
+                currentDollarAmountCommission: 0,
+                currentCommPercent: 0,
+                goalCommPercent: 0,
+                goalDollarAmountCommission: 0,
+                currentCommissionGaugeFillerDeg: 0,
+            },
+        };
+
+        if (commissionInfo.length === 0) {
+            const date = new Date();
+            obj.month = months[date.getMonth()] + " " + date.getFullYear();
+
+            document.documentElement.style.cssText = `
+                --current-sales-gauge-deg: ${obj.currentSales.currentSalesGaugeFillerDeg}deg;
+                --current-comm-gauge-deg: ${obj.currentCommission.currentCommissionGaugeFillerDeg}deg;
+            `;
+
+            return obj;
+        }
+
         commissionInfo.forEach((month) => {
             month.monyear = month.monyear.replace(/\s/g, "");
         });
@@ -38,41 +82,9 @@ function LoyaltyProgramGauges({ commissionInfo }: LoyaltyProgramGaugesProps) {
         );
 
         const latestMonth = commissionInfo[0];
-
-        const months = [
-            "January",
-            "February",
-            "March",
-            "April",
-            "May",
-            "June",
-            "July",
-            "August",
-            "September",
-            "October",
-            "November",
-            "December",
-        ];
-
         const arr = latestMonth.monyear.split("-");
         const selectedMonthName = months[Number.parseInt(arr[0]) - 1];
-
-        const obj = {
-            month: `${selectedMonthName} ${arr[1]}`,
-            currentSales: {
-                dollarAmountToTarget: 0,
-                dollarAmountGoal: 0,
-                dollarAmountSold: 0,
-                currentSalesGaugeFillerDeg: 0,
-            },
-            currentCommission: {
-                currentDollarAmountCommission: 0,
-                currentCommPercent: 0,
-                goalCommPercent: 0,
-                goalDollarAmountCommission: 0,
-                currentCommissionGaugeFillerDeg: 0,
-            },
-        };
+        obj.month = `${selectedMonthName} ${arr[1]}`;
 
         if (latestMonth.l2need !== 0) {
             obj.currentSales.dollarAmountToTarget = latestMonth.l2need;

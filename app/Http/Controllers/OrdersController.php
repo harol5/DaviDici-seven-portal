@@ -33,6 +33,10 @@ class OrdersController extends Controller
             $orders['rows'] = []; 
         }
 
+        if(array_key_exists('Result', $commissionInfo) && $commissionInfo['Result'] === 'there are no sales orders for this wholesaler') {
+            $commissionInfo['rows'] = [];
+        }
+
         return Inertia::render('Orders/Orders',['orders' => $orders['rows'], 'message' => $message, 'commissionInfo' => $commissionInfo['rows']]);
     }
 
@@ -571,7 +575,13 @@ class OrdersController extends Controller
 
         // $response = FoxproApi::call([
         //     'action' => 'GETUSERINFO',
-        //     'params' => ['hrcode95%40gmail.com'],
+        //     'params' => ['mmanicone$njwps_com'],
+        //     'keep_session' => false, 
+        // ]);
+
+        // $response = FoxproApi::call([
+        //     'action' => 'getordersbyuser',
+        //     'params' => ['mmanicone$njwps_com'],
         //     'keep_session' => false, 
         // ]);
 
@@ -627,7 +637,7 @@ class OrdersController extends Controller
         
         // $response = FoxproApi::call([
         //     'action' => 'GETCOMMINFO',
-        //     'params' => ['mia.ruzzo@alliedkitchenandbath.com'],
+        //     'params' => ['mmanicone$njwps_com'],
         //     'keep_session' => false,
         // ]);
 
