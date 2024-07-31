@@ -962,7 +962,6 @@ function Register({ message }: { message: string }) {
                         </form>
                     </section>
                 )}
-
                 <FlashMessage message={message} />
             </div>
         </>

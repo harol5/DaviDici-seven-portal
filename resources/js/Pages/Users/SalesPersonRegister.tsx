@@ -2,11 +2,17 @@ import { useForm } from "@inertiajs/react";
 import FlashMessage from "../../Components/FlashMessage";
 import { FormEvent } from "react";
 import { Link } from "@inertiajs/react";
+import { states } from "../../Models/UsaStates";
 
 function SalesPersonRegister({ message }: { message: string }) {
     const { data, setData, post, errors, reset } = useForm({
         firstName: "",
         lastName: "",
+        address: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        ssn: "",
         phone: "",
         businessPhone: "",
         email: "",
@@ -89,6 +95,121 @@ function SalesPersonRegister({ message }: { message: string }) {
                         {errors.lastName && (
                             <p className="text-red-500 text-xs mt-1">
                                 {errors.lastName}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="mb-6 address">
+                        <label
+                            htmlFor="address"
+                            className="inline-block text-lg mb-2"
+                        >
+                            Address
+                        </label>
+                        <input
+                            type="text"
+                            className="border border-gray-200 rounded p-2 w-full"
+                            name="address"
+                            value={data.address}
+                            onChange={(e) => setData("address", e.target.value)}
+                        />
+
+                        {errors.address && (
+                            <p className="text-red-500 text-xs mt-1">
+                                {errors.address}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="mb-6 city">
+                        <label
+                            htmlFor="city"
+                            className="inline-block text-lg mb-2"
+                        >
+                            City
+                        </label>
+                        <input
+                            type="text"
+                            className="border border-gray-200 rounded p-2 w-full"
+                            name="city"
+                            value={data.city}
+                            onChange={(e) => setData("city", e.target.value)}
+                        />
+
+                        {errors.city && (
+                            <p className="text-red-500 text-xs mt-1">
+                                {errors.city}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="mb-6 state">
+                        <label
+                            htmlFor="state"
+                            className="inline-block text-lg mb-2"
+                        >
+                            State
+                        </label>
+                        <select
+                            className="border border-gray-200 rounded p-2 w-full"
+                            name="state"
+                            value={data.state}
+                            onChange={(e) => setData("state", e.target.value)}
+                        >
+                            {states.map((state, index) => (
+                                <option key={index} value={state.abbreviation}>
+                                    {state.name}
+                                </option>
+                            ))}
+                        </select>
+
+                        {errors.state && (
+                            <p className="text-red-500 text-xs mt-1">
+                                {errors.state}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="mb-6 zip-code">
+                        <label
+                            htmlFor="zipCode"
+                            className="inline-block text-lg mb-2"
+                        >
+                            Zip code
+                        </label>
+                        <input
+                            type="text"
+                            className="border border-gray-200 rounded p-2 w-full"
+                            name="zipCode"
+                            value={data.zipCode}
+                            onChange={(e) => setData("zipCode", e.target.value)}
+                        />
+
+                        {errors.zipCode && (
+                            <p className="text-red-500 text-xs mt-1">
+                                {errors.zipCode}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="mb-6 ssn">
+                        <label
+                            htmlFor="ssn"
+                            className="inline-block text-lg mb-2"
+                        >
+                            Social Security Number
+                        </label>
+                        <input
+                            type="text"
+                            className="border border-gray-200 rounded p-2 w-full"
+                            name="ssn"
+                            value={data.ssn}
+                            onChange={(e) => setData("ssn", e.target.value)}
+                        />
+
+                        {errors.ssn && (
+                            <p className="text-red-500 text-xs mt-1">
+                                {errors.ssn}
                             </p>
                         )}
                     </div>
