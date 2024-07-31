@@ -217,10 +217,10 @@ class UserController extends Controller
         $formFields['role'] = 1950;
 
         //---- Get company code.
-        $username = auth()->user()->username;
+        $adminUsername = auth()->user()->username;
         $getCompanyInforesponse = FoxproApi::call([
             'action' => 'GETUSERINFO',
-            'params' => [$username],
+            'params' => [$adminUsername],
             'keep_session' => false, 
         ]);
 
@@ -257,25 +257,30 @@ class UserController extends Controller
             ],
             'keep_session' => false,
         ]);
+        
 
-        if($SaveUserInfoResponse['status'] === 201 && $SaveUserInfoResponse['Result'] === 'New User Added') {
-            //---- Get salesman code.
-            $response = FoxproApi::call([
-                'action' => 'GETUSERINFO',
-                'params' => [$formFields['username']],
-                'keep_session' => false, 
-            ]);
+        if($SaveUserInfoResponse['status'] === 500) {
+            Log::error("=VVVVV===ERROR REQUESTING DATA FROM FOXPRO. function: SaveUserInfo ====VVVVV");
+            Log::error($SaveUserInfoResponse);
+            return redirect('/orders')->with(['message' => 'something went wrong. Please contact support']);
+        }  
 
-            if($response['status'] === 500 || (array_key_exists('Result',$response) && $response['Result'] === 'no such user name found')){
-                Log::error("=VVVVV===ERROR REQUESTING DATA FROM FOXPRO. function: GETUSERINFO ====VVVVV");
-                Log::error($response);
-                return redirect('/orders')->with(['message' => 'something went wrong. Please contact support']);
-            }
-
-            $registrationNumberArray = explode('-', $response['rows'][0]['regno']);
-            $formFields['salesmanCode'] =  $registrationNumberArray[count($registrationNumberArray) - 1];
-        }        
-                
+         //---- Get salesman code.
+        $newUserInfoResponse = FoxproApi::call([
+            'action' => 'GETUSERINFO',
+            'params' => [$formFields['username']],
+            'keep_session' => false, 
+        ]);
+        
+        if($newUserInfoResponse['status'] === 500 || (array_key_exists('Result',$newUserInfoResponse) && $newUserInfoResponse['Result'] === 'no such user name found')){
+            Log::error("=VVVVV===ERROR REQUESTING DATA FROM FOXPRO. function: GETUSERINFO ====VVVVV");
+            Log::error($newUserInfoResponse);
+            return redirect('/orders')->with(['message' => 'something went wrong. Please contact support']);
+        }
+        
+        $registrationNumberArray = explode('-', $newUserInfoResponse['rows'][0]['regno']);
+        $formFields['salesmanCode'] =  $registrationNumberArray[count($registrationNumberArray) - 1];
+        
         //---- Save sales person into foxpro.
         $saveSalepersonInfoResponse = FoxproApi::call([
             'action' => 'SAVESLMNINFO',
@@ -294,12 +299,12 @@ class UserController extends Controller
             ],
             'keep_session' => false,
         ]);
-
+        
         /**
          * Save user into portal for login if user was created successfully into foxpro.
          * then sends email confirmation.
          */
-        if($saveSalepersonInfoResponse['status'] === 201 && $saveSalepersonInfoResponse['Result'] === 'New User Added') {            
+        if($saveSalepersonInfoResponse['status'] === 201 && $saveSalepersonInfoResponse['Result'] === 'Salesman Info Updated') {            
             $user = User::create([
                 'first_name' => $formFields['firstName'],
                 'last_name' => $formFields['lastName'],            
@@ -365,19 +370,20 @@ class UserController extends Controller
             }             
         }        
                 
-        Log::error("=VVVVV===ERROR REQUESTING DATA FROM FOXPRO. function: SaveUserInfo ====VVVVV");
+        Log::error("=VVVVV===ERROR REQUESTING DATA FROM FOXPRO. function: SAVESLMNINFO ====VVVVV");
         Log::error($saveSalepersonInfoResponse);
         return redirect('/orders')->with(['message' => 'something went wrong. Please contact support']);;            
     }
 
+    // Show form to update sales person info (salesman accounts only) ---------
+    public function updateSalesPersonForm(Request $request){
+        return Inertia::render('Users/SalesPersonUpdateInfo');
+    }
+
     public function updateSalesPersonInfo(Request $request){
         //---- Validate data.
-        $formFields = $request->validate([
-            'firstName' => ['required', 'min:3'],                        
-            'ssn' => ['required', 'min:9'],                   
-            'phone' => ['required', 'min:3'],                   
-            'email' => ['required', 'email', Rule::unique('users', 'email')],                                     
-            'password' => 'required|confirmed|min:6'
+        $formFields = $request->validate([            
+            'ssn' => ['required', 'min:9'],                                                                                   
         ]);
 
         //---- Get company code.
@@ -416,6 +422,14 @@ class UserController extends Controller
                 ' ', // businessPhone                
             ],
             'keep_session' => false,
-        ]);        
+        ]);
+        
+        if($saveSalepersonInfoResponse['status'] === 201 && $saveSalepersonInfoResponse['Result'] === 'Salesman Info Updated') {
+            return redirect('/orders')->with(['message' => 'Sales person information updated!!']);
+        }
+
+        Log::error("=VVVVV===ERROR REQUESTING DATA FROM FOXPRO. function: SAVESLMNINFO ====VVVVV");
+        Log::error($saveSalepersonInfoResponse);
+        return redirect('/orders')->with(['message' => 'something went wrong. Please contact support']);;            
     }
 }

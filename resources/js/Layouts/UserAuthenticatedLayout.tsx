@@ -106,6 +106,15 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
                                             Add sales person
                                         </Link>
                                     </li>
+                                    <li>
+                                        <Link
+                                            href="/salesperson/update"
+                                            as="button"
+                                            type="button"
+                                        >
+                                            Edit sales person info
+                                        </Link>
+                                    </li>
                                     <li onClick={handleOpenModal}>Invite</li>
                                     <li>
                                         <Link
@@ -141,6 +150,15 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
                                     </li>
                                     <li>
                                         <Link
+                                            href="/salesperson/update"
+                                            as="button"
+                                            type="button"
+                                        >
+                                            Edit my salesperson info
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link
                                             href="/logout"
                                             method="post"
                                             as="button"
@@ -153,6 +171,15 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
                             )}
                             {auth?.user.role === 1950 && (
                                 <ul>
+                                    <li>
+                                        <Link
+                                            href="/salesperson/update"
+                                            as="button"
+                                            type="button"
+                                        >
+                                            Edit my salesperson info
+                                        </Link>
+                                    </li>
                                     <li>
                                         <Link
                                             href="/logout"

@@ -542,23 +542,48 @@ class OrdersController extends Controller
         //     'action' => 'OrderEnter',
         //     'params' => ['HarolE$Davidici_com','HAR000014','71-VB-024-M03-V03**1~71-VB-024-M03-V15**2~71-TU-012-M03-V23**3~18-048-2S-T2!!ELORA**1~'],
         //     'keep_session' => false, 
-        // ]);                
+        // ]);      
+        
+        // $response = FoxproApi::call([
+        //     'action' => 'SaveUserInfo',
+        //     'params' => [
+        //         'hrcode95%40gmail.com',
+        //         '', 
+        //         '', // email
+        //         '44444444444', // phone
+        //         '', // businessPhone
+        //         '', // address
+        //         '', // city
+        //         '', // state - 2 letters
+        //         '', // zipCode
+        //         '', // firstName
+        //         '', // lastName
+        //         '', // companyName
+        //         '', // dateStarted
+        //         '', // isTaxExempt - Y | N
+        //         '', // einNumber
+        //         '', // ownerType - "PROP" | "PART" | "CORP"
+        //         '', // stateIncorporated - 2 letters
+        //         'HAR', // company code. 
+        //     ],
+        //     'keep_session' => false,
+        // ]);
 
         // $response = FoxproApi::call([
         //     'action' => 'GETUSERINFO',
-        //     'params' => ['zaid$goldensourceki'],
+        //     'params' => ['hrcode95%40gmail.com'],
         //     'keep_session' => false, 
         // ]);
 
         // $response = FoxproApi::call([
         //     'action' => 'GETSLMNINFO',
-        //     'params' => ['GS','GSK'],
+        //     'params' => [' ','HAR'],
         //     'keep_session' => false, 
         // ]);
 
         // $response = FoxproApi::call([
         //     'action' => 'SAVESLMNINFO',
-        //     'params' => ['HE','HAR',' ',' ',' ',' ',' ','123456789',' ',' ',' '],
+        //     'params' => ['DC','HAR',' ',' ',' ','NY',' ','432156789',' ',' ',' '],
         //     'keep_session' => false, 
         // ]);
         

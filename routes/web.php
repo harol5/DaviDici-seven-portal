@@ -32,7 +32,11 @@ Route::middleware(['auth','auth.session'])->group(function () {
     // Owner only endpoints.    
     Route::get('/register/salesperson', [UserController::class, 'registerSalesPerson'])->name('user.register.salesperson');
     Route::post('/users/salesperson', [UserController::class, 'createSalesPerson']);
-    
+
+    // Salesperson endpoints.
+    Route::get('/salesperson/update', [UserController::class, 'updateSalesPersonForm'])->name('user.update.salesperson');
+    Route::post('/salesperson/update', [UserController::class, 'updateSalesPersonInfo']);
+
     // Orders routes - read operations.
     Route::get('/orders', [OrdersController::class, 'all']);
     Route::get('/orders/create-so-num', [OrdersController::class, 'createOrderNumber']); // coming from davidici pricelist.
