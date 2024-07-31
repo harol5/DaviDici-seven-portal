@@ -23,7 +23,7 @@ function LoyaltyProgramGauges({ commissionInfo }: LoyaltyProgramGaugesProps) {
             "December",
         ];
 
-        const obj = {
+        const currentMonthObj = {
             month: "",
             currentSales: {
                 dollarAmountToTarget: 0,
@@ -42,14 +42,15 @@ function LoyaltyProgramGauges({ commissionInfo }: LoyaltyProgramGaugesProps) {
 
         if (commissionInfo.length === 0) {
             const date = new Date();
-            obj.month = months[date.getMonth()] + " " + date.getFullYear();
+            currentMonthObj.month =
+                months[date.getMonth()] + " " + date.getFullYear();
 
             document.documentElement.style.cssText = `
-                --current-sales-gauge-deg: ${obj.currentSales.currentSalesGaugeFillerDeg}deg;
-                --current-comm-gauge-deg: ${obj.currentCommission.currentCommissionGaugeFillerDeg}deg;
+                --current-sales-gauge-deg: ${currentMonthObj.currentSales.currentSalesGaugeFillerDeg}deg;
+                --current-comm-gauge-deg: ${currentMonthObj.currentCommission.currentCommissionGaugeFillerDeg}deg;
             `;
 
-            return obj;
+            return currentMonthObj;
         }
 
         commissionInfo.forEach((month) => {
@@ -70,44 +71,50 @@ function LoyaltyProgramGauges({ commissionInfo }: LoyaltyProgramGaugesProps) {
         const latestMonth = commissionInfo[0];
         const arr = latestMonth.monyear.split("-");
         const selectedMonthName = months[Number.parseInt(arr[0]) - 1];
-        obj.month = `${selectedMonthName} ${arr[1]}`;
+        currentMonthObj.month = `${selectedMonthName} ${arr[1]}`;
 
         if (latestMonth.l2need !== 0) {
-            obj.currentSales.dollarAmountToTarget = latestMonth.l2need;
-            obj.currentSales.dollarAmountGoal = latestMonth.level1;
-            obj.currentSales.dollarAmountSold = latestMonth.l1sum;
-            obj.currentSales.currentSalesGaugeFillerDeg =
+            currentMonthObj.currentSales.dollarAmountToTarget =
+                latestMonth.l2need;
+            currentMonthObj.currentSales.dollarAmountGoal = latestMonth.level1;
+            currentMonthObj.currentSales.dollarAmountSold = latestMonth.l1sum;
+            currentMonthObj.currentSales.currentSalesGaugeFillerDeg =
                 (latestMonth.l1sum * 180) / latestMonth.level1;
 
-            obj.currentCommission.currentDollarAmountCommission =
+            currentMonthObj.currentCommission.currentDollarAmountCommission =
                 latestMonth.l1comm;
-            obj.currentCommission.currentCommPercent = latestMonth.l1percent;
-            obj.currentCommission.goalCommPercent = latestMonth.l2percent;
-            obj.currentCommission.goalDollarAmountCommission =
+            currentMonthObj.currentCommission.currentCommPercent =
+                latestMonth.l1percent;
+            currentMonthObj.currentCommission.goalCommPercent =
+                latestMonth.l2percent;
+            currentMonthObj.currentCommission.goalDollarAmountCommission =
                 latestMonth.l2total;
-            obj.currentCommission.currentCommissionGaugeFillerDeg =
+            currentMonthObj.currentCommission.currentCommissionGaugeFillerDeg =
                 (latestMonth.l1comm * 180) / latestMonth.l2total;
         } else {
-            obj.currentSales.dollarAmountToTarget = latestMonth.l2need;
-            obj.currentSales.dollarAmountGoal = latestMonth.level1;
-            obj.currentSales.dollarAmountSold = latestMonth.l2sum;
-            obj.currentSales.currentSalesGaugeFillerDeg = 180;
+            currentMonthObj.currentSales.dollarAmountToTarget =
+                latestMonth.l2need;
+            currentMonthObj.currentSales.dollarAmountGoal = latestMonth.level1;
+            currentMonthObj.currentSales.dollarAmountSold = latestMonth.l2sum;
+            currentMonthObj.currentSales.currentSalesGaugeFillerDeg = 180;
 
-            obj.currentCommission.currentDollarAmountCommission =
+            currentMonthObj.currentCommission.currentDollarAmountCommission =
                 latestMonth.l2comm;
-            obj.currentCommission.currentCommPercent = latestMonth.l2percent;
-            obj.currentCommission.goalCommPercent = latestMonth.l2percent;
-            obj.currentCommission.goalDollarAmountCommission =
+            currentMonthObj.currentCommission.currentCommPercent =
+                latestMonth.l2percent;
+            currentMonthObj.currentCommission.goalCommPercent =
+                latestMonth.l2percent;
+            currentMonthObj.currentCommission.goalDollarAmountCommission =
                 latestMonth.l2total;
-            obj.currentCommission.currentCommissionGaugeFillerDeg = 180;
+            currentMonthObj.currentCommission.currentCommissionGaugeFillerDeg = 180;
         }
 
         document.documentElement.style.cssText = `
-            --current-sales-gauge-deg: ${obj.currentSales.currentSalesGaugeFillerDeg}deg;
-            --current-comm-gauge-deg: ${obj.currentCommission.currentCommissionGaugeFillerDeg}deg;
+            --current-sales-gauge-deg: ${currentMonthObj.currentSales.currentSalesGaugeFillerDeg}deg;
+            --current-comm-gauge-deg: ${currentMonthObj.currentCommission.currentCommissionGaugeFillerDeg}deg;
         `;
 
-        return obj;
+        return currentMonthObj;
     }, []);
 
     return (

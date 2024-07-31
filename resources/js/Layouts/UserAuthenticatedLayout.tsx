@@ -115,7 +115,11 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
                                             Edit sales person info
                                         </Link>
                                     </li>
-                                    <li onClick={handleOpenModal}>Invite</li>
+                                    <li>
+                                        <button onClick={handleOpenModal}>
+                                            Invite
+                                        </button>
+                                    </li>
                                     <li>
                                         <Link
                                             href="/register"
