@@ -43,8 +43,12 @@ function FinishesFilter({
         <section className={classes.titleAndFinishesFilterWrapper}>
             <div className={classes.titleWrapper}>
                 <h1>{filterTitle}</h1>
+                {crrValueSelected && (
+                    <button onClick={() => handleFilter(contentType, "")}>
+                        reset
+                    </button>
+                )}
             </div>
-
             <div className={classes.allFinishTypesWrapper}>
                 {finishTypes.melamine.length !== 0 && (
                     <div className={classes.finishTypeWrapper}>
@@ -59,21 +63,30 @@ function FinishesFilter({
                                             classes.labelAndFinishWrapper
                                         }
                                     >
-                                        <img
+                                        <div
                                             className={
                                                 crrValueSelected ===
                                                 finishObj.finish
-                                                    ? `${classes.finishFilter} ${classes.finishFilterValueSelected} `
-                                                    : classes.finishFilter
+                                                    ? `${classes.imageAndOverlayWrapper} ${classes.finishFilterValueSelected} `
+                                                    : classes.imageAndOverlayWrapper
                                             }
-                                            src={finishObj.url}
-                                            onClick={() =>
-                                                handleFilter(
-                                                    contentType,
-                                                    finishObj.finish
-                                                )
-                                            }
-                                        />
+                                        >
+                                            <img
+                                                className={classes.finishFilter}
+                                                src={finishObj.url}
+                                                onClick={() =>
+                                                    handleFilter(
+                                                        contentType,
+                                                        finishObj.finish
+                                                    )
+                                                }
+                                            />
+                                            <div
+                                                className={
+                                                    classes.filterOverlay
+                                                }
+                                            ></div>
+                                        </div>
                                         <p
                                             className={
                                                 classes.finishFilterLabel
@@ -101,21 +114,30 @@ function FinishesFilter({
                                             classes.labelAndFinishWrapper
                                         }
                                     >
-                                        <img
+                                        <div
                                             className={
                                                 crrValueSelected ===
                                                 finishObj.finish
-                                                    ? `${classes.finishFilter} ${classes.finishFilterValueSelected} `
-                                                    : classes.finishFilter
+                                                    ? `${classes.imageAndOverlayWrapper} ${classes.finishFilterValueSelected} `
+                                                    : classes.imageAndOverlayWrapper
                                             }
-                                            src={finishObj.url}
-                                            onClick={() =>
-                                                handleFilter(
-                                                    contentType,
-                                                    finishObj.finish
-                                                )
-                                            }
-                                        />
+                                        >
+                                            <img
+                                                className={classes.finishFilter}
+                                                src={finishObj.url}
+                                                onClick={() =>
+                                                    handleFilter(
+                                                        contentType,
+                                                        finishObj.finish
+                                                    )
+                                                }
+                                            />
+                                            <div
+                                                className={
+                                                    classes.filterOverlay
+                                                }
+                                            ></div>
+                                        </div>
                                         <p
                                             className={
                                                 classes.finishFilterLabel
@@ -143,21 +165,30 @@ function FinishesFilter({
                                             classes.labelAndFinishWrapper
                                         }
                                     >
-                                        <img
+                                        <div
                                             className={
                                                 crrValueSelected ===
                                                 finishObj.finish
-                                                    ? `${classes.finishFilter} ${classes.finishFilterValueSelected} `
-                                                    : classes.finishFilter
+                                                    ? `${classes.imageAndOverlayWrapper} ${classes.finishFilterValueSelected} `
+                                                    : classes.imageAndOverlayWrapper
                                             }
-                                            src={finishObj.url}
-                                            onClick={() =>
-                                                handleFilter(
-                                                    contentType,
-                                                    finishObj.finish
-                                                )
-                                            }
-                                        />
+                                        >
+                                            <img
+                                                className={classes.finishFilter}
+                                                src={finishObj.url}
+                                                onClick={() =>
+                                                    handleFilter(
+                                                        contentType,
+                                                        finishObj.finish
+                                                    )
+                                                }
+                                            />
+                                            <div
+                                                className={
+                                                    classes.filterOverlay
+                                                }
+                                            ></div>
+                                        </div>
                                         <p
                                             className={
                                                 classes.finishFilterLabel

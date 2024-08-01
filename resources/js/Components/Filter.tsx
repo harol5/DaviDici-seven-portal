@@ -20,6 +20,11 @@ function Filter({
         <section className={classes.titleAndFilterWrapper}>
             <div className={classes.titleWrapper}>
                 <h1>{filterTitle}</h1>
+                {crrValueSelected && (
+                    <button onClick={() => handleFilter(contentType, "")}>
+                        reset
+                    </button>
+                )}
             </div>
 
             {contentType === "sizes" && (

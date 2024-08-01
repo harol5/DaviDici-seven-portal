@@ -1,12 +1,11 @@
 .filtersModal {
     border: #d1aa68 1px solid;
     padding: 2rem 5rem;
-    width: 80%;
+    max-width: 1500px;
 }
 
 .filterIconAndValuesSelectedWrapper {
     background-color: white;
-    /* border-top: #d1aa68 1px solid; */
     border-bottom: #d1aa68 1px solid;
     margin-top: 1em;
     padding: 1rem;
@@ -51,6 +50,25 @@
     flex-direction: column;
 }
 
+.resetFiltersAndCloseFilterButtonsWrapper {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.resetFiltersAndCloseFilterButtonsWrapper .resetFiltersButton {
+    background-color: #d1aa68;
+    color: white;
+    padding: 0.5em 4em;
+    border-radius: 5px;
+}
+
+.resetFiltersAndCloseFilterButtonsWrapper .closeFilterModalButton {
+    background-color: #d1aa68;
+    color: white;
+    padding: 0.5em 4em;
+    border-radius: 5px;
+}
+
 .titleAndFilterWrapper {
     padding: 1em 0;
     box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.388);
@@ -60,8 +78,16 @@
 .titleWrapper {
     display: flex;
     justify-content: center;
+    gap: 1rem;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 14px;
+}
+
+.titleWrapper button {
+    box-shadow: 0px 0px 1px 2px rgba(0, 0, 0, 0.214);
+    padding: 0.15rem 0.4rem;
+    border-radius: 2px;
+    font-size: 0.9rem;
 }
 
 .filterWrapper {
@@ -94,14 +120,11 @@
 /*==== SINK POSITION FILTER STYLING=====*/
 
 .sinkPositionFilter {
-    /* height: 7em; */
-    /* width: 7em; */
-    flex-basis: 8%;
+    flex-basis: 10%;
     margin: 0 1em;
     cursor: pointer;
     display: flex;
     flex-direction: column;
-    /* justify-content: center; */
     align-items: center;
 }
 
@@ -113,6 +136,17 @@
     position: relative;
 }
 
+.sinkPositionFilterSelected .imageAndOverlayWrapper::before {
+    z-index: 1;
+    content: "SELECTED";
+    font-size: 1rem;
+    color: #d1aa68;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
 .sinkPositionFilterSelected .imageAndOverlayWrapper .filterOverlay {
     background-color: #00000075;
     position: absolute;
@@ -120,14 +154,6 @@
     left: 0;
     width: 100%;
     height: 100%;
-}
-
-.sinkPositionFilterSelected .imageAndOverlayWrapper .filterOverlay::before {
-    content: "SELECTED";
-    color: #d1aa68;
-    position: absolute;
-    left: 20%;
-    top: 40%;
 }
 
 /*==== FINISHES FILTER STYLING=====*/
@@ -157,57 +183,76 @@
     margin-bottom: 10px;
 }
 
-.finishFilterWrapper {
+.finishTypeWrapper .finishFilterWrapper {
     display: flex;
     text-align: center;
     flex-wrap: wrap;
 }
 
-.labelAndFinishWrapper {
-    width: 25%;
+.finishTypeWrapper .finishFilterWrapper .labelAndFinishWrapper {
+    width: calc(100% / 3);
     padding: 0.5em;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-.finishFilter {
-    border: 3px solid #d1aa68;
-    border-radius: 50%;
-    height: 4.8em;
-    width: 4.8em;
-    margin: 0 1em;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.finishTypeWrapper
+    .finishFilterWrapper
+    .labelAndFinishWrapper
+    .finishFilterLabel {
+    font-size: 12px;
 }
 
-.finishFilterLabel {
-    font-size: 12px;
+.finishTypeWrapper
+    .finishFilterWrapper
+    .labelAndFinishWrapper
+    .imageAndOverlayWrapper {
+    border: 3px solid #d1aa68;
+    border-radius: 50%;
+    margin: 0 1em;
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+}
+
+.finishTypeWrapper
+    .finishFilterWrapper
+    .labelAndFinishWrapper
+    .imageAndOverlayWrapper
+    .finishFilter {
+    object-fit: cover;
+}
+
+.finishTypeWrapper
+    .finishFilterWrapper
+    .labelAndFinishWrapper
+    .imageAndOverlayWrapper.finishFilterValueSelected
+    .filterOverlay {
+    background-color: #00000092;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.finishTypeWrapper
+    .finishFilterWrapper
+    .labelAndFinishWrapper
+    .imageAndOverlayWrapper.finishFilterValueSelected::before {
+    content: "SELECTED";
+    color: #d1aa68;
+    font-size: 0.7rem;
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .finishFilterValueSelected {
     box-shadow: 0px 0px 9px 2px #d1aa68;
-}
-
-.resetFiltersAndCloseFilterButtonsWrapper {
-    display: flex;
-    justify-content: space-evenly;
-}
-
-.resetFiltersButton {
-    background-color: #d1aa68;
-    color: white;
-    padding: 0.5em 4em;
-    border-radius: 5px;
-}
-
-.closeFilterModalButton {
-    background-color: #d1aa68;
-    color: white;
-    padding: 0.5em 4em;
-    border-radius: 5px;
 }
 
 /*== PRODUCTS CARS STYLING ==*/
@@ -302,7 +347,10 @@
         width: 25%;
     }
 
-    .finishFilter {
+    .finishTypeWrapper
+        .finishFilterWrapper
+        .labelAndFinishWrapper
+        .imageAndOverlayWrapper {
         height: 2.5em;
         width: 2.5em;
         margin: 0;
