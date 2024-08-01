@@ -232,7 +232,7 @@ function ProductsAvailable({
                 handleFilter("stateful filters", statefulFilters);
         }
     }, []);
-
+    console.log(compositions);
     return (
         <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <div className="main-content-wrapper">

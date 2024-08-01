@@ -24,6 +24,7 @@ interface SideUnit {
 interface CurrentConfiguration {
     vanity: { baseSku: string; handle: string; finish: string };
     isDoubleSink: boolean;
+    isDoubleSideUnit: boolean;
     sideUnit: SideUnit | null;
     washbasin: string;
 }
@@ -189,6 +190,7 @@ function NewYorkConfigurator({ composition }: NewYorkConfiguratorProps) {
             finish: vanityOptions.finishOptions[0].code,
         },
         isDoubleSink: composition.name.includes("DOUBLE"),
+        isDoubleSideUnit: composition.name.includes("(12+24+12)"),
         sideUnit: sideUnitOptions
             ? {
                   baseSku: sideUnitOptions.baseSku,
@@ -412,6 +414,7 @@ function NewYorkConfigurator({ composition }: NewYorkConfiguratorProps) {
             }
 
             if (currentConfiguration.isDoubleSink) vanityMsrp *= 2;
+            if (currentConfiguration.isDoubleSideUnit) sideUnitMsrp *= 2;
 
             if (vanityMsrp === 0) setGrandTotal(0);
             else setGrandTotal(vanityMsrp + washbasinMsrp + sideUnitMsrp);
@@ -429,17 +432,29 @@ function NewYorkConfigurator({ composition }: NewYorkConfiguratorProps) {
             : "";
         const washbasinSku = currentConfiguration.washbasin;
 
+        const getSecondSideUnit = () => {
+            const rightSideUnitCodes = structuredClone(
+                currentConfiguration.sideUnit
+            );
+            rightSideUnitCodes!.position = "RX";
+            return `~${Object.values(rightSideUnitCodes!).join("-")}-1`;
+        };
+
         let SKU;
         if (sideUnitSku && washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }~${washbasinSku}--1~${sideUnitSku}--1`;
+            }~${washbasinSku}--1~${sideUnitSku}--1${
+                currentConfiguration.isDoubleSideUnit && getSecondSideUnit()
+            }`;
         }
 
         if (sideUnitSku && !washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }~${sideUnitSku}--1`;
+            }~${sideUnitSku}--1${
+                currentConfiguration.isDoubleSideUnit && getSecondSideUnit()
+            }`;
         }
 
         if (!sideUnitSku && washbasinSku) {

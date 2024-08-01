@@ -77,24 +77,18 @@
     cursor: pointer;
 }
 
+.option p {
+    font-size: 13px;
+    text-align: center;
+}
+
 .option .imageAndOverlayWrapper {
     position: relative;
+    flex-grow: 1;
 }
 
 .option .imageAndOverlayWrapper img {
     border: 1px solid #d1aa68;
-    height: 7em;
-    width: 7em;
-    border-radius: 5px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.option .imageAndOverlayWrapper .imageOverlay {
-    position: absolute;
-    top: 0;
-    left: 0;
     height: 7em;
     width: 7em;
     border-radius: 5px;
@@ -110,7 +104,7 @@
     width: 4em;
 }
 
-.finishOption .imageAndOverlayWrapper .imageOverlay {
+.finishOption.optionSelected .imageAndOverlayWrapper .imageOverlay {
     border-radius: 50% !important;
     position: absolute;
     top: 0;
@@ -120,33 +114,37 @@
     border-radius: 5px;
 }
 
-.option p {
-    font-size: 13px;
-    text-align: center;
-}
-
 /*states of options*/
 
 .optionSelected .imageAndOverlayWrapper .imageOverlay {
-    background-color: #d1ab68b4;
     box-shadow: 0px 0px 3px 3px #d1aa68;
+    background-color: #00000075;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 }
 
-.optionSelected .imageAndOverlayWrapper .imageOverlay::after {
+.optionSelected .imageAndOverlayWrapper .imageOverlay::before {
     content: "SELECTED";
-    color: white;
+    color: #d1ab68;
     font-weight: 300;
     position: absolute;
-    transform: translate(25%, 100%);
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
 }
 
-.finishOption.optionSelected .imageAndOverlayWrapper .imageOverlay::after {
+.finishOption.optionSelected .imageAndOverlayWrapper .imageOverlay::before {
     content: "SELECTED";
-    color: white;
+    color: #d1ab68;
     font-size: x-small;
     font-weight: 300;
     position: absolute;
-    transform: translate(15%, 100%);
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .optionDisabled {

@@ -57,7 +57,6 @@ function Options({
                             }}
                         >
                             <div className={classes.imageAndOverlayWrapper}>
-                                <div className={classes.imageOverlay}></div>
                                 <img
                                     src={option.imgUrl}
                                     onError={(e) => {
@@ -67,6 +66,7 @@ function Options({
                                             "https://portal.davidici.com/images/express-program/not-image.jpg";
                                     }}
                                 />
+                                <div className={classes.imageOverlay}></div>
                             </div>
                             <p>{option.title}</p>
                         </div>

@@ -299,8 +299,9 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         );
 
         let sideUnits: ProductInventory[] = [];
-        if (itemsMap.get("SIDE UNIT")) sideUnits = itemsMap.get("SIDE UNIT");
-        if (model === "NEW YORK" && itemsMap.get("SIDE UNIT")) {
+        if (itemsMap.has("SIDE UNIT")) sideUnits = itemsMap.get("SIDE UNIT");
+
+        if (model === "NEW YORK" && itemsMap.has("SIDE UNIT")) {
             const actualPosition =
                 position === "LEFT"
                     ? "RIGHT"
@@ -308,6 +309,17 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                     ? "LEFT"
                     : "";
             sideUnits = itemsMap.get("SIDE UNIT").get(actualPosition);
+        }
+
+        if (
+            model === "NEW YORK" &&
+            itemsMap.has("SIDE UNIT") &&
+            sinkPositionMeasure === "(12+24+12)"
+        ) {
+            sideUnits = [
+                ...itemsMap.get("SIDE UNIT").get("LEFT"),
+                ...itemsMap.get("SIDE UNIT").get("RIGHT"),
+            ];
         }
 
         const getStartingPrice = () => {
@@ -448,6 +460,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                     const modelsMap = vanitiesAndSideUnitsMap
                         .get("VANITY")
                         .get(size);
+
                     for (const [model, listOfVanities] of modelsMap) {
                         modelsForFilterMap.set(model, {
                             name: model,
@@ -520,8 +533,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                             for (const [model, value] of modelsMap) {
                                 if (
                                     model === "NEW YORK" &&
-                                    (sinkPositionMeasure === "(12+24+12)" ||
-                                        sinkPositionMeasure === "(24+12+24)")
+                                    sinkPositionMeasure === "(24+12+24)"
                                 )
                                     continue;
 
@@ -537,22 +549,21 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                                 .get(size);
 
                             // IMPORTANT!! - "value" could be an array or a map(MARGI <door style, arr>).
-                            for (const [model, arr] of modelsMap) {
+                            for (const [model, value] of modelsMap) {
                                 if (
                                     model === "NEW YORK" &&
-                                    (sinkPositionMeasure === "(12+24+12)" ||
-                                        sinkPositionMeasure === "(24+12+24)")
+                                    sinkPositionMeasure === "(24+12+24)"
                                 )
                                     continue;
 
                                 //we can get only vanities that can be pair with a side unit.
                                 if (!validModels.has(model)) continue;
-                                validModels.get(model).set("VANITY", arr);
+                                validModels.get(model).set("VANITY", value);
                             }
                         }
                     }
 
-                    // Iterate over the sink position map to start creating the composition.
+                    // Iterate over the sink position map (centered, left right, double) to start creating the composition.
                     for (const [position, listOfWasbasins] of crrItems) {
                         for (const [model, itemsMap] of validModels) {
                             modelsForFilterMap.set(model, {

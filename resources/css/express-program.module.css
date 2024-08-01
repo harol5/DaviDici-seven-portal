@@ -128,12 +128,12 @@
     align-items: center;
 }
 
-.sinkPositionFilter .imageAndOverlayWrapper img {
-    border: 2px solid #d1aa68;
-}
-
 .sinkPositionFilterSelected .imageAndOverlayWrapper {
     position: relative;
+}
+
+.sinkPositionFilter .imageAndOverlayWrapper img {
+    border: 2px solid #d1aa68;
 }
 
 .sinkPositionFilterSelected .imageAndOverlayWrapper::before {
