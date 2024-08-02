@@ -631,7 +631,7 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
         setGrandTotal(0);
         dispatch({ type: "reset-configurator", payload: "" });
     };
-
+    console.log(currentConfiguration);
     return (
         <div className={classes.compositionConfiguratorWrapper}>
             <section className={classes.leftSideConfiguratorWrapper}>

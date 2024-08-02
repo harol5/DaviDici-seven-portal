@@ -1,6 +1,6 @@
 .filtersModal {
     border: #d1aa68 1px solid;
-    padding: 2rem 5rem;
+    padding: 2.5rem 5rem;
     max-width: 1500px;
 }
 
@@ -13,6 +13,7 @@
     align-items: flex-end;
     position: sticky;
     top: 0px;
+    z-index: 2;
 }
 
 .filterIconAndValuesSelectedWrapper .filterIconButton {
@@ -50,26 +51,59 @@
     flex-direction: column;
 }
 
-.resetFiltersAndCloseFilterButtonsWrapper {
+.allFiltersWrapper .sizeAndSinkPositionFiltersWrapper {
+    display: flex;
+}
+
+.allFiltersWrapper
+    .sizeAndSinkPositionFiltersWrapper
+    .titleAndFilterWrapper:nth-child(1) {
+    flex-basis: 55%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .filterWrapper {
+        flex-grow: 1;
+        align-items: center;
+    }
+}
+
+.allFiltersWrapper
+    .sizeAndSinkPositionFiltersWrapper
+    .titleAndFilterWrapper:nth-child(2) {
+    flex-basis: 45%;
+
+    .filterWrapper .sinkPositionFilter {
+        flex-basis: 16%;
+    }
+}
+
+.allFiltersWrapper .resetFiltersAndCloseFilterButtonsWrapper {
     display: flex;
     justify-content: space-evenly;
+    margin-bottom: 1em;
 }
 
-.resetFiltersAndCloseFilterButtonsWrapper .resetFiltersButton {
+.allFiltersWrapper
+    .resetFiltersAndCloseFilterButtonsWrapper
+    .resetFiltersButton {
     background-color: #d1aa68;
     color: white;
     padding: 0.5em 4em;
     border-radius: 5px;
 }
 
-.resetFiltersAndCloseFilterButtonsWrapper .closeFilterModalButton {
+.allFiltersWrapper
+    .resetFiltersAndCloseFilterButtonsWrapper
+    .closeFilterModalButton {
     background-color: #d1aa68;
     color: white;
     padding: 0.5em 4em;
     border-radius: 5px;
 }
 
-.titleAndFilterWrapper {
+.allFiltersWrapper .titleAndFilterWrapper {
     padding: 1em 0;
     box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.388);
     margin: 1em 0;
@@ -117,6 +151,11 @@
     color: white;
 }
 
+.sizeFilter:hover {
+    box-shadow: 0px 0px 2px 2px #000000d7;
+    transition: box-shadow 0.1s ease-in;
+}
+
 /*==== SINK POSITION FILTER STYLING=====*/
 
 .sinkPositionFilter {
@@ -126,6 +165,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.sinkPositionFilter .imageAndOverlayWrapper:hover {
+    box-shadow: 0px 0px 2px 2px #000000d7;
+    transition: box-shadow 0.1s ease-in;
 }
 
 .sinkPositionFilterSelected .imageAndOverlayWrapper {
@@ -190,7 +234,7 @@
 }
 
 .finishTypeWrapper .finishFilterWrapper .labelAndFinishWrapper {
-    width: calc(100% / 3);
+    width: calc(100% / 4);
     padding: 0.5em;
     display: flex;
     flex-direction: column;
@@ -214,6 +258,14 @@
     cursor: pointer;
     overflow: hidden;
     position: relative;
+}
+
+.finishTypeWrapper
+    .finishFilterWrapper
+    .labelAndFinishWrapper
+    .imageAndOverlayWrapper:hover {
+    box-shadow: 0px 0px 2px 2px #000000d7;
+    transition: box-shadow 0.1s ease-in;
 }
 
 .finishTypeWrapper
@@ -266,17 +318,30 @@
     width: 50%;
     display: flex;
     justify-content: center;
-    padding: 3.9rem;
+    padding: 1rem 1.9rem;
 }
 
 .expressProgramProductCard {
     cursor: pointer;
     border: solid 1px #d1ab68a1;
     transition: all 0.2s ease-in;
+    animation: southToNorthFadeIn 0.7s ease-in-out forwards;
+}
+
+@keyframes southToNorthFadeIn {
+    0% {
+        transform: scale(0.7) translate(0, 2%);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(0.9) translate(0);
+        opacity: 1;
+    }
 }
 
 .expressProgramProductCard:hover {
-    box-shadow: 1px 5px 25px #d1ab68a1;
+    box-shadow: 1px 8px 25px #d1ab68ae;
 }
 
 .expressProgramProductCard .productCardcontent {

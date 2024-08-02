@@ -110,12 +110,12 @@
 
 .currentSalesGaugeFiller {
     transform-origin: center;
-    animation: fillingSalesGauge 2s forwards;
+    animation: fillingSalesGauge 3.5s ease-in-out forwards;
 }
 
 .currentCommGaugeFiller {
     transform-origin: center;
-    animation: fillingCommGauge 2s forwards;
+    animation: fillingCommGauge 3.5s ease-in-out forwards;
 }
 
 /*===================================*/

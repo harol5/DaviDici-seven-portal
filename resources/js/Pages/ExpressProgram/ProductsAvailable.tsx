@@ -232,7 +232,7 @@ function ProductsAvailable({
                 handleFilter("stateful filters", statefulFilters);
         }
     }, []);
-    console.log(compositions);
+
     return (
         <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <div className="main-content-wrapper">
@@ -316,20 +316,24 @@ function ProductsAvailable({
                             SHOW RESULTS
                         </button>
                     </div>
-                    <Filter
-                        filterTitle="Filter By Size"
-                        contentType="sizes"
-                        values={sizesForFilter}
-                        crrValueSelected={crrFilteredSize}
-                        onFilter={handleFilter}
-                    />
-                    <Filter
-                        filterTitle="Filter By Sink Position"
-                        contentType="sink position"
-                        values={sinkPositionsForFilter}
-                        crrValueSelected={crrFilteredSinkPosition}
-                        onFilter={handleFilter}
-                    />
+                    <section
+                        className={classes.sizeAndSinkPositionFiltersWrapper}
+                    >
+                        <Filter
+                            filterTitle="Filter By Size"
+                            contentType="sizes"
+                            values={sizesForFilter}
+                            crrValueSelected={crrFilteredSize}
+                            onFilter={handleFilter}
+                        />
+                        <Filter
+                            filterTitle="Filter By Sink Position"
+                            contentType="sink position"
+                            values={sinkPositionsForFilter}
+                            crrValueSelected={crrFilteredSinkPosition}
+                            onFilter={handleFilter}
+                        />
+                    </section>
                     <Filter
                         filterTitle="Filter By Model"
                         contentType="models"
