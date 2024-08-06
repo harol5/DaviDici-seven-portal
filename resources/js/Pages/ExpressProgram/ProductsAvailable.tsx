@@ -13,16 +13,18 @@ import type {
     finish,
     sinkPosition,
     model,
+    shoppingCartProduct,
 } from "../../Models/ExpressProgramModels";
 
 /**
  * TODO:
- *  RE WRITE STATEFULL FILTERS WITH NEW IMPLETATION.
- * STYLE RESET BUTTON.
+ * think how i should hablde sync between server and local stirage for shopping cart.
+ *
  */
 
 interface ProductsAvailableProps {
     auth: User;
+    shoppingCartProducts: shoppingCartProduct[];
     rawProducts: ProductInventory[];
     message?: string;
 }
@@ -36,9 +38,11 @@ interface StatefulFilterObj {
 
 function ProductsAvailable({
     auth,
+    shoppingCartProducts,
     rawProducts,
     message,
 }: ProductsAvailableProps) {
+    console.log(shoppingCartProducts);
     // this creates all the possible compositions.
     const {
         initialCompositions,
@@ -74,7 +78,7 @@ function ProductsAvailable({
     const [crrFilteredSinkPosition, setCrrFilteredSinkPosition] = useState("");
 
     // --- Manage Modal filter.
-    const [openModal, setOpenModal] = useState(false);
+    const [openFiltersModal, setOpenFiltersModal] = useState(false);
 
     const handleFilter = (
         filter: string,
@@ -238,7 +242,7 @@ function ProductsAvailable({
             <div className="main-content-wrapper">
                 <section className={classes.filterIconAndValuesSelectedWrapper}>
                     <button
-                        onClick={() => setOpenModal(true)}
+                        onClick={() => setOpenFiltersModal(true)}
                         className={classes.filterIconButton}
                     >
                         <img
@@ -293,8 +297,8 @@ function ProductsAvailable({
                 </section>
             </div>
             <Modal
-                show={openModal}
-                onClose={() => setOpenModal(false)}
+                show={openFiltersModal}
+                onClose={() => setOpenFiltersModal(false)}
                 customClass={classes.filtersModal}
             >
                 <section className={classes.allFiltersWrapper}>
@@ -311,7 +315,7 @@ function ProductsAvailable({
                         </button>
                         <button
                             className={classes.closeFilterModalButton}
-                            onClick={() => setOpenModal(false)}
+                            onClick={() => setOpenFiltersModal(false)}
                         >
                             SHOW RESULTS
                         </button>

@@ -1,0 +1,7 @@
+.shoppingCartButton {
+    position: fixed;
+    bottom: 22px;
+    right: 22px;
+    background-color: aqua;
+    padding: 1rem;
+}

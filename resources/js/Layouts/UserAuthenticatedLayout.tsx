@@ -2,9 +2,12 @@ import { Link } from "@inertiajs/react";
 import { ReactNode, useState } from "react";
 import InviteForm from "../Components/InviteForm";
 import User from "../Models/User";
+import Modal from "../Components/Modal";
+import ShoppingCart from "../Components/ShoppingCart";
+import classes from "../../css/shoppingCart.module.css";
 
 interface UserLayoutProps {
-    auth?: User;
+    auth: User;
     children?: ReactNode;
     crrPage: string;
 }
@@ -20,6 +23,9 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
     const handleCloseModal = () => {
         setOpenModal(false);
     };
+
+    // --- Manage Modal shopping cart.
+    const [openShoppingCartModal, setOpenShoppingCartModal] = useState(false);
 
     return (
         <>
@@ -205,6 +211,18 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
                 openModal={openModal}
                 handleCloseModal={handleCloseModal}
             />
+            <Modal
+                show={openShoppingCartModal}
+                onClose={() => setOpenShoppingCartModal(false)}
+            >
+                <ShoppingCart auth={auth} />
+            </Modal>
+            <button
+                className={classes.shoppingCartButton}
+                onClick={() => setOpenShoppingCartModal(true)}
+            >
+                shopping cart
+            </button>
         </>
     );
 }

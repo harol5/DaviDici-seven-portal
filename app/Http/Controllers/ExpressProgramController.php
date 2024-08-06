@@ -6,9 +6,10 @@ use App\Models\User;
 use Inertia\Inertia;
 use App\FoxproApi\FoxproApi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Session;
 
 
 class ExpressProgramController extends Controller
@@ -22,11 +23,19 @@ class ExpressProgramController extends Controller
             'params' => ['','',''],
             'keep_session' => false,
         ]);
-                
-                        
+            
+        $shoppingCartProducts;
+        if($request->user()) {
+            $shoppingCart = DB::table('shopping_cart')->where('user_id', $request->user()->id)->first();
+            $shoppingCartProducts = $shoppingCart ? json_decode($shoppingCart->products) : [];            
+        }else {
+            $shoppingCartProducts = [];
+        }        
+                                                
         if($response['status'] === 201){
             return Inertia::render('ExpressProgram/ProductsAvailable',
-                [                    
+                [
+                    'shoppingCartProductsServer' => $shoppingCartProducts,         
                     'rawProducts' => $response['rows'],
                     'message' => $message                   
                 ]
@@ -44,16 +53,38 @@ class ExpressProgramController extends Controller
     }
 
     public function productConfigurator(Request $request){
-        $composition = $request->session()->get('data');   
+        $composition = $request->session()->get('data');           
         
         if(!$composition) {
             return redirect('/express-program')->with('message', 'Product expired!!!');
         }
-
+                
         return Inertia::render('ExpressProgram/ProductConfigurator',
-            [                    
+            [                                
                 'composition' => $composition,                     
             ]
         );
+    }
+
+    public function getShoppingCart(Request $request) {
+        $shoppingCartProducts;
+        if($request->user()) {
+            $shoppingCart = DB::table('shopping_cart')->where('user_id', $request->user()->id)->first();
+            $shoppingCartProducts = $shoppingCart ? json_decode($shoppingCart->products) : [];            
+        }else {
+            $shoppingCartProducts = [];
+        }        
+        
+        return response(['shoppingCartProducts' => $shoppingCartProducts, 'status' => 201])->header('Content-Type', 'application/json');
+    }
+
+    public function updateShoppingCart(Request $request) {
+        DB::table('shopping_cart')
+            ->updateOrInsert(
+                ['user_id' => $request->user()->id],
+                ['products' => $request->getContent()]
+            );
+            
+        return response(['message' => 'shopping cart updated', 'status' => 201])->header('Content-Type', 'application/json');
     }
 }
