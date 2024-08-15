@@ -537,7 +537,13 @@ class OrdersController extends Controller
         }                
     }
 
-    public function testApi(){        
+    public function testApi(){      
+        $response = FoxproApi::call([
+            'action' => 'GETINVSTOCK',
+            'params' => ['','','','N'],
+            'keep_session' => false,
+        ]);
+        
         // return Inertia::render('Test',['response' => $response]);
         return response(['response' => $response])->header('Content-Type', 'application/json');
     }
