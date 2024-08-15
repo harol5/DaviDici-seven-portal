@@ -19,7 +19,7 @@ class ExpressProgramController extends Controller
         // call foxpro program to get items in stock
         $response = FoxproApi::call([
             'action' => 'GETINVSTOCK',
-            'params' => ['','',''],
+            'params' => ['','','','S'],
             'keep_session' => false,
         ]);
                 
