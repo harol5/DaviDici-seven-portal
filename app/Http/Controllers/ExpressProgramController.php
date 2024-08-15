@@ -59,8 +59,10 @@ class ExpressProgramController extends Controller
             return redirect('/express-program')->with('message', 'Product expired!!!');
         }
                 
+
         return Inertia::render('ExpressProgram/ProductConfigurator',
-            [                                
+            [                
+                'shoppingCartProductsServer' => $shoppingCartProducts,    
                 'composition' => $composition,                     
             ]
         );

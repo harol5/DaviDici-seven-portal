@@ -19,51 +19,54 @@ function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
     const handleShoppingCartProduct = async (
         shoppingCartProduct: shoppingCartProductModel
     ) => {
-        let updatedShoppingCart = [];
-        // GET SHOPPING CART PRODUTS FROM LOCAL STORAGE.
-        if (!localStorage.getItem("shoppingCartProducts"))
-            localStorage.setItem("shoppingCartProducts", JSON.stringify([]));
+        console.log(location);
+        console.log(history.length);
 
-        const shoppingCartProductsLocalStorage: shoppingCartProductModel[] =
-            JSON.parse(localStorage.getItem("shoppingCartProducts")!);
+        // let updatedShoppingCart = [];
+        // // GET SHOPPING CART PRODUTS FROM LOCAL STORAGE.
+        // if (!localStorage.getItem("shoppingCartProducts"))
+        //     localStorage.setItem("shoppingCartProducts", JSON.stringify([]));
 
-        try {
-            // GET SHOPPING CART PRODUTS FROM SERVER.
-            const response = await axios.get(
-                "/express-program/shopping-cart/products"
-            );
+        // const shoppingCartProductsLocalStorage: shoppingCartProductModel[] =
+        //     JSON.parse(localStorage.getItem("shoppingCartProducts")!);
 
-            const shoppingCartProductsServer: shoppingCartProductModel[] =
-                response.data.shoppingCartProducts;
+        // try {
+        //     // GET SHOPPING CART PRODUTS FROM SERVER.
+        //     const response = await axios.get(
+        //         "/express-program/shopping-cart/products"
+        //     );
 
-            // sync local and server shopping cart.
-            if (
-                shoppingCartProductsLocalStorage.length === 0 &&
-                shoppingCartProductsServer.length !== 0
-            ) {
-                shoppingCartProductsServer.push(shoppingCartProduct);
-                updatedShoppingCart = [...shoppingCartProductsServer];
-            } else if (
-                shoppingCartProductsServer.length === 0 &&
-                shoppingCartProductsLocalStorage.length !== 0
-            ) {
-                shoppingCartProductsLocalStorage.push(shoppingCartProduct);
-                updatedShoppingCart = [...shoppingCartProductsLocalStorage];
-            } else {
-                shoppingCartProductsServer.push(shoppingCartProduct);
-                updatedShoppingCart = [...shoppingCartProductsServer];
-            }
+        //     const shoppingCartProductsServer: shoppingCartProductModel[] =
+        //         response.data.shoppingCartProducts;
 
-            localStorage.setItem(
-                "shoppingCartProducts",
-                JSON.stringify(updatedShoppingCart)
-            );
+        //     // sync local and server shopping cart.
+        //     if (
+        //         shoppingCartProductsLocalStorage.length === 0 &&
+        //         shoppingCartProductsServer.length !== 0
+        //     ) {
+        //         shoppingCartProductsServer.push(shoppingCartProduct);
+        //         updatedShoppingCart = [...shoppingCartProductsServer];
+        //     } else if (
+        //         shoppingCartProductsServer.length === 0 &&
+        //         shoppingCartProductsLocalStorage.length !== 0
+        //     ) {
+        //         shoppingCartProductsLocalStorage.push(shoppingCartProduct);
+        //         updatedShoppingCart = [...shoppingCartProductsLocalStorage];
+        //     } else {
+        //         shoppingCartProductsServer.push(shoppingCartProduct);
+        //         updatedShoppingCart = [...shoppingCartProductsServer];
+        //     }
 
-            await axios.post(
-                "/express-program/shopping-cart/update",
-                updatedShoppingCart
-            );
-        } catch (err) {}
+        //     localStorage.setItem(
+        //         "shoppingCartProducts",
+        //         JSON.stringify(updatedShoppingCart)
+        //     );
+
+        //     await axios.post(
+        //         "/express-program/shopping-cart/update",
+        //         updatedShoppingCart
+        //     );
+        // } catch (err) {}
     };
 
     useEffect(() => {

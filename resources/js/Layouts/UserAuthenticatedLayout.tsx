@@ -1,5 +1,5 @@
 import { Link } from "@inertiajs/react";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import InviteForm from "../Components/InviteForm";
 import User from "../Models/User";
 import Modal from "../Components/Modal";
@@ -26,6 +26,10 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
 
     // --- Manage Modal shopping cart.
     const [openShoppingCartModal, setOpenShoppingCartModal] = useState(false);
+
+    // useEffect(()=>{
+    //     window.addEventListener("");
+    // },[]);
 
     return (
         <>
