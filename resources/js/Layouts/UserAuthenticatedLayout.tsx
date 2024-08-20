@@ -27,10 +27,6 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
     // --- Manage Modal shopping cart.
     const [openShoppingCartModal, setOpenShoppingCartModal] = useState(false);
 
-    // useEffect(()=>{
-    //     window.addEventListener("");
-    // },[]);
-
     return (
         <>
             <nav>
@@ -221,12 +217,14 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
             >
                 <ShoppingCart auth={auth} />
             </Modal>
-            <button
-                className={classes.shoppingCartButton}
-                onClick={() => setOpenShoppingCartModal(true)}
-            >
-                shopping cart
-            </button>
+            {auth.user && (
+                <button
+                    className={classes.shoppingCartButton}
+                    onClick={() => setOpenShoppingCartModal(true)}
+                >
+                    shopping cart
+                </button>
+            )}
         </>
     );
 }

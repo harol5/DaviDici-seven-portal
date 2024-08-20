@@ -15,7 +15,7 @@ import { collections } from "../../Models/Collections";
 import User from "../../Models/User";
 
 interface OrderDetailsProps {
-    auth?: User;
+    auth: User;
     rawOrder: OrderModel;
     rawProducts: ProductModel[];
     isPaymentSubmitted: boolean;

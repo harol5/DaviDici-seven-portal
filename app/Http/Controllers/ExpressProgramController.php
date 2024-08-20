@@ -20,7 +20,7 @@ class ExpressProgramController extends Controller
         // call foxpro program to get items in stock
         $response = FoxproApi::call([
             'action' => 'GETINVSTOCK',
-            'params' => ['','',''],
+            'params' => ['','','','S'],
             'keep_session' => false,
         ]);
             
@@ -61,8 +61,7 @@ class ExpressProgramController extends Controller
                 
 
         return Inertia::render('ExpressProgram/ProductConfigurator',
-            [                
-                'shoppingCartProductsServer' => $shoppingCartProducts,    
+            [                                    
                 'composition' => $composition,                     
             ]
         );
@@ -70,11 +69,12 @@ class ExpressProgramController extends Controller
 
     public function getShoppingCart(Request $request) {
         $shoppingCartProducts;
-        if($request->user()) {
+        if($request->user()) {            
             $shoppingCart = DB::table('shopping_cart')->where('user_id', $request->user()->id)->first();
             $shoppingCartProducts = $shoppingCart ? json_decode($shoppingCart->products) : [];            
         }else {
             $shoppingCartProducts = [];
+            // return redirect("/")->with('location','express-program');
         }        
         
         return response(['shoppingCartProducts' => $shoppingCartProducts, 'status' => 201])->header('Content-Type', 'application/json');

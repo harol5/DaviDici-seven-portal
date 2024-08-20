@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { shoppingCartProduct as shoppingCartProductModel } from "../Models/ExpressProgramModels";
 import User from "../Models/User";
 import axios from "axios";
+import ShoppingCartProductCard from "./ShoppingCartProductCard";
 
 interface ShoppingCartProps {
     auth: User;
@@ -20,19 +21,26 @@ function ShoppingCart({ auth }: ShoppingCartProps) {
         shoppingCartProductModel[]
     >([]);
 
+    const handleRemoveProduct = async (product: shoppingCartProductModel) => {
+        const filteredProducts = crrShoppingCartProducts.filter(
+            (crrProduct) => crrProduct.description !== product.description
+        );
+
+        try {
+            const response = await axios.post(
+                "/express-program/shopping-cart/update",
+                filteredProducts
+            );
+
+            if (response.data.message === "shopping cart updated")
+                setShoppingCartProducts(filteredProducts);
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
     useEffect(() => {
         const getShoppingCartProducts = async () => {
-            console.log("useEffectsync local server Ran!!");
-            // GET SHOPPING CART PRODUTS FROM LOCAL STORAGE.
-            if (!localStorage.getItem("shoppingCartProducts"))
-                localStorage.setItem(
-                    "shoppingCartProducts",
-                    JSON.stringify([])
-                );
-
-            const shoppingCartProductsLocalStorage: shoppingCartProductModel[] =
-                JSON.parse(localStorage.getItem("shoppingCartProducts")!);
-
             try {
                 // GET SHOPPING CART PRODUTS FROM SERVER.
                 const response = await axios.get(
@@ -41,50 +49,27 @@ function ShoppingCart({ auth }: ShoppingCartProps) {
 
                 const shoppingCartProductsServer =
                     response.data.shoppingCartProducts;
-                console.log(shoppingCartProductsServer);
-                // sync local and server shopping cart.
-                if (
-                    shoppingCartProductsLocalStorage.length === 0 &&
-                    shoppingCartProductsServer.length !== 0
-                ) {
-                    localStorage.setItem(
-                        "shoppingCartProducts",
-                        JSON.stringify(shoppingCartProductsServer)
-                    );
 
-                    setShoppingCartProducts(shoppingCartProductsServer);
-                } else if (
-                    shoppingCartProductsServer.length === 0 &&
-                    shoppingCartProductsLocalStorage.length !== 0
-                ) {
-                    setShoppingCartProducts(shoppingCartProductsLocalStorage);
-                    if (auth.user) {
-                        axios
-                            .post(
-                                "/express-program/shopping-cart/update",
-                                shoppingCartProductsLocalStorage
-                            )
-                            .then((res) => console.log(res))
-                            .catch((err) => console.log(err));
-                    }
-                } else {
-                    localStorage.setItem(
-                        "shoppingCartProducts",
-                        JSON.stringify(shoppingCartProductsServer)
-                    );
-
-                    setShoppingCartProducts(shoppingCartProductsServer);
-                }
+                setShoppingCartProducts(shoppingCartProductsServer);
             } catch (err) {}
         };
-
         getShoppingCartProducts();
     }, []);
 
     console.log("====== SHOPPING CART COMPONENT========");
     console.log("current products", crrShoppingCartProducts);
-    console.log("user", auth);
-    return <h1>shopping cart</h1>;
+
+    return (
+        <section>
+            {crrShoppingCartProducts.map((product, index) => (
+                <ShoppingCartProductCard
+                    product={product}
+                    onRemoveProduct={handleRemoveProduct}
+                    key={index}
+                />
+            ))}
+        </section>
+    );
 }
 
 export default ShoppingCart;

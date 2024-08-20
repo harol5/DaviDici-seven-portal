@@ -9,6 +9,7 @@ import EloraConfigurator from "../../Components/ExpressProgramConfigurator/Elora
 import OtherModelsConfigurator from "../../Components/ExpressProgramConfigurator/OtherModelsConfigurator";
 import { shoppingCartProduct as shoppingCartProductModel } from "../../Models/ExpressProgramModels";
 import axios from "axios";
+import { router } from "@inertiajs/react";
 
 interface ProductConfiguratorProps {
     auth: User;
@@ -19,60 +20,41 @@ function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
     const handleShoppingCartProduct = async (
         shoppingCartProduct: shoppingCartProductModel
     ) => {
-        console.log(location);
-        console.log(history.length);
+        if (!auth.user) {
+            // saved intended products on local storage.
+            localStorage.setItem(
+                "shoppingCartProduct",
+                JSON.stringify(shoppingCartProduct)
+            );
 
-        // let updatedShoppingCart = [];
-        // // GET SHOPPING CART PRODUTS FROM LOCAL STORAGE.
-        // if (!localStorage.getItem("shoppingCartProducts"))
-        //     localStorage.setItem("shoppingCartProducts", JSON.stringify([]));
+            // redirect user to login page.
+            router.get("/", { location: "express-program" });
+        } else {
+            try {
+                // GET SHOPPING CART PRODUTS FROM SERVER.
+                const response = await axios.get(
+                    "/express-program/shopping-cart/products"
+                );
 
-        // const shoppingCartProductsLocalStorage: shoppingCartProductModel[] =
-        //     JSON.parse(localStorage.getItem("shoppingCartProducts")!);
+                const shoppingCartProductsServer: shoppingCartProductModel[] =
+                    response.data.shoppingCartProducts;
 
-        // try {
-        //     // GET SHOPPING CART PRODUTS FROM SERVER.
-        //     const response = await axios.get(
-        //         "/express-program/shopping-cart/products"
-        //     );
+                shoppingCartProductsServer.push(shoppingCartProduct);
 
-        //     const shoppingCartProductsServer: shoppingCartProductModel[] =
-        //         response.data.shoppingCartProducts;
-
-        //     // sync local and server shopping cart.
-        //     if (
-        //         shoppingCartProductsLocalStorage.length === 0 &&
-        //         shoppingCartProductsServer.length !== 0
-        //     ) {
-        //         shoppingCartProductsServer.push(shoppingCartProduct);
-        //         updatedShoppingCart = [...shoppingCartProductsServer];
-        //     } else if (
-        //         shoppingCartProductsServer.length === 0 &&
-        //         shoppingCartProductsLocalStorage.length !== 0
-        //     ) {
-        //         shoppingCartProductsLocalStorage.push(shoppingCartProduct);
-        //         updatedShoppingCart = [...shoppingCartProductsLocalStorage];
-        //     } else {
-        //         shoppingCartProductsServer.push(shoppingCartProduct);
-        //         updatedShoppingCart = [...shoppingCartProductsServer];
-        //     }
-
-        //     localStorage.setItem(
-        //         "shoppingCartProducts",
-        //         JSON.stringify(updatedShoppingCart)
-        //     );
-
-        //     await axios.post(
-        //         "/express-program/shopping-cart/update",
-        //         updatedShoppingCart
-        //     );
-        // } catch (err) {}
+                await axios.post(
+                    "/express-program/shopping-cart/update",
+                    shoppingCartProductsServer
+                );
+            } catch (err) {
+                console.log(err);
+            }
+        }
     };
 
     useEffect(() => {
         const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-            event.preventDefault();
-            event.returnValue = true;
+            // event.preventDefault();
+            // event.returnValue = true;
         };
         window.addEventListener("beforeunload", handleBeforeUnload);
 

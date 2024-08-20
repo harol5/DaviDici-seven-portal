@@ -9,6 +9,7 @@ import Modal from "../../Components/Modal";
 import type { ProductInventory } from "../../Models/Product";
 import type { Composition } from "../../Models/Composition";
 import classes from "../../../css/express-program.module.css";
+import axios from "axios";
 import type {
     finish,
     sinkPosition,
@@ -223,6 +224,10 @@ function ProductsAvailable({
 
     useEffect(() => {
         const statefulFiltersJSON = localStorage.getItem("statefulFilters");
+        const shoppingCartProductJSON = localStorage.getItem(
+            "shoppingCartProduct"
+        );
+
         if (statefulFiltersJSON) {
             const statefulFilters: StatefulFilterObj =
                 JSON.parse(statefulFiltersJSON);
@@ -234,6 +239,37 @@ function ProductsAvailable({
                 statefulFilters.crrFilteredModel
             )
                 handleFilter("stateful filters", statefulFilters);
+        }
+
+        if (shoppingCartProductJSON) {
+            const shoppingCartProduct = JSON.parse(shoppingCartProductJSON);
+
+            if (shoppingCartProduct) {
+                const getShoppingCartProducts = async () => {
+                    try {
+                        // GET SHOPPING CART PRODUTS FROM SERVER.
+                        const response = await axios.get(
+                            "/express-program/shopping-cart/products"
+                        );
+
+                        const shoppingCartProductsServer: shoppingCartProduct[] =
+                            response.data.shoppingCartProducts;
+
+                        shoppingCartProductsServer.push(shoppingCartProduct);
+
+                        await axios.post(
+                            "/express-program/shopping-cart/update",
+                            shoppingCartProductsServer
+                        );
+
+                        localStorage.setItem(
+                            "shoppingCartProduct",
+                            JSON.stringify(null)
+                        );
+                    } catch (err) {}
+                };
+                getShoppingCartProducts();
+            }
         }
     }, []);
 

@@ -540,7 +540,7 @@ class OrdersController extends Controller
     public function testApi(){      
         $response = FoxproApi::call([
             'action' => 'GETINVSTOCK',
-            'params' => ['','','','N'],
+            'params' => ['','','','T'],
             'keep_session' => false,
         ]);
         
