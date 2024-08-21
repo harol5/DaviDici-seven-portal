@@ -605,9 +605,6 @@ function MargiConfigurator({
 
     // Manage order now.
     const handleOrderNow = () => {
-        console.log(composition);
-        console.log(currentConfiguration);
-
         const vanitySku = Object.values(currentConfiguration.vanity).join("-");
         const sideUnitSku = currentConfiguration.sideUnit
             ? Object.values(currentConfiguration.sideUnit).join("-")
@@ -638,8 +635,6 @@ function MargiConfigurator({
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
             }`;
         }
-
-        console.log(SKU);
 
         router.get("/orders/create-so-num", { SKU });
     };

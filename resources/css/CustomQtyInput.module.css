@@ -1,0 +1,42 @@
+.customQtyInput {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+}
+
+.inputQty::-webkit-inner-spin-button,
+.inputQty::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.inputQty.notValid {
+    border: 1px solid red;
+    background-color: rgba(255, 0, 0, 0.365);
+}
+
+.inputQty {
+    -moz-appearance: textfield;
+    appearance: textfield;
+    text-align: center;
+    width: 2.1em;
+    border: 1px solid #d1aa68;
+}
+
+.errorMessage {
+    color: red;
+    font-size: small;
+    text-align: center;
+}
+
+.inputQty:focus {
+    border-color: #d1aa68;
+}
+
+.increment,
+.decrement {
+    padding: 0.05em 0.85em;
+    color: #d1aa68;
+    border-radius: 2px;
+    box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.299);
+}
