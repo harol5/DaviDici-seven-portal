@@ -1,9 +1,8 @@
 .shoppingCartButton {
     position: fixed;
-    bottom: 22px;
-    right: 22px;
-    background-color: aqua;
-    padding: 1rem;
+    bottom: 32px;
+    right: 32px;
+    width: 50px;
 }
 
 .shoppingCartModal {
@@ -20,7 +19,26 @@
     flex-wrap: wrap;
 }
 
-.placeOrderButton {
+.grandTotalAndPlaceOrderButtonWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4em;
+    margin-bottom: 1rem;
+    position: sticky;
+    top: 0;
+}
+
+.grandTotalAndPlaceOrderButtonWrapper .granTotalWrapper h1 {
+    font-size: 1.3rem;
+}
+
+.grandTotalAndPlaceOrderButtonWrapper .granTotalWrapper p {
+    font-size: 1.5rem;
+    color: #d1aa68;
+}
+
+.grandTotalAndPlaceOrderButtonWrapper .placeOrderButton {
     background-color: #d1aa68;
     color: white;
     padding: 0.5rem 4rem;

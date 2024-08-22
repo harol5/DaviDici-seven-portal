@@ -223,7 +223,10 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
                     className={classes.shoppingCartButton}
                     onClick={() => setOpenShoppingCartModal(true)}
                 >
-                    shopping cart
+                    <img
+                        src={`https://${location.hostname}/images/shopping-cart-icon.svg`}
+                        alt="shopping cart icon"
+                    />
                 </button>
             )}
         </>

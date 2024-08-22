@@ -5,6 +5,7 @@ import axios from "axios";
 import ShoppingCartProductCard from "./ShoppingCartProductCard";
 import classes from "../../css/shoppingCart.module.css";
 import { router } from "@inertiajs/react";
+import USDollar from "../utils/currentFormatter";
 
 interface ShoppingCartProps {
     auth: User;
@@ -83,16 +84,22 @@ function ShoppingCart({ auth }: ShoppingCartProps) {
         let SKU: string[] = [];
         crrShoppingCartProducts.forEach((productConfig) => {
             const skusArr: string[] = [];
+            const doubleItemFinalQty = `--${productConfig.quantity * 2}`;
+            const singleItemFinalQty = `--${productConfig.quantity * 1}`;
 
             skusArr.push(
                 `${productConfig.vanity.uscode}!!${
                     productConfig.composition.model
-                }${productConfig.isDoubleSink ? "--2" : "--1"}`
+                }${
+                    productConfig.isDoubleSink
+                        ? doubleItemFinalQty
+                        : singleItemFinalQty
+                }`
             );
 
             if (productConfig.washbasin) {
                 skusArr.push(
-                    `${productConfig.washbasin.uscode}!!${productConfig.composition.model}--1`
+                    `${productConfig.washbasin.uscode}!!${productConfig.composition.model}${singleItemFinalQty}`
                 );
             }
 
@@ -104,31 +111,23 @@ function ShoppingCart({ auth }: ShoppingCartProps) {
                         }${
                             productConfig.isDoubleSideunit &&
                             productConfig.composition.model === "OPERA"
-                                ? "--2"
-                                : "--1"
+                                ? doubleItemFinalQty
+                                : singleItemFinalQty
                         }`
                     );
                 });
             }
 
-            console.log(
-                `${productConfig.composition.model} ${
-                    productConfig.composition.size
-                } ${productConfig.composition.sinkPosition} SINK ${
-                    productConfig.washbasin
-                        ? productConfig.washbasin.model
-                        : "NOT SINK"
-                }`
-            );
-            console.log(productConfig);
-            console.log(skusArr);
-            console.log(skusArr.join("~"));
             SKU.push(skusArr.join("~"));
         });
 
-        console.log(SKU);
-        console.log(SKU.join("~"));
         router.get("/orders/create-so-num", { SKU: SKU.join("~") });
+    };
+
+    const calGrandTotal = (): number => {
+        return crrShoppingCartProducts.reduce((prev, crr) => {
+            return prev + crr.grandTotal * crr.quantity;
+        }, 0);
     };
 
     useEffect(() => {
@@ -153,6 +152,18 @@ function ShoppingCart({ auth }: ShoppingCartProps) {
 
     return (
         <section className={classes.shoppingCart}>
+            <section className={classes.grandTotalAndPlaceOrderButtonWrapper}>
+                <span className={classes.granTotalWrapper}>
+                    <h1>GRAND TOTAL:</h1>
+                    <p>{USDollar.format(calGrandTotal())}</p>
+                </span>
+                <button
+                    className={classes.placeOrderButton}
+                    onClick={handlePlaceOrder}
+                >
+                    PLACE ORDER
+                </button>
+            </section>
             <section className={classes.shoppingCartContent}>
                 {crrShoppingCartProducts.map((product, index) => (
                     <ShoppingCartProductCard
@@ -163,15 +174,6 @@ function ShoppingCart({ auth }: ShoppingCartProps) {
                     />
                 ))}
             </section>
-            <section>
-                <button
-                    className={classes.placeOrderButton}
-                    onClick={handlePlaceOrder}
-                >
-                    PLACE ORDER
-                </button>
-            </section>
-
             {crrShoppingCartProducts.length === 0 && (
                 <p>YOU SHOPPING CART IS EMPTY.</p>
             )}

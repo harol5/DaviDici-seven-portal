@@ -400,7 +400,7 @@ class OrdersController extends Controller
     public function createOrderNumber(Request $request){        
         $username = auth()->user()->username;        
         $products = $request->all();
-        info($products);
+        
         // Get all orders
         $orders = FoxproApi::call([
             'action' => 'getordersbyuser',
@@ -453,7 +453,7 @@ class OrdersController extends Controller
     }
 
     // Create new order.
-    public function createOrder(Request $request){        
+    public function createOrder(Request $request){
         /**
          * The "OrderEnter" only can handle max 200 characters for the SKU param,
          * if the skus string is larger than that, we will have to make a call to
@@ -463,8 +463,9 @@ class OrdersController extends Controller
         $data = $request->all();              
         
         if (strlen($data['skus']) <= 200) {
-            info("skus are lesss or equal to 200 chars");
+            info("skus are less or equal to 200 chars");
             info($data['skus']);
+            info(explode('~',$data['skus']));
             // Result: "This sales order already exists" | "All items entered"
             $response = FoxproApi::call([
                 'action' => 'OrderEnter',
@@ -485,19 +486,31 @@ class OrdersController extends Controller
                     
             return redirect('/orders')->with('message', "something went wrong. Please contact support.");
 
-        } else {
-            info("skus are lesss or equal to 200 chars");
-            info($data['skus']);
+        } else {            
             // get the number of calls we will have to make to the "addtoorder", depending on the size of the sku string;
             $numberOfCalls = floor(strlen($data['skus']) / 200);
             $skusArr = explode('~',$data['skus']);
 
-            $numOfArrays = count($skusArr) / ($numberOfCalls + 1);
-            $splittedArray = array_chunk($skusArr, ceil($numOfArrays));
-                        
+            $numOfSkusPerArray = count($skusArr) / ($numberOfCalls + 1);
+            $splittedArray = array_chunk($skusArr, ceil($numOfSkusPerArray));
+
+            info("skus are greater than 200 chars");
+            info($data['skus']);
+            info("all skus:");
+            info(explode('~',$data['skus']));
+            info("length of string:");
+            info(strlen($data['skus']));
+            info("number of calls:");   
+            info($numberOfCalls);
+            info("number of needed arrays");
+            info($numOfSkusPerArray);
+            info("splitted array:");            
+            info($splittedArray);            
+
             for ($i = 0; $i < count($splittedArray); $i++) {
                 $skus = implode('~',$splittedArray[$i]);
 
+                // first skus array send to newOrderNum to create the order.
                 if($i === 0) {
                     $response = FoxproApi::call([
                         'action' => 'OrderEnter',
@@ -515,7 +528,9 @@ class OrdersController extends Controller
                         Log::error($response);
 
                         return redirect('/orders')->with('message', "something went wrong. Please contact support.");
-                    }                                                
+                    }
+                    
+                    continue;
                 }
 
                 $response = FoxproApi::call([

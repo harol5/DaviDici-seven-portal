@@ -26,7 +26,7 @@
 }
 
 .productDetails {
-    padding: 1em;
+    padding: 1.5em 1.2em;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -38,6 +38,12 @@
 
 .productDetails span h2 {
     color: #d1aa68;
+}
+
+.productDetails span .sideUnitsWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .inputAndRemoveButtonWrapper {

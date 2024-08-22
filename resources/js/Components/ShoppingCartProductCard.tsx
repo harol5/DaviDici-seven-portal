@@ -1,6 +1,8 @@
 import type { shoppingCartProduct } from "../Models/ExpressProgramModels";
 import CustomQtyInput from "./CustomQtyInput";
 import classes from "../../css/shoppingCartProductCard.module.css";
+import { useMemo } from "react";
+import USDollar from "../utils/currentFormatter";
 
 interface ShoppingCartProductCardProps {
     product: shoppingCartProduct;
@@ -17,6 +19,14 @@ function ShoppingCartProductCard({
     onRemoveProduct: handleRemoveProduct,
     onQtyUpdated: handleQtyUpdated,
 }: ShoppingCartProductCardProps) {
+    const grandTotal = useMemo(() => {
+        let crrTotal = product.grandTotal;
+        if (product.quantity !== 0 && !isNaN(product.quantity)) {
+            crrTotal = crrTotal * product.quantity;
+        }
+        return USDollar.format(crrTotal);
+    }, [product.quantity]);
+
     return (
         <div className={classes.shoppingCartProductCard}>
             <div className={classes.productContent}>
@@ -38,7 +48,7 @@ function ShoppingCartProductCard({
                     </span>
                     <span>
                         <h2>SIDE UNITS:</h2>
-                        <div>
+                        <div className={classes.sideUnitsWrapper}>
                             {product.sideUnits.map((sideUnit, index) => (
                                 <p key={index}>{sideUnit.descw}</p>
                             ))}
@@ -47,7 +57,7 @@ function ShoppingCartProductCard({
                     </span>
                     <span>
                         <h2>TOTAL:</h2>
-                        <p>{product.grandTotal}</p>
+                        <p>{grandTotal}</p>
                     </span>
                     <span className={classes.inputAndRemoveButtonWrapper}>
                         <CustomQtyInput

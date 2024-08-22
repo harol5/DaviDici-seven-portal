@@ -5,7 +5,7 @@ import { router } from "@inertiajs/react";
 import User from "../../Models/User";
 
 interface OrderNumberProps {
-    auth?: User;
+    auth: User;
     nextOrderNumber: string;
     products: { SKU: string };
     orders: OrderModel[];
@@ -50,7 +50,10 @@ function OrderNumber({
                 return;
             }
         }
-
+        console.log(
+            "OrderNumber handleCreateOrder",
+            products.SKU.replaceAll("--", "**").split("~")
+        );
         router.post(
             "/orders/create",
             {
