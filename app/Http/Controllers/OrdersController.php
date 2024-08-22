@@ -463,6 +463,8 @@ class OrdersController extends Controller
         $data = $request->all();              
         
         if (strlen($data['skus']) <= 200) {
+            info("skus are lesss or equal to 200 chars");
+            info($data['skus']);
             // Result: "This sales order already exists" | "All items entered"
             $response = FoxproApi::call([
                 'action' => 'OrderEnter',
@@ -484,6 +486,8 @@ class OrdersController extends Controller
             return redirect('/orders')->with('message', "something went wrong. Please contact support.");
 
         } else {
+            info("skus are lesss or equal to 200 chars");
+            info($data['skus']);
             // get the number of calls we will have to make to the "addtoorder", depending on the size of the sku string;
             $numberOfCalls = floor(strlen($data['skus']) / 200);
             $skusArr = explode('~',$data['skus']);

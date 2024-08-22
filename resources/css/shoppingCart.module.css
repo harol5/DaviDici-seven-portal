@@ -6,6 +6,20 @@
     padding: 1rem;
 }
 
+.shoppingCartModal {
+    border: #d1aa68 1px solid;
+    padding: 2.5rem 5rem;
+    max-width: 1500px;
+}
+
+.shoppingCart {
+}
+
+.shoppingCartContent {
+    display: flex;
+    flex-wrap: wrap;
+}
+
 .placeOrderButton {
     background-color: #d1aa68;
     color: white;

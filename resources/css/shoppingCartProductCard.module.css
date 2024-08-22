@@ -1,0 +1,58 @@
+.shoppingCartProductCard {
+    width: 50%;
+    padding: 1em;
+}
+
+.productContent {
+    display: flex;
+    height: 100%;
+    box-shadow: 0px 1px 3px 3px rgba(0, 0, 0, 0.266);
+    border-radius: 2px;
+    gap: 0.5em;
+}
+
+.productDescription,
+.productDetails {
+    width: 50%;
+}
+
+.productDescription {
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    margin: auto 0;
+    padding: 0 2em;
+}
+
+.productDetails {
+    padding: 1em;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.productDetails span {
+    margin-bottom: 1em;
+}
+
+.productDetails span h2 {
+    color: #d1aa68;
+}
+
+.inputAndRemoveButtonWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.inputAndRemoveButtonWrapper > button {
+    border: 1px solid #d1aa68;
+    padding: 0.3rem;
+    border-radius: 3px;
+}
+
+.inputAndRemoveButtonWrapper > button:hover {
+    background-color: rgba(255, 0, 0, 0.443);
+    color: white;
+}

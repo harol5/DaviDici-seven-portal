@@ -19,6 +19,7 @@ function OrderNumber({
     orders,
     message,
 }: OrderNumberProps) {
+    console.log(products);
     const [orderNum, setOrderNum] = useState(() => nextOrderNumber.slice(3));
     const [error, setError] = useState<string>();
     const [isLoading, setIsLoading] = useState(false);

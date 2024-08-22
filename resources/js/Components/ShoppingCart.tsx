@@ -4,6 +4,7 @@ import User from "../Models/User";
 import axios from "axios";
 import ShoppingCartProductCard from "./ShoppingCartProductCard";
 import classes from "../../css/shoppingCart.module.css";
+import { router } from "@inertiajs/react";
 
 interface ShoppingCartProps {
     auth: User;
@@ -78,7 +79,57 @@ function ShoppingCart({ auth }: ShoppingCartProps) {
         }
     };
 
-    const handlePlaceOrder = () => {};
+    const handlePlaceOrder = () => {
+        let SKU: string[] = [];
+        crrShoppingCartProducts.forEach((productConfig) => {
+            const skusArr: string[] = [];
+
+            skusArr.push(
+                `${productConfig.vanity.uscode}!!${
+                    productConfig.composition.model
+                }${productConfig.isDoubleSink ? "--2" : "--1"}`
+            );
+
+            if (productConfig.washbasin) {
+                skusArr.push(
+                    `${productConfig.washbasin.uscode}!!${productConfig.composition.model}--1`
+                );
+            }
+
+            if (productConfig.sideUnits.length > 0) {
+                productConfig.sideUnits.forEach((sideunit) => {
+                    skusArr.push(
+                        `${sideunit.uscode}!!${
+                            productConfig.composition.model
+                        }${
+                            productConfig.isDoubleSideunit &&
+                            productConfig.composition.model === "OPERA"
+                                ? "--2"
+                                : "--1"
+                        }`
+                    );
+                });
+            }
+
+            console.log(
+                `${productConfig.composition.model} ${
+                    productConfig.composition.size
+                } ${productConfig.composition.sinkPosition} SINK ${
+                    productConfig.washbasin
+                        ? productConfig.washbasin.model
+                        : "NOT SINK"
+                }`
+            );
+            console.log(productConfig);
+            console.log(skusArr);
+            console.log(skusArr.join("~"));
+            SKU.push(skusArr.join("~"));
+        });
+
+        console.log(SKU);
+        console.log(SKU.join("~"));
+        router.get("/orders/create-so-num", { SKU: SKU.join("~") });
+    };
 
     useEffect(() => {
         const getShoppingCartProducts = async () => {
@@ -101,8 +152,8 @@ function ShoppingCart({ auth }: ShoppingCartProps) {
     console.log("current products", crrShoppingCartProducts);
 
     return (
-        <section>
-            <section>
+        <section className={classes.shoppingCart}>
+            <section className={classes.shoppingCartContent}>
                 {crrShoppingCartProducts.map((product, index) => (
                     <ShoppingCartProductCard
                         product={product}
@@ -113,7 +164,10 @@ function ShoppingCart({ auth }: ShoppingCartProps) {
                 ))}
             </section>
             <section>
-                <button className={classes.placeOrderButton}>
+                <button
+                    className={classes.placeOrderButton}
+                    onClick={handlePlaceOrder}
+                >
                     PLACE ORDER
                 </button>
             </section>

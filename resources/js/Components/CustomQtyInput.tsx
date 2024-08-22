@@ -15,9 +15,6 @@ function CustomQtyInput({
     product,
     onQtyUpdated: handleQtyUpdated,
 }: CustomQtyInputProps) {
-    console.log("=== CustomQtyInput ===");
-    console.log(product);
-
     return (
         <section>
             <div className={classes.customQtyInput}>

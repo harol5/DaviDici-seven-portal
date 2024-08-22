@@ -214,6 +214,7 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
             <Modal
                 show={openShoppingCartModal}
                 onClose={() => setOpenShoppingCartModal(false)}
+                customClass={classes.shoppingCartModal}
             >
                 <ShoppingCart auth={auth} />
             </Modal>
