@@ -1,7 +1,10 @@
 import { Composition } from "../../Models/Composition";
 import classes from "../../../css/product-configurator.module.css";
 import { useEffect, useMemo, useReducer, useState } from "react";
-import type { Option } from "../../Models/ExpressProgramModels";
+import type {
+    Option,
+    shoppingCartProduct as shoppingCartProductModel,
+} from "../../Models/ExpressProgramModels";
 import Options from "./Options";
 import { router } from "@inertiajs/react";
 
@@ -12,6 +15,7 @@ import { router } from "@inertiajs/react";
 
 interface MargiConfiguratorProps {
     composition: Composition;
+    onAddToCart: (shoppingCartProduct: shoppingCartProductModel) => void;
 }
 
 interface margiOpenUnit {
@@ -29,6 +33,7 @@ interface CurrentConfiguration {
     vanity: { baseSku: string; drawer: string; handle: string; finish: string };
     isDoubleSink: boolean;
     sideUnit: margiOpenUnit | margiSideCabinet | null;
+    sideUnitType: string;
     washbasin: string;
 }
 
@@ -48,7 +53,10 @@ interface margiSideCabinetOptions {
     finishOptions: Option[];
 }
 
-function MargiConfigurator({ composition }: MargiConfiguratorProps) {
+function MargiConfigurator({
+    composition,
+    onAddToCart,
+}: MargiConfiguratorProps) {
     // iterate over vanitites array and analize sku in order to get the valid options to get final sku. -------------|
     const initialVanityOptions: vanityOptions = useMemo(() => {
         let baseSku: string = "";
@@ -266,10 +274,15 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
     // create objetct that will hold current configuration. if only one option, make it default. --------------|
     const initialConfiguration: CurrentConfiguration = useMemo(() => {
         let sideUnit: margiOpenUnit | margiSideCabinet | null = null;
+        let sideUnitType = "";
+
         if (sideUnitOptions) {
             if (composition.sideUnits[0].descw.includes("8")) {
                 const margiOpenUnitOptions =
                     sideUnitOptions as margiOpenUnitOptions;
+
+                sideUnitType = "open unit";
+
                 sideUnit = {
                     baseSku: margiOpenUnitOptions.baseSku,
                     finish:
@@ -282,6 +295,9 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
             if (composition.sideUnits[0].descw.includes("16")) {
                 const margiSideCabinetOptions =
                     sideUnitOptions as margiSideCabinetOptions;
+
+                sideUnitType = "side cabinet";
+
                 sideUnit = {
                     baseSku: margiSideCabinetOptions.baseSku,
                     doorStyleAndHandle:
@@ -312,7 +328,8 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
                 finish: vanityOptions.finishOptions[0].code,
             },
             isDoubleSink: composition.name.includes("DOUBLE"),
-            sideUnit: sideUnit,
+            sideUnit,
+            sideUnitType,
             washbasin: composition.washbasins[0].uscode,
         };
     }, []);
@@ -542,11 +559,13 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
             }
         }
 
-        // this means we have a valid vanity sku number;
+        // this means we have a valid configuration;
         if (
             vanityCodesArray.length === 4 &&
-            (sideUnitCodesArray.length === 2 ||
-                sideUnitCodesArray.length === 3 ||
+            ((sideUnitCodesArray.length === 2 &&
+                currentConfiguration.sideUnitType === "open unit") ||
+                (sideUnitCodesArray.length === 3 &&
+                    currentConfiguration.sideUnitType === "side cabinet") ||
                 !currentConfiguration.sideUnit)
         ) {
             const vanitySku = vanityCodesArray.join("-");
@@ -586,9 +605,6 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
 
     // Manage order now.
     const handleOrderNow = () => {
-        console.log(composition);
-        console.log(currentConfiguration);
-
         const vanitySku = Object.values(currentConfiguration.vanity).join("-");
         const sideUnitSku = currentConfiguration.sideUnit
             ? Object.values(currentConfiguration.sideUnit).join("-")
@@ -620,8 +636,6 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
             }`;
         }
 
-        console.log(SKU);
-
         router.get("/orders/create-so-num", { SKU });
     };
 
@@ -631,7 +645,41 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
         setGrandTotal(0);
         dispatch({ type: "reset-configurator", payload: "" });
     };
-    console.log(currentConfiguration);
+
+    // Creates object for shopping cart.
+    const handleAddToCart = () => {
+        const vanitySku = Object.values(currentConfiguration.vanity).join("-");
+        const sideUnitSku = currentConfiguration.sideUnit
+            ? Object.values(currentConfiguration.sideUnit).join("-")
+            : "";
+        const washbasinSku = currentConfiguration.washbasin;
+
+        const vanityObj = composition.vanities.find(
+            (vanity) => vanity.uscode === vanitySku
+        );
+        const sideUnitsObj = composition.sideUnits.find(
+            (sideUnit) => sideUnit.uscode === sideUnitSku
+        );
+        const washbasinObj = composition.washbasins.find(
+            (washbasin) => washbasin.uscode === washbasinSku
+        );
+
+        const shoppingCartObj: shoppingCartProductModel = {
+            composition: composition,
+            description: composition.name,
+            vanity: vanityObj!,
+            sideUnits: sideUnitsObj ? [sideUnitsObj] : [],
+            washbasin: washbasinObj!,
+            otherProducts: [],
+            isDoubleSink: currentConfiguration.isDoubleSink,
+            isDoubleSideunit: false,
+            quantity: 1,
+            grandTotal: grandTotal,
+        };
+
+        onAddToCart(shoppingCartObj);
+    };
+
     return (
         <div className={classes.compositionConfiguratorWrapper}>
             <section className={classes.leftSideConfiguratorWrapper}>
@@ -715,6 +763,12 @@ function MargiConfigurator({ composition }: MargiConfiguratorProps) {
                         onClick={handleOrderNow}
                     >
                         ORDER NOW
+                    </button>
+                    <button
+                        disabled={!grandTotal ? true : false}
+                        onClick={handleAddToCart}
+                    >
+                        ADD TO CART
                     </button>
                 </div>
             </section>

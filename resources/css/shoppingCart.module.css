@@ -1,0 +1,61 @@
+.shoppingCartButton {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    width: 50px;
+    padding: 5px;
+}
+
+.shoppingCartButton .counter {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: red;
+    border: 1px solid red;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    font-size: 0.8rem;
+}
+
+.shoppingCartModal {
+    border: #d1aa68 1px solid;
+    padding: 2.5rem 5rem;
+    max-width: 1500px;
+}
+
+.shoppingCart {
+}
+
+.shoppingCartContent {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.grandTotalAndPlaceOrderButtonWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4em;
+    margin-bottom: 1rem;
+    position: sticky;
+    top: 0;
+}
+
+.grandTotalAndPlaceOrderButtonWrapper .granTotalWrapper h1 {
+    font-size: 1.3rem;
+}
+
+.grandTotalAndPlaceOrderButtonWrapper .granTotalWrapper p {
+    font-size: 1.5rem;
+    color: #d1aa68;
+}
+
+.grandTotalAndPlaceOrderButtonWrapper .placeOrderButton {
+    background-color: #d1aa68;
+    color: white;
+    padding: 0.5rem 4rem;
+    border-radius: 4px;
+}

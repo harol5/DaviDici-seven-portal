@@ -1,15 +1,25 @@
 import { Link } from "@inertiajs/react";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import InviteForm from "../Components/InviteForm";
 import User from "../Models/User";
+import Modal from "../Components/Modal";
+import ShoppingCart from "../Components/ShoppingCart";
+import classes from "../../css/shoppingCart.module.css";
+import axios from "axios";
 
-interface UserLayoutProps {
-    auth?: User;
+interface UserAuthenticatedLayoutProps {
+    auth: User;
     children?: ReactNode;
     crrPage: string;
+    shoppingCartSize?: number;
 }
 
-function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
+function UserAuthenticatedLayout({
+    auth,
+    children,
+    crrPage,
+    shoppingCartSize = 0,
+}: UserAuthenticatedLayoutProps) {
     // State for invite form modal.
     const [openModal, setOpenModal] = useState(false);
 
@@ -20,6 +30,32 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
     const handleCloseModal = () => {
         setOpenModal(false);
     };
+
+    // --- Manage Modal shopping cart.
+    const [openShoppingCartModal, setOpenShoppingCartModal] = useState(false);
+    const [counter, setCounter] = useState(shoppingCartSize);
+
+    const handleShoppingCartSize = (numOfProducts: number) => {
+        setCounter(numOfProducts);
+    };
+
+    useEffect(() => {
+        const getShoppingCartProducts = async () => {
+            try {
+                // GET SHOPPING CART PRODUTS FROM SERVER.
+                const response = await axios.get(
+                    "/express-program/shopping-cart/products"
+                );
+
+                const shoppingCartProductsServer =
+                    response.data.shoppingCartProducts;
+
+                if (shoppingCartProductsServer)
+                    setCounter(shoppingCartProductsServer.length);
+            } catch (err) {}
+        };
+        getShoppingCartProducts();
+    }, [shoppingCartSize]);
 
     return (
         <>
@@ -205,6 +241,25 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
                 openModal={openModal}
                 handleCloseModal={handleCloseModal}
             />
+            <Modal
+                show={openShoppingCartModal}
+                onClose={() => setOpenShoppingCartModal(false)}
+                customClass={classes.shoppingCartModal}
+            >
+                <ShoppingCart onShoppingSize={handleShoppingCartSize} />
+            </Modal>
+            {auth.user && (
+                <button
+                    className={classes.shoppingCartButton}
+                    onClick={() => setOpenShoppingCartModal(true)}
+                >
+                    <img
+                        src={`https://${location.hostname}/images/shopping-cart-icon.svg`}
+                        alt="shopping cart icon"
+                    />
+                    <p className={classes.counter}>{counter}</p>
+                </button>
+            )}
         </>
     );
 }

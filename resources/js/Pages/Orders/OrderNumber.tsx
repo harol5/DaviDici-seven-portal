@@ -3,11 +3,12 @@ import UserAuthenticatedLayout from "../../Layouts/UserAuthenticatedLayout";
 import type { Order as OrderModel } from "../../Models/Order";
 import { router } from "@inertiajs/react";
 import User from "../../Models/User";
+import axios from "axios";
 
 interface OrderNumberProps {
-    auth?: User;
+    auth: User;
     nextOrderNumber: string;
-    products: { SKU: string };
+    products: { SKU: string; isShoppingCart: string };
     orders: OrderModel[];
     message: string;
 }
@@ -23,6 +24,20 @@ function OrderNumber({
     const [error, setError] = useState<string>();
     const [isLoading, setIsLoading] = useState(false);
     const companyIdentifier = nextOrderNumber.slice(0, 3);
+
+    const updateShoppingCartProducts = async () => {
+        try {
+            const response = await axios.post(
+                "/express-program/shopping-cart/update",
+                []
+            );
+
+            if (response.data.message !== "shopping cart updated")
+                console.error("could not update shopping cart server");
+        } catch (err) {
+            console.log(err);
+        }
+    };
 
     const handleOrderNum = (e: ChangeEvent<HTMLInputElement>) => {
         if (error) setError("");
@@ -40,6 +55,7 @@ function OrderNumber({
         while (crrOrderNum.length < 6) {
             crrOrderNum = "0" + crrOrderNum;
         }
+
         const newOrderNum = companyIdentifier + crrOrderNum;
 
         // check if new order number is not taken.
@@ -58,7 +74,12 @@ function OrderNumber({
             },
             {
                 onStart: () => setIsLoading(true),
-                onFinish: () => setIsLoading(false),
+                onFinish: () => {
+                    products.isShoppingCart === "true" &&
+                        updateShoppingCartProducts();
+
+                    setIsLoading(false);
+                },
             }
         );
     };

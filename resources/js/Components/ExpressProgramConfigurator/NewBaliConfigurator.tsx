@@ -1,7 +1,10 @@
 import { Composition } from "../../Models/Composition";
 import classes from "../../../css/product-configurator.module.css";
 import { useEffect, useMemo, useReducer, useState } from "react";
-import type { Option } from "../../Models/ExpressProgramModels";
+import type {
+    Option,
+    shoppingCartProduct as shoppingCartProductModel,
+} from "../../Models/ExpressProgramModels";
 import Options from "./Options";
 import { router } from "@inertiajs/react";
 
@@ -12,6 +15,7 @@ import { router } from "@inertiajs/react";
 
 interface NewBaliConfiguratorProps {
     composition: Composition;
+    onAddToCart: (shoppingCartProduct: shoppingCartProductModel) => void;
 }
 
 interface CurrentConfiguration {
@@ -38,7 +42,10 @@ interface sideUnitOptions {
     finishOptions: Option[];
 }
 
-function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
+function NewBaliConfigurator({
+    composition,
+    onAddToCart,
+}: NewBaliConfiguratorProps) {
     // iterate over vanitites array and analize sku in order to get the valid options to get final sku. -------------|
     const initialVanityOptions: vanityOptions = useMemo(() => {
         let baseSku: string = "";
@@ -425,6 +432,40 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
         dispatch({ type: "reset-configurator", payload: "" });
     };
 
+    // Creates object for shopping cart.
+    const handleAddToCart = () => {
+        const vanitySku = Object.values(currentConfiguration.vanity).join("-");
+        const sideUnitSku = currentConfiguration.sideUnit
+            ? Object.values(currentConfiguration.sideUnit).join("-")
+            : "";
+        const washbasinSku = currentConfiguration.washbasin;
+
+        const vanityObj = composition.vanities.find(
+            (vanity) => vanity.uscode === vanitySku
+        );
+        const sideUnitsObj = composition.sideUnits.find(
+            (sideUnit) => sideUnit.uscode === sideUnitSku
+        );
+        const washbasinObj = composition.washbasins.find(
+            (washbasin) => washbasin.uscode === washbasinSku
+        );
+
+        const shoppingCartObj: shoppingCartProductModel = {
+            composition: composition,
+            description: composition.name,
+            vanity: vanityObj!,
+            sideUnits: sideUnitsObj ? [sideUnitsObj] : [],
+            washbasin: washbasinObj!,
+            otherProducts: [],
+            isDoubleSink: currentConfiguration.isDoubleSink,
+            isDoubleSideunit: false,
+            quantity: 1,
+            grandTotal: grandTotal,
+        };
+
+        onAddToCart(shoppingCartObj);
+    };
+
     return (
         <div className={classes.compositionConfiguratorWrapper}>
             <section className={classes.leftSideConfiguratorWrapper}>
@@ -506,6 +547,12 @@ function NewBaliConfigurator({ composition }: NewBaliConfiguratorProps) {
                         onClick={handleOrderNow}
                     >
                         ORDER NOW
+                    </button>
+                    <button
+                        disabled={!grandTotal ? true : false}
+                        onClick={handleAddToCart}
+                    >
+                        ADD TO CART
                     </button>
                 </div>
             </section>

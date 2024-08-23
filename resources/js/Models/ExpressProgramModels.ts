@@ -1,3 +1,6 @@
+import { Composition } from "./Composition";
+import { ProductInventory } from "./Product";
+
 export type Option = {
     code: string;
     imgUrl: string;
@@ -20,4 +23,17 @@ export type sinkPosition = {
 export type model = {
     name: string;
     url: string;
+};
+
+export type shoppingCartProduct = {
+    composition: Composition;
+    description: string;
+    vanity: ProductInventory;
+    sideUnits: ProductInventory[];
+    washbasin: ProductInventory;
+    otherProducts: ProductInventory[];
+    isDoubleSink: boolean;
+    isDoubleSideunit: boolean;
+    quantity: number;
+    grandTotal: number;
 };

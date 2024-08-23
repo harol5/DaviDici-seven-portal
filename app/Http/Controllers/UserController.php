@@ -20,6 +20,10 @@ class UserController extends Controller
     // Show login form ----------
     public function login(Request $request){
         $message = $request->session()->get('message');
+
+        $location = $request->query('location','');
+        if ($location) $request->session()->flash('location', $location);
+
         $username = auth()->user();
         if($username) {
             return redirect('/orders');
@@ -37,7 +41,8 @@ class UserController extends Controller
 
         if(auth()->attempt($formFields)) {
             $request->session()->regenerate();
-            return redirect()->intended('/orders')->with('message', 'You are now logged in!');
+            $defaultIntendedUrl = session()->has('location') ? '/' . session('location') : '/orders';
+            return redirect()->intended($defaultIntendedUrl)->with('message', 'You are now logged in!');
         }
 
         return back()->withErrors(['email' => 'Invalid Credentials'])->onlyInput('email');

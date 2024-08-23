@@ -9,16 +9,18 @@ import Modal from "../../Components/Modal";
 import type { ProductInventory } from "../../Models/Product";
 import type { Composition } from "../../Models/Composition";
 import classes from "../../../css/express-program.module.css";
+import axios from "axios";
 import type {
     finish,
     sinkPosition,
     model,
+    shoppingCartProduct,
 } from "../../Models/ExpressProgramModels";
 
 /**
  * TODO:
- *  RE WRITE STATEFULL FILTERS WITH NEW IMPLETATION.
- * STYLE RESET BUTTON.
+ * think how i should hablde sync between server and local stirage for shopping cart.
+ *
  */
 
 interface ProductsAvailableProps {
@@ -74,7 +76,7 @@ function ProductsAvailable({
     const [crrFilteredSinkPosition, setCrrFilteredSinkPosition] = useState("");
 
     // --- Manage Modal filter.
-    const [openModal, setOpenModal] = useState(false);
+    const [openFiltersModal, setOpenFiltersModal] = useState(false);
 
     const handleFilter = (
         filter: string,
@@ -219,6 +221,10 @@ function ProductsAvailable({
 
     useEffect(() => {
         const statefulFiltersJSON = localStorage.getItem("statefulFilters");
+        const shoppingCartProductJSON = localStorage.getItem(
+            "shoppingCartProduct"
+        );
+
         if (statefulFiltersJSON) {
             const statefulFilters: StatefulFilterObj =
                 JSON.parse(statefulFiltersJSON);
@@ -231,6 +237,37 @@ function ProductsAvailable({
             )
                 handleFilter("stateful filters", statefulFilters);
         }
+
+        if (shoppingCartProductJSON) {
+            const shoppingCartProduct = JSON.parse(shoppingCartProductJSON);
+
+            if (shoppingCartProduct) {
+                const getShoppingCartProducts = async () => {
+                    try {
+                        // GET SHOPPING CART PRODUTS FROM SERVER.
+                        const response = await axios.get(
+                            "/express-program/shopping-cart/products"
+                        );
+
+                        const shoppingCartProductsServer: shoppingCartProduct[] =
+                            response.data.shoppingCartProducts;
+
+                        shoppingCartProductsServer.push(shoppingCartProduct);
+
+                        await axios.post(
+                            "/express-program/shopping-cart/update",
+                            shoppingCartProductsServer
+                        );
+
+                        localStorage.setItem(
+                            "shoppingCartProduct",
+                            JSON.stringify(null)
+                        );
+                    } catch (err) {}
+                };
+                getShoppingCartProducts();
+            }
+        }
     }, []);
 
     return (
@@ -238,7 +275,7 @@ function ProductsAvailable({
             <div className="main-content-wrapper">
                 <section className={classes.filterIconAndValuesSelectedWrapper}>
                     <button
-                        onClick={() => setOpenModal(true)}
+                        onClick={() => setOpenFiltersModal(true)}
                         className={classes.filterIconButton}
                     >
                         <img
@@ -293,8 +330,8 @@ function ProductsAvailable({
                 </section>
             </div>
             <Modal
-                show={openModal}
-                onClose={() => setOpenModal(false)}
+                show={openFiltersModal}
+                onClose={() => setOpenFiltersModal(false)}
                 customClass={classes.filtersModal}
             >
                 <section className={classes.allFiltersWrapper}>
@@ -311,7 +348,7 @@ function ProductsAvailable({
                         </button>
                         <button
                             className={classes.closeFilterModalButton}
-                            onClick={() => setOpenModal(false)}
+                            onClick={() => setOpenFiltersModal(false)}
                         >
                             SHOW RESULTS
                         </button>
