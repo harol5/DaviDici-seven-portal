@@ -25,20 +25,6 @@ function OrderNumber({
     const [isLoading, setIsLoading] = useState(false);
     const companyIdentifier = nextOrderNumber.slice(0, 3);
 
-    const updateShoppingCartProducts = async () => {
-        try {
-            const response = await axios.post(
-                "/express-program/shopping-cart/update",
-                []
-            );
-
-            if (response.data.message !== "shopping cart updated")
-                console.error("could not update shopping cart server");
-        } catch (err) {
-            console.log(err);
-        }
-    };
-
     const handleOrderNum = (e: ChangeEvent<HTMLInputElement>) => {
         if (error) setError("");
         setOrderNum(e.currentTarget.value);
@@ -74,12 +60,7 @@ function OrderNumber({
             },
             {
                 onStart: () => setIsLoading(true),
-                onFinish: () => {
-                    products.isShoppingCart === "true" &&
-                        updateShoppingCartProducts();
-
-                    setIsLoading(false);
-                },
+                onFinish: () => setIsLoading(false),
             }
         );
     };

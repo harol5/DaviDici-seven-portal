@@ -8,6 +8,7 @@ use App\FoxproApi\FoxproApi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
 
 class OrdersController extends Controller
 {
@@ -463,10 +464,7 @@ class OrdersController extends Controller
         $username = auth()->user()->username;
         $data = $request->all();              
         
-        if (strlen($data['skus']) <= 200) {
-            info("skus are less or equal to 200 chars");
-            info($data['skus']);
-            info(explode('~',$data['skus']));
+        if (strlen($data['skus']) <= 200) {            
             // Result: "This sales order already exists" | "All items entered"
             $response = FoxproApi::call([
                 'action' => 'OrderEnter',
@@ -475,6 +473,12 @@ class OrdersController extends Controller
             ]);
         
             if($response['status'] === 201 && $response['Result'] === 'All items entered'){
+                DB::table('shopping_cart')
+                    ->updateOrInsert(
+                        ['user_id' => $request->user()->id],
+                        ['products' => '[]']
+                    );
+                    
                 return redirect('/orders')->with('message', 'Order Number ' . $data['newOrderNum'] . ' created!!');
             }
 
@@ -539,6 +543,12 @@ class OrdersController extends Controller
                     return redirect('/orders')->with('message', "something went wrong. Please contact support.");
                 }                                                                
             }
+
+            DB::table('shopping_cart')
+                ->updateOrInsert(
+                    ['user_id' => $request->user()->id],
+                    ['products' => '[]']
+                );
 
             return redirect('/orders')->with('message', 'Order Number ' . $data['newOrderNum'] . ' created!!');
         }                

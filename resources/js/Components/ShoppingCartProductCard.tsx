@@ -12,6 +12,7 @@ interface ShoppingCartProductCardProps {
     ) => void;
     onQtyUpdated: (
         product: shoppingCartProduct,
+        productIndex: number,
         qty: number,
         type: "decrement" | "increment" | "changeValue"
     ) => void;
@@ -67,6 +68,7 @@ function ShoppingCartProductCard({
                         <span className={classes.inputAndRemoveButtonWrapper}>
                             <CustomQtyInput
                                 product={product}
+                                productIndex={productIndex}
                                 onQtyUpdated={handleQtyUpdated}
                             />
                             <button

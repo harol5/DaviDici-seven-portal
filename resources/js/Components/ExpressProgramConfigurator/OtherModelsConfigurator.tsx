@@ -548,6 +548,15 @@ function OtherModelsConfigurator({
                         <h1 className={classes.label}>Grand Total:</h1>
                         <span className={classes.amount}>${grandTotal}</span>
                     </div>
+                    <a
+                        className={classes.specsLink}
+                        href={`https://www.davidici.com/${composition.model
+                            .toLocaleLowerCase()
+                            .replace(" ", "-")}-specs/`}
+                        target="_blank"
+                    >
+                        SPECS
+                    </a>
                     <button
                         disabled={!grandTotal ? true : false}
                         onClick={handleOrderNow}

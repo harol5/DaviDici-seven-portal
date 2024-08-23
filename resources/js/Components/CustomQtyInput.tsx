@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 
 interface CustomQtyInputProps {
     product: shoppingCartProduct;
+    productIndex: number;
     onQtyUpdated: (
         product: shoppingCartProduct,
+        productIndex: number,
         qty: number,
         type: "decrement" | "increment" | "changeValue"
     ) => void;
@@ -13,6 +15,7 @@ interface CustomQtyInputProps {
 
 function CustomQtyInput({
     product,
+    productIndex,
     onQtyUpdated: handleQtyUpdated,
 }: CustomQtyInputProps) {
     return (
@@ -28,6 +31,7 @@ function CustomQtyInput({
                         try {
                             handleQtyUpdated(
                                 product,
+                                productIndex,
                                 product.quantity,
                                 "decrement"
                             );
@@ -51,6 +55,7 @@ function CustomQtyInput({
                         try {
                             handleQtyUpdated(
                                 product,
+                                productIndex,
                                 Number.parseInt(e.target.value),
                                 "changeValue"
                             );
@@ -66,6 +71,7 @@ function CustomQtyInput({
                         try {
                             handleQtyUpdated(
                                 product,
+                                productIndex,
                                 product.quantity,
                                 "increment"
                             );

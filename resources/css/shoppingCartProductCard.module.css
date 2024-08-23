@@ -1,6 +1,7 @@
 .shoppingCartProductCard {
     width: 50%;
     padding: 1em;
+    flex-grow: 1;
 }
 
 .productContent {

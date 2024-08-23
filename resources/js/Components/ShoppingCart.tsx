@@ -48,12 +48,20 @@ function ShoppingCart({
 
     const handleQtyUpdated = async (
         product: shoppingCartProductModel,
+        productIndex: number,
         qty: number | typeof NaN,
         type: "decrement" | "increment" | "changeValue"
     ) => {
         const updatedProducts = structuredClone(crrShoppingCartProducts);
-        for (const crrProduct of updatedProducts) {
-            if (crrProduct.description !== product.description) continue;
+
+        for (let i = 0; i < updatedProducts.length; i++) {
+            const crrProduct = updatedProducts[i];
+
+            if (
+                crrProduct.description !== product.description ||
+                productIndex !== i
+            )
+                continue;
 
             switch (type) {
                 case "changeValue":

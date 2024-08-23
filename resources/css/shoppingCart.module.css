@@ -1,6 +1,6 @@
 .shoppingCartButton {
     position: fixed;
-    bottom: 32px;
+    bottom: 22px;
     right: 32px;
     width: 50px;
     padding: 5px;
@@ -32,6 +32,7 @@
 .shoppingCartContent {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
 .grandTotalAndPlaceOrderButtonWrapper {

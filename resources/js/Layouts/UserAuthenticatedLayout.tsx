@@ -40,6 +40,7 @@ function UserAuthenticatedLayout({
     };
 
     useEffect(() => {
+        console.log("UserAuthenticatedLayout useEffect");
         const getShoppingCartProducts = async () => {
             try {
                 // GET SHOPPING CART PRODUTS FROM SERVER.
