@@ -5,14 +5,21 @@ import User from "../Models/User";
 import Modal from "../Components/Modal";
 import ShoppingCart from "../Components/ShoppingCart";
 import classes from "../../css/shoppingCart.module.css";
+import axios from "axios";
 
-interface UserLayoutProps {
+interface UserAuthenticatedLayoutProps {
     auth: User;
     children?: ReactNode;
     crrPage: string;
+    shoppingCartSize?: number;
 }
 
-function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
+function UserAuthenticatedLayout({
+    auth,
+    children,
+    crrPage,
+    shoppingCartSize = 0,
+}: UserAuthenticatedLayoutProps) {
     // State for invite form modal.
     const [openModal, setOpenModal] = useState(false);
 
@@ -26,6 +33,29 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
 
     // --- Manage Modal shopping cart.
     const [openShoppingCartModal, setOpenShoppingCartModal] = useState(false);
+    const [counter, setCounter] = useState(shoppingCartSize);
+
+    const handleShoppingCartSize = (numOfProducts: number) => {
+        setCounter(numOfProducts);
+    };
+
+    useEffect(() => {
+        const getShoppingCartProducts = async () => {
+            try {
+                // GET SHOPPING CART PRODUTS FROM SERVER.
+                const response = await axios.get(
+                    "/express-program/shopping-cart/products"
+                );
+
+                const shoppingCartProductsServer =
+                    response.data.shoppingCartProducts;
+
+                if (shoppingCartProductsServer)
+                    setCounter(shoppingCartProductsServer.length);
+            } catch (err) {}
+        };
+        getShoppingCartProducts();
+    }, [shoppingCartSize]);
 
     return (
         <>
@@ -216,7 +246,7 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
                 onClose={() => setOpenShoppingCartModal(false)}
                 customClass={classes.shoppingCartModal}
             >
-                <ShoppingCart auth={auth} />
+                <ShoppingCart onShoppingSize={handleShoppingCartSize} />
             </Modal>
             {auth.user && (
                 <button
@@ -227,6 +257,7 @@ function UserAuthenticatedLayout({ auth, children, crrPage }: UserLayoutProps) {
                         src={`https://${location.hostname}/images/shopping-cart-icon.svg`}
                         alt="shopping cart icon"
                     />
+                    <p className={classes.counter}>{counter}</p>
                 </button>
             )}
         </>

@@ -25,7 +25,6 @@ import type {
 
 interface ProductsAvailableProps {
     auth: User;
-    shoppingCartProducts: shoppingCartProduct[];
     rawProducts: ProductInventory[];
     message?: string;
 }
@@ -39,11 +38,9 @@ interface StatefulFilterObj {
 
 function ProductsAvailable({
     auth,
-    shoppingCartProducts,
     rawProducts,
     message,
 }: ProductsAvailableProps) {
-    console.log(shoppingCartProducts);
     // this creates all the possible compositions.
     const {
         initialCompositions,

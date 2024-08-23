@@ -1,12 +1,15 @@
 import type { shoppingCartProduct } from "../Models/ExpressProgramModels";
 import CustomQtyInput from "./CustomQtyInput";
 import classes from "../../css/shoppingCartProductCard.module.css";
-import { useMemo } from "react";
 import USDollar from "../utils/currentFormatter";
 
 interface ShoppingCartProductCardProps {
     product: shoppingCartProduct;
-    onRemoveProduct: (product: shoppingCartProduct) => void;
+    productIndex: number;
+    onRemoveProduct: (
+        product: shoppingCartProduct,
+        productIndex: number
+    ) => void;
     onQtyUpdated: (
         product: shoppingCartProduct,
         qty: number,
@@ -16,16 +19,17 @@ interface ShoppingCartProductCardProps {
 
 function ShoppingCartProductCard({
     product,
+    productIndex,
     onRemoveProduct: handleRemoveProduct,
     onQtyUpdated: handleQtyUpdated,
 }: ShoppingCartProductCardProps) {
-    const grandTotal = useMemo(() => {
+    const getGrandTotal = () => {
         let crrTotal = product.grandTotal;
         if (product.quantity !== 0 && !isNaN(product.quantity)) {
             crrTotal = crrTotal * product.quantity;
         }
         return USDollar.format(crrTotal);
-    }, [product.quantity]);
+    };
 
     return (
         <div className={classes.shoppingCartProductCard}>
@@ -57,17 +61,33 @@ function ShoppingCartProductCard({
                     </span>
                     <span>
                         <h2>TOTAL:</h2>
-                        <p>{grandTotal}</p>
+                        <p>{getGrandTotal()}</p>
                     </span>
-                    <span className={classes.inputAndRemoveButtonWrapper}>
-                        <CustomQtyInput
-                            product={product}
-                            onQtyUpdated={handleQtyUpdated}
-                        />
-                        <button onClick={() => handleRemoveProduct(product)}>
-                            REMOVE
-                        </button>
-                    </span>
+                    {location.pathname !== "/orders/create-so-num" && (
+                        <span className={classes.inputAndRemoveButtonWrapper}>
+                            <CustomQtyInput
+                                product={product}
+                                onQtyUpdated={handleQtyUpdated}
+                            />
+                            <button
+                                onClick={() =>
+                                    handleRemoveProduct(product, productIndex)
+                                }
+                                disabled={
+                                    location.pathname ===
+                                    "/orders/create-so-num"
+                                }
+                            >
+                                REMOVE
+                            </button>
+                        </span>
+                    )}
+                    {location.pathname === "/orders/create-so-num" && (
+                        <span>
+                            <h2>QUANTITY:</h2>
+                            <p>{product.quantity.toString()}</p>
+                        </span>
+                    )}
                 </div>
             </div>
         </div>

@@ -23,19 +23,10 @@ class ExpressProgramController extends Controller
             'params' => ['','','','S'],
             'keep_session' => false,
         ]);
-            
-        $shoppingCartProducts;
-        if($request->user()) {
-            $shoppingCart = DB::table('shopping_cart')->where('user_id', $request->user()->id)->first();
-            $shoppingCartProducts = $shoppingCart ? json_decode($shoppingCart->products) : [];            
-        }else {
-            $shoppingCartProducts = [];
-        }        
-                                                
+                                                                    
         if($response['status'] === 201){
             return Inertia::render('ExpressProgram/ProductsAvailable',
-                [
-                    'shoppingCartProductsServer' => $shoppingCartProducts,         
+                [                       
                     'rawProducts' => $response['rows'],
                     'message' => $message                   
                 ]

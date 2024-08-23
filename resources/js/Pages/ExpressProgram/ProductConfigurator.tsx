@@ -17,6 +17,8 @@ interface ProductConfiguratorProps {
 }
 
 function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
+    const [shoppingCartSize, setShoppingCartSize] = useState(0);
+
     const handleShoppingCartProduct = async (
         shoppingCartProduct: shoppingCartProductModel
     ) => {
@@ -45,6 +47,8 @@ function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
                     "/express-program/shopping-cart/update",
                     shoppingCartProductsServer
                 );
+
+                setShoppingCartSize(shoppingCartProductsServer.length);
             } catch (err) {
                 console.log(err);
             }
@@ -63,7 +67,11 @@ function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
     }, []);
 
     return (
-        <UserAuthenticatedLayout auth={auth} crrPage="orders">
+        <UserAuthenticatedLayout
+            auth={auth}
+            crrPage="orders"
+            shoppingCartSize={shoppingCartSize}
+        >
             <div className="main-content-wrapper">
                 {composition.model === "MARGI" ? (
                     <MargiConfigurator

@@ -400,6 +400,7 @@ class OrdersController extends Controller
     public function createOrderNumber(Request $request){        
         $username = auth()->user()->username;        
         $products = $request->all();
+        if (!array_key_exists('isShoppingCart',$products)) $products['isShoppingCart'] = 'false';
         
         // Get all orders
         $orders = FoxproApi::call([
@@ -492,20 +493,7 @@ class OrdersController extends Controller
             $skusArr = explode('~',$data['skus']);
 
             $numOfSkusPerArray = count($skusArr) / ($numberOfCalls + 1);
-            $splittedArray = array_chunk($skusArr, ceil($numOfSkusPerArray));
-
-            info("skus are greater than 200 chars");
-            info($data['skus']);
-            info("all skus:");
-            info(explode('~',$data['skus']));
-            info("length of string:");
-            info(strlen($data['skus']));
-            info("number of calls:");   
-            info($numberOfCalls);
-            info("number of needed arrays");
-            info($numOfSkusPerArray);
-            info("splitted array:");            
-            info($splittedArray);            
+            $splittedArray = array_chunk($skusArr, ceil($numOfSkusPerArray));            
 
             for ($i = 0; $i < count($splittedArray); $i++) {
                 $skus = implode('~',$splittedArray[$i]);

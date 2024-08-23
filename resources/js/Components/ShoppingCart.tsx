@@ -8,23 +8,27 @@ import { router } from "@inertiajs/react";
 import USDollar from "../utils/currentFormatter";
 
 interface ShoppingCartProps {
-    auth: User;
+    onShoppingSize: (numOfProducts: number) => void;
 }
 
-/**
- * TODO:
- * CREATE FUNCTION THAT GENERATES SKU STRING.
- *
- */
-
-function ShoppingCart({ auth }: ShoppingCartProps) {
+function ShoppingCart({
+    onShoppingSize: handleShoppingCartSize,
+}: ShoppingCartProps) {
     const [crrShoppingCartProducts, setShoppingCartProducts] = useState<
         shoppingCartProductModel[]
     >([]);
 
-    const handleRemoveProduct = async (product: shoppingCartProductModel) => {
+    const handleRemoveProduct = async (
+        product: shoppingCartProductModel,
+        productIndex: number
+    ) => {
         const filteredProducts = crrShoppingCartProducts.filter(
-            (crrProduct) => crrProduct.description !== product.description
+            (crrProduct, index) => {
+                return (
+                    crrProduct.description !== product.description ||
+                    productIndex !== index
+                );
+            }
         );
 
         try {
@@ -33,8 +37,10 @@ function ShoppingCart({ auth }: ShoppingCartProps) {
                 filteredProducts
             );
 
-            if (response.data.message === "shopping cart updated")
+            if (response.data.message === "shopping cart updated") {
+                handleShoppingCartSize(filteredProducts.length);
                 setShoppingCartProducts(filteredProducts);
+            }
         } catch (err) {
             console.log(err);
         }
@@ -121,7 +127,10 @@ function ShoppingCart({ auth }: ShoppingCartProps) {
             SKU.push(skusArr.join("~"));
         });
 
-        router.get("/orders/create-so-num", { SKU: SKU.join("~") });
+        router.get("/orders/create-so-num", {
+            SKU: SKU.join("~"),
+            isShoppingCart: true,
+        });
     };
 
     const calGrandTotal = (): number => {
@@ -147,9 +156,6 @@ function ShoppingCart({ auth }: ShoppingCartProps) {
         getShoppingCartProducts();
     }, []);
 
-    console.log("====== SHOPPING CART COMPONENT========");
-    console.log("current products", crrShoppingCartProducts);
-
     return (
         <section className={classes.shoppingCart}>
             <section className={classes.grandTotalAndPlaceOrderButtonWrapper}>
@@ -157,25 +163,29 @@ function ShoppingCart({ auth }: ShoppingCartProps) {
                     <h1>GRAND TOTAL:</h1>
                     <p>{USDollar.format(calGrandTotal())}</p>
                 </span>
-                <button
-                    className={classes.placeOrderButton}
-                    onClick={handlePlaceOrder}
-                >
-                    PLACE ORDER
-                </button>
+                {location.pathname !== "/orders/create-so-num" && (
+                    <button
+                        className={classes.placeOrderButton}
+                        onClick={handlePlaceOrder}
+                        disabled={crrShoppingCartProducts.length === 0}
+                    >
+                        PLACE ORDER
+                    </button>
+                )}
             </section>
             <section className={classes.shoppingCartContent}>
                 {crrShoppingCartProducts.map((product, index) => (
                     <ShoppingCartProductCard
+                        key={index}
                         product={product}
+                        productIndex={index}
                         onRemoveProduct={handleRemoveProduct}
                         onQtyUpdated={handleQtyUpdated}
-                        key={index}
                     />
                 ))}
             </section>
             {crrShoppingCartProducts.length === 0 && (
-                <p>YOU SHOPPING CART IS EMPTY.</p>
+                <p>YOUR SHOPPING CART IS EMPTY.</p>
             )}
         </section>
     );

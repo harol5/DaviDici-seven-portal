@@ -3,6 +3,21 @@
     bottom: 32px;
     right: 32px;
     width: 50px;
+    padding: 5px;
+}
+
+.shoppingCartButton .counter {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: red;
+    border: 1px solid red;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    font-size: 0.8rem;
 }
 
 .shoppingCartModal {

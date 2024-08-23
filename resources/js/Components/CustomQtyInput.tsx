@@ -19,7 +19,10 @@ function CustomQtyInput({
         <section>
             <div className={classes.customQtyInput}>
                 <button
-                    disabled={product.quantity <= 1}
+                    disabled={
+                        product.quantity <= 1 ||
+                        location.pathname === "/orders/create-so-num"
+                    }
                     className={classes.increment}
                     onClick={() => {
                         try {
@@ -55,6 +58,7 @@ function CustomQtyInput({
                             console.log(error);
                         }
                     }}
+                    disabled={location.pathname === "/orders/create-so-num"}
                 />
                 <button
                     className={classes.increment}
@@ -69,6 +73,7 @@ function CustomQtyInput({
                             console.log(error);
                         }
                     }}
+                    disabled={location.pathname === "/orders/create-so-num"}
                 >
                     +
                 </button>
