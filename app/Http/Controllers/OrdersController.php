@@ -554,19 +554,7 @@ class OrdersController extends Controller
         }                
     }
 
-    public function testApi(){      
-        // $response = FoxproApi::call([
-        //     'action' => 'GETSLMNINFO',
-        //     'params' => ['','WAV'],
-        //     'keep_session' => false, 
-        // ]);
-
-        $response = FoxproApi::call([
-            'action' => 'GETUSERINFO',
-            'params' => ['Rivky%40wavehomeandbath.com'],
-            'keep_session' => false, 
-        ]);
-        
+    public function testApi(){                      
         // return Inertia::render('Test',['response' => $response]);
         return response(['response' => $response])->header('Content-Type', 'application/json');
     }
