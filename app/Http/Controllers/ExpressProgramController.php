@@ -72,6 +72,11 @@ class ExpressProgramController extends Controller
     }
 
     public function updateShoppingCart(Request $request) {
+
+        if(!$request->user()) {
+            return response(['message' => 'no user', 'status' => 500])->header('Content-Type', 'application/json');
+        }
+
         DB::table('shopping_cart')
             ->updateOrInsert(
                 ['user_id' => $request->user()->id],

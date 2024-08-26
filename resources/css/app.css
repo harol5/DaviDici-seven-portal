@@ -896,7 +896,7 @@ main {
         margin: 22px 20px;
     }
     .homeAndNavLogoWrapper {
-        flex-direction: column;
+        width: 100px;
     }
     .nav-logo {
         width: 130px;
@@ -1002,8 +1002,17 @@ main {
     }
     /*== nav bar ==*/
     .nav-content {
-        margin: 22px 10px;
+        margin: 15px 20px;
     }
+
+    .nav-links {
+        display: none;
+    }
+
+    .active-links {
+        display: flex;
+    }
+
     .main-content-wrapper {
         margin: 0 10px;
     }

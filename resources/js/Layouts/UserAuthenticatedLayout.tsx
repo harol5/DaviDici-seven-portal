@@ -4,7 +4,8 @@ import InviteForm from "../Components/InviteForm";
 import User from "../Models/User";
 import Modal from "../Components/Modal";
 import ShoppingCart from "../Components/ShoppingCart";
-import classes from "../../css/shoppingCart.module.css";
+import shoppingCartClasses from "../../css/shoppingCart.module.css";
+import authClasses from "../../css/user-authenticated-layout.module.css";
 import axios from "axios";
 
 interface UserAuthenticatedLayoutProps {
@@ -40,7 +41,6 @@ function UserAuthenticatedLayout({
     };
 
     useEffect(() => {
-        console.log("UserAuthenticatedLayout useEffect");
         const getShoppingCartProducts = async () => {
             try {
                 // GET SHOPPING CART PRODUTS FROM SERVER.
@@ -126,6 +126,11 @@ function UserAuthenticatedLayout({
                             </>
                         )}
                     </ul>
+                    <img
+                        src={`https://${location.hostname}/images/menu-icon.svg`}
+                        alt="menu icon"
+                        className={authClasses.menuIcon}
+                    />
                     {auth?.user && (
                         <div className="settings-wrapper">
                             <img
@@ -245,20 +250,20 @@ function UserAuthenticatedLayout({
             <Modal
                 show={openShoppingCartModal}
                 onClose={() => setOpenShoppingCartModal(false)}
-                customClass={classes.shoppingCartModal}
+                customClass={shoppingCartClasses.shoppingCartModal}
             >
                 <ShoppingCart onShoppingSize={handleShoppingCartSize} />
             </Modal>
             {auth.user && (
                 <button
-                    className={classes.shoppingCartButton}
+                    className={shoppingCartClasses.shoppingCartButton}
                     onClick={() => setOpenShoppingCartModal(true)}
                 >
                     <img
                         src={`https://${location.hostname}/images/shopping-cart-icon.svg`}
                         alt="shopping cart icon"
                     />
-                    <p className={classes.counter}>{counter}</p>
+                    <p className={shoppingCartClasses.counter}>{counter}</p>
                 </button>
             )}
         </>

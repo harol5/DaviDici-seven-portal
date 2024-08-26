@@ -30,6 +30,8 @@ Route::middleware(['auth','auth.session'])->group(function () {
     Route::post('/users/invite', [UserController::class, 'sendInvitation']);
     Route::get('/users/change-password', [UserController::class, 'showFormChangePassword']);
     Route::post('/users/change-password/handle', [UserController::class, 'ChangePassword']);
+    Route::get('/users/add-to-portal', [UserController::class, 'showFormAddUserToPortal']);
+    Route::post('/users/add-to-portal/add', [UserController::class, 'addUserToPortal']);
 
     // Owner only endpoints.    
     Route::get('/register/salesperson', [UserController::class, 'registerSalesPerson'])->name('user.register.salesperson');

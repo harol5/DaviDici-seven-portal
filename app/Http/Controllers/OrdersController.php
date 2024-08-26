@@ -555,10 +555,16 @@ class OrdersController extends Controller
     }
 
     public function testApi(){      
+        // $response = FoxproApi::call([
+        //     'action' => 'GETSLMNINFO',
+        //     'params' => ['','WAV'],
+        //     'keep_session' => false, 
+        // ]);
+
         $response = FoxproApi::call([
-            'action' => 'GETINVSTOCK',
-            'params' => ['','','','N'],
-            'keep_session' => false,
+            'action' => 'GETUSERINFO',
+            'params' => ['Rivky%40wavehomeandbath.com'],
+            'keep_session' => false, 
         ]);
         
         // return Inertia::render('Test',['response' => $response]);

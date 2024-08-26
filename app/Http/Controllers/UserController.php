@@ -173,7 +173,14 @@ class UserController extends Controller
         return redirect('/users/welcome')->with(['error' => 'something went wrong']);
     }
 
-    // show change password form ------------
+    // Shows welcome page ----------------------
+    public function welcome(Request $request){
+        $name = $request->session()->get('name');
+        $error = $request->session()->get('error');
+        return Inertia::render('Welcome',['name' => $name, 'error' => $error]);
+    }
+
+    // show change password form (admin only) ------------
     public function showFormChangePassword(){
         return Inertia::render('Users/ChangePassword');
     }
@@ -185,13 +192,44 @@ class UserController extends Controller
         User::where('email',$data['email'])->update(['password' => bcrypt($data['password'])]);
 
         back()->with('message', "done");
+    }    
+
+    // Show user portal (admin only) (user exits already in foxpro) -----------
+    public function showFormAddUserToPortal(Request $request){
+        $message = $request->session()->get('message');
+        return Inertia::render('Users/AddUserPortal', ['message' => $message]);
     }
 
-    // Shows welcome page ----------------------
-    public function welcome(Request $request){
-        $name = $request->session()->get('name');
-        $error = $request->session()->get('error');
-        return Inertia::render('Welcome',['name' => $name, 'error' => $error]);
+    // Add user only to portal (admin only) (user exits already in foxpro) -----------
+    public function addUserToPortal(Request $request){
+        //---- Validate data.
+        $formFields = $request->validate([
+            'firstName' => ['required', 'min:3'],                                                      
+            'phone' => ['required', 'min:3'],                   
+            'email' => ['required', 'email', Rule::unique('users', 'email')],
+            'role' => 'required',               
+            'password' => 'required|confirmed|min:6'
+        ]);
+
+        //---- Add additional info.
+        $formFields['lastName'] = $request->all()['lastName'] ?? ' ';
+        $formFields['businessPhone'] = $request->all()['businessPhone'] ?? ' ';
+        $formFields['username'] = urlencode($formFields['email']);
+        $formFields['role'] = $formFields['role'] === 'owner' ? 1919 : 1950;
+        $formFields['password'] = bcrypt($formFields['password']);                
+
+        $user = User::create([
+            'first_name' => $formFields['firstName'],
+            'last_name' => $formFields['lastName'],            
+            'phone' => $formFields['phone'],
+            'business_phone' => $formFields['businessPhone'],
+            'email' => $formFields['email'],
+            'username' => $formFields['username'],
+            'role' => $formFields['role'],
+            'password' => $formFields['password'],
+        ]);
+
+        return redirect('/orders')->with(['message' => 'User added!!']);
     }
 
     // Show register form for sales person (owner accounts only) ---------
