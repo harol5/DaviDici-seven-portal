@@ -914,7 +914,7 @@ main {
     .settings-wrapper ul {
         font-size: medium;
         min-width: 180px;
-        left: -500%;
+        /* left: -500%; */
     }
 
     /*== main container ==*/
@@ -1003,14 +1003,26 @@ main {
     /*== nav bar ==*/
     .nav-content {
         margin: 15px 20px;
+        flex-wrap: wrap;
     }
 
     .nav-links {
-        display: none;
+        height: 0;
+        visibility: hidden;
+        opacity: 0;
+        order: 4;
+        flex-basis: 100%;
+        justify-content: space-evenly;
+        border-top: dashed 1px #d1aa68;
+        transition: all 0.5s ease-in-out;
     }
 
     .active-links {
-        display: flex;
+        visibility: visible;
+        opacity: 1;
+        height: auto;
+        padding-top: 15px;
+        margin-top: 15px;
     }
 
     .main-content-wrapper {

@@ -21,6 +21,17 @@ function UserAuthenticatedLayout({
     crrPage,
     shoppingCartSize = 0,
 }: UserAuthenticatedLayoutProps) {
+    const [isNavLinksActived, setIsNavLinksActived] = useState(false);
+
+    const getNavLinksClass = () => {
+        let classes = "";
+
+        classes += auth?.user ? "nav-links" : "guess-links";
+        classes += isNavLinksActived ? " active-links" : "";
+
+        return classes;
+    };
+
     // State for invite form modal.
     const [openModal, setOpenModal] = useState(false);
 
@@ -77,7 +88,7 @@ function UserAuthenticatedLayout({
                             alt="home icon"
                         />
                     </a>
-                    <ul className={auth?.user ? "nav-links" : "guess-links"}>
+                    <ul className={getNavLinksClass()}>
                         {auth?.user ? (
                             <>
                                 <li
@@ -130,6 +141,7 @@ function UserAuthenticatedLayout({
                         src={`https://${location.hostname}/images/menu-icon.svg`}
                         alt="menu icon"
                         className={authClasses.menuIcon}
+                        onClick={() => setIsNavLinksActived(!isNavLinksActived)}
                     />
                     {auth?.user && (
                         <div className="settings-wrapper">

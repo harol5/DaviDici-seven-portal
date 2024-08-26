@@ -63,7 +63,7 @@
     flex-direction: column;
     justify-content: center;
 
-    .filterWrapper {
+    & .filterWrapper {
         flex-grow: 1;
         align-items: center;
     }
@@ -74,7 +74,7 @@
     .titleAndFilterWrapper:nth-child(2) {
     flex-basis: 45%;
 
-    .filterWrapper .sinkPositionFilter {
+    & .filterWrapper .sinkPositionFilter {
         flex-basis: 16%;
     }
 }
