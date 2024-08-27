@@ -108,12 +108,12 @@ function ShoppingCart({
                     productConfig.isDoubleSink
                         ? doubleItemFinalQty
                         : singleItemFinalQty
-                }`
+                }##bath_one`
             );
 
             if (productConfig.washbasin) {
                 skusArr.push(
-                    `${productConfig.washbasin.uscode}!!${productConfig.composition.model}${singleItemFinalQty}`
+                    `${productConfig.washbasin.uscode}!!${productConfig.composition.model}${singleItemFinalQty}##bath_one`
                 );
             }
 
@@ -127,7 +127,7 @@ function ShoppingCart({
                             productConfig.composition.model === "OPERA"
                                 ? doubleItemFinalQty
                                 : singleItemFinalQty
-                        }`
+                        }##bath_one`
                     );
                 });
             }

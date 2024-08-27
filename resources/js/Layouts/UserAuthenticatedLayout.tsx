@@ -87,6 +87,11 @@ function UserAuthenticatedLayout({
                             src="https://portal.davidici.com/images/home.svg"
                             alt="home icon"
                         />
+                        <img
+                            className="nav-logo-mobile"
+                            src={`https://${location.hostname}/images/davidici-logo-no-letters.svg`}
+                            alt="home icon"
+                        />
                     </a>
                     <ul className={getNavLinksClass()}>
                         {auth?.user ? (
@@ -94,8 +99,8 @@ function UserAuthenticatedLayout({
                                 <li
                                     className={
                                         crrPage === "orders"
-                                            ? "common-button active"
-                                            : "common-button"
+                                            ? "link-button active"
+                                            : "link-button"
                                     }
                                 >
                                     <Link href="/orders">Orders</Link>
@@ -103,17 +108,17 @@ function UserAuthenticatedLayout({
                                 <li
                                     className={
                                         crrPage === "inventory"
-                                            ? "common-button active"
-                                            : "common-button"
+                                            ? "link-button active"
+                                            : "link-button"
                                     }
                                 >
                                     <Link href="/inventory">Inventory</Link>
                                 </li>
                                 <li
                                     className={
-                                        crrPage === "inventory"
-                                            ? "common-button active"
-                                            : "common-button"
+                                        crrPage === "express program"
+                                            ? "link-button active"
+                                            : "link-button"
                                     }
                                 >
                                     <Link href="/express-program">
@@ -125,9 +130,9 @@ function UserAuthenticatedLayout({
                             <>
                                 <li
                                     className={
-                                        crrPage === "inventory"
-                                            ? "common-button active"
-                                            : "common-button"
+                                        crrPage === "express program"
+                                            ? "link-button active"
+                                            : "link-button"
                                     }
                                 >
                                     <Link href="/express-program">

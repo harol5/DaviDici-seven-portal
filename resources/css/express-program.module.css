@@ -245,7 +245,7 @@
     .finishFilterWrapper
     .labelAndFinishWrapper
     .finishFilterLabel {
-    font-size: 12px;
+    font-size: 0.7rem;
 }
 
 .finishTypeWrapper
@@ -254,7 +254,7 @@
     .imageAndOverlayWrapper {
     border: 3px solid #d1aa68;
     border-radius: 50%;
-    margin: 0 1em;
+    margin: 0 10px;
     cursor: pointer;
     overflow: hidden;
     position: relative;
@@ -352,12 +352,12 @@
 .expressProgramProductCard .productCardcontent .finishesContainer {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5em;
+    row-gap: 0.5em;
     margin-top: 1em;
 }
 
 .expressProgramProductCard .productCardcontent .finishesContainer .finish {
-    width: 22%;
+    width: 25%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -392,7 +392,128 @@
     color: #d1aa68;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 1300px) {
+    .finishTypeWrapper .finishFilterWrapper .labelAndFinishWrapper {
+        padding: 0.2em;
+    }
+}
+
+@media (max-width: 1200px) {
+    .filterIconAndValuesSelectedWrapper {
+        margin-top: 0;
+        padding: 0.7rem 1rem;
+        align-items: center;
+    }
+
+    .filterIconAndValuesSelectedWrapper .filterIconButton {
+        width: 2rem;
+    }
+
+    .filterIconAndValuesSelectedWrapper .valuesSelectedAndTitleWrapper > h1 {
+        margin-bottom: 0.2rem;
+    }
+
+    .filterIconAndValuesSelectedWrapper
+        .valuesSelectedAndTitleWrapper
+        .valuesSelectedWrapper {
+        display: flex;
+        justify-content: space-around;
+    }
+
+    .filterIconAndValuesSelectedWrapper
+        .valuesSelectedAndTitleWrapper
+        .valuesSelectedWrapper
+        p {
+        color: #d1aa68;
+        font-weight: 600;
+    }
+
+    .expressProgramProductCardLayout {
+        width: calc(100% / 2);
+        padding: 0.2rem;
+    }
+
+    .expressProgramProductCard .productCardcontent {
+        margin: 1.2em;
+    }
+
+    /*-- finishes --*/
+    .expressProgramProductCard .productCardcontent .finishesContainer {
+        gap: 0;
+    }
+
+    .expressProgramProductCard .productCardcontent .finishesContainer .finish {
+        width: 20%;
+        padding: 0 0.6rem;
+    }
+
+    .expressProgramProductCard
+        .productCardcontent
+        .finishesContainer
+        .finish
+        img {
+        height: 3.5em;
+        width: 3.5em;
+    }
+
+    .expressProgramProductCard
+        .productCardcontent
+        .finishesContainer
+        .finish
+        p {
+        font-size: 10px;
+        text-align: center;
+    }
+
+    /*-- composition name --*/
+    .expressProgramProductCard .productCardcontent .compositionName {
+        font-size: large;
+    }
+
+    /*-- starting price label --*/
+    .expressProgramProductCard .productCardcontent .startingPriceLabel {
+        font-size: large;
+        color: #d1aa68;
+    }
+}
+
+@media (max-width: 1000px) {
+    .allFinishTypesWrapper {
+        flex-direction: column;
+    }
+
+    .finishTypeWrapper
+        .finishFilterWrapper
+        .labelAndFinishWrapper
+        .imageAndOverlayWrapper
+        .finishFilter {
+        width: 3.5rem;
+    }
+}
+
+@media (max-width: 800px) {
+    .filterIconAndValuesSelectedWrapper .filterIconButton {
+        width: 1.8rem;
+    }
+
+    .filterIconAndValuesSelectedWrapper .valuesSelectedAndTitleWrapper h1 {
+        font-size: 0.8rem;
+    }
+
+    .filterIconAndValuesSelectedWrapper
+        .valuesSelectedAndTitleWrapper
+        .valuesSelectedWrapper
+        p {
+        font-size: 0.8rem;
+    }
+
+    .expressProgramProductCard .productCardcontent .finishesContainer .finish {
+        width: 25%;
+        padding: 0 0.9rem;
+    }
+}
+
+@media (max-width: 700px) {
     .filterWrapper {
         gap: 0.5em;
     }
@@ -425,7 +546,34 @@
         font-size: 9px;
     }
 
+    .filterIconAndValuesSelectedWrapper .filterIconButton {
+        width: 1.7rem;
+    }
+
+    .filterIconAndValuesSelectedWrapper .valuesSelectedAndTitleWrapper h1 {
+        font-size: 0.7rem;
+    }
+
+    .filterIconAndValuesSelectedWrapper
+        .valuesSelectedAndTitleWrapper
+        .valuesSelectedWrapper
+        p {
+        font-size: 0.7rem;
+    }
+
+    .expressProgramProductCardLayout {
+        width: calc(100% / 1);
+        padding: 0.2rem;
+    }
+
     .expressProgramProductCard {
         width: 100%;
+    }
+}
+
+@media (max-width: 400px) {
+    .expressProgramProductCard .productCardcontent .finishesContainer .finish {
+        width: 33.33%;
+        padding: 0 0.9rem;
     }
 }

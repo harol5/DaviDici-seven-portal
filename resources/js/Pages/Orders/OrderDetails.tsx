@@ -42,6 +42,9 @@ function OrderDetails({
 
     const [order, setOrder] = useState(formatOrder);
     const [products, setProducts] = useState(formatProducts);
+    console.log(rawOrder);
+    console.log(rawProducts);
+
     const modelsAvailable = useMemo(() => {
         const set = new Set<string>();
         products.forEach((product) => {

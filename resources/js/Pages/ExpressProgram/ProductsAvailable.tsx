@@ -271,7 +271,7 @@ function ProductsAvailable({
     }, []);
 
     return (
-        <UserAuthenticatedLayout auth={auth} crrPage="orders">
+        <UserAuthenticatedLayout auth={auth} crrPage="express program">
             <div className="main-content-wrapper">
                 <section className={classes.filterIconAndValuesSelectedWrapper}>
                     <button

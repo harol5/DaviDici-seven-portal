@@ -69,7 +69,7 @@ function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
     return (
         <UserAuthenticatedLayout
             auth={auth}
-            crrPage="orders"
+            crrPage="express program"
             shoppingCartSize={shoppingCartSize}
         >
             <div className="main-content-wrapper">

@@ -129,23 +129,26 @@ nav {
 .home-logo {
     width: 23px;
 }
+.nav-logo-mobile {
+    display: none;
+    width: 35px;
+}
 .nav-links {
     list-style: none;
     display: flex;
-    padding: 0;
-    overflow: hidden;
+    gap: 1.5rem;
 }
-.nav-links li {
-    margin: 0 10px;
+.link-button {
+    border: 1px solid #d1aa68;
+    border-radius: 7px;
 }
-.nav-links li > a {
+.link-button > a {
     text-decoration: none;
-}
-.nav-links li > a:visited {
-    color: black;
+    padding: 0.3rem 1.4rem;
 }
 .active {
-    border-bottom: 1.5px solid #d1aa68;
+    color: white;
+    background-color: #d1aa68;
 }
 
 .guess-links {
@@ -727,14 +730,6 @@ main {
 }
 
 @media (max-width: 1500px) {
-    .nav-content {
-        margin: 25px 20px;
-    }
-
-    .main-content-wrapper {
-        margin: 0 20px;
-    }
-
     /*======= DETAIL PAGE =======*/
     .product-wrapper {
         padding: 1.5em;
@@ -745,6 +740,16 @@ main {
     .product-info-wrapper {
         margin-right: 0;
         margin-bottom: 1.2em;
+    }
+}
+
+@media (max-width: 1400px) {
+    .nav-content {
+        margin: 25px 20px;
+    }
+
+    .main-content-wrapper {
+        margin: 0 20px;
     }
 }
 
@@ -806,6 +811,18 @@ main {
     /*====== MAIN LAYOUT ======*/
     .nav-content {
         margin: 15px 10px;
+    }
+    .homeAndNavLogoWrapper {
+        width: 100px;
+    }
+    .nav-logo {
+        width: 130px;
+    }
+    .home-logo {
+        width: 20px;
+    }
+    .settings-wrapper img {
+        width: 32px;
     }
     .main-content-wrapper {
         margin: 0 10px;
@@ -895,26 +912,16 @@ main {
     .nav-content {
         margin: 22px 20px;
     }
-    .homeAndNavLogoWrapper {
-        width: 100px;
-    }
-    .nav-logo {
-        width: 130px;
-    }
-    .nav-links {
-        font-size: small;
-    }
-    .nav-links li {
-        margin: 4px;
-        padding: 0 13px;
+    .link-button > a {
+        font-size: 0.8rem;
     }
     .settings-wrapper img {
         width: 30px;
+        margin: auto;
     }
     .settings-wrapper ul {
         font-size: medium;
         min-width: 180px;
-        /* left: -500%; */
     }
 
     /*== main container ==*/
@@ -1002,11 +1009,29 @@ main {
     }
     /*== nav bar ==*/
     .nav-content {
-        margin: 15px 20px;
+        margin: 3px 15px;
+        gap: 3px;
         flex-wrap: wrap;
     }
 
+    .homeAndNavLogoWrapper {
+        width: auto;
+    }
+
+    .home-logo {
+        display: none;
+    }
+
+    .nav-logo {
+        display: none;
+    }
+
+    .nav-logo-mobile {
+        display: block;
+    }
+
     .nav-links {
+        gap: 0.3rem;
         height: 0;
         visibility: hidden;
         opacity: 0;
@@ -1014,15 +1039,18 @@ main {
         flex-basis: 100%;
         justify-content: space-evenly;
         border-top: dashed 1px #d1aa68;
-        transition: all 0.5s ease-in-out;
+        transition: all 0.3s ease-out;
     }
 
     .active-links {
+        height: auto;
         visibility: visible;
         opacity: 1;
-        height: auto;
-        padding-top: 15px;
-        margin-top: 15px;
+        padding: 10px 0;
+    }
+
+    .link-button > a {
+        padding: 0.3rem 0.8rem;
     }
 
     .main-content-wrapper {

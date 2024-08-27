@@ -484,7 +484,8 @@ class OrdersController extends Controller
                 'params' => [$username, $data['newOrderNum'], $data['skus']],
                 'keep_session' => false,
             ]);
-
+            info("orderEnter======");
+            info($data['skus']);
             if ($response['status'] === 201 && $response['Result'] === 'All items entered') {
                 DB::table('shopping_cart')
                     ->updateOrInsert(
