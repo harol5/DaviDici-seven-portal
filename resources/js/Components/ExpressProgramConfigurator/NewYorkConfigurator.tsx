@@ -444,36 +444,36 @@ function NewYorkConfigurator({
                 currentConfiguration.sideUnit
             );
             rightSideUnitCodes!.position = "RX";
-            return `~${Object.values(rightSideUnitCodes!).join("-")}-1`;
+            return `~${Object.values(rightSideUnitCodes!).join("-")}--1`;
         };
 
         let SKU;
         if (sideUnitSku && washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }~${washbasinSku}--1~${sideUnitSku}--1${
+            }##bath_one~${washbasinSku}--1~${sideUnitSku}--1##bath_one${
                 currentConfiguration.isDoubleSideUnit && getSecondSideUnit()
-            }`;
+            }##bath_one`;
         }
 
         if (sideUnitSku && !washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }~${sideUnitSku}--1${
+            }##bath_one~${sideUnitSku}--1##bath_one${
                 currentConfiguration.isDoubleSideUnit && getSecondSideUnit()
-            }`;
+            }##bath_one`;
         }
 
         if (!sideUnitSku && washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }~${washbasinSku}--1`;
+            }##bath_one~${washbasinSku}--1##bath_one`;
         }
 
         if (!sideUnitSku && !washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }`;
+            }##bath_one`;
         }
 
         console.log(SKU);

@@ -615,25 +615,25 @@ function MargiConfigurator({
         if (sideUnitSku && washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }~${washbasinSku}--1~${sideUnitSku}--1`;
+            }##bath_one~${washbasinSku}--1~${sideUnitSku}--1##bath_one`;
         }
 
         if (sideUnitSku && !washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }~${sideUnitSku}--1`;
+            }##bath_one~${sideUnitSku}--1##bath_one`;
         }
 
         if (!sideUnitSku && washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }~${washbasinSku}--1`;
+            }##bath_one~${washbasinSku}--1##bath_one`;
         }
 
         if (!sideUnitSku && !washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }`;
+            }##bath_one`;
         }
 
         router.get("/orders/create-so-num", { SKU });

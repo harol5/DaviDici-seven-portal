@@ -35,27 +35,31 @@ function ProductExpressProgramCard({
                             }}
                         />
                     </div>
-                    <div className={classes.finishesContainer}>
-                        {composition.finishes.map((value, index) => {
-                            const finishObj = value as {
-                                finish: string;
-                                url: string;
-                            };
-                            return (
-                                <div key={index} className={classes.finish}>
-                                    <img src={finishObj.url} />
-                                    <p>{finishObj.finish}</p>
-                                </div>
-                            );
-                        })}
+                    <div className={classes.compositionInfo}>
+                        <div className={classes.nameAndPriceWrapper}>
+                            <h1 className={classes.compositionName}>
+                                {splitedCompositionName[0]} <br />
+                                Incl{splitedCompositionName[1]}
+                            </h1>
+                            <p className={classes.startingPriceLabel}>
+                                Starting at ${composition.startingPrice}
+                            </p>
+                        </div>
+                        <div className={classes.finishesContainer}>
+                            {composition.finishes.map((value, index) => {
+                                const finishObj = value as {
+                                    finish: string;
+                                    url: string;
+                                };
+                                return (
+                                    <div key={index} className={classes.finish}>
+                                        <img src={finishObj.url} />
+                                        <p>{finishObj.finish}</p>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
-                    <h1 className={classes.compositionName}>
-                        {splitedCompositionName[0]} <br />
-                        Incl{splitedCompositionName[1]}
-                    </h1>
-                    <p className={classes.startingPriceLabel}>
-                        Starting at ${composition.startingPrice}
-                    </p>
                 </div>
             </div>
         </div>

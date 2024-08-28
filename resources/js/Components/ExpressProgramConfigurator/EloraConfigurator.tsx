@@ -282,11 +282,11 @@ function EloraConfigurator({
         if (!washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }`;
+            }##bath_one`;
         } else {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }~${washbasinSku}--1`;
+            }##bath_one~${washbasinSku}--1##bath_one`;
         }
 
         console.log(SKU);
