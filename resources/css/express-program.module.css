@@ -73,10 +73,6 @@
     .sizeAndSinkPositionFiltersWrapper
     .titleAndFilterWrapper:nth-child(2) {
     flex-basis: 45%;
-
-    & .filterWrapper .sinkPositionFilter {
-        flex-basis: 16%;
-    }
 }
 
 .allFiltersWrapper .resetFiltersAndCloseFilterButtonsWrapper {
@@ -159,7 +155,7 @@
 /*==== SINK POSITION FILTER STYLING=====*/
 
 .sinkPositionFilter {
-    flex-basis: 10%;
+    flex-basis: 15%;
     margin: 0 1em;
     cursor: pointer;
     display: flex;
@@ -172,12 +168,12 @@
     transition: box-shadow 0.1s ease-in;
 }
 
-.sinkPositionFilterSelected .imageAndOverlayWrapper {
-    position: relative;
-}
-
 .sinkPositionFilter .imageAndOverlayWrapper img {
     border: 2px solid #d1aa68;
+}
+
+.sinkPositionFilterSelected .imageAndOverlayWrapper {
+    position: relative;
 }
 
 .sinkPositionFilterSelected .imageAndOverlayWrapper::before {
@@ -192,6 +188,50 @@
 }
 
 .sinkPositionFilterSelected .imageAndOverlayWrapper .filterOverlay {
+    background-color: #00000075;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/*==== MODELS FILTER STYLING=====*/
+
+.modelFilter {
+    flex-basis: 15%;
+    margin: 0 1em;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.modelFilter .imageAndOverlayWrapper:hover {
+    box-shadow: 0px 0px 2px 2px #000000d7;
+    transition: box-shadow 0.1s ease-in;
+}
+
+.modelFilter .imageAndOverlayWrapper img {
+    border: 2px solid #d1aa68;
+}
+
+.modelFilterSelected .imageAndOverlayWrapper {
+    position: relative;
+}
+
+.modelFilterSelected .imageAndOverlayWrapper::before {
+    z-index: 1;
+    content: "SELECTED";
+    font-size: 0.9em;
+    color: #d1aa68;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.modelFilterSelected .imageAndOverlayWrapper .filterOverlay {
     background-color: #00000075;
     position: absolute;
     top: 0;
@@ -295,7 +335,7 @@
     .imageAndOverlayWrapper.finishFilterValueSelected::before {
     content: "SELECTED";
     color: #d1aa68;
-    font-size: 0.7rem;
+    font-size: 0.6em;
     position: absolute;
     z-index: 1;
     left: 50%;
@@ -393,12 +433,44 @@
 }
 
 @media (max-width: 1300px) {
+    /*SINK POSITION FILTER*/
+    .allFiltersWrapper .sizeAndSinkPositionFiltersWrapper {
+        flex-direction: column;
+    }
+
+    /*FINISH FILTERS*/
     .finishTypeWrapper .finishFilterWrapper .labelAndFinishWrapper {
         padding: 0.2em;
     }
 }
 
 @media (max-width: 1200px) {
+    /*MAIN WRAPPER FOR SIZE, SINK POSITION, AND MODEL FILTERS*/
+    .filterWrapper {
+        gap: 0.5em;
+    }
+
+    /*SIZE FILTERS*/
+    .sizeFilter {
+        height: 3.5em;
+        width: 3.5em;
+        margin: 0 0.5em;
+    }
+
+    /*FINISH FILTERS*/
+    .finishTypeWrapper .finishFilterWrapper .labelAndFinishWrapper {
+        width: calc(100% / 3);
+    }
+
+    .finishTypeWrapper
+        .finishFilterWrapper
+        .labelAndFinishWrapper
+        .imageAndOverlayWrapper
+        .finishFilter {
+        width: 3.5rem;
+    }
+
+    /*==== FILTER BUTTON AND VALUES SELECT COMPONENT ====*/
     .filterIconAndValuesSelectedWrapper {
         margin-top: 0;
         padding: 0.7rem 1rem;
@@ -410,7 +482,7 @@
     }
 
     .filterIconAndValuesSelectedWrapper .valuesSelectedAndTitleWrapper > h1 {
-        margin-bottom: 0.2rem;
+        margin-bottom: 0.35rem;
     }
 
     .filterIconAndValuesSelectedWrapper
@@ -478,8 +550,18 @@
 }
 
 @media (max-width: 1000px) {
+    /*MODEL FILTERS*/
+    .modelFilter {
+        margin: 0 0.5em;
+    }
+
+    /*FINISH FILTERS*/
     .allFinishTypesWrapper {
         flex-direction: column;
+    }
+
+    .finishTypeWrapper .finishFilterWrapper .labelAndFinishWrapper {
+        width: calc(100% / 5);
     }
 
     .finishTypeWrapper
@@ -487,7 +569,7 @@
         .labelAndFinishWrapper
         .imageAndOverlayWrapper
         .finishFilter {
-        width: 3.5rem;
+        width: 3rem;
     }
 }
 
@@ -511,11 +593,39 @@
         width: 25%;
         padding: 0 0.9rem;
     }
+
+    /*FILTER MODAL*/
+    .allFiltersWrapper
+        .resetFiltersAndCloseFilterButtonsWrapper
+        .resetFiltersButton {
+        font-size: 0.8rem;
+    }
+
+    .allFiltersWrapper
+        .resetFiltersAndCloseFilterButtonsWrapper
+        .closeFilterModalButton {
+        font-size: 0.8rem;
+    }
 }
 
 @media (max-width: 700px) {
-    .filterWrapper {
-        gap: 0.5em;
+    /*=============================*/
+    .allFiltersWrapper
+        .resetFiltersAndCloseFilterButtonsWrapper
+        .resetFiltersButton {
+        font-size: 0.7rem;
+        padding: 0.5em 3em;
+    }
+
+    .allFiltersWrapper
+        .resetFiltersAndCloseFilterButtonsWrapper
+        .closeFilterModalButton {
+        font-size: 0.7rem;
+        padding: 0.5em 3em;
+    }
+
+    .filtersModal {
+        padding: 1rem;
     }
 
     .sizeFilter {
@@ -523,6 +633,18 @@
         width: 2.5em;
         margin: 0 0.25em;
         border: 2px solid #d1aa68;
+    }
+
+    .sinkPositionFilter {
+        flex-basis: 25%;
+    }
+
+    .sinkPositionFilter .imageAndOverlayWrapper img {
+        width: 6em;
+    }
+
+    .modelFilter {
+        flex-basis: 25%;
     }
 
     .allFinishTypesWrapper {
@@ -533,12 +655,16 @@
         width: 25%;
     }
 
+    .finishTypeWrapper .finishFilterWrapper .labelAndFinishWrapper {
+        width: calc(100% / 4);
+    }
+
     .finishTypeWrapper
         .finishFilterWrapper
         .labelAndFinishWrapper
         .imageAndOverlayWrapper {
-        height: 2.5em;
-        width: 2.5em;
+        height: 3em;
+        width: 3em;
         margin: 0;
     }
 
@@ -546,12 +672,14 @@
         font-size: 9px;
     }
 
-    .filterIconAndValuesSelectedWrapper .filterIconButton {
-        width: 1.7rem;
+    /*=============================*/
+
+    .filterIconAndValuesSelectedWrapper {
+        padding: 0.7rem 0;
     }
 
-    .filterIconAndValuesSelectedWrapper .valuesSelectedAndTitleWrapper h1 {
-        font-size: 0.7rem;
+    .filterIconAndValuesSelectedWrapper .filterIconButton {
+        width: 1.7rem;
     }
 
     .filterIconAndValuesSelectedWrapper
@@ -571,9 +699,32 @@
     }
 }
 
+@media (max-width: 700px) {
+    /*=============================*/
+}
+
 @media (max-width: 400px) {
     .expressProgramProductCard .productCardcontent .finishesContainer .finish {
         width: 33.33%;
         padding: 0 0.9rem;
+    }
+
+    /*FILTER MODAL*/
+    .filtersModal {
+        padding: 0.6rem;
+    }
+
+    .allFiltersWrapper
+        .resetFiltersAndCloseFilterButtonsWrapper
+        .resetFiltersButton {
+        font-size: 0.65rem;
+        padding: 0.5em 2.5em;
+    }
+
+    .allFiltersWrapper
+        .resetFiltersAndCloseFilterButtonsWrapper
+        .closeFilterModalButton {
+        font-size: 0.65rem;
+        padding: 0.5em 2.5em;
     }
 }

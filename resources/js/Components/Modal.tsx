@@ -55,7 +55,7 @@ function Modal({
                     {/* Full-screen scrollable container */}
                     <div className="fixed inset-0 w-screen overflow-y-auto">
                         {/* Container to center the panel */}
-                        <div className="flex min-h-full items-center justify-center p-12">
+                        <div className="flex min-h-full items-center justify-center p-3">
                             <Dialog.Panel
                                 className={`${customClass} bg-white rounded-lg shadow-davidiciGold/40 overflow-hidden shadow-2xl transform transition-all`}
                             >

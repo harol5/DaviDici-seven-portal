@@ -89,8 +89,8 @@ function Filter({
                                 key={index}
                                 className={
                                     crrValueSelected === model.name
-                                        ? `${classes.sinkPositionFilter} ${classes.sinkPositionFilterSelected} `
-                                        : classes.sinkPositionFilter
+                                        ? `${classes.modelFilter} ${classes.modelFilterSelected} `
+                                        : classes.modelFilter
                                 }
                                 onClick={() =>
                                     handleFilter(contentType, model.name)
