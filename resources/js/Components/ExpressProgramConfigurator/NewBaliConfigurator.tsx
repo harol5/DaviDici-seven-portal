@@ -64,14 +64,19 @@ function NewBaliConfigurator({
                 baseSku = `${codes[0]}`;
             }
 
-            if (!drawerOptionsMap.has(`${codes[1]}`))
+            if (!drawerOptionsMap.has(`${codes[1]}`)) {
+                const numOfDrawers = codes[1].includes("D")
+                    ? "2 DRAWERS"
+                    : "1 DRAWER";
+
                 drawerOptionsMap.set(`${codes[1]}`, {
                     code: codes[1],
-                    imgUrl: "https://portal.davidici.com/images/express-program/not-image.jpg",
-                    title: codes[1].includes("D") ? "2 DRAWERS" : "1 DRAWER",
+                    imgUrl: `https://${location.hostname}/images/express-program/${composition.model}/options/${numOfDrawers}.webp`,
+                    title: numOfDrawers,
                     validSkus: [],
                     isDisabled: false,
                 });
+            }
 
             drawerOptionsMap.get(`${codes[1]}`).validSkus.push(vanity.uscode);
 
@@ -118,7 +123,7 @@ function NewBaliConfigurator({
         composition.washbasins.forEach((washbasin) => {
             all.push({
                 code: washbasin.uscode,
-                imgUrl: `https://portal.davidici.com/images/express-program/washbasins/${washbasin.uscode}.webp`,
+                imgUrl: `https://${location.hostname}/images/express-program/washbasins/${washbasin.uscode}.webp`,
                 title: `${washbasin.model} ${washbasin.finish}`,
                 validSkus: [washbasin.uscode],
                 isDisabled: false,
@@ -128,7 +133,7 @@ function NewBaliConfigurator({
         // adds option to remove washbasin.
         all.push({
             code: "",
-            imgUrl: `https://portal.davidici.com/images/express-program/washbasins/no-sink.webp`,
+            imgUrl: `https://${location.hostname}/images/express-program/washbasins/no-sink.webp`,
             title: "NO WASHBASIN",
             validSkus: [""],
             isDisabled: false,
@@ -158,7 +163,7 @@ function NewBaliConfigurator({
             if (!finishOptionsMap.has(`${codes[3]}`))
                 finishOptionsMap.set(`${codes[3]}`, {
                     code: codes[3],
-                    imgUrl: `https://portal.davidici.com/images/express-program/finishes/${sideUnit.finish}.jpg`,
+                    imgUrl: `https://${location.hostname}/images/express-program/finishes/${sideUnit.finish}.jpg`,
                     title: sideUnit.finish,
                     validSkus: [],
                     isDisabled: false,

@@ -102,7 +102,7 @@ function EloraConfigurator({
         composition.washbasins.forEach((washbasin) => {
             all.push({
                 code: washbasin.uscode,
-                imgUrl: `https://portal.davidici.com/images/express-program/washbasins/${washbasin.uscode}.webp`,
+                imgUrl: `https://${location.hostname}/images/express-program/washbasins/${washbasin.uscode}.webp`,
                 title: `${washbasin.model} ${washbasin.finish}`,
                 validSkus: [washbasin.uscode],
                 isDisabled: false,

@@ -78,7 +78,9 @@ function MargiConfigurator({
             if (!drawerOptionsMap.has(`${codes[2]}`))
                 drawerOptionsMap.set(`${codes[2]}`, {
                     code: codes[2],
-                    imgUrl: `https://portal.davidici.com/images/express-program/MARGI/options/${
+                    imgUrl: `https://${
+                        location.hostname
+                    }/images/express-program/MARGI/options/${
                         codes[2].includes("D") ? "2 DRAWERS" : "1 DRAWER"
                     }.webp`,
                     title: codes[2].includes("D") ? "2 DRAWERS" : "1 DRAWER",
@@ -134,7 +136,7 @@ function MargiConfigurator({
         composition.washbasins.forEach((washbasin) => {
             all.push({
                 code: washbasin.uscode,
-                imgUrl: `https://portal.davidici.com/images/express-program/washbasins/${washbasin.uscode}.webp`,
+                imgUrl: `https://${location.hostname}/images/express-program/washbasins/${washbasin.uscode}.webp`,
                 title: `${washbasin.model} ${washbasin.finish}`,
                 validSkus: [washbasin.uscode],
                 isDisabled: false,

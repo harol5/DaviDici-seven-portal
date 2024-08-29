@@ -91,7 +91,7 @@ function OtherModelsConfigurator({
         composition.washbasins.forEach((washbasin) => {
             all.push({
                 code: washbasin.uscode,
-                imgUrl: `https://portal.davidici.com/images/express-program/washbasins/${washbasin.uscode}.webp`,
+                imgUrl: `https://${location.hostname}/images/express-program/washbasins/${washbasin.uscode}.webp`,
                 title: `${washbasin.model} ${washbasin.finish}`,
                 validSkus: [washbasin.uscode],
                 isDisabled: false,
@@ -132,13 +132,15 @@ function OtherModelsConfigurator({
             }
 
             if (!typeOptionsMap.has(`${codes[1]}`)) {
+                const typeOfSideUnit =
+                    codes[1] === "SO"
+                        ? "SIDE OPEN CABINET"
+                        : "SIDE BASE 1 DOOR CABINET";
+
                 typeOptionsMap.set(`${codes[1]}`, {
                     code: codes[1],
-                    imgUrl: "https://portal.davidici.com/images/express-program/not-image.jpg",
-                    title:
-                        codes[1] === "SO"
-                            ? "SIDE OPEN CABINET"
-                            : "SIDE BASE 1 DOOR CABINET",
+                    imgUrl: `https://${location.hostname}/images/express-program/${composition.model}/options/${typeOfSideUnit}.webp`,
+                    title: typeOfSideUnit,
                     validSkus: [],
                     isDisabled: false,
                 });
