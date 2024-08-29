@@ -47,7 +47,7 @@
 }
 
 .leftSideConfiguratorWrapper .backButtonAndNameWrapper .resetButton {
-    font-size: small;
+    font-size: 0.7rem;
     background-color: #d1aa68;
     color: white;
     padding: 0.5rem 2rem;
@@ -277,9 +277,10 @@
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 850px) {
     .compositionConfiguratorWrapper {
         flex-direction: column;
+        padding-top: 0;
     }
 
     .leftSideConfiguratorWrapper {
