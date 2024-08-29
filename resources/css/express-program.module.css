@@ -571,6 +571,11 @@
 }
 
 @media (max-width: 1000px) {
+    .compositionInfo {
+        flex-direction: column;
+        margin: 1em 1em;
+    }
+
     /*MODEL FILTERS*/
     .modelFilter {
         margin: 0 0.5em;
@@ -613,11 +618,6 @@
     .expressProgramProductCard .productCardcontent .finishesContainer .finish {
         width: 25%;
         padding: 0 0.9rem;
-    }
-
-    .compositionInfo {
-        flex-direction: column;
-        margin: 1em 1em;
     }
 }
 
