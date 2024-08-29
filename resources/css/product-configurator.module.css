@@ -59,6 +59,10 @@
     margin: 15px auto;
 }
 
+.leftSideConfiguratorWrapper .compositionImageWrapper img {
+    margin: 0 auto;
+}
+
 /*=== OPTIONS STYLING =====*/
 
 .titleAndOptionsWrapper {
