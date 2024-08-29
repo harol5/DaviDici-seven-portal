@@ -249,11 +249,13 @@
     background-color: #d1ab68ae;
 }
 
-@media (max-width: 1500px) {
+@media (max-width: 1600px) {
     .leftSideConfiguratorWrapper .compositionImageWrapper img {
-        width: 86%;
+        width: 85%;
     }
+}
 
+@media (max-width: 1500px) {
     .leftSideConfiguratorWrapper .backButtonAndNameWrapper .backButtonWrapper {
         flex-direction: column;
     }
