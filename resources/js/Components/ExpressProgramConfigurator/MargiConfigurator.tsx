@@ -107,11 +107,17 @@ function MargiConfigurator({
 
             handleOptionsMap.get(`${codes[3]}`).validSkus.push(vanity.uscode);
 
+            let finishLabel = vanity.finish;
+
+            if (vanity.finish.includes("MATT LACQ. ")) {
+                finishLabel = finishLabel.replace("MATT LACQ. ", "");
+            }
+
             if (!finishOptionsMap.has(`${codes[4]}`))
                 finishOptionsMap.set(`${codes[4]}`, {
                     code: codes[4],
                     imgUrl: `https://portal.davidici.com/images/express-program/finishes/${vanity.finish}.jpg`,
-                    title: vanity.finish,
+                    title: finishLabel,
                     validSkus: [],
                     isDisabled: false,
                 });
@@ -179,7 +185,7 @@ function MargiConfigurator({
                 }
 
                 if (!doorStyleAndHandleOptionsMap.has(`${codes[3]}`)) {
-                    let iniTitle = codes[3].includes("F")
+                    let doorStyle = codes[3].includes("F")
                         ? "FRAME"
                         : codes[3].includes("S")
                         ? "STRIPES"
@@ -188,14 +194,14 @@ function MargiConfigurator({
                         : codes[3].includes("P")
                         ? "PLAIN"
                         : "";
-                    iniTitle += codes[3].includes("1")
+                    let hanldeColor = codes[3].includes("1")
                         ? " W/ BLACK HANDLE"
                         : " W/ POLISH HANDLE";
 
                     doorStyleAndHandleOptionsMap.set(`${codes[3]}`, {
                         code: codes[3],
-                        imgUrl: "https://portal.davidici.com/images/express-program/not-image.jpg",
-                        title: iniTitle,
+                        imgUrl: `https://${location.hostname}/images/express-program/${composition.model}/options/SIDE UNIT - ${doorStyle}.webp`,
+                        title: doorStyle + hanldeColor,
                         validSkus: [],
                         isDisabled: false,
                     });
@@ -204,11 +210,16 @@ function MargiConfigurator({
                     .get(`${codes[3]}`)
                     .validSkus.push(sideUnit.uscode);
 
+                let finishLabel = sideUnit.finish;
+                if (sideUnit.finish.includes("MATT LACQ. ")) {
+                    finishLabel = finishLabel.replace("MATT LACQ. ", "");
+                }
+
                 if (!finishOptionsMap.has(`${codes[4]}`))
                     finishOptionsMap.set(`${codes[4]}`, {
                         code: codes[4],
                         imgUrl: `https://portal.davidici.com/images/express-program/finishes/${sideUnit.finish}.jpg`,
-                        title: sideUnit.finish,
+                        title: finishLabel,
                         validSkus: [],
                         isDisabled: false,
                     });

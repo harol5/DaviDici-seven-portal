@@ -146,12 +146,16 @@ function UserAuthenticatedLayout({
                             </>
                         )}
                     </ul>
-                    <img
-                        src={`https://${location.hostname}/images/menu-icon.svg`}
-                        alt="menu icon"
-                        className={authClasses.menuIcon}
-                        onClick={() => setIsNavLinksActived(!isNavLinksActived)}
-                    />
+                    {auth?.user && (
+                        <img
+                            src={`https://${location.hostname}/images/menu-icon.svg`}
+                            alt="menu icon"
+                            className={authClasses.menuIcon}
+                            onClick={() =>
+                                setIsNavLinksActived(!isNavLinksActived)
+                            }
+                        />
+                    )}
                     {auth?.user && (
                         <div className="settings-wrapper">
                             <img

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import UserAuthenticatedLayout from "../../Layouts/UserAuthenticatedLayout";
 import Filter from "../../Components/Filter";
 import FinishesFilter from "../../Components/FinishesFilter";

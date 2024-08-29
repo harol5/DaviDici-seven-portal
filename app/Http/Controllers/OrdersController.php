@@ -484,8 +484,7 @@ class OrdersController extends Controller
                 'params' => [$username, $data['newOrderNum'], $data['skus']],
                 'keep_session' => false,
             ]);
-            info("orderEnter======");
-            info($data['skus']);
+            
             if ($response['status'] === 201 && $response['Result'] === 'All items entered') {
                 DB::table('shopping_cart')
                     ->updateOrInsert(
@@ -504,7 +503,7 @@ class OrdersController extends Controller
             }
 
             return redirect('/orders')->with('message', "something went wrong. Please contact support.");
-        } else {
+        } else {            
             // get the number of calls we will have to make to the "addtoorder", depending on the size of the sku string;
             $numberOfCalls = floor(strlen($data['skus']) / 200);
             $skusArr = explode('~', $data['skus']);

@@ -2,6 +2,7 @@ import type { Composition } from "../Models/Composition";
 import classes from "../../css/express-program.module.css";
 import type { ProductInventory } from "../Models/Product";
 import { router } from "@inertiajs/react";
+import { useMemo } from "react";
 
 interface ProductExpressProgramCardProps {
     composition: Composition;
@@ -47,15 +48,12 @@ function ProductExpressProgramCard({
                         </div>
                         <div className={classes.finishesContainer}>
                             {composition.finishes.map((value, index) => {
-                                const finishObj = value as {
-                                    finish: string;
-                                    url: string;
-                                };
                                 return (
-                                    <div key={index} className={classes.finish}>
-                                        <img src={finishObj.url} />
-                                        <p>{finishObj.finish}</p>
-                                    </div>
+                                    <Finish
+                                        key={index}
+                                        composition={composition}
+                                        finishObj={value}
+                                    />
                                 );
                             })}
                         </div>
@@ -67,3 +65,45 @@ function ProductExpressProgramCard({
 }
 
 export default ProductExpressProgramCard;
+
+function Finish({
+    composition,
+    finishObj,
+}: {
+    composition: Composition;
+    finishObj: {
+        finish: string;
+        url: string;
+    };
+}) {
+    const formatFinishLabel = useMemo(() => {
+        if (composition.model === "ELORA" && finishObj.finish.includes("-")) {
+            return finishObj.finish.split("-")[0].replace("MATT LACQ. ", "");
+        }
+
+        if (
+            composition.model === "NEW BALI" ||
+            composition.model === "OPERA" ||
+            composition.model === "KORA" ||
+            (composition.model === "MARGI" &&
+                finishObj.finish.includes("MATT LACQ. "))
+        ) {
+            return finishObj.finish.replace("MATT LACQ. ", "");
+        }
+
+        if (
+            composition.model === "NEW YORK" &&
+            finishObj.finish.includes("GLOSSY LACQ. ")
+        ) {
+            return finishObj.finish.replace("GLOSSY LACQ. ", "");
+        }
+
+        return finishObj.finish;
+    }, []);
+    return (
+        <div className={classes.finish}>
+            <img src={finishObj.url} />
+            <p>{formatFinishLabel}</p>
+        </div>
+    );
+}

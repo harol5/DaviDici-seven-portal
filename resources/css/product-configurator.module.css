@@ -1,9 +1,8 @@
 .compositionConfiguratorWrapper {
     display: flex;
-    padding-top: 2rem;
+    padding-top: 0.5rem;
     padding-bottom: 8rem;
     gap: 25px;
-    /* height: 80vh; */
 }
 
 .leftSideConfiguratorWrapper {
@@ -144,6 +143,7 @@
 .optionSelected .imageAndOverlayWrapper .imageOverlay::before {
     content: "SELECTED";
     color: #d1ab68;
+    font-size: 0.6rem;
     font-weight: 300;
     position: absolute;
     left: 50%;
@@ -154,7 +154,7 @@
 .finishOption.optionSelected .imageAndOverlayWrapper .imageOverlay::before {
     content: "SELECTED";
     color: #d1ab68;
-    font-size: x-small;
+    font-size: 0.6rem;
     font-weight: 300;
     position: absolute;
     left: 50%;
@@ -180,7 +180,7 @@
 .optionDisabled .imageAndOverlayWrapper .imageOverlay::before {
     content: "OUT OF STOCK";
     color: #000000;
-    font-size: small;
+    font-size: 0.6rem;
     text-align: center;
     position: absolute;
     left: 50%;
@@ -281,6 +281,7 @@
     .compositionConfiguratorWrapper {
         flex-direction: column;
         padding-top: 0;
+        padding-bottom: 13rem;
     }
 
     .leftSideConfiguratorWrapper {
@@ -294,5 +295,9 @@
 
     .leftSideConfiguratorWrapper .backButtonAndNameWrapper h1 {
         font-size: medium;
+    }
+
+    .option {
+        width: 30%;
     }
 }

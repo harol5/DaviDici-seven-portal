@@ -51,16 +51,21 @@ function EloraConfigurator({
                 baseSku = `${codes[0]}-${codes[1]}-${codes[2]}`;
             }
 
-            let finish = vanity.finish;
+            let finishImageName = vanity.finish;
+            let finishLabel = vanity.finish;
+
             if (vanity.finish.includes("/")) {
-                finish = vanity.finish.replace("/", "-");
+                finishImageName = finishImageName.replace("/", "-");
+                finishLabel = finishLabel
+                    .split("/")[0]
+                    .replace("MATT LACQ. ", "");
             }
 
             if (!mattFinishOptionsMap.has(`${codes[3]}`))
                 mattFinishOptionsMap.set(`${codes[3]}`, {
                     code: codes[3],
-                    imgUrl: `https://portal.davidici.com/images/express-program/finishes/${finish}.jpg`,
-                    title: vanity.finish,
+                    imgUrl: `https://portal.davidici.com/images/express-program/finishes/${finishImageName}.jpg`,
+                    title: finishLabel,
                     validSkus: [],
                     isDisabled: false,
                 });
@@ -72,8 +77,8 @@ function EloraConfigurator({
             if (!glassFinishOptionsMap.has(`${codes[4]}`))
                 glassFinishOptionsMap.set(`${codes[4]}`, {
                     code: codes[4],
-                    imgUrl: `https://portal.davidici.com/images/express-program/finishes/${finish}.jpg`,
-                    title: vanity.finish,
+                    imgUrl: `https://portal.davidici.com/images/express-program/finishes/${finishImageName}.jpg`,
+                    title: finishLabel,
                     validSkus: [],
                     isDisabled: false,
                 });

@@ -65,11 +65,16 @@ function OtherModelsConfigurator({
                 baseSku = `${codes[0]}-${codes[1]}-${codes[2]}`;
             }
 
+            let finishLabel = vanity.finish;
+            if (vanity.finish.includes("MATT LACQ. ")) {
+                finishLabel = finishLabel.replace("MATT LACQ. ", "");
+            }
+
             if (!finishOptionsMap.has(`${codes[3]}`))
                 finishOptionsMap.set(`${codes[3]}`, {
                     code: codes[3],
                     imgUrl: `https://portal.davidici.com/images/express-program/finishes/${vanity.finish}.jpg`,
-                    title: vanity.finish,
+                    title: finishLabel,
                     validSkus: [],
                     isDisabled: false,
                 });
