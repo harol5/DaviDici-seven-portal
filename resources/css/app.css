@@ -41,7 +41,7 @@
 
 img {
     /* max-width: 100%; */
-    /* margin: auto; */
+    margin: auto;
 }
 
 #flash-message {
@@ -736,7 +736,7 @@ main {
 
 @media (max-width: 1500px) {
     * {
-        font-size: 0.8rem;
+        font-size: 0.803rem;
     }
     /*======= DETAIL PAGE =======*/
     .product-wrapper {

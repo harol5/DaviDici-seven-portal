@@ -478,8 +478,8 @@
 
     /*SIZE FILTERS*/
     .sizeFilter {
-        height: 3.5em;
-        width: 3.5em;
+        /* height: 3.5em;
+        width: 3.5em; */
         margin: 0 0.5em;
     }
 
@@ -527,10 +527,6 @@
     .expressProgramProductCardLayout {
         width: calc(100% / 2);
         padding: 0.2rem;
-    }
-
-    .expressProgramProductCard .productCardcontent {
-        margin: 1.2em;
     }
 
     /*-- finishes --*/
@@ -622,19 +618,6 @@
         flex-direction: column;
         margin: 1em 1em;
     }
-
-    /*FILTER MODAL*/
-    .allFiltersWrapper
-        .resetFiltersAndCloseFilterButtonsWrapper
-        .resetFiltersButton {
-        font-size: 0.8rem;
-    }
-
-    .allFiltersWrapper
-        .resetFiltersAndCloseFilterButtonsWrapper
-        .closeFilterModalButton {
-        font-size: 0.8rem;
-    }
 }
 
 @media (max-width: 700px) {
@@ -642,27 +625,14 @@
         margin-bottom: 0;
     }
     /*=============================*/
-    .allFiltersWrapper
-        .resetFiltersAndCloseFilterButtonsWrapper
-        .resetFiltersButton {
-        font-size: 0.7rem;
-        padding: 0.5em 3em;
-    }
-
-    .allFiltersWrapper
-        .resetFiltersAndCloseFilterButtonsWrapper
-        .closeFilterModalButton {
-        font-size: 0.7rem;
-        padding: 0.5em 3em;
-    }
 
     .filtersModal {
         padding: 1rem;
     }
 
     .sizeFilter {
-        height: 2.5em;
-        width: 2.5em;
+        /* height: 2.5em; */
+        /* width: 2.5em; */
         margin: 0 0.25em;
         border: 2px solid #d1aa68;
     }
@@ -672,7 +642,7 @@
     }
 
     .sinkPositionFilter .imageAndOverlayWrapper img {
-        width: 6em;
+        /* width: 6em; */
     }
 
     .modelFilter {
@@ -695,8 +665,6 @@
         .finishFilterWrapper
         .labelAndFinishWrapper
         .imageAndOverlayWrapper {
-        height: 3em;
-        width: 3em;
         margin: 0;
     }
 

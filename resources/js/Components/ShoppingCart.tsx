@@ -9,10 +9,12 @@ import USDollar from "../utils/currentFormatter";
 
 interface ShoppingCartProps {
     onShoppingSize: (numOfProducts: number) => void;
+    onClose: () => void;
 }
 
 function ShoppingCart({
     onShoppingSize: handleShoppingCartSize,
+    onClose: handleCloseShoppingCartModal,
 }: ShoppingCartProps) {
     const [crrShoppingCartProducts, setShoppingCartProducts] = useState<
         shoppingCartProductModel[]
@@ -180,6 +182,12 @@ function ShoppingCart({
                         PLACE ORDER
                     </button>
                 )}
+                <button
+                    className={classes.placeOrderButton}
+                    onClick={handleCloseShoppingCartModal}
+                >
+                    CLOSE CART
+                </button>
             </section>
             <section className={classes.shoppingCartContent}>
                 {crrShoppingCartProducts.map((product, index) => (

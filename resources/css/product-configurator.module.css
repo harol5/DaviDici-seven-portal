@@ -1,19 +1,23 @@
 .compositionConfiguratorWrapper {
     display: flex;
-    /* margin: 40px 0; */
-    padding-top: 3rem;
+    padding-top: 2rem;
+    padding-bottom: 8rem;
     gap: 25px;
+    /* height: 80vh; */
 }
 
 .leftSideConfiguratorWrapper {
+    background-color: white;
     flex-basis: 55%;
+    align-self: flex-start;
+    position: sticky;
+    top: 0;
+    z-index: 3;
 }
 
 .rightSideConfiguratorWrapper {
     flex-basis: 45%;
-    height: 76vh;
-    overflow-y: auto;
-    box-shadow: inset 0px 11px 10px -10px #ccc, inset 0px -11px 10px -10px #ccc;
+    /* box-shadow: inset 0px 11px 10px -10px #ccc, inset 0px -11px 10px -10px #ccc; */
 }
 
 .leftSideConfiguratorWrapper .backButtonAndNameWrapper {
@@ -21,7 +25,7 @@
     gap: 2.5em;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin: 15px auto;
 }
 
 .leftSideConfiguratorWrapper .backButtonAndNameWrapper .backButtonWrapper {
@@ -31,15 +35,15 @@
 }
 
 .leftSideConfiguratorWrapper .backButtonAndNameWrapper .backButtonWrapper img {
-    width: 30px;
+    width: 2.7em;
 }
 
 .leftSideConfiguratorWrapper .backButtonAndNameWrapper .backButtonWrapper p {
-    font-size: small;
+    font-size: 1rem;
 }
 
 .leftSideConfiguratorWrapper .backButtonAndNameWrapper h1 {
-    font-size: x-large;
+    font-size: 1.2rem;
     color: #d1aa68;
 }
 
@@ -53,6 +57,7 @@
 
 .leftSideConfiguratorWrapper .compositionImageWrapper {
     width: 100%;
+    margin: 15px auto;
 }
 
 /*=== OPTIONS STYLING =====*/
@@ -241,6 +246,32 @@
     background-color: #d1ab68ae;
 }
 
+@media (max-width: 1500px) {
+    .leftSideConfiguratorWrapper .compositionImageWrapper img {
+        width: 86%;
+    }
+
+    .leftSideConfiguratorWrapper .backButtonAndNameWrapper .backButtonWrapper {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 950px) {
+    .grandTotalAndOrderNowButtonWrapper {
+        flex-wrap: wrap;
+        row-gap: 10px;
+    }
+    .grandTotalAndOrderNowButtonWrapper .grandTotalWrapper {
+        flex-basis: 100%;
+        justify-content: center;
+    }
+
+    .grandTotalAndOrderNowButtonWrapper button,
+    .grandTotalAndOrderNowButtonWrapper .specsLink {
+        padding: 0.5em 4em;
+    }
+}
+
 @media (max-width: 600px) {
     .compositionConfiguratorWrapper {
         flex-direction: column;
@@ -248,17 +279,11 @@
 
     .leftSideConfiguratorWrapper {
         flex-basis: 100%;
+        position: static;
     }
 
     .rightSideConfiguratorWrapper {
         flex-basis: 100%;
-    }
-
-    .leftSideConfiguratorWrapper
-        .backButtonAndNameWrapper
-        .backButtonWrapper
-        img {
-        width: 40%;
     }
 
     .leftSideConfiguratorWrapper .backButtonAndNameWrapper h1 {

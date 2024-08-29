@@ -51,6 +51,10 @@ function UserAuthenticatedLayout({
         setCounter(numOfProducts);
     };
 
+    const handleCloseShoppingCartModal = () => {
+        setOpenShoppingCartModal(false);
+    };
+
     useEffect(() => {
         const getShoppingCartProducts = async () => {
             try {
@@ -269,7 +273,10 @@ function UserAuthenticatedLayout({
                 onClose={() => setOpenShoppingCartModal(false)}
                 customClass={shoppingCartClasses.shoppingCartModal}
             >
-                <ShoppingCart onShoppingSize={handleShoppingCartSize} />
+                <ShoppingCart
+                    onShoppingSize={handleShoppingCartSize}
+                    onClose={handleCloseShoppingCartModal}
+                />
             </Modal>
             {auth.user && (
                 <button

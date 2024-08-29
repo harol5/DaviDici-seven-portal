@@ -1,7 +1,7 @@
 .shoppingCartButton {
     position: fixed;
-    bottom: 22px;
-    right: 32px;
+    bottom: 1vw;
+    right: 2vh;
     width: 50px;
     padding: 5px;
 }
@@ -37,9 +37,10 @@
 
 .grandTotalAndPlaceOrderButtonWrapper {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    gap: 4em;
+    column-gap: 4em;
     margin-bottom: 1rem;
     position: sticky;
     top: 0;
@@ -59,4 +60,34 @@
     color: white;
     padding: 0.5rem 4rem;
     border-radius: 4px;
+}
+
+@media (max-width: 950px) {
+    .shoppingCartButton {
+        bottom: 2vw;
+        right: 2vh;
+    }
+
+    .shoppingCartModal {
+        padding: 2.5rem 1rem;
+    }
+}
+
+@media (max-width: 700px) {
+    .shoppingCartContent {
+        flex-direction: column;
+    }
+
+    .grandTotalAndPlaceOrderButtonWrapper {
+        row-gap: 2em;
+    }
+
+    .grandTotalAndPlaceOrderButtonWrapper .placeOrderButton {
+        font-size: 0.8rem;
+    }
+
+    .grandTotalAndPlaceOrderButtonWrapper .granTotalWrapper {
+        flex-basis: 100%;
+        text-align: center;
+    }
 }

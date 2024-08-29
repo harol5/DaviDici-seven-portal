@@ -63,3 +63,9 @@
     background-color: rgba(255, 0, 0, 0.443);
     color: white;
 }
+
+@media (max-width: 700px) {
+    .shoppingCartProductCard {
+        width: 100%;
+    }
+}
