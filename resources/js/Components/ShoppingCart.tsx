@@ -110,12 +110,12 @@ function ShoppingCart({
                     productConfig.isDoubleSink
                         ? doubleItemFinalQty
                         : singleItemFinalQty
-                }##bath_one`
+                }##${productConfig.label}`
             );
 
             if (productConfig.washbasin) {
                 skusArr.push(
-                    `${productConfig.washbasin.uscode}!!${productConfig.composition.model}${singleItemFinalQty}##bath_one`
+                    `${productConfig.washbasin.uscode}!!${productConfig.composition.model}${singleItemFinalQty}##${productConfig.label}`
                 );
             }
 
@@ -129,7 +129,7 @@ function ShoppingCart({
                             productConfig.composition.model === "OPERA"
                                 ? doubleItemFinalQty
                                 : singleItemFinalQty
-                        }##bath_one`
+                        }##${productConfig.label}`
                     );
                 });
             }
@@ -137,6 +137,8 @@ function ShoppingCart({
             SKU.push(skusArr.join("~"));
         });
 
+        console.log("=== shopping cart place order fun -> skus generated ===");
+        console.log(SKU);
         router.get("/orders/create-so-num", {
             SKU: SKU.join("~"),
             isShoppingCart: true,

@@ -9,6 +9,7 @@ import Options from "./Options";
 import ConfigurationName from "./ConfigurationName";
 import { ToastContainer, toast } from "react-toastify";
 import { router } from "@inertiajs/react";
+import { isAlphanumericWithSpaces } from "../../utils/helperFunc";
 
 /**
  * TODO;
@@ -338,11 +339,21 @@ function NewBaliConfigurator({
 
     // Manage label (repeated logic)
     const [isMissingLabel, setIsMissingLabel] = useState(false);
+    const [isInvalidLabel, setIsInvalidLabel] = useState(false);
     const handleConfigurationLabel = (name: string) => {
         if (!name) {
             setIsMissingLabel(true);
-            toast.error("missing composition name!!");
-        } else setIsMissingLabel(false);
+        }
+
+        if (name && !isAlphanumericWithSpaces(name)) {
+            setIsInvalidLabel(true);
+            return;
+        }
+
+        if (name && isAlphanumericWithSpaces(name)) {
+            setIsMissingLabel(false);
+            setIsInvalidLabel(false);
+        }
 
         dispatch({ type: "set-label", payload: name });
     };
@@ -547,6 +558,7 @@ function NewBaliConfigurator({
                     crrName={currentConfiguration.label}
                     onChange={handleConfigurationLabel}
                     isMissingLabel={isMissingLabel}
+                    isInvalidLabel={isInvalidLabel}
                 />
                 <Options
                     item="vanity"
