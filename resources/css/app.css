@@ -39,11 +39,6 @@
     font-size: 0.9rem;
 }
 
-img {
-    /* max-width: 100%; */
-    /* margin: auto; */
-}
-
 #flash-message {
 }
 
@@ -102,6 +97,7 @@ img {
     color: white;
     border-radius: 3px;
 }
+
 #form-wrapper form > button {
     padding: 8px 20px;
     backdrop-filter: blur(6px);
@@ -736,7 +732,7 @@ main {
 
 @media (max-width: 1600px) {
     * {
-        font-size: 0.803rem;
+        font-size: 0.87rem;
     }
     /*======= DETAIL PAGE =======*/
     .product-wrapper {

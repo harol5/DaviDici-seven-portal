@@ -326,7 +326,9 @@ function EloraConfigurator({
         } else {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }##bath_one~${washbasinSku}--1##${currentConfiguration.label}`;
+            }##${currentConfiguration.label}~${washbasinSku}--1##${
+                currentConfiguration.label
+            }`;
         }
 
         router.get("/orders/create-so-num", { SKU });
