@@ -9,7 +9,7 @@ import { useMemo, useState } from "react";
 import User from "../../Models/User";
 
 interface OrderDeliveryProps {
-    auth?: User;
+    auth: User;
     rawOrder: OrderModel;
     rawProducts: ProductModel[];
     deliveryInfoByProd: DeliveryInfoModel[];

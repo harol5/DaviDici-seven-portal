@@ -28,6 +28,7 @@ export type model = {
 export type shoppingCartProduct = {
     composition: Composition;
     description: string;
+    label: string;
     vanity: ProductInventory;
     sideUnits: ProductInventory[];
     washbasin: ProductInventory;

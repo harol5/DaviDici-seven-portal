@@ -6,6 +6,8 @@ import type {
     shoppingCartProduct as shoppingCartProductModel,
 } from "../../Models/ExpressProgramModels";
 import Options from "./Options";
+import ConfigurationName from "./ConfigurationName";
+import { ToastContainer, toast } from "react-toastify";
 import { router } from "@inertiajs/react";
 
 /**
@@ -28,6 +30,7 @@ interface CurrentConfiguration {
     isDoubleSink: boolean;
     sideUnit: { baseSku: string; finish: string } | null;
     washbasin: string;
+    label: string;
 }
 
 interface vanityOptions {
@@ -124,7 +127,7 @@ function NewBaliConfigurator({
             all.push({
                 code: washbasin.uscode,
                 imgUrl: `https://${location.hostname}/images/express-program/washbasins/${washbasin.uscode}.webp`,
-                title: `${washbasin.model} ${washbasin.finish}`,
+                title: washbasin.descw,
                 validSkus: [washbasin.uscode],
                 isDisabled: false,
             });
@@ -203,6 +206,7 @@ function NewBaliConfigurator({
               }
             : null,
         washbasin: composition.washbasins[0].uscode,
+        label: "",
     };
 
     const reducer = (
@@ -255,6 +259,12 @@ function NewBaliConfigurator({
             case "reset-configurator":
                 return {
                     ...initialConfiguration,
+                };
+
+            case "set-label":
+                return {
+                    ...state,
+                    label: action.payload,
                 };
 
             default:
@@ -326,6 +336,17 @@ function NewBaliConfigurator({
         dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
     };
 
+    // Manage label (repeated logic)
+    const [isMissingLabel, setIsMissingLabel] = useState(false);
+    const handleConfigurationLabel = (name: string) => {
+        if (!name) {
+            setIsMissingLabel(true);
+            toast.error("missing composition name!!");
+        } else setIsMissingLabel(false);
+
+        dispatch({ type: "set-label", payload: name });
+    };
+
     // Manage grand total
     const [grandTotal, setGrandTotal] = useState(0);
 
@@ -392,8 +413,11 @@ function NewBaliConfigurator({
 
     // Manage order now.
     const handleOrderNow = () => {
-        console.log(composition);
-        console.log(currentConfiguration);
+        if (!currentConfiguration.label) {
+            toast.error("missing composition name!!");
+            setIsMissingLabel(true);
+            return;
+        }
 
         const vanitySku = Object.values(currentConfiguration.vanity).join("-");
         const sideUnitSku = currentConfiguration.sideUnit
@@ -405,28 +429,34 @@ function NewBaliConfigurator({
         if (sideUnitSku && washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }##bath_one~${washbasinSku}--1~${sideUnitSku}--1##bath_one`;
+            }##${
+                currentConfiguration.label
+            }~${washbasinSku}--1~${sideUnitSku}--1##${
+                currentConfiguration.label
+            }`;
         }
 
         if (sideUnitSku && !washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }##bath_one~${sideUnitSku}--1##bath_one`;
+            }##${currentConfiguration.label}~${sideUnitSku}--1##${
+                currentConfiguration.label
+            }`;
         }
 
         if (!sideUnitSku && washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }##bath_one~${washbasinSku}--1##bath_one`;
+            }##${currentConfiguration.label}~${washbasinSku}--1##${
+                currentConfiguration.label
+            }`;
         }
 
         if (!sideUnitSku && !washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }##bath_one`;
+            }##${currentConfiguration.label}`;
         }
-
-        console.log(SKU);
 
         router.get("/orders/create-so-num", { SKU });
     };
@@ -439,6 +469,12 @@ function NewBaliConfigurator({
 
     // Creates object for shopping cart.
     const handleAddToCart = () => {
+        if (!currentConfiguration.label) {
+            toast.error("missing composition name!!");
+            setIsMissingLabel(true);
+            return;
+        }
+
         const vanitySku = Object.values(currentConfiguration.vanity).join("-");
         const sideUnitSku = currentConfiguration.sideUnit
             ? Object.values(currentConfiguration.sideUnit).join("-")
@@ -458,6 +494,7 @@ function NewBaliConfigurator({
         const shoppingCartObj: shoppingCartProductModel = {
             composition: composition,
             description: composition.name,
+            label: currentConfiguration.label,
             vanity: vanityObj!,
             sideUnits: sideUnitsObj ? [sideUnitsObj] : [],
             washbasin: washbasinObj!,
@@ -506,6 +543,11 @@ function NewBaliConfigurator({
                 </section>
             </section>
             <section className={classes.rightSideConfiguratorWrapper}>
+                <ConfigurationName
+                    crrName={currentConfiguration.label}
+                    onChange={handleConfigurationLabel}
+                    isMissingLabel={isMissingLabel}
+                />
                 <Options
                     item="vanity"
                     property="finish"
@@ -570,6 +612,7 @@ function NewBaliConfigurator({
                     </button>
                 </div>
             </section>
+            <ToastContainer />
         </div>
     );
 }

@@ -6,6 +6,8 @@ import type {
     shoppingCartProduct as shoppingCartProductModel,
 } from "../../Models/ExpressProgramModels";
 import Options from "./Options";
+import ConfigurationName from "./ConfigurationName";
+import { ToastContainer, toast } from "react-toastify";
 import { router } from "@inertiajs/react";
 
 /**
@@ -31,6 +33,7 @@ interface CurrentConfiguration {
     isDoubleSideUnit: boolean;
     sideUnit: SideUnit | null;
     washbasin: string;
+    label: string;
 }
 
 interface vanityOptions {
@@ -97,7 +100,7 @@ function OtherModelsConfigurator({
             all.push({
                 code: washbasin.uscode,
                 imgUrl: `https://${location.hostname}/images/express-program/washbasins/${washbasin.uscode}.webp`,
-                title: `${washbasin.model} ${washbasin.finish}`,
+                title: washbasin.descw,
                 validSkus: [washbasin.uscode],
                 isDisabled: false,
             });
@@ -199,6 +202,7 @@ function OtherModelsConfigurator({
               }
             : null,
         washbasin: composition.washbasins[0].uscode,
+        label: "",
     };
 
     const reducer = (
@@ -242,6 +246,12 @@ function OtherModelsConfigurator({
             case "reset-configurator":
                 return {
                     ...initialConfiguration,
+                };
+
+            case "set-label":
+                return {
+                    ...state,
+                    label: action.payload,
                 };
 
             default:
@@ -323,6 +333,17 @@ function OtherModelsConfigurator({
         dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
     };
 
+    // Manage label (repeated logic)
+    const [isMissingLabel, setIsMissingLabel] = useState(false);
+    const handleConfigurationLabel = (name: string) => {
+        if (!name) {
+            toast.error("missing composition name!!");
+            setIsMissingLabel(true);
+        } else setIsMissingLabel(false);
+
+        dispatch({ type: "set-label", payload: name });
+    };
+
     // Manage grand total.
     const [grandTotal, setGrandTotal] = useState(0);
 
@@ -390,8 +411,11 @@ function OtherModelsConfigurator({
 
     // Manage order now.
     const handleOrderNow = () => {
-        console.log(composition);
-        console.log(currentConfiguration);
+        if (!currentConfiguration.label) {
+            toast.error("missing composition name!!");
+            setIsMissingLabel(true);
+            return;
+        }
 
         const vanitySku = Object.values(currentConfiguration.vanity).join("-");
         const sideUnitSku = currentConfiguration.sideUnit
@@ -403,32 +427,34 @@ function OtherModelsConfigurator({
         if (sideUnitSku && washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }##bath_one~${washbasinSku}--1##bath_one~${sideUnitSku}${
+            }##${currentConfiguration.label}~${washbasinSku}--1##${
+                currentConfiguration.label
+            }~${sideUnitSku}${
                 currentConfiguration.isDoubleSideUnit ? "--2" : "--1"
-            }##bath_one`;
+            }##${currentConfiguration.label}`;
         }
 
         if (sideUnitSku && !washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }##bath_one~${sideUnitSku}${
+            }##${currentConfiguration.label}~${sideUnitSku}${
                 currentConfiguration.isDoubleSideUnit ? "--2" : "--1"
-            }##bath_one`;
+            }##${currentConfiguration.label}`;
         }
 
         if (!sideUnitSku && washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }##bath_one~${washbasinSku}--1##bath_one`;
+            }##${currentConfiguration.label}~${washbasinSku}--1##${
+                currentConfiguration.label
+            }`;
         }
 
         if (!sideUnitSku && !washbasinSku) {
             SKU = `${vanitySku}${
                 currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }##bath_one`;
+            }##${currentConfiguration.label}`;
         }
-
-        console.log(SKU);
 
         router.get("/orders/create-so-num", { SKU });
     };
@@ -442,6 +468,12 @@ function OtherModelsConfigurator({
 
     // Creates object for shopping cart.
     const handleAddToCart = () => {
+        if (!currentConfiguration.label) {
+            toast.error("missing composition name!!");
+            setIsMissingLabel(true);
+            return;
+        }
+
         const vanitySku = Object.values(currentConfiguration.vanity).join("-");
         const sideUnitSku = currentConfiguration.sideUnit
             ? Object.values(currentConfiguration.sideUnit).join("-")
@@ -462,6 +494,7 @@ function OtherModelsConfigurator({
         const shoppingCartObj: shoppingCartProductModel = {
             composition: composition,
             description: composition.name,
+            label: currentConfiguration.label,
             vanity: vanityObj!,
             sideUnits: sideUnitsObj,
             washbasin: washbasinObj!,
@@ -510,6 +543,11 @@ function OtherModelsConfigurator({
                 </section>
             </section>
             <section className={classes.rightSideConfiguratorWrapper}>
+                <ConfigurationName
+                    crrName={currentConfiguration.label}
+                    onChange={handleConfigurationLabel}
+                    isMissingLabel={isMissingLabel}
+                />
                 <Options
                     item="vanity"
                     property="finish"
@@ -578,6 +616,7 @@ function OtherModelsConfigurator({
                     </button>
                 </div>
             </section>
+            <ToastContainer />
         </div>
     );
 }

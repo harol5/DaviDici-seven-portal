@@ -64,10 +64,35 @@
 
 /*=== OPTIONS STYLING =====*/
 
-.titleAndOptionsWrapper {
+.titleAndOptionsWrapper,
+.configurationName {
     margin: 1.4rem;
     padding: 0.8rem 1rem;
     box-shadow: 0px 2px 2px 1px #0000001f;
+}
+
+.configurationName {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 1em;
+    align-items: center;
+}
+
+.configurationName label {
+    font-size: 1rem;
+}
+
+.configurationName input {
+    border: 1px solid;
+    border-radius: 3px;
+    padding: 0.2em 0.5em;
+    font-size: 1rem;
+    flex-grow: 1;
+}
+
+.configurationName p {
+    flex-basis: 100%;
+    color: red;
 }
 
 .title {
