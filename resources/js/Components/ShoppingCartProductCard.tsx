@@ -45,7 +45,7 @@ function ShoppingCartProductCard({
                 <div className={classes.productDetails}>
                     <span>
                         <h2>COMPOSITION NAME:</h2>
-                        <p>{product.label.toUpperCase()}</p>
+                        <p>{product.label?.toUpperCase()}</p>
                     </span>
                     <span>
                         <h2>VANITY:</h2>

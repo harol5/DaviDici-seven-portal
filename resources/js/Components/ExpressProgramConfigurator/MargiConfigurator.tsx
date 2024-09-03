@@ -10,6 +10,7 @@ import ConfigurationName from "./ConfigurationName";
 import { ToastContainer, toast } from "react-toastify";
 import { router } from "@inertiajs/react";
 import { isAlphanumericWithSpaces } from "../../utils/helperFunc";
+import { ProductInventory } from "../../Models/Product";
 
 /**
  * TODO;
@@ -19,6 +20,35 @@ import { isAlphanumericWithSpaces } from "../../utils/helperFunc";
 interface MargiConfiguratorProps {
     composition: Composition;
     onAddToCart: (shoppingCartProduct: shoppingCartProductModel) => void;
+}
+
+interface vanityOptions {
+    baseSku: string;
+    drawerOptions: Option[];
+    handleOptions: Option[];
+    finishOptions: Option[];
+}
+
+interface otherMargiProducts {
+    "WALL UNIT": ProductInventory[];
+}
+
+interface wallUnitOptions {
+    baseSku: string;
+    sizeOptions: Option[];
+    doorStyleOptions: Option[];
+    finishOptions: Option[];
+}
+
+interface margiOpenUnitOptions {
+    baseSku: string;
+    finishOptions: Option[];
+}
+
+interface margiSideCabinetOptions {
+    baseSku: string;
+    doorStyleAndHandleOptions: Option[];
+    finishOptions: Option[];
 }
 
 interface margiOpenUnit {
@@ -32,36 +62,28 @@ interface margiSideCabinet {
     finish: string;
 }
 
+interface wallUnit {
+    baseSku: string;
+    size: string;
+    doorStyle: string;
+    finish: string;
+}
+
 interface CurrentConfiguration {
     vanity: { baseSku: string; drawer: string; handle: string; finish: string };
     isDoubleSink: boolean;
     sideUnit: margiOpenUnit | margiSideCabinet | null;
     sideUnitType: string;
     washbasin: string;
+    wallUnit: wallUnit | null;
     label: string;
-}
-
-interface vanityOptions {
-    baseSku: string;
-    drawerOptions: Option[];
-    handleOptions: Option[];
-    finishOptions: Option[];
-}
-interface margiOpenUnitOptions {
-    baseSku: string;
-    finishOptions: Option[];
-}
-interface margiSideCabinetOptions {
-    baseSku: string;
-    doorStyleAndHandleOptions: Option[];
-    finishOptions: Option[];
 }
 
 function MargiConfigurator({
     composition,
     onAddToCart,
 }: MargiConfiguratorProps) {
-    // iterate over vanitites array and analize sku in order to get the valid options to get final sku. -------------|
+    // |====== creates vanity options ======|
     const initialVanityOptions: vanityOptions = useMemo(() => {
         let baseSku: string = "";
         const drawerOptionsMap = new Map();
@@ -139,8 +161,8 @@ function MargiConfigurator({
 
     const [vanityOptions, setVanityOptions] = useState(initialVanityOptions);
 
-    // iterate over washbasin array and created Options array. ----------------------|
-    // this logic is the same for the other collection. mMUST CREATE A FUNTION THAT WRAPS TO AVOID REPETICION.
+    // |====== creates washbasin options ======|
+    // this logic is the same for the other collection. MUST CREATE A FUNTION THAT WRAPS TO AVOID REPETICION.
     const washbasinOptions: Option[] = useMemo(() => {
         const all: Option[] = [];
         composition.washbasins.forEach((washbasin) => {
@@ -165,7 +187,7 @@ function MargiConfigurator({
         return all;
     }, []);
 
-    // if sideUnits array is not empty
+    // |====== creates side unit options ======|
     const initialSideUnitOptions:
         | margiSideCabinetOptions
         | margiOpenUnitOptions
@@ -288,7 +310,110 @@ function MargiConfigurator({
         initialSideUnitOptions
     );
 
-    // create objetct that will hold current configuration. if only one option, make it default. --------------|
+    // |====== creates wall unit options ======|
+    const initialWallUnitOptions: wallUnitOptions | null = useMemo(() => {
+        if (!composition.otherProductsAvailable) return null;
+
+        //TODO: somehow i need to check what kind of keys the "otherProductsAvailable" has.
+        const otherProducts =
+            composition.otherProductsAvailable as otherMargiProducts;
+
+        let baseSku: string = "";
+        const sizeOptionsMap = new Map();
+        const doorStyleOptionsMap = new Map();
+        const finishOptionsMap = new Map();
+
+        for (
+            let index = 0;
+            index < otherProducts["WALL UNIT"].length;
+            index++
+        ) {
+            const wallUnit = otherProducts["WALL UNIT"][index];
+
+            if (wallUnit.uscode === "21-P1-NE") continue;
+
+            const codes = wallUnit.uscode.split("-");
+            // the following logic is only for margi because each model has a different sku number order.
+            // EX: 68 - WU  -   012    -   F     -    M23
+            //    base sku     size    door/style    finish
+
+            // only get base sku from first wall unit.
+            if (!baseSku) {
+                baseSku = `${codes[0]}-${codes[1]}`;
+            }
+
+            // == generate size options. ==
+            if (!sizeOptionsMap.has(`${codes[2]}`)) {
+                sizeOptionsMap.set(`${codes[2]}`, {
+                    code: codes[2],
+                    imgUrl: `https://portal.davidici.com/images/express-program/not-image.jpg`,
+                    title: `WALL UNIT ${codes[2]}"`,
+                    validSkus: [],
+                    isDisabled: false,
+                });
+            }
+
+            sizeOptionsMap.get(`${codes[2]}`).validSkus.push(wallUnit.uscode);
+
+            // == generate door style options. ==
+            const doorStyle = codes[3];
+            const doorStyleTitle =
+                doorStyle === "F"
+                    ? "FRAME"
+                    : doorStyle === "S"
+                    ? "STRIPES"
+                    : doorStyle === "G"
+                    ? "GRID"
+                    : doorStyle === "P"
+                    ? "PLAIN"
+                    : "";
+            if (!doorStyleOptionsMap.has(`${codes[3]}`)) {
+                doorStyleOptionsMap.set(`${codes[3]}`, {
+                    code: codes[3],
+                    imgUrl: `https://portal.davidici.com/images/express-program/not-image.jpg`,
+                    title: doorStyleTitle,
+                    validSkus: [],
+                    isDisabled: false,
+                });
+            }
+            doorStyleOptionsMap
+                .get(`${codes[3]}`)
+                .validSkus.push(wallUnit.uscode);
+
+            // == generate finish options. ==
+            let finishTitle = wallUnit.finish;
+
+            if (wallUnit.finish.includes("MATT LACQ. ")) {
+                finishTitle = finishTitle.replace("MATT LACQ. ", "");
+            }
+
+            if (!finishOptionsMap.has(`${codes[4]}`)) {
+                finishOptionsMap.set(`${codes[4]}`, {
+                    code: codes[4],
+                    imgUrl: `https://portal.davidici.com/images/express-program/finishes/${wallUnit.finish}.jpg`,
+                    title: finishTitle,
+                    validSkus: [],
+                    isDisabled: false,
+                });
+            }
+            finishOptionsMap.get(`${codes[4]}`).validSkus.push(wallUnit.uscode);
+        }
+
+        return {
+            baseSku,
+            sizeOptions: Object.values(Object.fromEntries(sizeOptionsMap)),
+            doorStyleOptions: Object.values(
+                Object.fromEntries(doorStyleOptionsMap)
+            ),
+            finishOptions: Object.values(Object.fromEntries(finishOptionsMap)),
+        };
+    }, []);
+
+    const [wallUnitOptions, setWallUnitOptions] = useState(
+        initialWallUnitOptions
+    );
+
+    // |====== create objetct that will hold current configuration. if only one option, make it default. ======|
     const initialConfiguration: CurrentConfiguration = useMemo(() => {
         let sideUnit: margiOpenUnit | margiSideCabinet | null = null;
         let sideUnitType = "";
@@ -331,6 +456,26 @@ function MargiConfigurator({
             }
         }
 
+        let wallUnit = null;
+        if (wallUnitOptions) {
+            const options = wallUnitOptions as wallUnitOptions;
+            wallUnit = {
+                baseSku: options.baseSku,
+                size:
+                    options.sizeOptions.length === 1
+                        ? options.sizeOptions[0].code
+                        : "",
+                doorStyle:
+                    options.doorStyleOptions.length === 1
+                        ? options.doorStyleOptions[0].code
+                        : "",
+                finish:
+                    options.finishOptions.length === 1
+                        ? options.finishOptions[0].code
+                        : "",
+            };
+        }
+
         return {
             vanity: {
                 baseSku: vanityOptions.baseSku,
@@ -348,6 +493,7 @@ function MargiConfigurator({
             sideUnit,
             sideUnitType,
             washbasin: composition.washbasins[0].uscode,
+            wallUnit,
             label: "",
         };
     }, []);
@@ -408,6 +554,33 @@ function MargiConfigurator({
                     } as margiSideCabinet,
                 };
 
+            case "set-wallUnit-size":
+                return {
+                    ...state,
+                    wallUnit: {
+                        ...state.wallUnit,
+                        size: action.payload,
+                    } as wallUnit,
+                };
+
+            case "set-wallUnit-doorStyle":
+                return {
+                    ...state,
+                    wallUnit: {
+                        ...state.wallUnit,
+                        doorStyle: action.payload,
+                    } as wallUnit,
+                };
+
+            case "set-wallUnit-finish":
+                return {
+                    ...state,
+                    wallUnit: {
+                        ...state.wallUnit,
+                        finish: action.payload,
+                    } as wallUnit,
+                };
+
             case "reset-configurator":
                 return {
                     ...initialConfiguration,
@@ -436,7 +609,6 @@ function MargiConfigurator({
         option: string
     ) => {
         if (item === "vanity") {
-            // const copyOptions = { ...vanityOptions };
             const copyOptions = structuredClone(vanityOptions);
 
             for (const drawersOption of copyOptions.drawerOptions) {
@@ -556,6 +728,54 @@ function MargiConfigurator({
             }
         }
 
+        if (item === "wallUnit") {
+            const copyOptions = structuredClone(wallUnitOptions);
+
+            for (const sizeOption of copyOptions?.sizeOptions!) {
+                if (property === "size") break;
+                for (let i = 0; i < sizeOption.validSkus.length; i++) {
+                    const validSku = sizeOption.validSkus[i];
+                    if (validSku.includes(option)) {
+                        sizeOption.isDisabled = false;
+                        break;
+                    }
+
+                    if (i === sizeOption.validSkus.length - 1)
+                        sizeOption.isDisabled = true;
+                }
+            }
+
+            for (const doorStyleOption of copyOptions?.doorStyleOptions!) {
+                if (property === "door style") break;
+                for (let i = 0; i < doorStyleOption.validSkus.length; i++) {
+                    const validSku = doorStyleOption.validSkus[i];
+                    if (validSku.includes(option)) {
+                        doorStyleOption.isDisabled = false;
+                        break;
+                    }
+
+                    if (i === doorStyleOption.validSkus.length - 1)
+                        doorStyleOption.isDisabled = true;
+                }
+            }
+
+            for (const finishOption of copyOptions?.finishOptions!) {
+                if (property === "finish") break;
+                for (let i = 0; i < finishOption.validSkus.length; i++) {
+                    const validSku = finishOption.validSkus[i];
+                    if (validSku.includes(option)) {
+                        finishOption.isDisabled = false;
+                        break;
+                    }
+
+                    if (i === finishOption.validSkus.length - 1)
+                        finishOption.isDisabled = true;
+                }
+            }
+
+            setWallUnitOptions(copyOptions);
+        }
+
         dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
     };
 
@@ -565,12 +785,9 @@ function MargiConfigurator({
     useEffect(() => {
         const vanityCodesArray = [];
         for (const key in currentConfiguration.vanity) {
-            const value =
-                currentConfiguration.vanity[
-                    key as "baseSku" | "drawer" | "handle" | "finish"
-                ];
-
-            if (value) vanityCodesArray.push(value);
+            const property = key as "baseSku" | "drawer" | "handle" | "finish";
+            const code = currentConfiguration.vanity[property];
+            if (code) vanityCodesArray.push(code);
         }
 
         const sideUnitCodesArray = [];
@@ -701,6 +918,7 @@ function MargiConfigurator({
     const handleResetConfigurator = () => {
         setVanityOptions(initialVanityOptions);
         setSideUnitOptions(initialSideUnitOptions);
+        setWallUnitOptions(initialWallUnitOptions);
         setGrandTotal(0);
         dispatch({ type: "reset-configurator", payload: "" });
     };
@@ -745,6 +963,9 @@ function MargiConfigurator({
 
         onAddToCart(shoppingCartObj);
     };
+
+    console.log(composition);
+    console.log(currentConfiguration);
 
     return (
         <div className={classes.compositionConfiguratorWrapper}>
@@ -825,6 +1046,42 @@ function MargiConfigurator({
                     crrOptionSelected={currentConfiguration.washbasin}
                     onOptionSelected={handleOptionSelected}
                 />
+
+                {wallUnitOptions && (
+                    <>
+                        <Options
+                            item="wallUnit"
+                            property="size"
+                            title="SELECT WALL UNIT SIZE"
+                            options={wallUnitOptions.sizeOptions}
+                            crrOptionSelected={
+                                currentConfiguration.wallUnit!.size
+                            }
+                            onOptionSelected={handleOptionSelected}
+                        />
+                        <Options
+                            item="wallUnit"
+                            property="doorStyle"
+                            title="SELECT WALL UNIT DOOR STYLE"
+                            options={wallUnitOptions.doorStyleOptions}
+                            crrOptionSelected={
+                                currentConfiguration.wallUnit!.doorStyle
+                            }
+                            onOptionSelected={handleOptionSelected}
+                        />
+                        <Options
+                            item="wallUnit"
+                            property="finish"
+                            title="SELECT WALL UNIT FINISH"
+                            options={wallUnitOptions.finishOptions}
+                            crrOptionSelected={
+                                currentConfiguration.wallUnit!.finish
+                            }
+                            onOptionSelected={handleOptionSelected}
+                        />
+                    </>
+                )}
+
                 <div className={classes.grandTotalAndOrderNowButtonWrapper}>
                     <div className={classes.grandTotalWrapper}>
                         <h1 className={classes.label}>Grand Total:</h1>

@@ -630,6 +630,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
             Object.fromEntries(sinkPositionsForFilterMap)
         );
 
+        console.log(otherProductsMap);
+
         return {
             initialCompositions,
             initialSizesForFilter,
