@@ -18,8 +18,7 @@ class FoxproApi{
         ])->withBody($js_data,'application/json')->get($api_url);
         
         // foxpro program 'GETINVSTOCK' does return a malform data json.
-        if($options['action'] === 'GETINVSTOCK') {
-            // info(json_decode(preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $response->body()), true));
+        if($options['action'] === 'GETINVSTOCK') {            
             $data = json_decode(utf8_encode($response->body()), true);                
         }else {
             $data = $response->json();

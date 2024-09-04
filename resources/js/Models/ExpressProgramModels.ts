@@ -38,3 +38,32 @@ export type shoppingCartProduct = {
     quantity: number;
     grandTotal: number;
 };
+
+export type otherProductsAvailable = {
+    accessories: ProductInventory[];
+    drawersVanities: ProductInventory[];
+    mirrors: ProductInventory[];
+    tallUnitsLinenClosets: ProductInventory[];
+    tops: ProductInventory[];
+    vesselSinks: ProductInventory[];
+    wallUnits: ProductInventory[];
+};
+
+export const modelsAvailable = {
+    BRERA: 1,
+    ELORA: 2,
+    "FLORA 17": 3,
+    "FLORA 20": 4,
+    KORA: 5,
+    "KORA XL": 6,
+    MARGI: 7,
+    MINI: 8,
+    "NEW BALI": 9,
+    "NEW YORK": 10,
+    OPERA: 11,
+    ORIALI: 12,
+    PETRA: 13,
+    RAFFAELLO: 14,
+};
+
+export type modelsAvailableKeys = keyof typeof modelsAvailable;
