@@ -69,6 +69,17 @@ export type CurrentConfiguration = {
     wallUnit: wallUnit | null;
     wallUnitSku: string;
     wallUnitPrice: number;
+    mirrorCabinet: {
+        baseSku: string;
+        size: string;
+        finish: string;
+    };
+    mirrorCabinetSku: string;
+    mirrorCabinetPrice: number;
+    ledMirror: string;
+    ledMirrorPrice: number;
+    openCompMirror: string;
+    openCompMirrorPrice: number;
     label: string;
 };
 
@@ -77,4 +88,5 @@ export const SkuLengths = {
     vanity: 4,
     openUnit: 2,
     sideCabinet: 3,
+    mirrorCabinet: 3,
 };

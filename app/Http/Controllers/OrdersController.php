@@ -577,7 +577,7 @@ class OrdersController extends Controller
 
         // $response = FoxproApi::call([
         //     'action' => 'GETEMAILINFO',
-        //     'params' => ['rveloz@prosein.us'],
+        //     'params' => ['Kadir.demir@expresscabinet.com'],
         //     'keep_session' => false, 
         // ]);
 

@@ -27,6 +27,7 @@ export type model = {
 
 export type shoppingCartProduct = {
     composition: Composition;
+    configuration: any;
     description: string;
     label: string;
     vanity: ProductInventory;
