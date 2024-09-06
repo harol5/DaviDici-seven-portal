@@ -1,0 +1,23 @@
+.itemPropertiesAccordion {
+    background-color: rgb(254, 254, 254);
+
+    .itemPropertiesHeader {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1em;
+        border-top: 1px solid #d1aa68;
+
+        .headerTitle {
+            font-size: 1.5rem;
+            color: #d1aa68;
+        }
+
+        .triangleDownIcon {
+            width: 4%;
+        }
+    }
+
+    .propertiesWrapper {
+    }
+}

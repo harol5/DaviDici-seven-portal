@@ -25,6 +25,11 @@ export type model = {
     url: string;
 };
 
+export type otherItems = {
+    wallUnit: ProductInventory[];
+    mirror: ProductInventory[];
+};
+
 export type shoppingCartProduct = {
     composition: Composition;
     configuration: any;
@@ -33,7 +38,7 @@ export type shoppingCartProduct = {
     vanity: ProductInventory;
     sideUnits: ProductInventory[];
     washbasin: ProductInventory;
-    otherProducts: ProductInventory[];
+    otherProducts: otherItems;
     isDoubleSink: boolean;
     isDoubleSideunit: boolean;
     quantity: number;

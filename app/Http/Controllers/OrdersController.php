@@ -567,20 +567,7 @@ class OrdersController extends Controller
     }
 
     public function testApi()
-    {
-        
-        // $response = FoxproApi::call([
-        //     'action' => 'GETUSERINFO',
-        //     'params' => ['lmarcano@prosein.us'],
-        //     'keep_session' => false, 
-        // ]);
-
-        // $response = FoxproApi::call([
-        //     'action' => 'GETEMAILINFO',
-        //     'params' => ['Kadir.demir@expresscabinet.com'],
-        //     'keep_session' => false, 
-        // ]);
-
+    {                
         // return Inertia::render('Test',['response' => $response]);
         return response(['response' => $response])->header('Content-Type', 'application/json');
     }

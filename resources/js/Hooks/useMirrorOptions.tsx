@@ -1,17 +1,12 @@
 import { useMemo } from "react";
 import { ProductInventory } from "../Models/Product";
 import type { Option } from "../Models/ExpressProgramModels";
+import type { MirrorCabinetsOptions } from "../Models/MirrorConfigTypes";
 
 type MirrorCategories = {
     mirrorCabinets: ProductInventory[];
     openCompMirrors: ProductInventory[];
     ledMirrors: ProductInventory[];
-};
-
-export type MirrorCabinetsOptions = {
-    baseSku: string;
-    sizeOptions: Option[];
-    finishOptions: Option[];
 };
 
 function useMirrorOptions(mirrors: ProductInventory[]) {
