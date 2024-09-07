@@ -1,5 +1,5 @@
 import type { ProductInventory } from "./Product";
-import type { finish } from "./ExpressProgramModels";
+import type { finish, otherProductsAvailable } from "./ExpressProgramModels";
 
 export type Composition = {
     model: string;
@@ -12,5 +12,5 @@ export type Composition = {
     finishes: finish[];
     sideUnits: ProductInventory[];
     washbasins: ProductInventory[];
-    otherProductsAvailable: {} | null;
+    otherProductsAvailable: otherProductsAvailable;
 };

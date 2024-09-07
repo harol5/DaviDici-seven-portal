@@ -1,10 +1,13 @@
 import { useMemo } from "react";
 import { ProductInventory } from "../Models/Product";
 import { Composition } from "../Models/Composition";
-import type {
+import {
     finish,
     model,
     sinkPosition,
+    otherProductsAvailable,
+    modelsAvailable,
+    modelsAvailableKeys,
 } from "../Models/ExpressProgramModels";
 
 function useExpressProgramProducts(rawProducts: ProductInventory[]) {
@@ -12,6 +15,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         const vanitiesAndSideUnitsMap = new Map();
         const otherProductsMap = new Map();
         const validCompositionSizesMap = new Map();
+        const sharedItemsMap = new Map();
 
         rawProducts.forEach((product) => {
             if (product.item === "VANITY" || product.item === "SIDE UNIT") {
@@ -64,13 +68,21 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                     modelMap.get(product.model).push(product);
                 }
             } else {
-                if (!otherProductsMap.has(product.model))
-                    otherProductsMap.set(product.model, new Map());
+                if (modelsAvailable[product.model as modelsAvailableKeys]) {
+                    if (!otherProductsMap.has(product.model))
+                        otherProductsMap.set(product.model, new Map());
 
-                const itemsMap = otherProductsMap.get(product.model);
-                if (!itemsMap.has(product.item)) itemsMap.set(product.item, []);
+                    const itemsMap = otherProductsMap.get(product.model);
+                    if (!itemsMap.has(product.item))
+                        itemsMap.set(product.item, []);
 
-                itemsMap.get(product.item).push(product);
+                    itemsMap.get(product.item).push(product);
+                } else {
+                    if (!sharedItemsMap.has(product.item))
+                        sharedItemsMap.set(product.item, []);
+
+                    sharedItemsMap.get(product.item).push(product);
+                }
             }
 
             // adds valid sizes composition to the map so we can use later.
@@ -120,6 +132,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
             vanitiesAndSideUnitsMap,
             validCompositionSizesMap,
             otherProductsMap,
+            sharedItemsMap,
         };
     };
 
@@ -155,15 +168,45 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
 
     const generateOtherProductsObj = (
         otherProducts: Map<string, Map<string, ProductInventory[]>>,
+        sharedItemsMap: Map<string, ProductInventory[]>,
         model: string
     ) => {
-        if (otherProducts.get(model)) {
-            return Object.fromEntries(
-                otherProducts.get(model) as Map<string, ProductInventory[]>
-            );
+        const otherProductsObj: otherProductsAvailable = {
+            accessories: [],
+            drawersVanities: [],
+            mirrors: [],
+            tallUnitsLinenClosets: [],
+            tops: [],
+            vesselSinks: [],
+            wallUnits: [],
+        };
+
+        if (otherProducts.has(model)) {
+            const itemsMap: Map<string, ProductInventory[]> =
+                otherProducts.get(model)!;
+
+            const LacqTops = sharedItemsMap.get("TOP") ?? [];
+            const modelTops = itemsMap.get("TOP") ?? [];
+
+            otherProductsObj.accessories = itemsMap.get("ACCESSORY") ?? [];
+
+            otherProductsObj.drawersVanities =
+                itemsMap.get("DRAWER/VANITY") ?? [];
+
+            otherProductsObj.mirrors = sharedItemsMap.get("MIRROR") ?? [];
+
+            otherProductsObj.tallUnitsLinenClosets =
+                itemsMap.get("TALL UNIT/LINEN CLOSET") ?? [];
+
+            otherProductsObj.tops = [...modelTops, ...LacqTops];
+
+            otherProductsObj.vesselSinks =
+                sharedItemsMap.get("VESSEL SINK") ?? [];
+
+            otherProductsObj.wallUnits = itemsMap.get("WALL UNIT") ?? [];
         }
 
-        return null;
+        return otherProductsObj;
     };
 
     const generateCenteredSinkCompositions = (
@@ -175,7 +218,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         size: string,
         sinkPositionMeasure: string,
         washbasingAvailable: ProductInventory[],
-        otherProducts: Map<string, Map<string, ProductInventory[]>>
+        otherProducts: Map<string, Map<string, ProductInventory[]>>,
+        sharedItemsMap: Map<string, ProductInventory[]>
     ) => {
         const vanities = listOfVanities.sort(
             (a: ProductInventory, b: ProductInventory) => a.msrp - b.msrp
@@ -210,6 +254,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
             washbasins,
             otherProductsAvailable: generateOtherProductsObj(
                 otherProducts,
+                sharedItemsMap,
                 model
             ),
         });
@@ -224,7 +269,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         size: string,
         sinkPositionMeasure: string,
         washbasingAvailable: ProductInventory[],
-        otherProducts: Map<string, Map<string, []>>
+        otherProducts: Map<string, Map<string, []>>,
+        sharedItemsMap: Map<string, ProductInventory[]>
     ) => {
         for (const [doorStyle, margiVanityList] of doorStylesMap) {
             const finishes = generateFinishes(
@@ -263,6 +309,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                 washbasins,
                 otherProductsAvailable: generateOtherProductsObj(
                     otherProducts,
+                    sharedItemsMap,
                     model
                 ),
             });
@@ -279,7 +326,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         sinkPositionMeasure: string,
         position: string,
         washbasingAvailable: ProductInventory[],
-        otherProducts: Map<string, Map<string, []>>
+        otherProducts: Map<string, Map<string, []>>,
+        sharedItemsMap: Map<string, ProductInventory[]>
     ) => {
         const vanities = itemsMap
             .get("VANITY")
@@ -357,6 +405,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
             washbasins,
             otherProductsAvailable: generateOtherProductsObj(
                 otherProducts,
+                sharedItemsMap,
                 model
             ),
         });
@@ -372,7 +421,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         sinkPositionMeasure: string,
         position: string,
         washbasingAvailable: ProductInventory[],
-        otherProducts: Map<string, Map<string, []>>
+        otherProducts: Map<string, Map<string, []>>,
+        sharedItemsMap: Map<string, ProductInventory[]>
     ) => {
         const doorStylesMap = itemsMap.get("VANITY");
         const sideUnits = itemsMap.get("SIDE UNIT") ?? [];
@@ -424,6 +474,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                 washbasins,
                 otherProductsAvailable: generateOtherProductsObj(
                     otherProducts,
+                    sharedItemsMap,
                     model
                 ),
             });
@@ -436,6 +487,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
             vanitiesAndSideUnitsMap,
             validCompositionSizesMap,
             otherProductsMap,
+            sharedItemsMap,
         } = createProductsTree();
 
         const initialCompositions: Composition[] = [];
@@ -444,7 +496,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         const sinkPositionsForFilterMap = new Map<string, sinkPosition>();
         const modelsForFilterMap = new Map<string, model>();
 
-        // Traverse throght validCompositionSizesMap map so we can create all possible compositions.
+        // Traverse throght validCompositionSizesMap so we can create all possible compositions.
         // SIZE -> SINK SET UP -> SINK POSITION.
         for (const [size, sinkPositionsMap] of validCompositionSizesMap) {
             // this is not a valid size, therefore, we continue. we must fix that in foxpro.
@@ -479,7 +531,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                                 size,
                                 sinkPositionMeasure,
                                 crrItems,
-                                otherProductsMap
+                                otherProductsMap,
+                                sharedItemsMap
                             );
                         else
                             generateCenteredSinkCompositions(
@@ -491,7 +544,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                                 size,
                                 sinkPositionMeasure,
                                 crrItems,
-                                otherProductsMap
+                                otherProductsMap,
+                                sharedItemsMap
                             );
                     }
                 } else {
@@ -582,7 +636,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                                     sinkPositionMeasure,
                                     position,
                                     listOfWasbasins,
-                                    otherProductsMap
+                                    otherProductsMap,
+                                    sharedItemsMap
                                 );
                             else
                                 generateComplexCompositions(
@@ -595,7 +650,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                                     sinkPositionMeasure,
                                     position,
                                     listOfWasbasins,
-                                    otherProductsMap
+                                    otherProductsMap,
+                                    sharedItemsMap
                                 );
                         }
                     }
@@ -629,6 +685,9 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         const initialSinkPositionsForFilter: sinkPosition[] = Object.values(
             Object.fromEntries(sinkPositionsForFilterMap)
         );
+
+        console.log(otherProductsMap);
+        console.log(sharedItemsMap);
 
         return {
             initialCompositions,

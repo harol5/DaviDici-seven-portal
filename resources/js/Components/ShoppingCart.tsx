@@ -19,7 +19,8 @@ function ShoppingCart({
     const [crrShoppingCartProducts, setShoppingCartProducts] = useState<
         shoppingCartProductModel[]
     >([]);
-
+    console.log("=== Shopping Cart Component ===");
+    console.log(crrShoppingCartProducts);
     const handleRemoveProduct = async (
         product: shoppingCartProductModel,
         productIndex: number

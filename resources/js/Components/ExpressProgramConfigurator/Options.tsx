@@ -38,7 +38,7 @@ function Options({
     };
 
     return (
-        <section className={classes.titleAndOptionsWrapper}>
+        <section className={classes.headerAndOptionsWrapper}>
             <h1 className={classes.title}>{title}</h1>
             <div className={classes.OptionsWrapper}>
                 {options.map((option, index) => {
