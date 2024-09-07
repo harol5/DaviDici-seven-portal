@@ -1293,7 +1293,7 @@ function MargiConfigurator({
 
     const isValidConfiguration = () => {
         if (!currentConfiguration.label) {
-            toast.error("missing composition name!!");
+            alert("Looks like COMPOSITION NAME is missing!!   . ");
             setIsMissingLabel(true);
             return false;
         }
