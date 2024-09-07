@@ -1227,11 +1227,10 @@ function MargiConfigurator({
                     isMirrorCabinetSelected: true,
                 }));
 
-            skuAndPrice.price > 0 &&
-                setMirrorCabinetStatus((prev) => ({
-                    ...prev,
-                    isMirrorCabinetValid: true,
-                }));
+            setMirrorCabinetStatus((prev) => ({
+                ...prev,
+                isMirrorCabinetValid: skuAndPrice.price > 0,
+            }));
         }
 
         if (item === "ledMirror") {
