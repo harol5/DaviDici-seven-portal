@@ -378,36 +378,23 @@ function MargiConfigurator({
     // |====== MIRRORS LOGIC -> get all mirror options ======|
     const {
         initialMirrorCabinetOptions,
-        initialLedMirrorOptions: ledMirrorOptions,
-        initialOpenCompMirrorOptions: openCompMirrorOptions,
+        mirrorCabinetOptions,
+        setMirrorCabinetOptions,
+        ledMirrorOptions,
+        openCompMirrorOptions,
+        mirrorCabinetStatus,
+        setMirrorCabinetStatus,
+        crrMirrorCategory,
+        setCrrMirrorCategory,
+        handleSwitchCrrMirrorCategory: updateCurrentMirrorCategory,
+        handleMirrorOptionSelected: updateMirrorOptions,
     } = useMirrorOptions(composition.otherProductsAvailable.mirrors);
-
-    // mirror cabinets are the only one that has a complex sku
-    const [mirrorCabinetOptions, setMirrorCabinetOptions] = useState(
-        initialMirrorCabinetOptions
-    );
-
-    const [mirrorCabinetStatus, setMirrorCabinetStatus] = useState({
-        isMirrorCabinetSelected: false,
-        isMirrorCabinetValid: false,
-    });
-
-    const [crrMirrorCategory, setCrrMirrorCategory] =
-        useState<mirrorCategories>("mirrorCabinet");
 
     const handleSwitchCrrMirrorCategory = (
         mirrorCategory: mirrorCategories
     ) => {
-        if (crrMirrorCategory === "mirrorCabinet") {
-            setMirrorCabinetOptions(initialMirrorCabinetOptions);
-            setMirrorCabinetStatus({
-                isMirrorCabinetSelected: false,
-                isMirrorCabinetValid: false,
-            });
-        }
-
+        updateCurrentMirrorCategory(mirrorCategory);
         dispatch({ type: `reset-${crrMirrorCategory}`, payload: "" });
-        setCrrMirrorCategory(mirrorCategory);
     };
 
     // |====== create objetct that will hold current configuration. if only one option, make it default. ======|
@@ -730,6 +717,8 @@ function MargiConfigurator({
                     wallUnitPrice: initialConfiguration.wallUnitPrice,
                 };
 
+            // |===vvvvvv SAME MIRROR CASES FOR ALL MODELS VVVVV===|
+
             case "set-mirrorCabinet-size":
                 return {
                     ...state,
@@ -830,7 +819,7 @@ function MargiConfigurator({
         initialConfiguration
     );
 
-    // Manage grand total
+    // |===== GRAND TOTAL =====|
     const grandTotal = useMemo(() => {
         const {
             vanityPrice,
@@ -876,6 +865,10 @@ function MargiConfigurator({
             return grandTotal;
         }
     }, [currentConfiguration]);
+
+    // |===== Manage label =====| (repeated logic)
+    const [isMissingLabel, setIsMissingLabel] = useState(false);
+    const [isInvalidLabel, setIsInvalidLabel] = useState(false);
 
     // |====== Events ======|
     const handleOptionSelected = (
@@ -1168,37 +1161,9 @@ function MargiConfigurator({
             });
         }
 
+        // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
+
         if (item === "mirrorCabinet") {
-            const copyOptions = structuredClone(mirrorCabinetOptions);
-
-            for (const sizeOption of copyOptions.sizeOptions) {
-                if (property === "size") break;
-                for (let i = 0; i < sizeOption.validSkus.length; i++) {
-                    const validSku = sizeOption.validSkus[i];
-                    if (validSku.includes(option)) {
-                        sizeOption.isDisabled = false;
-                        break;
-                    }
-
-                    if (i === sizeOption.validSkus.length - 1)
-                        sizeOption.isDisabled = true;
-                }
-            }
-
-            for (const finishOption of copyOptions.finishOptions) {
-                if (property === "finish") break;
-                for (let i = 0; i < finishOption.validSkus.length; i++) {
-                    const validSku = finishOption.validSkus[i];
-                    if (validSku.includes(option)) {
-                        finishOption.isDisabled = false;
-                        break;
-                    }
-
-                    if (i === finishOption.validSkus.length - 1)
-                        finishOption.isDisabled = true;
-                }
-            }
-
             const mirrorCabinetCurrentConfiguration = structuredClone(
                 currentConfiguration.mirrorCabinet
             );
@@ -1219,18 +1184,7 @@ function MargiConfigurator({
                 payload: skuAndPrice.price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
-            setMirrorCabinetOptions(copyOptions);
-
-            !mirrorCabinetStatus.isMirrorCabinetSelected &&
-                setMirrorCabinetStatus((prev) => ({
-                    ...prev,
-                    isMirrorCabinetSelected: true,
-                }));
-
-            setMirrorCabinetStatus((prev) => ({
-                ...prev,
-                isMirrorCabinetValid: skuAndPrice.price > 0,
-            }));
+            updateMirrorOptions(item, property, option, skuAndPrice.price > 0);
         }
 
         if (item === "ledMirror") {
@@ -1270,9 +1224,6 @@ function MargiConfigurator({
         }
     };
 
-    // Manage label (repeated logic)
-    const [isMissingLabel, setIsMissingLabel] = useState(false);
-    const [isInvalidLabel, setIsInvalidLabel] = useState(false);
     const handleConfigurationLabel = (name: string) => {
         if (!name) {
             setIsMissingLabel(true);
@@ -1293,7 +1244,7 @@ function MargiConfigurator({
 
     const isValidConfiguration = () => {
         if (!currentConfiguration.label) {
-            alert("Looks like COMPOSITION NAME is missing!!   . ");
+            alert("Looks like COMPOSITION NAME is missing!!");
             setIsMissingLabel(true);
             return false;
         }
@@ -1303,7 +1254,7 @@ function MargiConfigurator({
             !wallUnitStatus.isWallUnitValid
         ) {
             alert(
-                "Looks like you forgot to select all available wall unit options. Either clear the wall unit section or select the missing option(s). "
+                "Looks like you forgot to select all available WALL UNIT OPTIONS. Either clear the wall unit section or select the missing option(s). "
             );
             return false;
         }
@@ -1313,7 +1264,7 @@ function MargiConfigurator({
             !mirrorCabinetStatus.isMirrorCabinetValid
         ) {
             alert(
-                "Looks like you forgot to select all available mirror cabinet options. Either clear the mirror cabinet section or select the missing option(s). "
+                "Looks like you forgot to select all available MIRROR CABINET OPTIONS. Either clear the mirror cabinet section or select the missing option(s). "
             );
             return false;
         }
@@ -1321,7 +1272,6 @@ function MargiConfigurator({
         return true;
     };
 
-    // Manage order now.
     const handleOrderNow = () => {
         if (!isValidConfiguration()) return;
 
@@ -1357,6 +1307,7 @@ function MargiConfigurator({
             : "";
         wallUnitFormattedSku && allFormattedSkus.push(wallUnitFormattedSku);
 
+        // ========= VVVV MIRROR (REPEATED LOGIC) ==========VVVVV
         const mirrorCabinetFormattedSku = mirrorCabinetSku
             ? `${mirrorCabinetSku}!!${composition.model}--1##${currentConfiguration.label}`
             : "";
@@ -1450,6 +1401,8 @@ function MargiConfigurator({
 
         const otherProducts = {
             wallUnit: [] as ProductInventory[],
+            tallUnit: [] as ProductInventory[],
+            accessory: [] as ProductInventory[],
             mirror: [] as ProductInventory[],
         };
 

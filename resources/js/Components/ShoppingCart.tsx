@@ -135,6 +135,18 @@ function ShoppingCart({
                 });
             }
 
+            for (const item in productConfig.otherProducts) {
+                const itemProducts =
+                    productConfig.otherProducts[
+                        item as keyof typeof productConfig.otherProducts
+                    ];
+                itemProducts.forEach((product) => {
+                    skusArr.push(
+                        `${product.uscode}!!${productConfig.composition.model}${singleItemFinalQty}##${productConfig.label}`
+                    );
+                });
+            }
+
             SKU.push(skusArr.join("~"));
         });
 

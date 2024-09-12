@@ -7,3 +7,19 @@ export type MirrorCabinetsOptions = {
     sizeOptions: Option[];
     finishOptions: Option[];
 };
+
+export type MirrorCabinet = {
+    baseSku: string;
+    size: string;
+    finish: string;
+};
+
+export type MirrorConfig = {
+    mirrorCabinet: MirrorCabinet;
+    mirrorCabinetSku: string;
+    mirrorCabinetPrice: number;
+    ledMirror: string;
+    ledMirrorPrice: number;
+    openCompMirror: string;
+    openCompMirrorPrice: number;
+};

@@ -370,6 +370,13 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
             ];
         }
 
+        if (model === "NEW YORK" && sinkPositionMeasure === "(24+12+24)") {
+            sideUnits = [
+                ...itemsMap.get("SIDE UNIT").get("LEFT"),
+                ...itemsMap.get("SIDE UNIT").get("RIGHT"),
+            ];
+        }
+
         const getStartingPrice = () => {
             const vanityMsrp =
                 position === "DOUBLE" ? vanities[0].msrp * 2 : vanities[0].msrp;
@@ -585,16 +592,17 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
 
                             // IMPORTANT!! - "value" could be an array or a map(NEW YORK <position, arr>).
                             for (const [model, value] of modelsMap) {
-                                if (
-                                    model === "NEW YORK" &&
-                                    sinkPositionMeasure === "(24+12+24)"
-                                )
-                                    continue;
-
                                 if (!validModels.has(model))
                                     validModels.set(model, new Map());
 
                                 validModels.get(model).set("SIDE UNIT", value);
+
+                                // if (
+                                //     model === "NEW YORK" &&
+                                //     sinkPositionMeasure === "(24+12+24)"
+                                // ) {
+                                //     console.log(validModels);
+                                // }
                             }
                         } else {
                             // Once we got the valid model from the side units,
@@ -604,11 +612,11 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
 
                             // IMPORTANT!! - "value" could be an array or a map(MARGI <door style, arr>).
                             for (const [model, value] of modelsMap) {
-                                if (
-                                    model === "NEW YORK" &&
-                                    sinkPositionMeasure === "(24+12+24)"
-                                )
-                                    continue;
+                                // if (
+                                //     model === "NEW YORK" &&
+                                //     sinkPositionMeasure === "(24+12+24)"
+                                // )
+                                //     continue;
 
                                 //we can get only vanities that can be pair with a side unit.
                                 if (!validModels.has(model)) continue;
@@ -685,9 +693,6 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         const initialSinkPositionsForFilter: sinkPosition[] = Object.values(
             Object.fromEntries(sinkPositionsForFilterMap)
         );
-
-        console.log(otherProductsMap);
-        console.log(sharedItemsMap);
 
         return {
             initialCompositions,

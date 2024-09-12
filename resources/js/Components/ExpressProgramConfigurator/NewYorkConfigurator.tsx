@@ -10,6 +10,25 @@ import ConfigurationName from "./ConfigurationName";
 import { ToastContainer, toast } from "react-toastify";
 import { router } from "@inertiajs/react";
 import { isAlphanumericWithSpaces } from "../../utils/helperFunc";
+import { ProductInventory } from "../../Models/Product";
+import {
+    CurrentConfiguration,
+    Vanity,
+    SideUnit,
+    VanityOptions,
+    SideUnitOptions,
+    SkuLengths,
+    WallUnitOptions,
+    TallUnitOptions,
+    WallUnit,
+    TallUnit,
+} from "../../Models/NewYorkConfigTypes";
+import useMirrorOptions from "../../Hooks/useMirrorOptions";
+import {
+    MirrorCabinet,
+    mirrorCategories,
+} from "../../Models/MirrorConfigTypes";
+import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 
 /**
  * TODO;
@@ -21,41 +40,12 @@ interface NewYorkConfiguratorProps {
     onAddToCart: (shoppingCartProduct: shoppingCartProductModel) => void;
 }
 
-interface SideUnit {
-    baseSku: string;
-    handle: string;
-    position: string;
-    finish: string;
-}
-
-interface CurrentConfiguration {
-    vanity: { baseSku: string; handle: string; finish: string };
-    isDoubleSink: boolean;
-    isDoubleSideUnit: boolean;
-    sideUnit: SideUnit | null;
-    washbasin: string;
-    label: string;
-}
-
-interface vanityOptions {
-    baseSku: string;
-    handleOptions: Option[];
-    finishOptions: Option[];
-}
-
-interface sideUnitOptions {
-    baseSku: string;
-    handleOptions: Option[];
-    position: string;
-    finishOptions: Option[];
-}
-
 function NewYorkConfigurator({
     composition,
     onAddToCart,
 }: NewYorkConfiguratorProps) {
-    // iterate over vanitites array and analize sku in order to get the valid options to get final sku. -------------|
-    const initialVanityOptions: vanityOptions = useMemo(() => {
+    // |===== VANITY =====|
+    const initialVanityOptions: VanityOptions = useMemo(() => {
         let baseSku: string = "";
         const handleOptionsMap = new Map();
         const finishOptionsMap = new Map();
@@ -106,7 +96,7 @@ function NewYorkConfigurator({
 
     const [vanityOptions, setVanityOptions] = useState(initialVanityOptions);
 
-    // iterate over washbasin array and created Options array. ----------------------|
+    // |===== WASHBASIN =====|
     const washbasinOptions: Option[] = useMemo(() => {
         const all: Option[] = [];
         composition.washbasins.forEach((washbasin) => {
@@ -131,8 +121,8 @@ function NewYorkConfigurator({
         return all;
     }, []);
 
-    // if sideUnits array is not empty
-    const initialSideUnitOptions: sideUnitOptions | null = useMemo(() => {
+    // |===== SIDE UNIT =====|
+    const initialSideUnitOptions: SideUnitOptions | null = useMemo(() => {
         if (composition.sideUnits.length === 0) return null;
 
         let baseSku: string = "";
@@ -190,19 +180,234 @@ function NewYorkConfigurator({
         initialSideUnitOptions
     );
 
-    // create objetct that will hold current configuration. if only one option, make it default. --------------|
-    const initialConfiguration: CurrentConfiguration = {
-        vanity: {
+    // |===== WALL UNIT =====|
+    const initialWallUnitOptions: WallUnitOptions | null = useMemo(() => {
+        const { wallUnits } = composition.otherProductsAvailable;
+
+        if (wallUnits.length === 0) return null;
+
+        let baseSku: string = "";
+        const handleOptionsMap = new Map();
+        const finishOptionsMap = new Map();
+
+        wallUnits.forEach((wallUnit) => {
+            // the following logic is only for NEW YORK because each model has a different sku number order.
+            // EX:   65 - 012  -   WUB     -    BI
+            //       base sku    handle      finish
+
+            const codes = wallUnit.uscode.split("-");
+
+            if (!baseSku) {
+                baseSku = `${codes[0]}-${codes[1]}`;
+            }
+
+            if (!handleOptionsMap.has(`${codes[2]}`)) {
+                handleOptionsMap.set(`${codes[2]}`, {
+                    code: codes[2],
+                    imgUrl: `https://portal.davidici.com/images/express-program/NEW YORK/options/${
+                        codes[2] === "WUB" ? "BLACK HANDLE" : "CHROMED HANDLE"
+                    }.webp`,
+                    title:
+                        codes[2] === "WUB" ? "BLACK HANDLE" : "CHROMED HANDLE",
+                    validSkus: [],
+                    isDisabled: false,
+                });
+            }
+            handleOptionsMap.get(`${codes[2]}`).validSkus.push(wallUnit.uscode);
+
+            if (!finishOptionsMap.has(`${codes[3]}`)) {
+                finishOptionsMap.set(`${codes[3]}`, {
+                    code: codes[3],
+                    imgUrl: `https://portal.davidici.com/images/express-program/finishes/${wallUnit.finish}.jpg`,
+                    title: wallUnit.finish,
+                    validSkus: [],
+                    isDisabled: false,
+                });
+            }
+            finishOptionsMap.get(`${codes[3]}`).validSkus.push(wallUnit.uscode);
+        });
+
+        return {
+            baseSku,
+            handleOptions: Object.values(Object.fromEntries(handleOptionsMap)),
+            finishOptions: Object.values(Object.fromEntries(finishOptionsMap)),
+        };
+    }, []);
+
+    const [wallUnitOptions, setWallUnitOptions] = useState(
+        initialWallUnitOptions
+    );
+
+    const [wallUnitStatus, setWallUnitStatus] = useState({
+        isWallUnitSelected: false,
+        isWallUnitValid: false,
+    });
+
+    // |===== TALL UNIT =====|
+    const initialTallUnitOptions: TallUnitOptions | null = useMemo(() => {
+        const { tallUnitsLinenClosets } = composition.otherProductsAvailable;
+
+        if (tallUnitsLinenClosets.length === 0) return null;
+
+        let baseSku: string = "";
+        const handleOptionsMap = new Map();
+        const finishOptionsMap = new Map();
+
+        tallUnitsLinenClosets.forEach((tallUnit) => {
+            // the following logic is only for NEW YORK because each model has a different sku number order.
+            // EX:   65 - 016  -   TUB     -    BI
+            //       base sku    handle      finish
+
+            const codes = tallUnit.uscode.split("-");
+
+            if (!baseSku) {
+                baseSku = `${codes[0]}-${codes[1]}`;
+            }
+
+            if (!handleOptionsMap.has(`${codes[2]}`)) {
+                handleOptionsMap.set(`${codes[2]}`, {
+                    code: codes[2],
+                    imgUrl: `https://portal.davidici.com/images/express-program/NEW YORK/options/${
+                        codes[2] === "TUB" ? "BLACK HANDLE" : "CHROMED HANDLE"
+                    }.webp`,
+                    title:
+                        codes[2] === "TUB" ? "BLACK HANDLE" : "CHROMED HANDLE",
+                    validSkus: [],
+                    isDisabled: false,
+                });
+            }
+            handleOptionsMap.get(`${codes[2]}`).validSkus.push(tallUnit.uscode);
+
+            if (!finishOptionsMap.has(`${codes[3]}`)) {
+                finishOptionsMap.set(`${codes[3]}`, {
+                    code: codes[3],
+                    imgUrl: `https://portal.davidici.com/images/express-program/finishes/${tallUnit.finish}.jpg`,
+                    title: tallUnit.finish,
+                    validSkus: [],
+                    isDisabled: false,
+                });
+            }
+            finishOptionsMap.get(`${codes[3]}`).validSkus.push(tallUnit.uscode);
+        });
+
+        return {
+            baseSku,
+            handleOptions: Object.values(Object.fromEntries(handleOptionsMap)),
+            finishOptions: Object.values(Object.fromEntries(finishOptionsMap)),
+        };
+    }, []);
+
+    const [tallUnitOptions, setTallUnitOptions] = useState(
+        initialTallUnitOptions
+    );
+
+    const [tallUnitStatus, setTallUnitStatus] = useState({
+        isTallUnitSelected: false,
+        isTallUnitValid: false,
+    });
+
+    // |===== ACCESSORIES =====|
+    const accessoryOptions: Option[] = useMemo(() => {
+        const { accessories } = composition.otherProductsAvailable;
+        const options: Option[] = [];
+        accessories.forEach((accessory) => {
+            options.push({
+                code: accessory.uscode,
+                imgUrl: `https://${location.hostname}/images/express-program/washbasins/${accessory.uscode}.webp`,
+                title: accessory.descw,
+                validSkus: [accessory.uscode],
+                isDisabled: false,
+            });
+        });
+        return options;
+    }, []);
+
+    // |====== MIRRORS LOGIC -> get all mirror options ======|
+    const {
+        initialMirrorCabinetOptions,
+        mirrorCabinetOptions,
+        setMirrorCabinetOptions,
+        ledMirrorOptions,
+        openCompMirrorOptions,
+        mirrorCabinetStatus,
+        setMirrorCabinetStatus,
+        crrMirrorCategory,
+        setCrrMirrorCategory,
+        handleSwitchCrrMirrorCategory: updateCurrentMirrorCategory,
+        handleMirrorOptionSelected: updateMirrorOptions,
+    } = useMirrorOptions(composition.otherProductsAvailable.mirrors);
+
+    const handleSwitchCrrMirrorCategory = (
+        mirrorCategory: mirrorCategories
+    ) => {
+        updateCurrentMirrorCategory(mirrorCategory);
+        dispatch({ type: `reset-${crrMirrorCategory}`, payload: "" });
+    };
+
+    // |===== INITIAL CONFIG =====|
+    const getSkuAndPrice = (
+        item: string,
+        itemObj: Vanity | SideUnit | {},
+        products: ProductInventory[],
+        wholeSku?: string
+    ) => {
+        const skuAndPrice = { sku: "", price: 0 };
+
+        if (wholeSku) {
+            for (const crrProduct of products) {
+                if (crrProduct.uscode === wholeSku) {
+                    skuAndPrice.price = crrProduct.msrp;
+                    skuAndPrice.sku = wholeSku;
+                    break;
+                }
+            }
+        } else {
+            const itemCodesArray: string[] = [];
+
+            for (const key in itemObj) {
+                const property = key as keyof typeof itemObj;
+                const code = itemObj[property];
+                if (code) itemCodesArray.push(code);
+            }
+
+            if (
+                itemCodesArray.length !==
+                SkuLengths[item as keyof typeof SkuLengths]
+            ) {
+                return skuAndPrice;
+            }
+
+            const productSku = itemCodesArray.join("-");
+
+            for (const crrProduct of products) {
+                if (crrProduct.uscode === productSku) {
+                    skuAndPrice.price = crrProduct.msrp;
+                    skuAndPrice.sku = productSku;
+                    break;
+                }
+            }
+        }
+
+        return skuAndPrice;
+    };
+
+    const initialConfiguration: CurrentConfiguration = useMemo(() => {
+        const vanity: Vanity = {
             baseSku: vanityOptions.baseSku,
             handle:
                 vanityOptions.handleOptions.length === 1
                     ? vanityOptions.handleOptions[0].code
                     : "",
             finish: vanityOptions.finishOptions[0].code,
-        },
-        isDoubleSink: composition.name.includes("DOUBLE"),
-        isDoubleSideUnit: composition.name.includes("(12+24+12)"),
-        sideUnit: sideUnitOptions
+        };
+
+        const vanitySkuAndPrice = getSkuAndPrice(
+            "vanity",
+            vanity,
+            composition.vanities
+        );
+
+        const sideUnit: SideUnit | null = sideUnitOptions
             ? {
                   baseSku: sideUnitOptions.baseSku,
                   handle:
@@ -215,14 +420,67 @@ function NewYorkConfigurator({
                           ? sideUnitOptions.finishOptions[0].code
                           : "",
               }
-            : null,
-        washbasin: composition.washbasins[0].uscode,
-        label: "",
-    };
+            : null;
+
+        let sideUnitSkuAndPrice =
+            sideUnit &&
+            getSkuAndPrice("sideUnit", sideUnit, composition.vanities);
+
+        const wallUnit: WallUnit | null = wallUnitOptions
+            ? {
+                  baseSku: wallUnitOptions.baseSku,
+                  handle: "",
+                  finish: "",
+              }
+            : null;
+
+        const tallUnit: TallUnit | null = tallUnitOptions
+            ? {
+                  baseSku: tallUnitOptions.baseSku,
+                  handle: "",
+                  finish: "",
+              }
+            : null;
+
+        const mirrorCabinet: MirrorCabinet = {
+            baseSku: mirrorCabinetOptions.baseSku,
+            size: "",
+            finish: "",
+        };
+
+        return {
+            label: "",
+            vanity,
+            vanitySku: vanitySkuAndPrice.sku,
+            vanityPrice: vanitySkuAndPrice.price,
+            isDoubleSink: composition.name.includes("DOUBLE"),
+            isDoubleSideUnit: composition.name.includes("(12+24+12)"),
+            sideUnit,
+            sideUnitSku: sideUnitSkuAndPrice ? sideUnitSkuAndPrice.sku : "",
+            sideUnitPrice: sideUnitSkuAndPrice ? sideUnitSkuAndPrice.price : 0,
+            washbasin: composition.washbasins[0].uscode,
+            washbasinPrice: composition.washbasins[0].msrp,
+            wallUnit,
+            wallUnitSku: "",
+            wallUnitPrice: 0,
+            tallUnit,
+            tallUnitSku: "",
+            tallUnitPrice: 0,
+            accessory: "",
+            accessoryPrice: 0,
+            mirrorCabinet,
+            mirrorCabinetSku: "",
+            mirrorCabinetPrice: 0,
+            ledMirror: "",
+            ledMirrorPrice: 0,
+            openCompMirror: "",
+            openCompMirrorPrice: 0,
+        };
+    }, []);
 
     const reducer = (
         state: CurrentConfiguration,
-        action: { type: string; payload: string }
+        action: { type: string; payload: string | number }
     ) => {
         switch (action.type) {
             case "set-vanity-handle":
@@ -230,7 +488,7 @@ function NewYorkConfigurator({
                     ...state,
                     vanity: {
                         ...state.vanity,
-                        handle: action.payload,
+                        handle: action.payload as string,
                     },
                 };
 
@@ -239,14 +497,32 @@ function NewYorkConfigurator({
                     ...state,
                     vanity: {
                         ...state.vanity,
-                        finish: action.payload,
+                        finish: action.payload as string,
                     },
+                };
+
+            case "set-vanity-sku":
+                return {
+                    ...state,
+                    vanitySku: action.payload as string,
+                };
+
+            case "set-vanity-price":
+                return {
+                    ...state,
+                    vanityPrice: action.payload as number,
                 };
 
             case "set-washbasin-type":
                 return {
                     ...state,
-                    washbasin: action.payload,
+                    washbasin: action.payload as string,
+                };
+
+            case "set-washbasin-price":
+                return {
+                    ...state,
+                    washbasinPrice: action.payload as number,
                 };
 
             case "set-sideUnit-handle":
@@ -254,7 +530,7 @@ function NewYorkConfigurator({
                     ...state,
                     sideUnit: {
                         ...state.sideUnit,
-                        handle: action.payload,
+                        handle: action.payload as string,
                     } as SideUnit,
                 };
 
@@ -263,8 +539,200 @@ function NewYorkConfigurator({
                     ...state,
                     sideUnit: {
                         ...state.sideUnit,
-                        finish: action.payload,
+                        finish: action.payload as string,
                     } as SideUnit,
+                };
+
+            case "set-sideUnit-sku":
+                return {
+                    ...state,
+                    sideUnitSku: action.payload as string,
+                };
+
+            case "set-sideUnit-price":
+                return {
+                    ...state,
+                    sideUnitPrice: action.payload as number,
+                };
+
+            case "set-wallUnit-handle":
+                return {
+                    ...state,
+                    wallUnit: {
+                        ...state.wallUnit,
+                        handle: action.payload as string,
+                    } as WallUnit,
+                };
+
+            case "set-wallUnit-finish":
+                return {
+                    ...state,
+                    wallUnit: {
+                        ...state.wallUnit,
+                        finish: action.payload as string,
+                    } as WallUnit,
+                };
+
+            case "set-wallUnit-sku":
+                return {
+                    ...state,
+                    wallUnitSku: action.payload as string,
+                };
+
+            case "set-wallUnit-price":
+                return {
+                    ...state,
+                    wallUnitPrice: action.payload as number,
+                };
+
+            case "reset-wallUnit":
+                return {
+                    ...state,
+                    wallUnit: {
+                        ...(initialConfiguration.wallUnit as WallUnit),
+                    },
+                    wallUnitSku: initialConfiguration.wallUnitSku,
+                    wallUnitPrice: initialConfiguration.wallUnitPrice,
+                };
+
+            case "set-tallUnit-handle":
+                return {
+                    ...state,
+                    tallUnit: {
+                        ...state.tallUnit,
+                        handle: action.payload as string,
+                    } as TallUnit,
+                };
+
+            case "set-tallUnit-finish":
+                return {
+                    ...state,
+                    tallUnit: {
+                        ...state.tallUnit,
+                        finish: action.payload as string,
+                    } as TallUnit,
+                };
+
+            case "set-tallUnit-sku":
+                return {
+                    ...state,
+                    tallUnitSku: action.payload as string,
+                };
+
+            case "set-tallUnit-price":
+                return {
+                    ...state,
+                    tallUnitPrice: action.payload as number,
+                };
+
+            case "reset-tallUnit":
+                return {
+                    ...state,
+                    tallUnit: {
+                        ...(initialConfiguration.tallUnit as TallUnit),
+                    },
+                    tallUnitSku: initialConfiguration.tallUnitSku,
+                    tallUnitPrice: initialConfiguration.tallUnitPrice,
+                };
+
+            case "set-accessory-type":
+                return {
+                    ...state,
+                    accessory: action.payload as string,
+                };
+
+            case "set-accessory-price":
+                return {
+                    ...state,
+                    accessoryPrice: action.payload as number,
+                };
+
+            case "reset-accessory":
+                return {
+                    ...state,
+                    accessory: initialConfiguration.accessory,
+                    accessoryPrice: initialConfiguration.accessoryPrice,
+                };
+
+            // |===vvvvvv SAME MIRROR CASES FOR ALL MODELS VVVVV===|
+
+            case "set-mirrorCabinet-size":
+                return {
+                    ...state,
+                    mirrorCabinet: {
+                        ...state.mirrorCabinet,
+                        size: action.payload as string,
+                    },
+                };
+
+            case "set-mirrorCabinet-finish":
+                return {
+                    ...state,
+                    mirrorCabinet: {
+                        ...state.mirrorCabinet,
+                        finish: action.payload as string,
+                    },
+                };
+
+            case "set-mirrorCabinet-sku":
+                return {
+                    ...state,
+                    mirrorCabinetSku: action.payload as string,
+                };
+
+            case "set-mirrorCabinet-price":
+                return {
+                    ...state,
+                    mirrorCabinetPrice: action.payload as number,
+                };
+
+            case "reset-mirrorCabinet":
+                return {
+                    ...state,
+                    mirrorCabinet: {
+                        ...initialConfiguration.mirrorCabinet,
+                    },
+                    mirrorCabinetPrice: initialConfiguration.mirrorCabinetPrice,
+                    mirrorCabinetSku: initialConfiguration.mirrorCabinetSku,
+                };
+
+            case "set-ledMirror-type":
+                return {
+                    ...state,
+                    ledMirror: action.payload as string,
+                };
+
+            case "set-ledMirror-price":
+                return {
+                    ...state,
+                    ledMirrorPrice: action.payload as number,
+                };
+
+            case "reset-ledMirror":
+                return {
+                    ...state,
+                    ledMirror: initialConfiguration.ledMirror,
+                    ledMirrorPrice: initialConfiguration.ledMirrorPrice,
+                };
+
+            case "set-openCompMirror-type":
+                return {
+                    ...state,
+                    openCompMirror: action.payload as string,
+                };
+
+            case "set-openCompMirror-price":
+                return {
+                    ...state,
+                    openCompMirrorPrice: action.payload as number,
+                };
+
+            case "reset-openCompMirror":
+                return {
+                    ...state,
+                    openCompMirror: initialConfiguration.openCompMirror,
+                    openCompMirrorPrice:
+                        initialConfiguration.openCompMirrorPrice,
                 };
 
             case "reset-configurator":
@@ -275,7 +743,7 @@ function NewYorkConfigurator({
             case "set-label":
                 return {
                     ...state,
-                    label: action.payload,
+                    label: action.payload as string,
                 };
 
             default:
@@ -288,14 +756,73 @@ function NewYorkConfigurator({
         initialConfiguration
     );
 
-    // |====== Events ======|
+    // |===== Manage label =====| (repeated logic)
+    const [isMissingLabel, setIsMissingLabel] = useState(false);
+    const [isInvalidLabel, setIsInvalidLabel] = useState(false);
+
+    // |===== GRAND TOTAL =====|
+    const grandTotal = useMemo(() => {
+        const {
+            vanityPrice,
+            washbasinPrice,
+            isDoubleSink,
+            isDoubleSideUnit,
+            sideUnit,
+            sideUnitPrice,
+            wallUnitPrice,
+            tallUnitPrice,
+            accessoryPrice,
+            mirrorCabinetPrice,
+            ledMirrorPrice,
+            openCompMirrorPrice,
+        } = currentConfiguration;
+
+        /**
+         * in order to allow the user to order or add product to
+         * the shopping cart, they must select the mandatory options.
+         *
+         * for only vanities, user must select all the options that
+         * allow the program to generate a valid sku number
+         *
+         * if the product includes a side unit, user also must select
+         * all the options that allow the program to generate the sku for the side unit.
+         *
+         * following if statement checks that all the conditions mentioned
+         * above are meet.
+         */
+
+        if (vanityPrice === 0 || (sideUnit && sideUnitPrice === 0)) return 0;
+        else {
+            const finalVanityPrice = isDoubleSink
+                ? vanityPrice * 2
+                : vanityPrice;
+
+            const finalSideUnitPrice = isDoubleSideUnit
+                ? sideUnitPrice * 2
+                : sideUnitPrice;
+
+            const grandTotal =
+                finalVanityPrice +
+                washbasinPrice +
+                finalSideUnitPrice +
+                wallUnitPrice +
+                tallUnitPrice +
+                mirrorCabinetPrice +
+                ledMirrorPrice +
+                openCompMirrorPrice +
+                accessoryPrice;
+
+            return grandTotal;
+        }
+    }, [currentConfiguration]);
+
+    // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (
         item: string,
         property: string,
         option: string
     ) => {
         if (item === "vanity") {
-            // const copyOptions = { ...vanityOptions };
             const copyOptions = structuredClone(vanityOptions);
 
             // Checks if any handle option should be disabled.
@@ -328,14 +855,33 @@ function NewYorkConfigurator({
                 }
             }
 
+            const vanityCurrentConfiguration = structuredClone(
+                currentConfiguration.vanity
+            );
+
+            vanityCurrentConfiguration[
+                property as keyof typeof vanityCurrentConfiguration
+            ] = option;
+
+            const skuAndPrice = getSkuAndPrice(
+                item,
+                vanityCurrentConfiguration,
+                composition.vanities
+            );
+
+            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({
+                type: `set-${item}-price`,
+                payload: skuAndPrice.price,
+            });
+            dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setVanityOptions(copyOptions);
         }
 
         if (item === "sideUnit") {
-            // const copyOptions = { ...sideUnitOptions } as sideUnitOptions;
             const copyOptions = structuredClone(
                 sideUnitOptions
-            ) as sideUnitOptions;
+            ) as SideUnitOptions;
 
             // because this models dont have other option, this logic is useless but i lkept it for maybe future updates
             for (const finishOption of copyOptions.finishOptions) {
@@ -366,15 +912,265 @@ function NewYorkConfigurator({
                 }
             }
 
+            const sideUnitCurrentConfiguration = structuredClone(
+                currentConfiguration.sideUnit
+            ) as SideUnit;
+
+            sideUnitCurrentConfiguration[
+                property as keyof typeof sideUnitCurrentConfiguration
+            ] = option;
+
+            const skuAndPrice = getSkuAndPrice(
+                item,
+                sideUnitCurrentConfiguration,
+                composition.sideUnits
+            );
+
+            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({
+                type: `set-${item}-price`,
+                payload: skuAndPrice.price,
+            });
+            dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setSideUnitOptions(copyOptions);
         }
 
-        dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
+        if (item === "washbasin") {
+            const skuAndPrice = getSkuAndPrice(
+                item,
+                {},
+                composition.washbasins,
+                option
+            );
+
+            dispatch({
+                type: `set-${item}-${property}`,
+                payload: skuAndPrice.sku,
+            });
+            dispatch({
+                type: `set-${item}-price`,
+                payload: skuAndPrice.price,
+            });
+        }
+
+        if (item === "wallUnit") {
+            const copyOptions = structuredClone(
+                wallUnitOptions
+            ) as WallUnitOptions;
+
+            // Checks if any handle option should be disabled.
+            for (const handleOption of copyOptions.handleOptions) {
+                if (property === "handle") break;
+                for (let i = 0; i < handleOption.validSkus.length; i++) {
+                    const validSku = handleOption.validSkus[i];
+                    if (validSku.includes(option)) {
+                        handleOption.isDisabled = false;
+                        break;
+                    }
+
+                    if (i === handleOption.validSkus.length - 1)
+                        handleOption.isDisabled = true;
+                }
+            }
+
+            // Checks if any finish option should be disabled.
+            for (const finishOption of copyOptions.finishOptions) {
+                if (property === "finish") break;
+                for (let i = 0; i < finishOption.validSkus.length; i++) {
+                    const validSku = finishOption.validSkus[i];
+                    if (validSku.includes(option)) {
+                        finishOption.isDisabled = false;
+                        break;
+                    }
+
+                    if (i === finishOption.validSkus.length - 1)
+                        finishOption.isDisabled = true;
+                }
+            }
+
+            const wallUnitCurrentConfig = structuredClone(
+                currentConfiguration.wallUnit
+            ) as WallUnit;
+            wallUnitCurrentConfig[
+                property as keyof typeof wallUnitCurrentConfig
+            ] = option;
+
+            const skuAndPrice = getSkuAndPrice(
+                item,
+                wallUnitCurrentConfig,
+                composition.otherProductsAvailable.wallUnits
+            );
+
+            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({
+                type: `set-${item}-price`,
+                payload: skuAndPrice.price,
+            });
+            dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
+            setWallUnitOptions(copyOptions);
+
+            setWallUnitStatus((prev) => ({
+                ...prev,
+                isWallUnitValid: skuAndPrice.price > 0,
+            }));
+
+            !wallUnitStatus.isWallUnitSelected &&
+                setWallUnitStatus((prev) => ({
+                    ...prev,
+                    isWallUnitSelected: true,
+                }));
+        }
+
+        if (item === "tallUnit") {
+            const copyOptions = structuredClone(
+                tallUnitOptions
+            ) as TallUnitOptions;
+
+            // Checks if any handle option should be disabled.
+            for (const handleOption of copyOptions.handleOptions) {
+                if (property === "handle") break;
+                for (let i = 0; i < handleOption.validSkus.length; i++) {
+                    const validSku = handleOption.validSkus[i];
+                    if (validSku.includes(option)) {
+                        handleOption.isDisabled = false;
+                        break;
+                    }
+
+                    if (i === handleOption.validSkus.length - 1)
+                        handleOption.isDisabled = true;
+                }
+            }
+
+            // Checks if any finish option should be disabled.
+            for (const finishOption of copyOptions.finishOptions) {
+                if (property === "finish") break;
+                for (let i = 0; i < finishOption.validSkus.length; i++) {
+                    const validSku = finishOption.validSkus[i];
+                    if (validSku.includes(option)) {
+                        finishOption.isDisabled = false;
+                        break;
+                    }
+
+                    if (i === finishOption.validSkus.length - 1)
+                        finishOption.isDisabled = true;
+                }
+            }
+
+            const tallUnitCurrentConfig = structuredClone(
+                currentConfiguration.tallUnit
+            ) as TallUnit;
+
+            tallUnitCurrentConfig[
+                property as keyof typeof tallUnitCurrentConfig
+            ] = option;
+
+            const skuAndPrice = getSkuAndPrice(
+                item,
+                tallUnitCurrentConfig,
+                composition.otherProductsAvailable.tallUnitsLinenClosets
+            );
+
+            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({
+                type: `set-${item}-price`,
+                payload: skuAndPrice.price,
+            });
+            dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
+            setTallUnitOptions(copyOptions);
+
+            setTallUnitStatus((prev) => ({
+                ...prev,
+                isTallUnitValid: skuAndPrice.price > 0,
+            }));
+
+            !tallUnitStatus.isTallUnitSelected &&
+                setTallUnitStatus((prev) => ({
+                    ...prev,
+                    isTallUnitSelected: true,
+                }));
+        }
+
+        if (item === "accessory") {
+            const skuAndPrice = getSkuAndPrice(
+                item,
+                {},
+                composition.otherProductsAvailable.accessories,
+                option
+            );
+
+            dispatch({
+                type: `set-${item}-${property}`,
+                payload: skuAndPrice.sku,
+            });
+            dispatch({
+                type: `set-${item}-price`,
+                payload: skuAndPrice.price,
+            });
+        }
+
+        // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
+
+        if (item === "mirrorCabinet") {
+            const mirrorCabinetCurrentConfiguration = structuredClone(
+                currentConfiguration.mirrorCabinet
+            );
+
+            mirrorCabinetCurrentConfiguration[
+                property as keyof typeof mirrorCabinetCurrentConfiguration
+            ] = option;
+
+            const skuAndPrice = getSkuAndPrice(
+                item,
+                mirrorCabinetCurrentConfiguration,
+                composition.otherProductsAvailable.mirrors
+            );
+
+            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({
+                type: `set-${item}-price`,
+                payload: skuAndPrice.price,
+            });
+            dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
+            updateMirrorOptions(item, property, option, skuAndPrice.price > 0);
+        }
+
+        if (item === "ledMirror") {
+            const skuAndPrice = getSkuAndPrice(
+                item,
+                {},
+                composition.otherProductsAvailable.mirrors,
+                option
+            );
+
+            dispatch({
+                type: `set-${item}-type`,
+                payload: skuAndPrice.sku === "none" ? "" : skuAndPrice.sku,
+            });
+            dispatch({
+                type: `set-${item}-price`,
+                payload: skuAndPrice.price,
+            });
+        }
+
+        if (item === "openCompMirror") {
+            const skuAndPrice = getSkuAndPrice(
+                item,
+                {},
+                composition.otherProductsAvailable.mirrors,
+                option
+            );
+
+            dispatch({
+                type: `set-${item}-type`,
+                payload: skuAndPrice.sku === "none" ? "" : skuAndPrice.sku,
+            });
+            dispatch({
+                type: `set-${item}-price`,
+                payload: skuAndPrice.price,
+            });
+        }
     };
 
-    // Manage label (repeated logic)
-    const [isMissingLabel, setIsMissingLabel] = useState(false);
-    const [isInvalidLabel, setIsInvalidLabel] = useState(false);
     const handleConfigurationLabel = (name: string) => {
         if (!name) {
             setIsMissingLabel(true);
@@ -393,190 +1189,281 @@ function NewYorkConfigurator({
         dispatch({ type: "set-label", payload: name });
     };
 
-    // Manage grand total
-    const [grandTotal, setGrandTotal] = useState(0);
-
-    useEffect(() => {
-        const codesArray = [];
-        for (const key in currentConfiguration.vanity) {
-            const value =
-                currentConfiguration.vanity[
-                    key as "baseSku" | "handle" | "finish"
-                ];
-
-            if (value) codesArray.push(value);
-        }
-
-        const sideUnitCodesArray = [];
-        if (currentConfiguration.sideUnit) {
-            for (const key in currentConfiguration.sideUnit) {
-                const value =
-                    currentConfiguration.sideUnit[
-                        key as "baseSku" | "finish" | "handle" | "position"
-                    ];
-
-                if (value) sideUnitCodesArray.push(value);
-            }
-        }
-
-        // this means we have a valid vanity sku number;
-        if (
-            codesArray.length === 3 &&
-            (sideUnitCodesArray.length === 4 || !currentConfiguration.sideUnit)
-        ) {
-            const vanitySku = codesArray.join("-");
-            const sideUnitSku = sideUnitCodesArray.join("-");
-
-            let vanityMsrp = 0;
-            let washbasinMsrp = 0;
-            let sideUnitMsrp = 0;
-
-            for (const crrVanity of composition.vanities) {
-                if (crrVanity.uscode === vanitySku) {
-                    vanityMsrp = crrVanity.msrp;
-                    break;
-                }
-            }
-
-            for (const washbasin of composition.washbasins) {
-                if (washbasin.uscode === currentConfiguration.washbasin) {
-                    washbasinMsrp = washbasin.msrp;
-                    break;
-                }
-            }
-
-            for (const sideUnit of composition.sideUnits) {
-                if (sideUnit.uscode === sideUnitSku) {
-                    sideUnitMsrp = sideUnit.msrp;
-                    break;
-                }
-            }
-
-            if (currentConfiguration.isDoubleSink) vanityMsrp *= 2;
-            if (currentConfiguration.isDoubleSideUnit) sideUnitMsrp *= 2;
-
-            if (vanityMsrp === 0) setGrandTotal(0);
-            else setGrandTotal(vanityMsrp + washbasinMsrp + sideUnitMsrp);
-        }
-    }, [currentConfiguration]);
-
-    // Manage order now.
-    const handleOrderNow = () => {
+    const isValidConfiguration = () => {
         if (!currentConfiguration.label) {
-            toast.error("missing composition name!!");
+            alert("Looks like COMPOSITION NAME is missing!!");
             setIsMissingLabel(true);
-            return;
+            return false;
         }
 
-        const vanitySku = Object.values(currentConfiguration.vanity).join("-");
-        const sideUnitSku = currentConfiguration.sideUnit
-            ? Object.values(currentConfiguration.sideUnit).join("-")
-            : "";
-        const washbasinSku = currentConfiguration.washbasin;
+        if (
+            wallUnitStatus.isWallUnitSelected &&
+            !wallUnitStatus.isWallUnitValid
+        ) {
+            alert(
+                "Looks like you forgot to select all available WALL UNIT OPTIONS. Either clear the wall unit section or select the missing option(s). "
+            );
+            return false;
+        }
+
+        if (
+            tallUnitStatus.isTallUnitSelected &&
+            !tallUnitStatus.isTallUnitValid
+        ) {
+            alert(
+                "Looks like you forgot to select all available TALL UNIT OPTIONS. Either clear the tal unit section or select the missing option(s). "
+            );
+            return false;
+        }
+
+        if (
+            mirrorCabinetStatus.isMirrorCabinetSelected &&
+            !mirrorCabinetStatus.isMirrorCabinetValid
+        ) {
+            alert(
+                "Looks like you forgot to select all available MIRROR CABINET OPTIONS. Either clear the mirror cabinet section or select the missing option(s). "
+            );
+            return false;
+        }
+
+        return true;
+    };
+
+    const handleOrderNow = () => {
+        if (!isValidConfiguration()) return;
+
+        const {
+            vanitySku,
+            sideUnit,
+            sideUnitSku,
+            washbasin: washbasinSku,
+            wallUnitSku,
+            tallUnitSku,
+            accessory: accessorySku,
+            mirrorCabinetSku,
+            ledMirror: ledMirrorSku,
+            openCompMirror: openCompMirrorSku,
+            label,
+            isDoubleSink,
+            isDoubleSideUnit,
+        } = currentConfiguration;
 
         const getSecondSideUnit = () => {
-            const rightSideUnitCodes = structuredClone(
-                currentConfiguration.sideUnit
-            );
+            const rightSideUnitCodes = structuredClone(sideUnit);
             rightSideUnitCodes!.position = "RX";
-            return `~${Object.values(rightSideUnitCodes!).join("-")}--1`;
+            return `${Object.values(rightSideUnitCodes!).join("-")}!!${
+                composition.model
+            }--1##${label}`;
         };
 
-        let SKU;
-        if (sideUnitSku && washbasinSku) {
-            SKU = `${vanitySku}${
-                currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }##${
-                currentConfiguration.label
-            }~${washbasinSku}--1~${sideUnitSku}--1##${
-                currentConfiguration.label
-            }${currentConfiguration.isDoubleSideUnit && getSecondSideUnit()}##${
-                currentConfiguration.label
-            }`;
-        }
+        const allFormattedSkus: string[] = [];
 
-        if (sideUnitSku && !washbasinSku) {
-            SKU = `${vanitySku}${
-                currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }##${currentConfiguration.label}~${sideUnitSku}--1##${
-                currentConfiguration.label
-            }${currentConfiguration.isDoubleSideUnit && getSecondSideUnit()}##${
-                currentConfiguration.label
-            }`;
-        }
+        const vanityFormattedSku = `${vanitySku}!!${composition.model}${
+            isDoubleSink ? "--2" : "--1"
+        }##${label}`;
+        allFormattedSkus.push(vanityFormattedSku);
 
-        if (!sideUnitSku && washbasinSku) {
-            SKU = `${vanitySku}${
-                currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }##${currentConfiguration.label}~${washbasinSku}--1##${
-                currentConfiguration.label
-            }`;
-        }
+        const sideUnitFormattedSku = sideUnitSku
+            ? `${sideUnitSku}!!${composition.model}--1##${label}`
+            : "";
+        sideUnitFormattedSku && allFormattedSkus.push(sideUnitFormattedSku);
 
-        if (!sideUnitSku && !washbasinSku) {
-            SKU = `${vanitySku}${
-                currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }##${currentConfiguration.label}`;
-        }
+        const secondSideUnitFormattedSku = isDoubleSideUnit
+            ? getSecondSideUnit()
+            : "";
+        secondSideUnitFormattedSku &&
+            allFormattedSkus.push(secondSideUnitFormattedSku);
 
-        router.get("/orders/create-so-num", { SKU });
+        const washbasinFormattedSku = washbasinSku
+            ? `${washbasinSku}!!${composition.model}--1##${label}`
+            : "";
+        washbasinFormattedSku && allFormattedSkus.push(washbasinFormattedSku);
+
+        const wallUnitFormattedSku = wallUnitSku
+            ? `${wallUnitSku}!!${composition.model}--1##${label}`
+            : "";
+        wallUnitFormattedSku && allFormattedSkus.push(wallUnitFormattedSku);
+
+        const tallUnitFormattedSku = tallUnitSku
+            ? `${tallUnitSku}!!${composition.model}--1##${label}`
+            : "";
+        tallUnitFormattedSku && allFormattedSkus.push(tallUnitFormattedSku);
+
+        const accessoryFormattedSku = accessorySku
+            ? `${accessorySku}!!${composition.model}--1##${label}`
+            : "";
+        accessoryFormattedSku && allFormattedSkus.push(accessoryFormattedSku);
+
+        // ========= VVVV MIRROR (REPEATED LOGIC) ==========VVVVV
+        const mirrorCabinetFormattedSku = mirrorCabinetSku
+            ? `${mirrorCabinetSku}!!${composition.model}--1##${label}`
+            : "";
+        mirrorCabinetFormattedSku &&
+            allFormattedSkus.push(mirrorCabinetFormattedSku);
+
+        const ledMirrorFormattedSku = ledMirrorSku
+            ? `${ledMirrorSku}!!${composition.model}--1##${label}`
+            : "";
+        ledMirrorFormattedSku && allFormattedSkus.push(ledMirrorFormattedSku);
+
+        const openCompMirrorFormattedSku = openCompMirrorSku
+            ? `${openCompMirrorSku}!!${composition.model}--1##${label}`
+            : "";
+        openCompMirrorFormattedSku &&
+            allFormattedSkus.push(openCompMirrorFormattedSku);
+
+        router.get("/orders/create-so-num", {
+            SKU: allFormattedSkus.join("~"),
+        });
     };
 
     const handleResetConfigurator = () => {
         setVanityOptions(initialVanityOptions);
         setSideUnitOptions(initialSideUnitOptions);
-        setGrandTotal(0);
+        setWallUnitOptions(initialWallUnitOptions);
+        setTallUnitOptions(initialTallUnitOptions);
+        setMirrorCabinetOptions(initialMirrorCabinetOptions);
+        setWallUnitStatus({
+            isWallUnitSelected: false,
+            isWallUnitValid: false,
+        });
+        setTallUnitStatus({
+            isTallUnitSelected: false,
+            isTallUnitValid: false,
+        });
+        setCrrMirrorCategory("mirrorCabinet");
         dispatch({ type: "reset-configurator", payload: "" });
     };
 
-    // Creates object for shopping cart.
-    const handleAddToCart = () => {
-        if (!currentConfiguration.label) {
-            toast.error("missing composition name!!");
-            setIsMissingLabel(true);
-            return;
-        }
+    const handleClearItem = (item: string) => {
+        switch (item) {
+            case "wallUnit":
+                setWallUnitOptions(initialWallUnitOptions);
+                setWallUnitStatus({
+                    isWallUnitSelected: false,
+                    isWallUnitValid: false,
+                });
+                dispatch({ type: "reset-wallUnit", payload: "" });
+                break;
 
-        const getSecondSideUnit = () => {
-            if (currentConfiguration.isDoubleSideUnit) {
-                const rightSideUnitCodes = structuredClone(
-                    currentConfiguration.sideUnit
-                );
-                rightSideUnitCodes!.position = "RX";
-                return Object.values(rightSideUnitCodes!).join("-");
-            }
-            return "";
+            case "tallUnit":
+                setTallUnitOptions(initialTallUnitOptions);
+                setTallUnitStatus({
+                    isTallUnitSelected: false,
+                    isTallUnitValid: false,
+                });
+                dispatch({ type: "reset-tallUnit", payload: "" });
+                break;
+
+            case "accessory":
+                dispatch({ type: "reset-accessory", payload: "" });
+                break;
+
+            case "mirrorCabinet":
+                setMirrorCabinetOptions(initialMirrorCabinetOptions);
+                setMirrorCabinetStatus({
+                    isMirrorCabinetSelected: false,
+                    isMirrorCabinetValid: false,
+                });
+                dispatch({ type: "reset-mirrorCabinet", payload: "" });
+                break;
+
+            case "ledMirror":
+                dispatch({ type: "reset-ledMirror", payload: "" });
+                break;
+
+            case "openCompMirror":
+                dispatch({ type: "reset-openCompMirror", payload: "" });
+                break;
+
+            default:
+                throw new Error("case condition not found");
+        }
+    };
+
+    const handleAddToCart = () => {
+        if (!isValidConfiguration()) return;
+
+        const {
+            vanitySku,
+            sideUnit,
+            sideUnitSku,
+            washbasin: washbasinSku,
+            wallUnitSku,
+            tallUnitSku,
+            accessory: accessorySku,
+            mirrorCabinetSku,
+            ledMirror: ledMirrorSku,
+            openCompMirror: openCompMirrorSku,
+            label,
+            isDoubleSink,
+            isDoubleSideUnit,
+        } = currentConfiguration;
+
+        const otherProducts = {
+            wallUnit: [] as ProductInventory[],
+            tallUnit: [] as ProductInventory[],
+            accessory: [] as ProductInventory[],
+            mirror: [] as ProductInventory[],
         };
 
-        const vanitySku = Object.values(currentConfiguration.vanity).join("-");
-        const sideUnitSku = currentConfiguration.sideUnit
-            ? Object.values(currentConfiguration.sideUnit).join("-")
-            : "";
-        const secondSideUnitSku = getSecondSideUnit();
-        const washbasinSku = currentConfiguration.washbasin;
+        const mirrorSku = mirrorCabinetSku || ledMirrorSku || openCompMirrorSku;
+
+        const getSecondSideUnit = () => {
+            const rightSideUnitCodes = structuredClone(sideUnit);
+            rightSideUnitCodes!.position = "RX";
+            return `${Object.values(rightSideUnitCodes!).join("-")}`;
+        };
+
+        const secondSideUnitSku = isDoubleSideUnit ? getSecondSideUnit() : "";
 
         const vanityObj = composition.vanities.find(
             (vanity) => vanity.uscode === vanitySku
         );
+
         const sideUnitsObj = composition.sideUnits.filter(
             (sideUnit) =>
                 sideUnit.uscode === sideUnitSku ||
                 sideUnit.uscode === secondSideUnitSku
         );
+
         const washbasinObj = composition.washbasins.find(
             (washbasin) => washbasin.uscode === washbasinSku
         );
 
+        const wallUnitObj = composition.otherProductsAvailable.wallUnits.find(
+            (wallUnit) => wallUnit.uscode === wallUnitSku
+        );
+        wallUnitObj && otherProducts.wallUnit.push(wallUnitObj);
+
+        const tallUnitObj =
+            composition.otherProductsAvailable.tallUnitsLinenClosets.find(
+                (tallUnit) => tallUnit.uscode === tallUnitSku
+            );
+        tallUnitObj && otherProducts.tallUnit.push(tallUnitObj);
+
+        const accessoryObj =
+            composition.otherProductsAvailable.accessories.find(
+                (accessory) => accessory.uscode === accessorySku
+            );
+        accessoryObj && otherProducts.accessory.push(accessoryObj);
+
+        const mirrorObj = composition.otherProductsAvailable.mirrors.find(
+            (mirror) => mirror.uscode === mirrorSku
+        );
+        mirrorObj && otherProducts.mirror.push(mirrorObj);
+
         const shoppingCartObj: shoppingCartProductModel = {
             composition: composition,
             description: composition.name,
-            label: currentConfiguration.label,
+            configuration: currentConfiguration,
+            label,
             vanity: vanityObj!,
             sideUnits: sideUnitsObj,
             washbasin: washbasinObj!,
-            otherProducts: [],
-            isDoubleSink: currentConfiguration.isDoubleSink,
-            isDoubleSideunit: currentConfiguration.isDoubleSideUnit,
+            otherProducts,
+            isDoubleSink,
+            isDoubleSideunit: isDoubleSideUnit,
             quantity: 1,
             grandTotal: grandTotal,
         };
@@ -625,54 +1512,266 @@ function NewYorkConfigurator({
                     isMissingLabel={isMissingLabel}
                     isInvalidLabel={isInvalidLabel}
                 />
-                <Options
-                    item="vanity"
-                    property="finish"
-                    title="SELECT VANITY FINISH"
-                    options={vanityOptions.finishOptions}
-                    crrOptionSelected={currentConfiguration.vanity.finish}
-                    onOptionSelected={handleOptionSelected}
-                />
-                <Options
-                    item="vanity"
-                    property="handle"
-                    title="SELECT VANITY HANDLES"
-                    options={vanityOptions.handleOptions}
-                    crrOptionSelected={currentConfiguration.vanity.handle}
-                    onOptionSelected={handleOptionSelected}
-                />
-                {sideUnitOptions && (
+
+                <ItemPropertiesAccordion headerTitle="VANITY">
                     <Options
-                        item="sideUnit"
-                        property="handle"
-                        title="SELECT SIDE UNIT HANDLE"
-                        options={sideUnitOptions.handleOptions}
-                        crrOptionSelected={
-                            currentConfiguration.sideUnit?.handle as string
-                        }
-                        onOptionSelected={handleOptionSelected}
-                    />
-                )}
-                {sideUnitOptions && (
-                    <Options
-                        item="sideUnit"
+                        item="vanity"
                         property="finish"
-                        title="SELECT SIDE UNIT FINISH"
-                        options={sideUnitOptions.finishOptions}
-                        crrOptionSelected={
-                            currentConfiguration.sideUnit?.finish as string
-                        }
+                        title="SELECT FINISH"
+                        options={vanityOptions.finishOptions}
+                        crrOptionSelected={currentConfiguration.vanity.finish}
                         onOptionSelected={handleOptionSelected}
                     />
+                    <Options
+                        item="vanity"
+                        property="handle"
+                        title="SELECT HANDLES"
+                        options={vanityOptions.handleOptions}
+                        crrOptionSelected={currentConfiguration.vanity.handle}
+                        onOptionSelected={handleOptionSelected}
+                    />
+                </ItemPropertiesAccordion>
+
+                {sideUnitOptions && (
+                    <ItemPropertiesAccordion headerTitle="SIDE UNIT">
+                        <Options
+                            item="sideUnit"
+                            property="handle"
+                            title="SELECT HANDLE"
+                            options={sideUnitOptions.handleOptions}
+                            crrOptionSelected={
+                                currentConfiguration.sideUnit?.handle!
+                            }
+                            onOptionSelected={handleOptionSelected}
+                        />
+
+                        <Options
+                            item="sideUnit"
+                            property="finish"
+                            title="SELECT FINISH"
+                            options={sideUnitOptions.finishOptions}
+                            crrOptionSelected={
+                                currentConfiguration.sideUnit?.finish!
+                            }
+                            onOptionSelected={handleOptionSelected}
+                        />
+                    </ItemPropertiesAccordion>
                 )}
-                <Options
-                    item="washbasin"
-                    property="type"
-                    title="SELECT WASHBASIN"
-                    options={washbasinOptions}
-                    crrOptionSelected={currentConfiguration.washbasin}
-                    onOptionSelected={handleOptionSelected}
-                />
+
+                <ItemPropertiesAccordion headerTitle="WASHBASIN">
+                    <Options
+                        item="washbasin"
+                        property="type"
+                        title="SELECT WASHBASIN"
+                        options={washbasinOptions}
+                        crrOptionSelected={currentConfiguration.washbasin}
+                        onOptionSelected={handleOptionSelected}
+                    />
+                </ItemPropertiesAccordion>
+
+                {wallUnitOptions && (
+                    <ItemPropertiesAccordion headerTitle="WALL UNIT">
+                        <button
+                            className={classes.clearButton}
+                            onClick={() => handleClearItem("wallUnit")}
+                        >
+                            CLEAR
+                        </button>
+                        <Options
+                            item="wallUnit"
+                            property="handle"
+                            title="SELECT HANDLE"
+                            options={wallUnitOptions?.handleOptions}
+                            crrOptionSelected={
+                                currentConfiguration.wallUnit?.handle!
+                            }
+                            onOptionSelected={handleOptionSelected}
+                        />
+                        <Options
+                            item="wallUnit"
+                            property="finish"
+                            title="SELECT FINISH"
+                            options={wallUnitOptions?.finishOptions}
+                            crrOptionSelected={
+                                currentConfiguration.wallUnit?.finish!
+                            }
+                            onOptionSelected={handleOptionSelected}
+                        />
+                    </ItemPropertiesAccordion>
+                )}
+
+                {tallUnitOptions && (
+                    <ItemPropertiesAccordion headerTitle="TALL UNIT">
+                        <button
+                            className={classes.clearButton}
+                            onClick={() => handleClearItem("tallUnit")}
+                        >
+                            CLEAR
+                        </button>
+                        <Options
+                            item="tallUnit"
+                            property="handle"
+                            title="SELECT HANDLE"
+                            options={tallUnitOptions?.handleOptions}
+                            crrOptionSelected={
+                                currentConfiguration.tallUnit?.handle!
+                            }
+                            onOptionSelected={handleOptionSelected}
+                        />
+                        <Options
+                            item="tallUnit"
+                            property="finish"
+                            title="SELECT FINISH"
+                            options={tallUnitOptions?.finishOptions}
+                            crrOptionSelected={
+                                currentConfiguration.tallUnit?.finish!
+                            }
+                            onOptionSelected={handleOptionSelected}
+                        />
+                    </ItemPropertiesAccordion>
+                )}
+
+                <ItemPropertiesAccordion headerTitle="MIRRORS">
+                    <section className={classes.mirrorCategories}>
+                        <div className={classes.mirrorCategoriesSwitchers}>
+                            <button
+                                className={
+                                    crrMirrorCategory === "mirrorCabinet"
+                                        ? classes.mirrorCategorySelected
+                                        : ""
+                                }
+                                onClick={() =>
+                                    handleSwitchCrrMirrorCategory(
+                                        "mirrorCabinet"
+                                    )
+                                }
+                            >
+                                MIRROR CABINETS
+                            </button>
+                            <button
+                                className={
+                                    crrMirrorCategory === "ledMirror"
+                                        ? classes.mirrorCategorySelected
+                                        : ""
+                                }
+                                onClick={() =>
+                                    handleSwitchCrrMirrorCategory("ledMirror")
+                                }
+                            >
+                                LED MIRRORS
+                            </button>
+                            <button
+                                className={
+                                    crrMirrorCategory === "openCompMirror"
+                                        ? classes.mirrorCategorySelected
+                                        : ""
+                                }
+                                onClick={() =>
+                                    handleSwitchCrrMirrorCategory(
+                                        "openCompMirror"
+                                    )
+                                }
+                            >
+                                OPEN COMPARTMENT MIRRORS
+                            </button>
+                        </div>
+                        {crrMirrorCategory === "mirrorCabinet" && (
+                            <div>
+                                <button
+                                    className={classes.clearButton}
+                                    onClick={() =>
+                                        handleClearItem("mirrorCabinet")
+                                    }
+                                >
+                                    CLEAR
+                                </button>
+                                <Options
+                                    item="mirrorCabinet"
+                                    property="size"
+                                    title="SELECT SIZE"
+                                    options={mirrorCabinetOptions.sizeOptions}
+                                    crrOptionSelected={
+                                        currentConfiguration.mirrorCabinet.size
+                                    }
+                                    onOptionSelected={handleOptionSelected}
+                                />
+                                <Options
+                                    item="mirrorCabinet"
+                                    property="finish"
+                                    title="SELECT FINISH"
+                                    options={mirrorCabinetOptions.finishOptions}
+                                    crrOptionSelected={
+                                        currentConfiguration.mirrorCabinet
+                                            .finish
+                                    }
+                                    onOptionSelected={handleOptionSelected}
+                                />
+                            </div>
+                        )}
+                        {crrMirrorCategory === "ledMirror" && (
+                            <div>
+                                <button
+                                    className={classes.clearButton}
+                                    onClick={() => handleClearItem("ledMirror")}
+                                >
+                                    CLEAR
+                                </button>
+                                <Options
+                                    item="ledMirror"
+                                    property="type"
+                                    title="SELECT LED MIRROR"
+                                    options={ledMirrorOptions}
+                                    crrOptionSelected={
+                                        currentConfiguration.ledMirror
+                                    }
+                                    onOptionSelected={handleOptionSelected}
+                                />
+                            </div>
+                        )}
+                        {crrMirrorCategory === "openCompMirror" && (
+                            <div>
+                                <button
+                                    className={classes.clearButton}
+                                    onClick={() =>
+                                        handleClearItem("openCompMirror")
+                                    }
+                                >
+                                    CLEAR
+                                </button>
+                                <Options
+                                    item="openCompMirror"
+                                    property="type"
+                                    title="SELECT OPEN COMPARMENT MIRROR"
+                                    options={openCompMirrorOptions}
+                                    crrOptionSelected={
+                                        currentConfiguration.openCompMirror
+                                    }
+                                    onOptionSelected={handleOptionSelected}
+                                />
+                            </div>
+                        )}
+                    </section>
+                </ItemPropertiesAccordion>
+
+                {accessoryOptions && (
+                    <ItemPropertiesAccordion headerTitle="ACCESSORIES">
+                        <button
+                            className={classes.clearButton}
+                            onClick={() => handleClearItem("accessory")}
+                        >
+                            CLEAR
+                        </button>
+                        <Options
+                            item="accessory"
+                            property="type"
+                            title="SELECT ACCESSORY"
+                            options={accessoryOptions}
+                            crrOptionSelected={currentConfiguration.accessory}
+                            onOptionSelected={handleOptionSelected}
+                        />
+                    </ItemPropertiesAccordion>
+                )}
+
                 <div className={classes.grandTotalAndOrderNowButtonWrapper}>
                     <div className={classes.grandTotalWrapper}>
                         <h1 className={classes.label}>Grand Total:</h1>
@@ -688,13 +1787,13 @@ function NewYorkConfigurator({
                         SPECS
                     </a>
                     <button
-                        disabled={!grandTotal ? true : false}
+                        disabled={grandTotal === 0}
                         onClick={handleOrderNow}
                     >
                         ORDER NOW
                     </button>
                     <button
-                        disabled={!grandTotal ? true : false}
+                        disabled={grandTotal === 0}
                         onClick={handleAddToCart}
                     >
                         ADD TO CART

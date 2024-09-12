@@ -1,5 +1,6 @@
 import type { Option } from "./ExpressProgramModels";
 import { ProductInventory } from "./Product";
+import { MirrorConfig } from "./MirrorConfigTypes";
 
 export type vanityOptions = {
     baseSku: string;
@@ -55,7 +56,7 @@ export type wallUnit = {
     finish: string;
 };
 
-export type CurrentConfiguration = {
+export type CurrentConfiguration = MirrorConfig & {
     vanity: vanity;
     vanitySku: string;
     vanityPrice: number;
@@ -69,17 +70,6 @@ export type CurrentConfiguration = {
     wallUnit: wallUnit | null;
     wallUnitSku: string;
     wallUnitPrice: number;
-    mirrorCabinet: {
-        baseSku: string;
-        size: string;
-        finish: string;
-    };
-    mirrorCabinetSku: string;
-    mirrorCabinetPrice: number;
-    ledMirror: string;
-    ledMirrorPrice: number;
-    openCompMirror: string;
-    openCompMirrorPrice: number;
     label: string;
 };
 

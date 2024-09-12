@@ -1,7 +1,10 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ProductInventory } from "../Models/Product";
 import type { Option } from "../Models/ExpressProgramModels";
-import type { MirrorCabinetsOptions } from "../Models/MirrorConfigTypes";
+import type {
+    MirrorCabinetsOptions,
+    mirrorCategories,
+} from "../Models/MirrorConfigTypes";
 
 type MirrorCategories = {
     mirrorCabinets: ProductInventory[];
@@ -133,7 +136,11 @@ function useMirrorOptions(mirrors: ProductInventory[]) {
         return all;
     };
 
-    return useMemo(() => {
+    const {
+        initialMirrorCabinetOptions,
+        initialLedMirrorOptions: ledMirrorOptions,
+        initialOpenCompMirrorOptions: openCompMirrorOptions,
+    } = useMemo(() => {
         const mirrorCategories = createMirrorsMap();
         const initialMirrorCabinetOptions = getMirrorCabinetsOptions(
             mirrorCategories.mirrorCabinets
@@ -151,6 +158,98 @@ function useMirrorOptions(mirrors: ProductInventory[]) {
             initialOpenCompMirrorOptions,
         };
     }, []);
+
+    // mirror cabinets are the only one that has a complex sku
+    const [mirrorCabinetOptions, setMirrorCabinetOptions] = useState(
+        initialMirrorCabinetOptions
+    );
+
+    const [mirrorCabinetStatus, setMirrorCabinetStatus] = useState({
+        isMirrorCabinetSelected: false,
+        isMirrorCabinetValid: false,
+    });
+
+    const [crrMirrorCategory, setCrrMirrorCategory] =
+        useState<mirrorCategories>("mirrorCabinet");
+
+    const handleSwitchCrrMirrorCategory = (
+        mirrorCategory: mirrorCategories
+    ) => {
+        if (crrMirrorCategory === "mirrorCabinet") {
+            setMirrorCabinetOptions(initialMirrorCabinetOptions);
+            setMirrorCabinetStatus({
+                isMirrorCabinetSelected: false,
+                isMirrorCabinetValid: false,
+            });
+        }
+
+        setCrrMirrorCategory(mirrorCategory);
+    };
+
+    const handleMirrorOptionSelected = (
+        item: string,
+        property: string,
+        option: string,
+        isValid: boolean = false
+    ) => {
+        if (item === "mirrorCabinet") {
+            const copyOptions = structuredClone(mirrorCabinetOptions);
+
+            for (const sizeOption of copyOptions.sizeOptions) {
+                if (property === "size") break;
+                for (let i = 0; i < sizeOption.validSkus.length; i++) {
+                    const validSku = sizeOption.validSkus[i];
+                    if (validSku.includes(option)) {
+                        sizeOption.isDisabled = false;
+                        break;
+                    }
+
+                    if (i === sizeOption.validSkus.length - 1)
+                        sizeOption.isDisabled = true;
+                }
+            }
+
+            for (const finishOption of copyOptions.finishOptions) {
+                if (property === "finish") break;
+                for (let i = 0; i < finishOption.validSkus.length; i++) {
+                    const validSku = finishOption.validSkus[i];
+                    if (validSku.includes(option)) {
+                        finishOption.isDisabled = false;
+                        break;
+                    }
+
+                    if (i === finishOption.validSkus.length - 1)
+                        finishOption.isDisabled = true;
+                }
+            }
+
+            setMirrorCabinetOptions(copyOptions);
+            !mirrorCabinetStatus.isMirrorCabinetSelected &&
+                setMirrorCabinetStatus((prev) => ({
+                    ...prev,
+                    isMirrorCabinetSelected: true,
+                }));
+
+            setMirrorCabinetStatus((prev) => ({
+                ...prev,
+                isMirrorCabinetValid: isValid,
+            }));
+        }
+    };
+
+    return {
+        initialMirrorCabinetOptions,
+        mirrorCabinetOptions,
+        setMirrorCabinetOptions,
+        ledMirrorOptions,
+        openCompMirrorOptions,
+        mirrorCabinetStatus,
+        setMirrorCabinetStatus,
+        crrMirrorCategory,
+        setCrrMirrorCategory,
+        handleSwitchCrrMirrorCategory,
+        handleMirrorOptionSelected,
+    };
 }
 
 export default useMirrorOptions;

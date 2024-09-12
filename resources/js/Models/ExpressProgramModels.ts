@@ -27,6 +27,8 @@ export type model = {
 
 export type otherItems = {
     wallUnit: ProductInventory[];
+    tallUnit: ProductInventory[];
+    accessory: ProductInventory[];
     mirror: ProductInventory[];
 };
 
