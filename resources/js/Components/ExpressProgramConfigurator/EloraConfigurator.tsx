@@ -10,6 +10,11 @@ import ConfigurationName from "./ConfigurationName";
 import { ToastContainer, toast } from "react-toastify";
 import { router } from "@inertiajs/react";
 import { isAlphanumericWithSpaces } from "../../utils/helperFunc";
+import { ProductInventory } from "../../Models/Product";
+import {
+    CurrentConfiguration,
+    VanityOptions,
+} from "../../Models/EloraConfigTypes";
 
 /**
  * TODO;
@@ -21,25 +26,13 @@ interface EloraConfiguratorProps {
     onAddToCart: (shoppingCartProduct: shoppingCartProductModel) => void;
 }
 
-interface CurrentConfiguration {
-    vanity: { baseSku: string; mattFinish: string; glassFinish: string };
-    isDoubleSink: boolean;
-    washbasin: string;
-    label: string;
-}
-
-interface vanityOptions {
-    baseSku: string;
-    mattFinishOptions: Option[];
-    glassFinishOptions: Option[];
-}
-
 function EloraConfigurator({
     composition,
     onAddToCart,
 }: EloraConfiguratorProps) {
+    console.log(composition);
     // iterate over vanitites array and analize sku in order to get the valid options to get final sku. -------------|
-    const initialVanityOptions: vanityOptions = useMemo(() => {
+    const initialVanityOptions: VanityOptions = useMemo(() => {
         let baseSku: string = "";
         const mattFinishOptionsMap = new Map();
         const glassFinishOptionsMap = new Map();
@@ -348,6 +341,13 @@ function EloraConfigurator({
             return;
         }
 
+        const otherProducts = {
+            wallUnit: [] as ProductInventory[],
+            tallUnit: [] as ProductInventory[],
+            accessory: [] as ProductInventory[],
+            mirror: [] as ProductInventory[],
+        };
+
         const vanitySku = Object.values(currentConfiguration.vanity).join("-");
         const washbasinSku = currentConfiguration.washbasin;
 
@@ -361,11 +361,12 @@ function EloraConfigurator({
         const shoppingCartObj: shoppingCartProductModel = {
             composition: composition,
             description: composition.name,
+            configuration: currentConfiguration,
             label: currentConfiguration.label,
             vanity: vanityObj!,
             sideUnits: [],
             washbasin: washbasinObj!,
-            otherProducts: [],
+            otherProducts,
             isDoubleSink: currentConfiguration.isDoubleSink,
             isDoubleSideunit: false,
             quantity: 1,

@@ -1,57 +1,59 @@
 import type { Option } from "./ExpressProgramModels";
 import { MirrorConfig } from "./MirrorConfigTypes";
 
-export type Vanity = {
+export const Name = "NEW YORK";
+
+type Vanity = {
     baseSku: string;
     handle: string;
     finish: string;
 };
 
-export type SideUnit = {
+type SideUnit = {
     baseSku: string;
     handle: string;
     position: string;
     finish: string;
 };
 
-export type WallUnit = {
+type WallUnit = {
     baseSku: string;
     handle: string;
     finish: string;
 };
 
-export type TallUnit = {
+type TallUnit = {
     baseSku: string;
     handle: string;
     finish: string;
 };
 
-export type VanityOptions = {
+type VanityOptions = {
     baseSku: string;
     handleOptions: Option[];
     finishOptions: Option[];
 };
 
-export type SideUnitOptions = {
+type SideUnitOptions = {
     baseSku: string;
     handleOptions: Option[];
     position: string;
     finishOptions: Option[];
 };
 
-export type WallUnitOptions = {
+type WallUnitOptions = {
     baseSku: string;
     handleOptions: Option[];
     finishOptions: Option[];
 };
 
-export type TallUnitOptions = {
+type TallUnitOptions = {
     baseSku: string;
     handleOptions: Option[];
     finishOptions: Option[];
 };
 
-export type CurrentConfiguration = MirrorConfig & {
+type CurrentConfiguration = MirrorConfig & {
     label: string;
     vanity: Vanity;
     vanitySku: string;
@@ -71,6 +73,18 @@ export type CurrentConfiguration = MirrorConfig & {
     tallUnitPrice: number;
     accessory: string;
     accessoryPrice: number;
+};
+
+export type {
+    Vanity,
+    SideUnit,
+    WallUnit,
+    TallUnit,
+    VanityOptions,
+    SideUnitOptions,
+    WallUnitOptions,
+    TallUnitOptions,
+    CurrentConfiguration,
 };
 
 export const SkuLengths = {

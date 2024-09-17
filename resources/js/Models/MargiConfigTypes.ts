@@ -1,73 +1,70 @@
 import type { Option } from "./ExpressProgramModels";
-import { ProductInventory } from "./Product";
 import { MirrorConfig } from "./MirrorConfigTypes";
 
-export type vanityOptions = {
-    baseSku: string;
-    drawerOptions: Option[];
-    handleOptions: Option[];
-    finishOptions: Option[];
-};
+export const Name = "MARGI";
 
-export type otherMargiProducts = {
-    "WALL UNIT": ProductInventory[];
-};
-
-export type wallUnitOptions = {
-    baseSku: string;
-    sizeOptions: Option[];
-    doorStyleOptions: Option[];
-    finishOptions: Option[];
-};
-
-export type margiOpenUnitOptions = {
-    baseSku: string;
-    finishOptions: Option[];
-};
-
-export type margiSideCabinetOptions = {
-    baseSku: string;
-    doorStyleAndHandleOptions: Option[];
-    finishOptions: Option[];
-};
-
-export type vanity = {
+type Vanity = {
     baseSku: string;
     drawer: string;
     handle: string;
     finish: string;
 };
 
-export type margiOpenUnit = {
+type OpenUnit = {
     baseSku: string;
     finish: string;
 };
 
-export type margiSideCabinet = {
+type SideCabinet = {
     baseSku: string;
     doorStyleAndHandle: string;
     finish: string;
 };
 
-export type wallUnit = {
+type WallUnit = {
     baseSku: string;
     size: string;
     doorStyle: string;
     finish: string;
 };
 
-export type CurrentConfiguration = MirrorConfig & {
-    vanity: vanity;
+type VanityOptions = {
+    baseSku: string;
+    drawerOptions: Option[];
+    handleOptions: Option[];
+    finishOptions: Option[];
+};
+
+type WallUnitOptions = {
+    baseSku: string;
+    sizeOptions: Option[];
+    doorStyleOptions: Option[];
+    finishOptions: Option[];
+};
+
+type OpenUnitOptions = {
+    baseSku: string;
+    finishOptions: Option[];
+};
+
+type SideCabinetOptions = {
+    baseSku: string;
+    doorStyleAndHandleOptions: Option[];
+    finishOptions: Option[];
+};
+
+type CurrentConfiguration = MirrorConfig & {
+    vanity: Vanity;
     vanitySku: string;
     vanityPrice: number;
     isDoubleSink: boolean;
-    sideUnit: margiOpenUnit | margiSideCabinet | null;
+    sideUnit: OpenUnit | SideCabinet | null;
     sideUnitType: string;
     sideUnitSku: string;
     sideUnitPrice: number;
     washbasin: string;
     washbasinPrice: number;
-    wallUnit: wallUnit | null;
+    wallUnit: WallUnit | null;
     wallUnitSku: string;
     wallUnitPrice: number;
     label: string;
@@ -79,4 +76,16 @@ export const SkuLengths = {
     openUnit: 2,
     sideCabinet: 3,
     mirrorCabinet: 3,
+};
+
+export type {
+    Vanity,
+    OpenUnit,
+    SideCabinet,
+    WallUnit,
+    VanityOptions,
+    WallUnitOptions,
+    OpenUnitOptions,
+    SideCabinetOptions,
+    CurrentConfiguration,
 };

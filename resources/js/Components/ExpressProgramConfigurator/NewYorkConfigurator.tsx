@@ -1,15 +1,17 @@
 import { Composition } from "../../Models/Composition";
 import classes from "../../../css/product-configurator.module.css";
-import { useEffect, useMemo, useReducer, useState } from "react";
+import { useMemo, useReducer, useState } from "react";
 import type {
     Option,
     shoppingCartProduct as shoppingCartProductModel,
 } from "../../Models/ExpressProgramModels";
 import Options from "./Options";
 import ConfigurationName from "./ConfigurationName";
-import { ToastContainer, toast } from "react-toastify";
 import { router } from "@inertiajs/react";
-import { isAlphanumericWithSpaces } from "../../utils/helperFunc";
+import {
+    isAlphanumericWithSpaces,
+    getSkuAndPrice,
+} from "../../utils/helperFunc";
 import { ProductInventory } from "../../Models/Product";
 import {
     CurrentConfiguration,
@@ -17,7 +19,6 @@ import {
     SideUnit,
     VanityOptions,
     SideUnitOptions,
-    SkuLengths,
     WallUnitOptions,
     TallUnitOptions,
     WallUnit,
@@ -29,6 +30,7 @@ import {
     mirrorCategories,
 } from "../../Models/MirrorConfigTypes";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
+import { Model } from "../../Models/ModelConfigTypes";
 
 /**
  * TODO;
@@ -96,7 +98,7 @@ function NewYorkConfigurator({
 
     const [vanityOptions, setVanityOptions] = useState(initialVanityOptions);
 
-    // |===== WASHBASIN =====|
+    // |===== WASHBASIN =====| (repeated logic)
     const washbasinOptions: Option[] = useMemo(() => {
         const all: Option[] = [];
         composition.washbasins.forEach((washbasin) => {
@@ -345,52 +347,6 @@ function NewYorkConfigurator({
     };
 
     // |===== INITIAL CONFIG =====|
-    const getSkuAndPrice = (
-        item: string,
-        itemObj: Vanity | SideUnit | {},
-        products: ProductInventory[],
-        wholeSku?: string
-    ) => {
-        const skuAndPrice = { sku: "", price: 0 };
-
-        if (wholeSku) {
-            for (const crrProduct of products) {
-                if (crrProduct.uscode === wholeSku) {
-                    skuAndPrice.price = crrProduct.msrp;
-                    skuAndPrice.sku = wholeSku;
-                    break;
-                }
-            }
-        } else {
-            const itemCodesArray: string[] = [];
-
-            for (const key in itemObj) {
-                const property = key as keyof typeof itemObj;
-                const code = itemObj[property];
-                if (code) itemCodesArray.push(code);
-            }
-
-            if (
-                itemCodesArray.length !==
-                SkuLengths[item as keyof typeof SkuLengths]
-            ) {
-                return skuAndPrice;
-            }
-
-            const productSku = itemCodesArray.join("-");
-
-            for (const crrProduct of products) {
-                if (crrProduct.uscode === productSku) {
-                    skuAndPrice.price = crrProduct.msrp;
-                    skuAndPrice.sku = productSku;
-                    break;
-                }
-            }
-        }
-
-        return skuAndPrice;
-    };
-
     const initialConfiguration: CurrentConfiguration = useMemo(() => {
         const vanity: Vanity = {
             baseSku: vanityOptions.baseSku,
@@ -402,6 +358,7 @@ function NewYorkConfigurator({
         };
 
         const vanitySkuAndPrice = getSkuAndPrice(
+            composition.model as Model,
             "vanity",
             vanity,
             composition.vanities
@@ -424,7 +381,12 @@ function NewYorkConfigurator({
 
         let sideUnitSkuAndPrice =
             sideUnit &&
-            getSkuAndPrice("sideUnit", sideUnit, composition.vanities);
+            getSkuAndPrice(
+                composition.model as Model,
+                "sideUnit",
+                sideUnit,
+                composition.vanities
+            );
 
         const wallUnit: WallUnit | null = wallUnitOptions
             ? {
@@ -756,10 +718,6 @@ function NewYorkConfigurator({
         initialConfiguration
     );
 
-    // |===== Manage label =====| (repeated logic)
-    const [isMissingLabel, setIsMissingLabel] = useState(false);
-    const [isInvalidLabel, setIsInvalidLabel] = useState(false);
-
     // |===== GRAND TOTAL =====|
     const grandTotal = useMemo(() => {
         const {
@@ -816,6 +774,10 @@ function NewYorkConfigurator({
         }
     }, [currentConfiguration]);
 
+    // |===== COMPOSITION NAME =====| (repeated logic)
+    const [isMissingLabel, setIsMissingLabel] = useState(false);
+    const [isInvalidLabel, setIsInvalidLabel] = useState(false);
+
     // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (
         item: string,
@@ -864,6 +826,7 @@ function NewYorkConfigurator({
             ] = option;
 
             const skuAndPrice = getSkuAndPrice(
+                composition.model as Model,
                 item,
                 vanityCurrentConfiguration,
                 composition.vanities
@@ -921,6 +884,7 @@ function NewYorkConfigurator({
             ] = option;
 
             const skuAndPrice = getSkuAndPrice(
+                composition.model as Model,
                 item,
                 sideUnitCurrentConfiguration,
                 composition.sideUnits
@@ -937,6 +901,7 @@ function NewYorkConfigurator({
 
         if (item === "washbasin") {
             const skuAndPrice = getSkuAndPrice(
+                composition.model as Model,
                 item,
                 {},
                 composition.washbasins,
@@ -996,6 +961,7 @@ function NewYorkConfigurator({
             ] = option;
 
             const skuAndPrice = getSkuAndPrice(
+                composition.model as Model,
                 item,
                 wallUnitCurrentConfig,
                 composition.otherProductsAvailable.wallUnits
@@ -1065,6 +1031,7 @@ function NewYorkConfigurator({
             ] = option;
 
             const skuAndPrice = getSkuAndPrice(
+                composition.model as Model,
                 item,
                 tallUnitCurrentConfig,
                 composition.otherProductsAvailable.tallUnitsLinenClosets
@@ -1092,6 +1059,7 @@ function NewYorkConfigurator({
 
         if (item === "accessory") {
             const skuAndPrice = getSkuAndPrice(
+                composition.model as Model,
                 item,
                 {},
                 composition.otherProductsAvailable.accessories,
@@ -1120,6 +1088,7 @@ function NewYorkConfigurator({
             ] = option;
 
             const skuAndPrice = getSkuAndPrice(
+                composition.model as Model,
                 item,
                 mirrorCabinetCurrentConfiguration,
                 composition.otherProductsAvailable.mirrors
@@ -1136,6 +1105,7 @@ function NewYorkConfigurator({
 
         if (item === "ledMirror") {
             const skuAndPrice = getSkuAndPrice(
+                composition.model as Model,
                 item,
                 {},
                 composition.otherProductsAvailable.mirrors,
@@ -1154,6 +1124,7 @@ function NewYorkConfigurator({
 
         if (item === "openCompMirror") {
             const skuAndPrice = getSkuAndPrice(
+                composition.model as Model,
                 item,
                 {},
                 composition.otherProductsAvailable.mirrors,
@@ -1800,7 +1771,6 @@ function NewYorkConfigurator({
                     </button>
                 </div>
             </section>
-            <ToastContainer />
         </div>
     );
 }
