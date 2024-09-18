@@ -1,5 +1,4 @@
 import type { Option } from "./ExpressProgramModels";
-import { MirrorConfig } from "./MirrorConfigTypes";
 
 export const Name = "NEW YORK";
 
@@ -53,18 +52,18 @@ type TallUnitOptions = {
     finishOptions: Option[];
 };
 
-type CurrentConfiguration = MirrorConfig & {
+type CurrentConfiguration = {
     label: string;
     vanity: Vanity;
     vanitySku: string;
     vanityPrice: number;
+    washbasin: string;
+    washbasinPrice: number;
     isDoubleSink: boolean;
-    isDoubleSideUnit: boolean;
     sideUnit: SideUnit | null;
     sideUnitSku: string;
     sideUnitPrice: number;
-    washbasin: string;
-    washbasinPrice: number;
+    isDoubleSideUnit: boolean;
     wallUnit: WallUnit | null;
     wallUnitSku: string;
     wallUnitPrice: number;
@@ -92,5 +91,4 @@ export const SkuLengths = {
     sideUnit: 4,
     wallUnit: 3,
     tallUnit: 3,
-    mirrorCabinet: 3,
 };

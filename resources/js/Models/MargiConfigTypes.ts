@@ -1,5 +1,4 @@
 import type { Option } from "./ExpressProgramModels";
-import { MirrorConfig } from "./MirrorConfigTypes";
 
 export const Name = "MARGI";
 
@@ -53,21 +52,21 @@ type SideCabinetOptions = {
     finishOptions: Option[];
 };
 
-type CurrentConfiguration = MirrorConfig & {
+type CurrentConfiguration = {
+    label: string;
     vanity: Vanity;
     vanitySku: string;
     vanityPrice: number;
+    washbasin: string;
+    washbasinPrice: number;
     isDoubleSink: boolean;
     sideUnit: OpenUnit | SideCabinet | null;
     sideUnitType: string;
     sideUnitSku: string;
     sideUnitPrice: number;
-    washbasin: string;
-    washbasinPrice: number;
     wallUnit: WallUnit | null;
     wallUnitSku: string;
     wallUnitPrice: number;
-    label: string;
 };
 
 export const SkuLengths = {
@@ -75,7 +74,6 @@ export const SkuLengths = {
     vanity: 4,
     openUnit: 2,
     sideCabinet: 3,
-    mirrorCabinet: 3,
 };
 
 export type {

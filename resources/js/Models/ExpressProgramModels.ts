@@ -9,30 +9,30 @@ export type Option = {
     isDisabled: boolean;
 };
 
-export type finish = {
+export type FinishObj = {
     type: string;
     finish: string;
     url: string;
 };
 
-export type sinkPosition = {
+export type SinkPositionObj = {
     name: string;
     url: string;
 };
 
-export type model = {
+export type ModelObj = {
     name: string;
     url: string;
 };
 
-export type otherItems = {
+export type OtherItems = {
     wallUnit: ProductInventory[];
     tallUnit: ProductInventory[];
     accessory: ProductInventory[];
     mirror: ProductInventory[];
 };
 
-export type shoppingCartProduct = {
+export type ShoppingCartProduct = {
     composition: Composition;
     configuration: any;
     description: string;
@@ -40,14 +40,14 @@ export type shoppingCartProduct = {
     vanity: ProductInventory;
     sideUnits: ProductInventory[];
     washbasin: ProductInventory;
-    otherProducts: otherItems;
+    otherProducts: OtherItems;
     isDoubleSink: boolean;
     isDoubleSideunit: boolean;
     quantity: number;
     grandTotal: number;
 };
 
-export type otherProductsAvailable = {
+export type OtherProductsAvailable = {
     accessories: ProductInventory[];
     drawersVanities: ProductInventory[];
     mirrors: ProductInventory[];
@@ -57,7 +57,7 @@ export type otherProductsAvailable = {
     wallUnits: ProductInventory[];
 };
 
-export const modelsAvailable = {
+export const ModelsAvailable = {
     BRERA: 1,
     ELORA: 2,
     "FLORA 17": 3,
@@ -74,4 +74,4 @@ export const modelsAvailable = {
     RAFFAELLO: 14,
 };
 
-export type modelsAvailableKeys = keyof typeof modelsAvailable;
+export type ModelsAvailableKeys = keyof typeof ModelsAvailable;

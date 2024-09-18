@@ -7,7 +7,7 @@ import NewBaliConfigurator from "../../Components/ExpressProgramConfigurator/New
 import NewYorkConfigurator from "../../Components/ExpressProgramConfigurator/NewYorkConfigurator";
 import EloraConfigurator from "../../Components/ExpressProgramConfigurator/EloraConfigurator";
 import OtherModelsConfigurator from "../../Components/ExpressProgramConfigurator/OtherModelsConfigurator";
-import { shoppingCartProduct as shoppingCartProductModel } from "../../Models/ExpressProgramModels";
+import { ShoppingCartProduct as shoppingCartProductModel } from "../../Models/ExpressProgramModels";
 import axios from "axios";
 import { router } from "@inertiajs/react";
 

@@ -1,20 +1,31 @@
 import { Option } from "./ExpressProgramModels";
 
-export type Vanity = {
+export const Name = "ELORA";
+
+type Vanity = {
     baseSku: string;
     mattFinish: string;
     glassFinish: string;
 };
 
-export type CurrentConfiguration = {
-    vanity: Vanity;
-    isDoubleSink: boolean;
-    washbasin: string;
+type CurrentConfiguration = {
     label: string;
+    vanity: Vanity;
+    vanitySku: string;
+    vanityPrice: number;
+    washbasin: string;
+    washbasinPrice: number;
+    isDoubleSink: boolean;
 };
 
-export type VanityOptions = {
+type VanityOptions = {
     baseSku: string;
     mattFinishOptions: Option[];
     glassFinishOptions: Option[];
+};
+
+export type { Vanity, CurrentConfiguration, VanityOptions };
+
+export const SkuLengths = {
+    vanity: 3,
 };

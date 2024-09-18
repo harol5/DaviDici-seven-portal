@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import UserAuthenticatedLayout from "../../Layouts/UserAuthenticatedLayout";
 import Filter from "../../Components/Filter";
 import FinishesFilter from "../../Components/FinishesFilter";
@@ -11,10 +11,10 @@ import type { Composition } from "../../Models/Composition";
 import classes from "../../../css/express-program.module.css";
 import axios from "axios";
 import type {
-    finish,
-    sinkPosition,
-    model,
-    shoppingCartProduct,
+    FinishObj,
+    SinkPositionObj,
+    ModelObj,
+    ShoppingCartProduct,
 } from "../../Models/ExpressProgramModels";
 
 /**
@@ -162,9 +162,9 @@ function ProductsAvailable({
             return hasSize && hasSinkPosition && hasFinish && hasModel;
         });
 
-        const finishesForFilterMap = new Map<string, finish>();
-        const modelsForFilterMap = new Map<string, model>();
-        const sinkPositionsForFilterMap = new Map<string, sinkPosition>();
+        const finishesForFilterMap = new Map<string, FinishObj>();
+        const modelsForFilterMap = new Map<string, ModelObj>();
+        const sinkPositionsForFilterMap = new Map<string, SinkPositionObj>();
         const sizesForFilterSet = new Set<string>();
 
         filteredComposition.forEach((composition) => {
@@ -249,7 +249,7 @@ function ProductsAvailable({
                             "/express-program/shopping-cart/products"
                         );
 
-                        const shoppingCartProductsServer: shoppingCartProduct[] =
+                        const shoppingCartProductsServer: ShoppingCartProduct[] =
                             response.data.shoppingCartProducts;
 
                         shoppingCartProductsServer.push(shoppingCartProduct);

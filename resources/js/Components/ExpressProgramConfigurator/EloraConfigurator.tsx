@@ -1,20 +1,28 @@
 import { Composition } from "../../Models/Composition";
 import classes from "../../../css/product-configurator.module.css";
-import { useEffect, useMemo, useReducer, useState } from "react";
+import { useMemo, useReducer, useState } from "react";
 import type {
     Option,
-    shoppingCartProduct as shoppingCartProductModel,
+    ShoppingCartProduct as shoppingCartProductModel,
 } from "../../Models/ExpressProgramModels";
 import Options from "./Options";
 import ConfigurationName from "./ConfigurationName";
-import { ToastContainer, toast } from "react-toastify";
 import { router } from "@inertiajs/react";
-import { isAlphanumericWithSpaces } from "../../utils/helperFunc";
+import {
+    getSkuAndPrice,
+    isAlphanumericWithSpaces,
+} from "../../utils/helperFunc";
 import { ProductInventory } from "../../Models/Product";
 import {
     CurrentConfiguration,
+    Vanity,
     VanityOptions,
 } from "../../Models/EloraConfigTypes";
+import { Model } from "../../Models/ModelConfigTypes";
+import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
+import useMirrorOptions from "../../Hooks/useMirrorOptions";
+import { MirrorCategory } from "../../Models/MirrorConfigTypes";
+import MirrorConfigurator from "./MirrorConfigurator";
 
 /**
  * TODO;
@@ -30,8 +38,7 @@ function EloraConfigurator({
     composition,
     onAddToCart,
 }: EloraConfiguratorProps) {
-    console.log(composition);
-    // iterate over vanitites array and analize sku in order to get the valid options to get final sku. -------------|
+    // |===== VANITY =====|
     const initialVanityOptions: VanityOptions = useMemo(() => {
         let baseSku: string = "";
         const mattFinishOptionsMap = new Map();
@@ -98,7 +105,7 @@ function EloraConfigurator({
 
     const [vanityOptions, setVanityOptions] = useState(initialVanityOptions);
 
-    // iterate over washbasin array and created Options array. ----------------------|
+    // |===== WASHBASIN =====| (repeated logic)
     const washbasinOptions: Option[] = useMemo(() => {
         const all: Option[] = [];
         composition.washbasins.forEach((washbasin) => {
@@ -123,9 +130,29 @@ function EloraConfigurator({
         return all;
     }, []);
 
-    // create objetct that will hold current configuration. if only one option, make it default. --------------|
-    const initialConfiguration: CurrentConfiguration = {
-        vanity: {
+    // |====== MIRRORS LOGIC -> get all mirror options ======|
+    const {
+        mirrorCabinetOptions,
+        ledMirrorOptions,
+        openCompMirrorOptions,
+        crrMirrorCategory,
+        currentMirrorsConfiguration,
+        handleSwitchCrrMirrorCategory: updateCurrentMirrorCategory,
+        handleMirrorOptionSelected: updateMirrorOptions,
+        handleResetMirrorConfigurator: resetMirrorConfigurator,
+        handleClearMirrorCategory: clearMirrorCategory,
+        getFormattedMirrorSkus,
+        getMirrorProductObj,
+        isMirrorCabinetConfigValid,
+    } = useMirrorOptions(composition.otherProductsAvailable.mirrors);
+
+    const handleSwitchCrrMirrorCategory = (mirrorCategory: MirrorCategory) => {
+        updateCurrentMirrorCategory(mirrorCategory);
+    };
+
+    // |===== INITIAL CONFIG =====|
+    const initialConfiguration: CurrentConfiguration = useMemo(() => {
+        const vanity: Vanity = {
             baseSku: vanityOptions.baseSku,
             mattFinish:
                 vanityOptions.mattFinishOptions.length === 1
@@ -135,15 +162,29 @@ function EloraConfigurator({
                 vanityOptions.glassFinishOptions.length === 1
                     ? vanityOptions.glassFinishOptions[0].code
                     : "",
-        },
-        isDoubleSink: composition.name.includes("DOUBLE"),
-        washbasin: composition.washbasins[0].uscode,
-        label: "",
-    };
+        };
+
+        const vanitySkuAndPrice = getSkuAndPrice(
+            composition.model as Model,
+            "vanity",
+            vanity,
+            composition.vanities
+        );
+
+        return {
+            label: "",
+            vanity,
+            vanitySku: vanitySkuAndPrice.sku,
+            vanityPrice: vanitySkuAndPrice.price,
+            washbasin: composition.washbasins[0].uscode,
+            washbasinPrice: composition.washbasins[0].msrp,
+            isDoubleSink: composition.name.includes("DOUBLE"),
+        };
+    }, []);
 
     const reducer = (
         state: CurrentConfiguration,
-        action: { type: string; payload: string }
+        action: { type: string; payload: string | number }
     ) => {
         switch (action.type) {
             case "set-vanity-mattFinish":
@@ -151,7 +192,7 @@ function EloraConfigurator({
                     ...state,
                     vanity: {
                         ...state.vanity,
-                        mattFinish: action.payload,
+                        mattFinish: action.payload as string,
                     },
                 };
 
@@ -160,14 +201,32 @@ function EloraConfigurator({
                     ...state,
                     vanity: {
                         ...state.vanity,
-                        glassFinish: action.payload,
+                        glassFinish: action.payload as string,
                     },
+                };
+
+            case "set-vanity-sku":
+                return {
+                    ...state,
+                    vanitySku: action.payload as string,
+                };
+
+            case "set-vanity-price":
+                return {
+                    ...state,
+                    vanityPrice: action.payload as number,
                 };
 
             case "set-washbasin-type":
                 return {
                     ...state,
-                    washbasin: action.payload,
+                    washbasin: action.payload as string,
+                };
+
+            case "set-washbasin-price":
+                return {
+                    ...state,
+                    washbasinPrice: action.payload as number,
                 };
 
             case "reset-configurator":
@@ -178,7 +237,7 @@ function EloraConfigurator({
             case "set-label":
                 return {
                     ...state,
-                    label: action.payload,
+                    label: action.payload as string,
                 };
 
             default:
@@ -191,14 +250,56 @@ function EloraConfigurator({
         initialConfiguration
     );
 
-    // |====== Events ======|
+    // |===== GRAND TOTAL =====|
+    const grandTotal = useMemo(() => {
+        const { vanityPrice, washbasinPrice, isDoubleSink } =
+            currentConfiguration;
+
+        const { mirrorCabinetPrice, ledMirrorPrice, openCompMirrorPrice } =
+            currentMirrorsConfiguration;
+
+        /**
+         * in order to allow the user to order or add product to
+         * the shopping cart, they must select the mandatory options.
+         *
+         * for only vanities, user must select all the options that
+         * allow the program to generate a valid sku number
+         *
+         * if the product includes a side unit, user also must select
+         * all the options that allow the program to generate the sku for the side unit.
+         *
+         * following if statement checks that all the conditions mentioned
+         * above are meet.
+         */
+
+        if (vanityPrice === 0) return 0;
+        else {
+            const finalVanityPrice = isDoubleSink
+                ? vanityPrice * 2
+                : vanityPrice;
+
+            const grandTotal =
+                finalVanityPrice +
+                washbasinPrice +
+                mirrorCabinetPrice +
+                ledMirrorPrice +
+                openCompMirrorPrice;
+
+            return grandTotal;
+        }
+    }, [currentConfiguration, currentMirrorsConfiguration]);
+
+    // |===== COMPOSITION NAME =====| (repeated logic)
+    const [isMissingLabel, setIsMissingLabel] = useState(false);
+    const [isInvalidLabel, setIsInvalidLabel] = useState(false);
+
+    // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (
         item: string,
         property: string,
         option: string
     ) => {
         if (item === "vanity") {
-            // const copyOptions = { ...vanityOptions };
             const copyOptions = structuredClone(vanityOptions);
 
             // Checks if any matt option should be disabled.
@@ -231,15 +332,59 @@ function EloraConfigurator({
                 }
             }
 
+            const vanityCurrentConfiguration = structuredClone(
+                currentConfiguration.vanity
+            );
+
+            vanityCurrentConfiguration[
+                property as keyof typeof vanityCurrentConfiguration
+            ] = option;
+
+            const skuAndPrice = getSkuAndPrice(
+                composition.model as Model,
+                item,
+                vanityCurrentConfiguration,
+                composition.vanities
+            );
+
+            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({
+                type: `set-${item}-price`,
+                payload: skuAndPrice.price,
+            });
+            dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
+
             setVanityOptions(copyOptions);
         }
 
-        dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
+        if (item === "washbasin") {
+            const skuAndPrice = getSkuAndPrice(
+                composition.model as Model,
+                item,
+                {},
+                composition.washbasins,
+                option
+            );
+
+            dispatch({
+                type: `set-${item}-${property}`,
+                payload: skuAndPrice.sku,
+            });
+            dispatch({
+                type: `set-${item}-price`,
+                payload: skuAndPrice.price,
+            });
+        }
+
+        // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
+        updateMirrorOptions(
+            item,
+            property,
+            option,
+            composition.otherProductsAvailable.mirrors
+        );
     };
 
-    // Manage label (repeated logic)
-    const [isMissingLabel, setIsMissingLabel] = useState(false);
-    const [isInvalidLabel, setIsInvalidLabel] = useState(false);
     const handleConfigurationLabel = (name: string) => {
         if (!name) {
             setIsMissingLabel(true);
@@ -258,88 +403,72 @@ function EloraConfigurator({
         dispatch({ type: "set-label", payload: name });
     };
 
-    // Manage grand total
-    const [grandTotal, setGrandTotal] = useState(0);
-
-    useEffect(() => {
-        const codesArray = [];
-        for (const key in currentConfiguration.vanity) {
-            const value =
-                currentConfiguration.vanity[
-                    key as "baseSku" | "mattFinish" | "glassFinish"
-                ];
-
-            if (value) codesArray.push(value);
-        }
-
-        // this means we have a valid sku number;
-        if (codesArray.length === 3) {
-            const vanitySku = codesArray.join("-");
-
-            let vanityMsrp = 0;
-            let washbasinMsrp = 0;
-
-            for (const crrVanity of composition.vanities) {
-                if (crrVanity.uscode === vanitySku) {
-                    vanityMsrp = crrVanity.msrp;
-                    break;
-                }
-            }
-
-            for (const washbasin of composition.washbasins) {
-                if (washbasin.uscode === currentConfiguration.washbasin) {
-                    washbasinMsrp = washbasin.msrp;
-                    break;
-                }
-            }
-
-            if (currentConfiguration.isDoubleSink) vanityMsrp *= 2;
-
-            if (vanityMsrp === 0) setGrandTotal(0);
-            else setGrandTotal(vanityMsrp + washbasinMsrp);
-        }
-    }, [currentConfiguration]);
-
-    // Manage order now.
-    const handleOrderNow = () => {
+    const isValidConfiguration = () => {
         if (!currentConfiguration.label) {
+            alert("Looks like COMPOSITION NAME is missing!!");
             setIsMissingLabel(true);
-            toast.error("missing composition name!!");
-            return;
+            return false;
         }
 
-        const vanitySku = Object.values(currentConfiguration.vanity).join("-");
-        const washbasinSku = currentConfiguration.washbasin;
-
-        let SKU;
-        if (!washbasinSku) {
-            SKU = `${vanitySku}${
-                currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }##${currentConfiguration.label}`;
-        } else {
-            SKU = `${vanitySku}${
-                currentConfiguration.isDoubleSink ? "--2" : "--1"
-            }##${currentConfiguration.label}~${washbasinSku}--1##${
-                currentConfiguration.label
-            }`;
+        if (!isMirrorCabinetConfigValid()) {
+            alert(
+                "Looks like you forgot to select all available MIRROR CABINET OPTIONS. Either clear the mirror cabinet section or select the missing option(s). "
+            );
+            return false;
         }
 
-        router.get("/orders/create-so-num", { SKU });
+        return true;
+    };
+
+    const handleOrderNow = () => {
+        if (!isValidConfiguration()) return;
+
+        const {
+            vanitySku,
+            washbasin: washbasinSku,
+            label,
+            isDoubleSink,
+        } = currentConfiguration;
+
+        const allFormattedSkus: string[] = [];
+
+        const vanityFormattedSku = `${vanitySku}!!${composition.model}${
+            isDoubleSink ? "--2" : "--1"
+        }##${label}`;
+        allFormattedSkus.push(vanityFormattedSku);
+
+        const washbasinFormattedSku = washbasinSku
+            ? `${washbasinSku}!!${composition.model}--1##${label}`
+            : "";
+        washbasinFormattedSku && allFormattedSkus.push(washbasinFormattedSku);
+
+        // ========= VVVV MIRROR (REPEATED LOGIC) ==========VVVVV
+        getFormattedMirrorSkus(
+            composition.model,
+            currentConfiguration.label,
+            allFormattedSkus
+        );
+
+        router.get("/orders/create-so-num", {
+            SKU: allFormattedSkus.join("~"),
+        });
     };
 
     const handleResetConfigurator = () => {
         setVanityOptions(initialVanityOptions);
-        setGrandTotal(0);
+        resetMirrorConfigurator();
         dispatch({ type: "reset-configurator", payload: "" });
     };
 
-    // Creates object for shopping cart.
     const handleAddToCart = () => {
-        if (!currentConfiguration.label) {
-            setIsMissingLabel(true);
-            toast.error("missing composition name!!");
-            return;
-        }
+        if (!isValidConfiguration()) return;
+
+        const {
+            vanitySku,
+            washbasin: washbasinSku,
+            label,
+            isDoubleSink,
+        } = currentConfiguration;
 
         const otherProducts = {
             wallUnit: [] as ProductInventory[],
@@ -348,9 +477,6 @@ function EloraConfigurator({
             mirror: [] as ProductInventory[],
         };
 
-        const vanitySku = Object.values(currentConfiguration.vanity).join("-");
-        const washbasinSku = currentConfiguration.washbasin;
-
         const vanityObj = composition.vanities.find(
             (vanity) => vanity.uscode === vanitySku
         );
@@ -358,16 +484,21 @@ function EloraConfigurator({
             (washbasin) => washbasin.uscode === washbasinSku
         );
 
+        getMirrorProductObj(
+            composition.otherProductsAvailable.mirrors,
+            otherProducts
+        );
+
         const shoppingCartObj: shoppingCartProductModel = {
             composition: composition,
             description: composition.name,
             configuration: currentConfiguration,
-            label: currentConfiguration.label,
+            label,
             vanity: vanityObj!,
             sideUnits: [],
             washbasin: washbasinObj!,
             otherProducts,
-            isDoubleSink: currentConfiguration.isDoubleSink,
+            isDoubleSink,
             isDoubleSideunit: false,
             quantity: 1,
             grandTotal: grandTotal,
@@ -375,6 +506,12 @@ function EloraConfigurator({
 
         onAddToCart(shoppingCartObj);
     };
+
+    console.log("=== elora confg render ===");
+    console.log("composition:", composition);
+    console.log("current config:", currentConfiguration);
+    console.log("current mirror config:", currentMirrorsConfiguration);
+    console.log("grand total:", grandTotal);
 
     return (
         <div className={classes.compositionConfiguratorWrapper}>
@@ -417,30 +554,53 @@ function EloraConfigurator({
                     isMissingLabel={isMissingLabel}
                     isInvalidLabel={isInvalidLabel}
                 />
-                <Options
-                    item="vanity"
-                    property="mattFinish"
-                    title="SELECT MATT FINISH"
-                    options={vanityOptions.mattFinishOptions}
-                    crrOptionSelected={currentConfiguration.vanity.mattFinish}
-                    onOptionSelected={handleOptionSelected}
-                />
-                <Options
-                    item="vanity"
-                    property="glassFinish"
-                    title="SELECT GLASS FINISH"
-                    options={vanityOptions.glassFinishOptions}
-                    crrOptionSelected={currentConfiguration.vanity.glassFinish}
-                    onOptionSelected={handleOptionSelected}
-                />
-                <Options
-                    item="washbasin"
-                    property="type"
-                    title="SELECT WASHBASIN"
-                    options={washbasinOptions}
-                    crrOptionSelected={currentConfiguration.washbasin}
-                    onOptionSelected={handleOptionSelected}
-                />
+                <ItemPropertiesAccordion headerTitle="VANITY">
+                    <Options
+                        item="vanity"
+                        property="mattFinish"
+                        title="SELECT MATT FINISH"
+                        options={vanityOptions.mattFinishOptions}
+                        crrOptionSelected={
+                            currentConfiguration.vanity.mattFinish
+                        }
+                        onOptionSelected={handleOptionSelected}
+                    />
+                    <Options
+                        item="vanity"
+                        property="glassFinish"
+                        title="SELECT GLASS FINISH"
+                        options={vanityOptions.glassFinishOptions}
+                        crrOptionSelected={
+                            currentConfiguration.vanity.glassFinish
+                        }
+                        onOptionSelected={handleOptionSelected}
+                    />
+                </ItemPropertiesAccordion>
+
+                <ItemPropertiesAccordion headerTitle="WASHBASIN">
+                    <Options
+                        item="washbasin"
+                        property="type"
+                        title="SELECT WASHBASIN"
+                        options={washbasinOptions}
+                        crrOptionSelected={currentConfiguration.washbasin}
+                        onOptionSelected={handleOptionSelected}
+                    />
+                </ItemPropertiesAccordion>
+
+                <MirrorConfigurator
+                    mirrorCabinetOptions={mirrorCabinetOptions}
+                    ledMirrorOptions={ledMirrorOptions}
+                    openCompMirrorOptions={openCompMirrorOptions}
+                    crrMirrorCategory={crrMirrorCategory}
+                    currentMirrorsConfiguration={currentMirrorsConfiguration}
+                    handleSwitchCrrMirrorCategory={
+                        handleSwitchCrrMirrorCategory
+                    }
+                    clearMirrorCategory={clearMirrorCategory}
+                    handleOptionSelected={handleOptionSelected}
+                ></MirrorConfigurator>
+
                 <div className={classes.grandTotalAndOrderNowButtonWrapper}>
                     <div className={classes.grandTotalWrapper}>
                         <h1 className={classes.label}>Grand Total:</h1>
@@ -456,20 +616,19 @@ function EloraConfigurator({
                         SPECS
                     </a>
                     <button
-                        disabled={!grandTotal ? true : false}
+                        disabled={grandTotal === 0}
                         onClick={handleOrderNow}
                     >
                         ORDER NOW
                     </button>
                     <button
-                        disabled={!grandTotal ? true : false}
+                        disabled={grandTotal === 0}
                         onClick={handleAddToCart}
                     >
                         ADD TO CART
                     </button>
                 </div>
             </section>
-            <ToastContainer />
         </div>
     );
 }

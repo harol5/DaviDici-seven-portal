@@ -3,7 +3,7 @@ import classes from "../../../css/product-configurator.module.css";
 import { useMemo, useReducer, useState } from "react";
 import type {
     Option,
-    shoppingCartProduct as shoppingCartProductModel,
+    ShoppingCartProduct as shoppingCartProductModel,
 } from "../../Models/ExpressProgramModels";
 import Options from "./Options";
 import ConfigurationName from "./ConfigurationName";
@@ -26,13 +26,9 @@ import {
 } from "../../Models/MargiConfigTypes";
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
-import type { mirrorCategories } from "../../Models/MirrorConfigTypes";
+import type { MirrorCategory } from "../../Models/MirrorConfigTypes";
 import { Model } from "../../Models/ModelConfigTypes";
-
-/**
- * TODO;
- * 3. redesign options by sections (vanity, side unit, wall unit, etc...)
- */
+import MirrorConfigurator from "./MirrorConfigurator";
 
 interface MargiConfiguratorProps {
     composition: Composition;
@@ -374,28 +370,25 @@ function MargiConfigurator({
 
     // |====== MIRRORS LOGIC -> get all mirror options ======|
     const {
-        initialMirrorCabinetOptions,
         mirrorCabinetOptions,
-        setMirrorCabinetOptions,
         ledMirrorOptions,
         openCompMirrorOptions,
-        mirrorCabinetStatus,
-        setMirrorCabinetStatus,
         crrMirrorCategory,
-        setCrrMirrorCategory,
+        currentMirrorsConfiguration,
         handleSwitchCrrMirrorCategory: updateCurrentMirrorCategory,
         handleMirrorOptionSelected: updateMirrorOptions,
+        handleResetMirrorConfigurator: resetMirrorConfigurator,
+        handleClearMirrorCategory: clearMirrorCategory,
+        getFormattedMirrorSkus,
+        getMirrorProductObj,
+        isMirrorCabinetConfigValid,
     } = useMirrorOptions(composition.otherProductsAvailable.mirrors);
 
-    const handleSwitchCrrMirrorCategory = (
-        mirrorCategory: mirrorCategories
-    ) => {
+    const handleSwitchCrrMirrorCategory = (mirrorCategory: MirrorCategory) => {
         updateCurrentMirrorCategory(mirrorCategory);
-        dispatch({ type: `reset-${crrMirrorCategory}`, payload: "" });
     };
 
     // |===== INITIAL CONFIG =====|
-
     const initialConfiguration: CurrentConfiguration = useMemo(() => {
         // --- VANITY---
         const vanity: Vanity = {
@@ -511,17 +504,6 @@ function MargiConfigurator({
             wallUnit,
             wallUnitSku: "",
             wallUnitPrice: 0,
-            mirrorCabinet: {
-                baseSku: mirrorCabinetOptions.baseSku,
-                size: "",
-                finish: "",
-            },
-            mirrorCabinetSku: "",
-            mirrorCabinetPrice: 0,
-            ledMirror: "",
-            ledMirrorPrice: 0,
-            openCompMirror: "",
-            openCompMirrorPrice: 0,
             label: "",
         };
     }, []);
@@ -671,87 +653,6 @@ function MargiConfigurator({
                     wallUnitPrice: initialConfiguration.wallUnitPrice,
                 };
 
-            // |===vvvvvv SAME MIRROR CASES FOR ALL MODELS VVVVV===|
-
-            case "set-mirrorCabinet-size":
-                return {
-                    ...state,
-                    mirrorCabinet: {
-                        ...state.mirrorCabinet,
-                        size: action.payload as string,
-                    },
-                };
-
-            case "set-mirrorCabinet-finish":
-                return {
-                    ...state,
-                    mirrorCabinet: {
-                        ...state.mirrorCabinet,
-                        finish: action.payload as string,
-                    },
-                };
-
-            case "set-mirrorCabinet-sku":
-                return {
-                    ...state,
-                    mirrorCabinetSku: action.payload as string,
-                };
-
-            case "set-mirrorCabinet-price":
-                return {
-                    ...state,
-                    mirrorCabinetPrice: action.payload as number,
-                };
-
-            case "reset-mirrorCabinet":
-                return {
-                    ...state,
-                    mirrorCabinet: {
-                        ...initialConfiguration.mirrorCabinet,
-                    },
-                    mirrorCabinetPrice: initialConfiguration.mirrorCabinetPrice,
-                    mirrorCabinetSku: initialConfiguration.mirrorCabinetSku,
-                };
-
-            case "set-ledMirror-type":
-                return {
-                    ...state,
-                    ledMirror: action.payload as string,
-                };
-
-            case "set-ledMirror-price":
-                return {
-                    ...state,
-                    ledMirrorPrice: action.payload as number,
-                };
-
-            case "reset-ledMirror":
-                return {
-                    ...state,
-                    ledMirror: initialConfiguration.ledMirror,
-                    ledMirrorPrice: initialConfiguration.ledMirrorPrice,
-                };
-
-            case "set-openCompMirror-type":
-                return {
-                    ...state,
-                    openCompMirror: action.payload as string,
-                };
-
-            case "set-openCompMirror-price":
-                return {
-                    ...state,
-                    openCompMirrorPrice: action.payload as number,
-                };
-
-            case "reset-openCompMirror":
-                return {
-                    ...state,
-                    openCompMirror: initialConfiguration.openCompMirror,
-                    openCompMirrorPrice:
-                        initialConfiguration.openCompMirrorPrice,
-                };
-
             case "reset-configurator":
                 return {
                     ...initialConfiguration,
@@ -782,10 +683,10 @@ function MargiConfigurator({
             sideUnit,
             sideUnitPrice,
             wallUnitPrice,
-            mirrorCabinetPrice,
-            ledMirrorPrice,
-            openCompMirrorPrice,
         } = currentConfiguration;
+
+        const { mirrorCabinetPrice, ledMirrorPrice, openCompMirrorPrice } =
+            currentMirrorsConfiguration;
 
         /**
          * in order to allow the user to order or add product to
@@ -818,7 +719,7 @@ function MargiConfigurator({
 
             return grandTotal;
         }
-    }, [currentConfiguration]);
+    }, [currentConfiguration, currentMirrorsConfiguration]);
 
     // |===== COMPOSITION NAME =====| (repeated logic)
     const [isMissingLabel, setIsMissingLabel] = useState(false);
@@ -1121,69 +1022,12 @@ function MargiConfigurator({
         }
 
         // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
-
-        if (item === "mirrorCabinet") {
-            const mirrorCabinetCurrentConfiguration = structuredClone(
-                currentConfiguration.mirrorCabinet
-            );
-
-            mirrorCabinetCurrentConfiguration[
-                property as keyof typeof mirrorCabinetCurrentConfiguration
-            ] = option;
-
-            const skuAndPrice = getSkuAndPrice(
-                composition.model as Model,
-                item,
-                mirrorCabinetCurrentConfiguration,
-                composition.otherProductsAvailable.mirrors
-            );
-
-            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
-            dispatch({
-                type: `set-${item}-price`,
-                payload: skuAndPrice.price,
-            });
-            dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
-            updateMirrorOptions(item, property, option, skuAndPrice.price > 0);
-        }
-
-        if (item === "ledMirror") {
-            const skuAndPrice = getSkuAndPrice(
-                composition.model as Model,
-                item,
-                {},
-                composition.otherProductsAvailable.mirrors,
-                option
-            );
-
-            dispatch({
-                type: `set-${item}-type`,
-                payload: skuAndPrice.sku === "none" ? "" : skuAndPrice.sku,
-            });
-            dispatch({
-                type: `set-${item}-price`,
-                payload: skuAndPrice.price,
-            });
-        }
-
-        if (item === "openCompMirror") {
-            const skuAndPrice = getSkuAndPrice(
-                composition.model as Model,
-                item,
-                {},
-                composition.otherProductsAvailable.mirrors,
-                option
-            );
-
-            dispatch({
-                type: `set-${item}-type`,
-                payload: skuAndPrice.sku === "none" ? "" : skuAndPrice.sku,
-            });
-            dispatch({
-                type: `set-${item}-price`,
-                payload: skuAndPrice.price,
-            });
-        }
+        updateMirrorOptions(
+            item,
+            property,
+            option,
+            composition.otherProductsAvailable.mirrors
+        );
     };
 
     const handleConfigurationLabel = (name: string) => {
@@ -1221,10 +1065,7 @@ function MargiConfigurator({
             return false;
         }
 
-        if (
-            mirrorCabinetStatus.isMirrorCabinetSelected &&
-            !mirrorCabinetStatus.isMirrorCabinetValid
-        ) {
+        if (!isMirrorCabinetConfigValid()) {
             alert(
                 "Looks like you forgot to select all available MIRROR CABINET OPTIONS. Either clear the mirror cabinet section or select the missing option(s). "
             );
@@ -1242,9 +1083,6 @@ function MargiConfigurator({
             sideUnitSku,
             washbasin: washbasinSku,
             wallUnitSku,
-            mirrorCabinetSku,
-            ledMirror: ledMirrorSku,
-            openCompMirror: openCompMirrorSku,
         } = currentConfiguration;
 
         const allFormattedSkus: string[] = [];
@@ -1270,22 +1108,11 @@ function MargiConfigurator({
         wallUnitFormattedSku && allFormattedSkus.push(wallUnitFormattedSku);
 
         // ========= VVVV MIRROR (REPEATED LOGIC) ==========VVVVV
-        const mirrorCabinetFormattedSku = mirrorCabinetSku
-            ? `${mirrorCabinetSku}!!${composition.model}--1##${currentConfiguration.label}`
-            : "";
-        mirrorCabinetFormattedSku &&
-            allFormattedSkus.push(mirrorCabinetFormattedSku);
-
-        const ledMirrorFormattedSku = ledMirrorSku
-            ? `${ledMirrorSku}!!${composition.model}--1##${currentConfiguration.label}`
-            : "";
-        ledMirrorFormattedSku && allFormattedSkus.push(ledMirrorFormattedSku);
-
-        const openCompMirrorFormattedSku = openCompMirrorSku
-            ? `${openCompMirrorSku}!!${composition.model}--1##${currentConfiguration.label}`
-            : "";
-        openCompMirrorFormattedSku &&
-            allFormattedSkus.push(openCompMirrorFormattedSku);
+        getFormattedMirrorSkus(
+            composition.model,
+            currentConfiguration.label,
+            allFormattedSkus
+        );
 
         router.get("/orders/create-so-num", {
             SKU: allFormattedSkus.join("~"),
@@ -1300,12 +1127,7 @@ function MargiConfigurator({
             isWallUnitSelected: false,
             isWallUnitValid: false,
         });
-        setMirrorCabinetOptions(initialMirrorCabinetOptions);
-        setMirrorCabinetStatus({
-            isMirrorCabinetSelected: false,
-            isMirrorCabinetValid: false,
-        });
-        setCrrMirrorCategory("mirrorCabinet");
+        resetMirrorConfigurator();
         dispatch({ type: "reset-configurator", payload: "" });
     };
 
@@ -1325,23 +1147,6 @@ function MargiConfigurator({
                 dispatch({ type: "reset-wallUnit", payload: "" });
                 break;
 
-            case "mirrorCabinet":
-                setMirrorCabinetOptions(initialMirrorCabinetOptions);
-                setMirrorCabinetStatus({
-                    isMirrorCabinetSelected: false,
-                    isMirrorCabinetValid: false,
-                });
-                dispatch({ type: "reset-mirrorCabinet", payload: "" });
-                break;
-
-            case "ledMirror":
-                dispatch({ type: "reset-ledMirror", payload: "" });
-                break;
-
-            case "openCompMirror":
-                dispatch({ type: "reset-openCompMirror", payload: "" });
-                break;
-
             default:
                 throw new Error("case condition not found");
         }
@@ -1355,9 +1160,6 @@ function MargiConfigurator({
             sideUnitSku,
             washbasin: washbasinSku,
             wallUnitSku,
-            mirrorCabinetSku,
-            ledMirror: ledMirrorSku,
-            openCompMirror: openCompMirrorSku,
         } = currentConfiguration;
 
         const otherProducts = {
@@ -1366,8 +1168,6 @@ function MargiConfigurator({
             accessory: [] as ProductInventory[],
             mirror: [] as ProductInventory[],
         };
-
-        const mirrorSku = mirrorCabinetSku || ledMirrorSku || openCompMirrorSku;
 
         const vanityObj = composition.vanities.find(
             (vanity) => vanity.uscode === vanitySku
@@ -1386,10 +1186,10 @@ function MargiConfigurator({
         );
         wallUnitObj && otherProducts.wallUnit.push(wallUnitObj);
 
-        const mirrorObj = composition.otherProductsAvailable.mirrors.find(
-            (mirror) => mirror.uscode === mirrorSku
+        getMirrorProductObj(
+            composition.otherProductsAvailable.mirrors,
+            otherProducts
         );
-        mirrorObj && otherProducts.mirror.push(mirrorObj);
 
         const shoppingCartObj: shoppingCartProductModel = {
             composition: composition,
@@ -1412,16 +1212,9 @@ function MargiConfigurator({
     console.log("=== margi confg render ===");
     console.log("composition:", composition);
     console.log("current config:", currentConfiguration);
+    console.log("current mirror config:", currentMirrorsConfiguration);
     console.log("is wall unit active?", wallUnitStatus.isWallUnitSelected);
     console.log("is wall unit valid?", wallUnitStatus.isWallUnitValid);
-    console.log(
-        "is mirror cabinet active?",
-        mirrorCabinetStatus.isMirrorCabinetSelected
-    );
-    console.log(
-        "is mirror cabinet valid?",
-        mirrorCabinetStatus.isMirrorCabinetValid
-    );
     console.log("grand total:", grandTotal);
 
     return (
@@ -1556,127 +1349,18 @@ function MargiConfigurator({
                     </ItemPropertiesAccordion>
                 )}
 
-                <ItemPropertiesAccordion headerTitle="MIRRORS">
-                    <section className={classes.mirrorCategories}>
-                        <div className={classes.mirrorCategoriesSwitchers}>
-                            <button
-                                className={
-                                    crrMirrorCategory === "mirrorCabinet"
-                                        ? classes.mirrorCategorySelected
-                                        : ""
-                                }
-                                onClick={() =>
-                                    handleSwitchCrrMirrorCategory(
-                                        "mirrorCabinet"
-                                    )
-                                }
-                            >
-                                MIRROR CABINETS
-                            </button>
-                            <button
-                                className={
-                                    crrMirrorCategory === "ledMirror"
-                                        ? classes.mirrorCategorySelected
-                                        : ""
-                                }
-                                onClick={() =>
-                                    handleSwitchCrrMirrorCategory("ledMirror")
-                                }
-                            >
-                                LED MIRRORS
-                            </button>
-                            <button
-                                className={
-                                    crrMirrorCategory === "openCompMirror"
-                                        ? classes.mirrorCategorySelected
-                                        : ""
-                                }
-                                onClick={() =>
-                                    handleSwitchCrrMirrorCategory(
-                                        "openCompMirror"
-                                    )
-                                }
-                            >
-                                OPEN COMPARTMENT MIRRORS
-                            </button>
-                        </div>
-                        {crrMirrorCategory === "mirrorCabinet" && (
-                            <div>
-                                <button
-                                    className={classes.clearButton}
-                                    onClick={() =>
-                                        handleClearItem("mirrorCabinet")
-                                    }
-                                >
-                                    CLEAR
-                                </button>
-                                <Options
-                                    item="mirrorCabinet"
-                                    property="size"
-                                    title="SELECT SIZE"
-                                    options={mirrorCabinetOptions.sizeOptions}
-                                    crrOptionSelected={
-                                        currentConfiguration.mirrorCabinet.size
-                                    }
-                                    onOptionSelected={handleOptionSelected}
-                                />
-                                <Options
-                                    item="mirrorCabinet"
-                                    property="finish"
-                                    title="SELECT FINISH"
-                                    options={mirrorCabinetOptions.finishOptions}
-                                    crrOptionSelected={
-                                        currentConfiguration.mirrorCabinet
-                                            .finish
-                                    }
-                                    onOptionSelected={handleOptionSelected}
-                                />
-                            </div>
-                        )}
-                        {crrMirrorCategory === "ledMirror" && (
-                            <div>
-                                <button
-                                    className={classes.clearButton}
-                                    onClick={() => handleClearItem("ledMirror")}
-                                >
-                                    CLEAR
-                                </button>
-                                <Options
-                                    item="ledMirror"
-                                    property="type"
-                                    title="SELECT LED MIRROR"
-                                    options={ledMirrorOptions}
-                                    crrOptionSelected={
-                                        currentConfiguration.ledMirror
-                                    }
-                                    onOptionSelected={handleOptionSelected}
-                                />
-                            </div>
-                        )}
-                        {crrMirrorCategory === "openCompMirror" && (
-                            <div>
-                                <button
-                                    className={classes.clearButton}
-                                    onClick={() =>
-                                        handleClearItem("openCompMirror")
-                                    }
-                                >
-                                    CLEAR
-                                </button>
-                                <Options
-                                    item="openCompMirror"
-                                    property="type"
-                                    title="SELECT OPEN COMPARMENT MIRROR"
-                                    options={openCompMirrorOptions}
-                                    crrOptionSelected={
-                                        currentConfiguration.openCompMirror
-                                    }
-                                    onOptionSelected={handleOptionSelected}
-                                />
-                            </div>
-                        )}
-                    </section>
-                </ItemPropertiesAccordion>
+                <MirrorConfigurator
+                    mirrorCabinetOptions={mirrorCabinetOptions}
+                    ledMirrorOptions={ledMirrorOptions}
+                    openCompMirrorOptions={openCompMirrorOptions}
+                    crrMirrorCategory={crrMirrorCategory}
+                    currentMirrorsConfiguration={currentMirrorsConfiguration}
+                    handleSwitchCrrMirrorCategory={
+                        handleSwitchCrrMirrorCategory
+                    }
+                    clearMirrorCategory={clearMirrorCategory}
+                    handleOptionSelected={handleOptionSelected}
+                ></MirrorConfigurator>
 
                 <div className={classes.grandTotalAndOrderNowButtonWrapper}>
                     <div className={classes.grandTotalWrapper}>

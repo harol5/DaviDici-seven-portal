@@ -1,20 +1,29 @@
 import type { Option } from "./ExpressProgramModels";
+import { ProductInventory } from "./Product";
 
-export type mirrorCategories = "mirrorCabinet" | "ledMirror" | "openCompMirror";
+export const Name = "MIRROR";
 
-export type MirrorCabinetsOptions = {
+type MirrorCategory = "mirrorCabinet" | "ledMirror" | "openCompMirror";
+
+type MirrorCategoriesObj = {
+    mirrorCabinets: ProductInventory[];
+    openCompMirrors: ProductInventory[];
+    ledMirrors: ProductInventory[];
+};
+
+type MirrorCabinetsOptions = {
     baseSku: string;
     sizeOptions: Option[];
     finishOptions: Option[];
 };
 
-export type MirrorCabinet = {
+type MirrorCabinet = {
     baseSku: string;
     size: string;
     finish: string;
 };
 
-export type MirrorConfig = {
+type MirrorConfig = {
     mirrorCabinet: MirrorCabinet;
     mirrorCabinetSku: string;
     mirrorCabinetPrice: number;
@@ -22,4 +31,16 @@ export type MirrorConfig = {
     ledMirrorPrice: number;
     openCompMirror: string;
     openCompMirrorPrice: number;
+};
+
+export type {
+    MirrorCategory,
+    MirrorCategoriesObj,
+    MirrorCabinetsOptions,
+    MirrorConfig,
+    MirrorCabinet,
+};
+
+export const SkuLengths = {
+    mirrorCabinet: 3,
 };

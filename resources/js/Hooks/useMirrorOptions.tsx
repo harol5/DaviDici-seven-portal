@@ -1,19 +1,18 @@
-import { useMemo, useState } from "react";
+import { useMemo, useReducer, useState } from "react";
 import { ProductInventory } from "../Models/Product";
-import type { Option } from "../Models/ExpressProgramModels";
-import type {
+import type { Option, OtherItems } from "../Models/ExpressProgramModels";
+import {
+    Name,
+    MirrorCabinet,
     MirrorCabinetsOptions,
-    mirrorCategories,
+    MirrorCategory,
+    MirrorCategoriesObj,
+    MirrorConfig,
 } from "../Models/MirrorConfigTypes";
-
-type MirrorCategories = {
-    mirrorCabinets: ProductInventory[];
-    openCompMirrors: ProductInventory[];
-    ledMirrors: ProductInventory[];
-};
+import { getSkuAndPrice } from "../utils/helperFunc";
 
 function useMirrorOptions(mirrors: ProductInventory[]) {
-    const createMirrorsMap = (): MirrorCategories => {
+    const createMirrorsMap = (): MirrorCategoriesObj => {
         const ledMirrorModels = {
             Florence: 1,
             Verona: 2,
@@ -170,27 +169,132 @@ function useMirrorOptions(mirrors: ProductInventory[]) {
     });
 
     const [crrMirrorCategory, setCrrMirrorCategory] =
-        useState<mirrorCategories>("mirrorCabinet");
+        useState<MirrorCategory>("mirrorCabinet");
 
-    const handleSwitchCrrMirrorCategory = (
-        mirrorCategory: mirrorCategories
+    const initialMirrorsConfig: MirrorConfig = useMemo(() => {
+        const mirrorCabinet: MirrorCabinet = {
+            baseSku: mirrorCabinetOptions.baseSku,
+            size: "",
+            finish: "",
+        };
+
+        return {
+            mirrorCabinet,
+            mirrorCabinetSku: "",
+            mirrorCabinetPrice: 0,
+            ledMirror: "",
+            ledMirrorPrice: 0,
+            openCompMirror: "",
+            openCompMirrorPrice: 0,
+        };
+    }, []);
+
+    const reducer = (
+        state: MirrorConfig,
+        action: { type: string; payload: string | number }
     ) => {
-        if (crrMirrorCategory === "mirrorCabinet") {
-            setMirrorCabinetOptions(initialMirrorCabinetOptions);
-            setMirrorCabinetStatus({
-                isMirrorCabinetSelected: false,
-                isMirrorCabinetValid: false,
-            });
-        }
+        switch (action.type) {
+            // |===vvvvvv SAME MIRROR CASES FOR ALL MODELS VVVVV===|
 
-        setCrrMirrorCategory(mirrorCategory);
+            case "set-mirrorCabinet-size":
+                return {
+                    ...state,
+                    mirrorCabinet: {
+                        ...state.mirrorCabinet,
+                        size: action.payload as string,
+                    },
+                };
+
+            case "set-mirrorCabinet-finish":
+                return {
+                    ...state,
+                    mirrorCabinet: {
+                        ...state.mirrorCabinet,
+                        finish: action.payload as string,
+                    },
+                };
+
+            case "set-mirrorCabinet-sku":
+                return {
+                    ...state,
+                    mirrorCabinetSku: action.payload as string,
+                };
+
+            case "set-mirrorCabinet-price":
+                return {
+                    ...state,
+                    mirrorCabinetPrice: action.payload as number,
+                };
+
+            case "reset-mirrorCabinet":
+                return {
+                    ...state,
+                    mirrorCabinet: {
+                        ...initialMirrorsConfig.mirrorCabinet,
+                    },
+                    mirrorCabinetPrice: initialMirrorsConfig.mirrorCabinetPrice,
+                    mirrorCabinetSku: initialMirrorsConfig.mirrorCabinetSku,
+                };
+
+            case "set-ledMirror-type":
+                return {
+                    ...state,
+                    ledMirror: action.payload as string,
+                };
+
+            case "set-ledMirror-price":
+                return {
+                    ...state,
+                    ledMirrorPrice: action.payload as number,
+                };
+
+            case "reset-ledMirror":
+                return {
+                    ...state,
+                    ledMirror: initialMirrorsConfig.ledMirror,
+                    ledMirrorPrice: initialMirrorsConfig.ledMirrorPrice,
+                };
+
+            case "set-openCompMirror-type":
+                return {
+                    ...state,
+                    openCompMirror: action.payload as string,
+                };
+
+            case "set-openCompMirror-price":
+                return {
+                    ...state,
+                    openCompMirrorPrice: action.payload as number,
+                };
+
+            case "reset-openCompMirror":
+                return {
+                    ...state,
+                    openCompMirror: initialMirrorsConfig.openCompMirror,
+                    openCompMirrorPrice:
+                        initialMirrorsConfig.openCompMirrorPrice,
+                };
+
+            case "reset-mirror-configurator":
+                return {
+                    ...initialMirrorsConfig,
+                };
+
+            default:
+                throw new Error("case condition not found");
+        }
     };
+
+    const [currentMirrorsConfiguration, dispatch] = useReducer(
+        reducer,
+        initialMirrorsConfig
+    );
 
     const handleMirrorOptionSelected = (
         item: string,
         property: string,
         option: string,
-        isValid: boolean = false
+        mirrorsInventory: ProductInventory[]
     ) => {
         if (item === "mirrorCabinet") {
             const copyOptions = structuredClone(mirrorCabinetOptions);
@@ -223,6 +327,28 @@ function useMirrorOptions(mirrors: ProductInventory[]) {
                 }
             }
 
+            const mirrorCabinetCurrentConfiguration = structuredClone(
+                currentMirrorsConfiguration.mirrorCabinet
+            );
+
+            mirrorCabinetCurrentConfiguration[
+                property as keyof typeof mirrorCabinetCurrentConfiguration
+            ] = option;
+
+            const skuAndPrice = getSkuAndPrice(
+                Name,
+                item,
+                mirrorCabinetCurrentConfiguration,
+                mirrorsInventory
+            );
+
+            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({
+                type: `set-${item}-price`,
+                payload: skuAndPrice.price,
+            });
+            dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
+
             setMirrorCabinetOptions(copyOptions);
             !mirrorCabinetStatus.isMirrorCabinetSelected &&
                 setMirrorCabinetStatus((prev) => ({
@@ -232,23 +358,177 @@ function useMirrorOptions(mirrors: ProductInventory[]) {
 
             setMirrorCabinetStatus((prev) => ({
                 ...prev,
-                isMirrorCabinetValid: isValid,
+                isMirrorCabinetValid: skuAndPrice.price > 0,
             }));
+        }
+
+        if (item === "ledMirror") {
+            const skuAndPrice = getSkuAndPrice(
+                Name,
+                item,
+                {},
+                mirrorsInventory,
+                option
+            );
+
+            dispatch({
+                type: `set-${item}-type`,
+                payload: skuAndPrice.sku === "none" ? "" : skuAndPrice.sku,
+            });
+            dispatch({
+                type: `set-${item}-price`,
+                payload: skuAndPrice.price,
+            });
+        }
+
+        if (item === "openCompMirror") {
+            const skuAndPrice = getSkuAndPrice(
+                Name,
+                item,
+                {},
+                mirrorsInventory,
+                option
+            );
+
+            dispatch({
+                type: `set-${item}-type`,
+                payload: skuAndPrice.sku === "none" ? "" : skuAndPrice.sku,
+            });
+            dispatch({
+                type: `set-${item}-price`,
+                payload: skuAndPrice.price,
+            });
         }
     };
 
+    const handleSwitchCrrMirrorCategory = (mirrorCategory: MirrorCategory) => {
+        if (crrMirrorCategory === "mirrorCabinet") {
+            setMirrorCabinetOptions(initialMirrorCabinetOptions);
+            setMirrorCabinetStatus({
+                isMirrorCabinetSelected: false,
+                isMirrorCabinetValid: false,
+            });
+        }
+
+        setCrrMirrorCategory(mirrorCategory);
+        dispatch({ type: `reset-${crrMirrorCategory}`, payload: "" });
+    };
+
+    const handleResetMirrorConfigurator = () => {
+        setMirrorCabinetOptions(initialMirrorCabinetOptions);
+        setMirrorCabinetStatus({
+            isMirrorCabinetSelected: false,
+            isMirrorCabinetValid: false,
+        });
+        setCrrMirrorCategory("mirrorCabinet");
+        dispatch({ type: "reset-mirror-configurator", payload: "" });
+    };
+
+    const handleClearMirrorCategory = (mirrorCategory: MirrorCategory) => {
+        switch (mirrorCategory) {
+            case "mirrorCabinet":
+                setMirrorCabinetOptions(initialMirrorCabinetOptions);
+                setMirrorCabinetStatus({
+                    isMirrorCabinetSelected: false,
+                    isMirrorCabinetValid: false,
+                });
+                dispatch({ type: "reset-mirrorCabinet", payload: "" });
+                break;
+
+            case "ledMirror":
+                dispatch({ type: "reset-ledMirror", payload: "" });
+                break;
+
+            case "openCompMirror":
+                dispatch({ type: "reset-openCompMirror", payload: "" });
+                break;
+
+            default:
+                throw new Error("case condition not found");
+        }
+    };
+
+    const getFormattedMirrorSkus = (
+        model: string,
+        label: string,
+        allFormattedSkus: string[]
+    ) => {
+        const {
+            mirrorCabinetSku,
+            ledMirror: ledMirrorSku,
+            openCompMirror: openCompMirrorSku,
+        } = currentMirrorsConfiguration;
+
+        const mirrorCabinetFormattedSku = mirrorCabinetSku
+            ? `${mirrorCabinetSku}!!${model}--1##${label}`
+            : "";
+        mirrorCabinetFormattedSku &&
+            allFormattedSkus.push(mirrorCabinetFormattedSku);
+
+        const ledMirrorFormattedSku = ledMirrorSku
+            ? `${ledMirrorSku}!!${model}--1##${label}`
+            : "";
+        ledMirrorFormattedSku && allFormattedSkus.push(ledMirrorFormattedSku);
+
+        const openCompMirrorFormattedSku = openCompMirrorSku
+            ? `${openCompMirrorSku}!!${model}--1##${label}`
+            : "";
+        openCompMirrorFormattedSku &&
+            allFormattedSkus.push(openCompMirrorFormattedSku);
+    };
+
+    const getMirrorProductObj = (
+        mirrorsInventory: ProductInventory[],
+        otherProducts: OtherItems
+    ) => {
+        const {
+            mirrorCabinetSku,
+            ledMirror: ledMirrorSku,
+            openCompMirror: openCompMirrorSku,
+        } = currentMirrorsConfiguration;
+
+        const mirrorSku = mirrorCabinetSku || ledMirrorSku || openCompMirrorSku;
+
+        const mirrorObj = mirrorsInventory.find(
+            (mirror) => mirror.uscode === mirrorSku
+        );
+        mirrorObj && otherProducts.mirror.push(mirrorObj);
+    };
+
+    const isMirrorCabinetConfigValid = () => {
+        const { isMirrorCabinetSelected, isMirrorCabinetValid } =
+            mirrorCabinetStatus;
+
+        return (
+            !isMirrorCabinetSelected ||
+            (isMirrorCabinetSelected && isMirrorCabinetValid)
+        );
+    };
+
+    console.log("==== useMirrorOptions hook ran!! ====");
+    console.log(ledMirrorOptions);
+    console.log(currentMirrorsConfiguration);
+    console.log(
+        "is mirror cabinet active?",
+        mirrorCabinetStatus.isMirrorCabinetSelected
+    );
+    console.log(
+        "is mirror cabinet valid?",
+        mirrorCabinetStatus.isMirrorCabinetValid
+    );
     return {
-        initialMirrorCabinetOptions,
         mirrorCabinetOptions,
-        setMirrorCabinetOptions,
         ledMirrorOptions,
         openCompMirrorOptions,
-        mirrorCabinetStatus,
-        setMirrorCabinetStatus,
         crrMirrorCategory,
-        setCrrMirrorCategory,
+        currentMirrorsConfiguration,
         handleSwitchCrrMirrorCategory,
         handleMirrorOptionSelected,
+        handleResetMirrorConfigurator,
+        handleClearMirrorCategory,
+        getFormattedMirrorSkus,
+        getMirrorProductObj,
+        isMirrorCabinetConfigValid,
     };
 }
 

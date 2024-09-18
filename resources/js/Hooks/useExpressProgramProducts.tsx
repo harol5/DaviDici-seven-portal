@@ -2,12 +2,12 @@ import { useMemo } from "react";
 import { ProductInventory } from "../Models/Product";
 import { Composition } from "../Models/Composition";
 import {
-    finish,
-    model,
-    sinkPosition,
-    otherProductsAvailable,
-    modelsAvailable,
-    modelsAvailableKeys,
+    FinishObj,
+    ModelObj,
+    SinkPositionObj,
+    OtherProductsAvailable,
+    ModelsAvailable,
+    ModelsAvailableKeys,
 } from "../Models/ExpressProgramModels";
 
 function useExpressProgramProducts(rawProducts: ProductInventory[]) {
@@ -68,7 +68,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                     modelMap.get(product.model).push(product);
                 }
             } else {
-                if (modelsAvailable[product.model as modelsAvailableKeys]) {
+                if (ModelsAvailable[product.model as ModelsAvailableKeys]) {
                     if (!otherProductsMap.has(product.model))
                         otherProductsMap.set(product.model, new Map());
 
@@ -138,8 +138,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
 
     const generateFinishes = (
         listOfVanities: ProductInventory[],
-        finishesForFilterMap: Map<string, finish>
-    ): finish[] => {
+        finishesForFilterMap: Map<string, FinishObj>
+    ): FinishObj[] => {
         const listOfFinishesMap = new Map();
 
         // add finishes to use in filter and composition.
@@ -171,7 +171,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         sharedItemsMap: Map<string, ProductInventory[]>,
         model: string
     ) => {
-        const otherProductsObj: otherProductsAvailable = {
+        const otherProductsObj: OtherProductsAvailable = {
             accessories: [],
             drawersVanities: [],
             mirrors: [],
@@ -211,8 +211,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
 
     const generateCenteredSinkCompositions = (
         listOfVanities: ProductInventory[],
-        finishesForFilterMap: Map<string, finish>,
-        sinkPositionsForFilterMap: Map<string, sinkPosition>,
+        finishesForFilterMap: Map<string, FinishObj>,
+        sinkPositionsForFilterMap: Map<string, SinkPositionObj>,
         compositions: Composition[],
         model: string,
         size: string,
@@ -262,8 +262,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
 
     const generateCenteredSinkMargiCompositions = (
         doorStylesMap: Map<string, ProductInventory[]>,
-        finishesForFilterMap: Map<string, finish>,
-        sinkPositionsForFilterMap: Map<string, sinkPosition>,
+        finishesForFilterMap: Map<string, FinishObj>,
+        sinkPositionsForFilterMap: Map<string, SinkPositionObj>,
         compositions: Composition[],
         model: string,
         size: string,
@@ -318,8 +318,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
 
     const generateComplexCompositions = (
         itemsMap: Map<string, any>,
-        finishesForFilterMap: Map<string, finish>,
-        sinkPositionsForFilterMap: Map<string, sinkPosition>,
+        finishesForFilterMap: Map<string, FinishObj>,
+        sinkPositionsForFilterMap: Map<string, SinkPositionObj>,
         compositions: Composition[],
         model: string,
         size: string,
@@ -420,8 +420,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
 
     const generateComplexMargiCompositions = (
         itemsMap: Map<string, any>,
-        finishesForFilterMap: Map<string, finish>,
-        sinkPositionsForFilterMap: Map<string, sinkPosition>,
+        finishesForFilterMap: Map<string, FinishObj>,
+        sinkPositionsForFilterMap: Map<string, SinkPositionObj>,
         compositions: Composition[],
         model: string,
         size: string,
@@ -500,8 +500,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         const initialCompositions: Composition[] = [];
         const initialSizesForFilter: string[] = [];
         const finishesForFilterMap = new Map();
-        const sinkPositionsForFilterMap = new Map<string, sinkPosition>();
-        const modelsForFilterMap = new Map<string, model>();
+        const sinkPositionsForFilterMap = new Map<string, SinkPositionObj>();
+        const modelsForFilterMap = new Map<string, ModelObj>();
 
         // Traverse throght validCompositionSizesMap so we can create all possible compositions.
         // SIZE -> SINK SET UP -> SINK POSITION.
@@ -668,16 +668,16 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         }
 
         // Converts finishesForFilterMap values to and array with such values.
-        const initialFinishesForFilter: finish[] = Object.values(
+        const initialFinishesForFilter: FinishObj[] = Object.values(
             Object.fromEntries(finishesForFilterMap)
         );
 
         // Converts finishesForFilterMap values to and array with such values.
-        const initialModelsForFilter: model[] = Object.values(
+        const initialModelsForFilter: ModelObj[] = Object.values(
             Object.fromEntries(modelsForFilterMap)
         );
 
-        initialFinishesForFilter.sort((a: finish, b: finish) => {
+        initialFinishesForFilter.sort((a: FinishObj, b: FinishObj) => {
             if (a.type.toUpperCase() < b.type.toUpperCase()) return -1;
             if (a.type.toUpperCase() > b.type.toUpperCase()) return 1;
             return 0;
@@ -690,7 +690,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         );
 
         // Converts sink potision set into an array.
-        const initialSinkPositionsForFilter: sinkPosition[] = Object.values(
+        const initialSinkPositionsForFilter: SinkPositionObj[] = Object.values(
             Object.fromEntries(sinkPositionsForFilterMap)
         );
 
