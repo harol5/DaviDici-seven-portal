@@ -15,8 +15,12 @@ import {
 import { ProductInventory } from "../../Models/Product";
 import {
     CurrentConfiguration,
+    TallUnit,
+    TallUnitOptions,
     Vanity,
     VanityOptions,
+    WallUnit,
+    WallUnitOptions,
 } from "../../Models/EloraConfigTypes";
 import { Model } from "../../Models/ModelConfigTypes";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
@@ -130,6 +134,178 @@ function EloraConfigurator({
         return all;
     }, []);
 
+    // |===== WALL UNIT =====|
+    const initialWallUnitOptions: WallUnitOptions | null = useMemo(() => {
+        const { wallUnits } = composition.otherProductsAvailable;
+
+        if (wallUnits.length === 0) return null;
+
+        let baseSku: string = "";
+        const mattFinishOptionsMap = new Map();
+        const glassFinishOptionsMap = new Map();
+
+        wallUnits.forEach((wallUnit, index) => {
+            const codes = wallUnit.uscode.split("-");
+            // the following logic is only for ELORA because each model has a different sku number order.
+            // EX: 71-WU-012     -    M23  -   V23
+            //     base-sku          matt    glass
+
+            // only get base sku from first wallUnit.
+            if (!baseSku) {
+                baseSku = `${codes[0]}-${codes[1]}-${codes[2]}`;
+            }
+
+            let finishImageName = wallUnit.finish;
+            let finishLabel = wallUnit.finish;
+
+            if (wallUnit.finish.includes("/")) {
+                finishImageName = finishImageName.replace("/", "-");
+                finishLabel = finishLabel
+                    .split("/")[0]
+                    .replace("MATT LACQ. ", "");
+            }
+
+            if (!mattFinishOptionsMap.has(`${codes[3]}`))
+                mattFinishOptionsMap.set(`${codes[3]}`, {
+                    code: codes[3],
+                    imgUrl: `https://portal.davidici.com/images/express-program/finishes/${finishImageName}.jpg`,
+                    title: finishLabel,
+                    validSkus: [],
+                    isDisabled: false,
+                });
+
+            mattFinishOptionsMap
+                .get(`${codes[3]}`)
+                .validSkus.push(wallUnit.uscode);
+
+            if (!glassFinishOptionsMap.has(`${codes[4]}`))
+                glassFinishOptionsMap.set(`${codes[4]}`, {
+                    code: codes[4],
+                    imgUrl: `https://portal.davidici.com/images/express-program/finishes/${finishImageName}.jpg`,
+                    title: finishLabel,
+                    validSkus: [],
+                    isDisabled: false,
+                });
+
+            glassFinishOptionsMap
+                .get(`${codes[4]}`)
+                .validSkus.push(wallUnit.uscode);
+        });
+
+        return {
+            baseSku,
+            mattFinishOptions: Object.values(
+                Object.fromEntries(mattFinishOptionsMap)
+            ),
+            glassFinishOptions: Object.values(
+                Object.fromEntries(glassFinishOptionsMap)
+            ),
+        };
+    }, []);
+
+    const [wallUnitOptions, setWallUnitOptions] = useState(
+        initialWallUnitOptions
+    );
+
+    const [wallUnitStatus, setWallUnitStatus] = useState({
+        isWallUnitSelected: false,
+        isWallUnitValid: false,
+    });
+
+    // |===== TALL UNIT =====|
+    const initialTallUnitOptions: TallUnitOptions | null = useMemo(() => {
+        const { tallUnitsLinenClosets } = composition.otherProductsAvailable;
+
+        if (tallUnitsLinenClosets.length === 0) return null;
+
+        let baseSku: string = "";
+        const mattFinishOptionsMap = new Map();
+        const glassFinishOptionsMap = new Map();
+
+        tallUnitsLinenClosets.forEach((tallUnit) => {
+            const codes = tallUnit.uscode.split("-");
+            // the following logic is only for ELORA because each model has a different sku number order.
+            // EX: 71-WU-012     -    M23  -   V23
+            //     base-sku          matt    glass
+
+            // only get base sku from first tallUnit.
+            if (!baseSku) {
+                baseSku = `${codes[0]}-${codes[1]}-${codes[2]}`;
+            }
+
+            let finishImageName = tallUnit.finish;
+            let finishLabel = tallUnit.finish;
+
+            if (tallUnit.finish.includes("/")) {
+                finishImageName = finishImageName.replace("/", "-");
+                finishLabel = finishLabel
+                    .split("/")[0]
+                    .replace("MATT LACQ. ", "");
+            }
+
+            if (!mattFinishOptionsMap.has(`${codes[3]}`))
+                mattFinishOptionsMap.set(`${codes[3]}`, {
+                    code: codes[3],
+                    imgUrl: `https://portal.davidici.com/images/express-program/finishes/${finishImageName}.jpg`,
+                    title: finishLabel,
+                    validSkus: [],
+                    isDisabled: false,
+                });
+
+            mattFinishOptionsMap
+                .get(`${codes[3]}`)
+                .validSkus.push(tallUnit.uscode);
+
+            if (!glassFinishOptionsMap.has(`${codes[4]}`))
+                glassFinishOptionsMap.set(`${codes[4]}`, {
+                    code: codes[4],
+                    imgUrl: `https://portal.davidici.com/images/express-program/finishes/${finishImageName}.jpg`,
+                    title: finishLabel,
+                    validSkus: [],
+                    isDisabled: false,
+                });
+
+            glassFinishOptionsMap
+                .get(`${codes[4]}`)
+                .validSkus.push(tallUnit.uscode);
+        });
+
+        return {
+            baseSku,
+            mattFinishOptions: Object.values(
+                Object.fromEntries(mattFinishOptionsMap)
+            ),
+            glassFinishOptions: Object.values(
+                Object.fromEntries(glassFinishOptionsMap)
+            ),
+        };
+    }, []);
+
+    const [tallUnitOptions, setTallUnitOptions] = useState(
+        initialTallUnitOptions
+    );
+
+    const [tallUnitStatus, setTallUnitStatus] = useState({
+        isTallUnitSelected: false,
+        isTallUnitValid: false,
+    });
+
+    // |===== ACCESSORIES =====|
+    const accessoryOptions: Option[] = useMemo(() => {
+        const { accessories } = composition.otherProductsAvailable;
+        const options: Option[] = [];
+        accessories.forEach((accessory) => {
+            options.push({
+                code: accessory.uscode,
+                imgUrl: `https://${location.hostname}/images/express-program/washbasins/${accessory.uscode}.webp`,
+                title: accessory.descw,
+                validSkus: [accessory.uscode],
+                isDisabled: false,
+            });
+        });
+        return options;
+    }, []);
+
     // |====== MIRRORS LOGIC -> get all mirror options ======|
     const {
         mirrorCabinetOptions,
@@ -171,6 +347,22 @@ function EloraConfigurator({
             composition.vanities
         );
 
+        const wallUnit: WallUnit | null = wallUnitOptions
+            ? {
+                  baseSku: wallUnitOptions.baseSku,
+                  mattFinish: "",
+                  glassFinish: "",
+              }
+            : null;
+
+        const tallUnit: TallUnit | null = tallUnitOptions
+            ? {
+                  baseSku: tallUnitOptions.baseSku,
+                  mattFinish: "",
+                  glassFinish: "",
+              }
+            : null;
+
         return {
             label: "",
             vanity,
@@ -179,6 +371,14 @@ function EloraConfigurator({
             washbasin: composition.washbasins[0].uscode,
             washbasinPrice: composition.washbasins[0].msrp,
             isDoubleSink: composition.name.includes("DOUBLE"),
+            wallUnit,
+            wallUnitSku: "",
+            wallUnitPrice: 0,
+            tallUnit,
+            tallUnitSku: "",
+            tallUnitPrice: 0,
+            accessory: "",
+            accessoryPrice: 0,
         };
     }, []);
 
@@ -229,6 +429,105 @@ function EloraConfigurator({
                     washbasinPrice: action.payload as number,
                 };
 
+            case "set-wallUnit-mattFinish":
+                return {
+                    ...state,
+                    wallUnit: {
+                        ...state.wallUnit,
+                        mattFinish: action.payload as string,
+                    } as WallUnit,
+                };
+
+            case "set-wallUnit-glassFinish":
+                return {
+                    ...state,
+                    wallUnit: {
+                        ...state.wallUnit,
+                        glassFinish: action.payload as string,
+                    } as WallUnit,
+                };
+
+            case "set-wallUnit-sku":
+                return {
+                    ...state,
+                    wallUnitSku: action.payload as string,
+                };
+
+            case "set-wallUnit-price":
+                return {
+                    ...state,
+                    wallUnitPrice: action.payload as number,
+                };
+
+            case "reset-wallUnit":
+                return {
+                    ...state,
+                    wallUnit: {
+                        ...(initialConfiguration.wallUnit as WallUnit),
+                    },
+                    wallUnitSku: initialConfiguration.wallUnitSku,
+                    wallUnitPrice: initialConfiguration.wallUnitPrice,
+                };
+
+            case "set-tallUnit-mattFinish":
+                return {
+                    ...state,
+                    tallUnit: {
+                        ...state.tallUnit,
+                        mattFinish: action.payload as string,
+                    } as TallUnit,
+                };
+
+            case "set-tallUnit-glassFinish":
+                return {
+                    ...state,
+                    tallUnit: {
+                        ...state.tallUnit,
+                        glassFinish: action.payload as string,
+                    } as TallUnit,
+                };
+
+            case "set-tallUnit-sku":
+                return {
+                    ...state,
+                    tallUnitSku: action.payload as string,
+                };
+
+            case "set-tallUnit-price":
+                return {
+                    ...state,
+                    tallUnitPrice: action.payload as number,
+                };
+
+            case "reset-tallUnit":
+                return {
+                    ...state,
+                    tallUnit: {
+                        ...(initialConfiguration.tallUnit as TallUnit),
+                    },
+                    tallUnitSku: initialConfiguration.tallUnitSku,
+                    tallUnitPrice: initialConfiguration.tallUnitPrice,
+                };
+
+            case "set-accessory-type":
+                return {
+                    ...state,
+                    accessory: action.payload as string,
+                };
+
+            case "set-accessory-price":
+                return {
+                    ...state,
+                    accessoryPrice: action.payload as number,
+                };
+
+            case "reset-accessory":
+                return {
+                    ...state,
+                    accessory: initialConfiguration.accessory,
+                    accessoryPrice: initialConfiguration.accessoryPrice,
+                };
+
             case "reset-configurator":
                 return {
                     ...initialConfiguration,
@@ -252,8 +551,14 @@ function EloraConfigurator({
 
     // |===== GRAND TOTAL =====|
     const grandTotal = useMemo(() => {
-        const { vanityPrice, washbasinPrice, isDoubleSink } =
-            currentConfiguration;
+        const {
+            vanityPrice,
+            washbasinPrice,
+            isDoubleSink,
+            wallUnitPrice,
+            tallUnitPrice,
+            accessoryPrice,
+        } = currentConfiguration;
 
         const { mirrorCabinetPrice, ledMirrorPrice, openCompMirrorPrice } =
             currentMirrorsConfiguration;
@@ -281,9 +586,12 @@ function EloraConfigurator({
             const grandTotal =
                 finalVanityPrice +
                 washbasinPrice +
+                wallUnitPrice +
+                tallUnitPrice +
                 mirrorCabinetPrice +
                 ledMirrorPrice +
-                openCompMirrorPrice;
+                openCompMirrorPrice +
+                accessoryPrice;
 
             return grandTotal;
         }
@@ -376,6 +684,168 @@ function EloraConfigurator({
             });
         }
 
+        if (item === "wallUnit") {
+            const copyOptions = structuredClone(
+                wallUnitOptions
+            ) as WallUnitOptions;
+
+            // Checks if any matt option should be disabled.
+            for (const mattFinishOption of copyOptions.mattFinishOptions) {
+                if (property === "mattFinish") break;
+                for (let i = 0; i < mattFinishOption.validSkus.length; i++) {
+                    const validSku = mattFinishOption.validSkus[i];
+                    if (validSku.includes(option)) {
+                        mattFinishOption.isDisabled = false;
+                        break;
+                    }
+
+                    if (i === mattFinishOption.validSkus.length - 1)
+                        mattFinishOption.isDisabled = true;
+                }
+            }
+
+            // Checks if any glass option should be disabled.
+            for (const glassFinishOption of copyOptions.glassFinishOptions) {
+                if (property === "glassFinish") break;
+                for (let i = 0; i < glassFinishOption.validSkus.length; i++) {
+                    const validSku = glassFinishOption.validSkus[i];
+                    if (validSku.includes(option)) {
+                        glassFinishOption.isDisabled = false;
+                        break;
+                    }
+
+                    if (i === glassFinishOption.validSkus.length - 1)
+                        glassFinishOption.isDisabled = true;
+                }
+            }
+
+            const wallUnitCurrentConfiguration = structuredClone(
+                currentConfiguration.wallUnit
+            ) as WallUnit;
+
+            wallUnitCurrentConfiguration[
+                property as keyof typeof wallUnitCurrentConfiguration
+            ] = option;
+
+            const { sku, price } = getSkuAndPrice(
+                composition.model as Model,
+                item,
+                wallUnitCurrentConfiguration,
+                composition.otherProductsAvailable.wallUnits
+            );
+
+            const { isWallUnitSelected } = wallUnitStatus;
+
+            dispatch({ type: `set-${item}-sku`, payload: sku });
+            dispatch({
+                type: `set-${item}-price`,
+                payload: price,
+            });
+            dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
+            setWallUnitOptions(copyOptions);
+
+            setWallUnitStatus((prev) => ({
+                ...prev,
+                isWallUnitValid: price > 0,
+            }));
+
+            !isWallUnitSelected &&
+                setWallUnitStatus((prev) => ({
+                    ...prev,
+                    isWallUnitSelected: true,
+                }));
+        }
+
+        if (item === "tallUnit") {
+            const copyOptions = structuredClone(
+                tallUnitOptions
+            ) as TallUnitOptions;
+
+            // Checks if any matt option should be disabled.
+            for (const mattFinishOption of copyOptions.mattFinishOptions) {
+                if (property === "mattFinish") break;
+                for (let i = 0; i < mattFinishOption.validSkus.length; i++) {
+                    const validSku = mattFinishOption.validSkus[i];
+                    if (validSku.includes(option)) {
+                        mattFinishOption.isDisabled = false;
+                        break;
+                    }
+
+                    if (i === mattFinishOption.validSkus.length - 1)
+                        mattFinishOption.isDisabled = true;
+                }
+            }
+
+            // Checks if any glass option should be disabled.
+            for (const glassFinishOption of copyOptions.glassFinishOptions) {
+                if (property === "glassFinish") break;
+                for (let i = 0; i < glassFinishOption.validSkus.length; i++) {
+                    const validSku = glassFinishOption.validSkus[i];
+                    if (validSku.includes(option)) {
+                        glassFinishOption.isDisabled = false;
+                        break;
+                    }
+
+                    if (i === glassFinishOption.validSkus.length - 1)
+                        glassFinishOption.isDisabled = true;
+                }
+            }
+
+            const tallUnitCurrentConfiguration = structuredClone(
+                currentConfiguration.tallUnit
+            ) as TallUnit;
+
+            tallUnitCurrentConfiguration[
+                property as keyof typeof tallUnitCurrentConfiguration
+            ] = option;
+
+            const { sku, price } = getSkuAndPrice(
+                composition.model as Model,
+                item,
+                tallUnitCurrentConfiguration,
+                composition.otherProductsAvailable.tallUnitsLinenClosets
+            );
+
+            const { isTallUnitSelected } = tallUnitStatus;
+
+            dispatch({ type: `set-${item}-sku`, payload: sku });
+            dispatch({
+                type: `set-${item}-price`,
+                payload: price,
+            });
+            dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
+            setTallUnitOptions(copyOptions);
+
+            setTallUnitStatus((prev) => ({
+                ...prev,
+                isTallUnitValid: price > 0,
+            }));
+            !isTallUnitSelected &&
+                setTallUnitStatus((prev) => ({
+                    ...prev,
+                    isTallUnitSelected: true,
+                }));
+        }
+
+        if (item === "accessory") {
+            const skuAndPrice = getSkuAndPrice(
+                composition.model as Model,
+                item,
+                {},
+                composition.otherProductsAvailable.accessories,
+                option
+            );
+
+            dispatch({
+                type: `set-${item}-${property}`,
+                payload: skuAndPrice.sku,
+            });
+            dispatch({
+                type: `set-${item}-price`,
+                payload: skuAndPrice.price,
+            });
+        }
+
         // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
         updateMirrorOptions(
             item,
@@ -410,6 +880,26 @@ function EloraConfigurator({
             return false;
         }
 
+        if (
+            wallUnitStatus.isWallUnitSelected &&
+            !wallUnitStatus.isWallUnitValid
+        ) {
+            alert(
+                "Looks like you forgot to select all available WALL UNIT OPTIONS. Either clear the wall unit section or select the missing option(s). "
+            );
+            return false;
+        }
+
+        if (
+            tallUnitStatus.isTallUnitSelected &&
+            !tallUnitStatus.isTallUnitValid
+        ) {
+            alert(
+                "Looks like you forgot to select all available TALL UNIT OPTIONS. Either clear the tal unit section or select the missing option(s). "
+            );
+            return false;
+        }
+
         if (!isMirrorCabinetConfigValid()) {
             alert(
                 "Looks like you forgot to select all available MIRROR CABINET OPTIONS. Either clear the mirror cabinet section or select the missing option(s). "
@@ -428,6 +918,9 @@ function EloraConfigurator({
             washbasin: washbasinSku,
             label,
             isDoubleSink,
+            wallUnitSku,
+            tallUnitSku,
+            accessory: accessorySku,
         } = currentConfiguration;
 
         const allFormattedSkus: string[] = [];
@@ -442,6 +935,21 @@ function EloraConfigurator({
             : "";
         washbasinFormattedSku && allFormattedSkus.push(washbasinFormattedSku);
 
+        const wallUnitFormattedSku = wallUnitSku
+            ? `${wallUnitSku}!!${composition.model}--1##${label}`
+            : "";
+        wallUnitFormattedSku && allFormattedSkus.push(wallUnitFormattedSku);
+
+        const tallUnitFormattedSku = tallUnitSku
+            ? `${tallUnitSku}!!${composition.model}--1##${label}`
+            : "";
+        tallUnitFormattedSku && allFormattedSkus.push(tallUnitFormattedSku);
+
+        const accessoryFormattedSku = accessorySku
+            ? `${accessorySku}!!${composition.model}--1##${label}`
+            : "";
+        accessoryFormattedSku && allFormattedSkus.push(accessoryFormattedSku);
+
         // ========= VVVV MIRROR (REPEATED LOGIC) ==========VVVVV
         getFormattedMirrorSkus(
             composition.model,
@@ -449,6 +957,7 @@ function EloraConfigurator({
             allFormattedSkus
         );
 
+        console.log(allFormattedSkus);
         router.get("/orders/create-so-num", {
             SKU: allFormattedSkus.join("~"),
         });
@@ -456,8 +965,47 @@ function EloraConfigurator({
 
     const handleResetConfigurator = () => {
         setVanityOptions(initialVanityOptions);
+        setTallUnitOptions(initialTallUnitOptions);
+        setTallUnitStatus({
+            isTallUnitSelected: false,
+            isTallUnitValid: false,
+        });
+        setWallUnitOptions(initialWallUnitOptions);
+        setWallUnitStatus({
+            isWallUnitSelected: false,
+            isWallUnitValid: false,
+        });
         resetMirrorConfigurator();
         dispatch({ type: "reset-configurator", payload: "" });
+    };
+
+    const handleClearItem = (item: string) => {
+        switch (item) {
+            case "wallUnit":
+                setWallUnitOptions(initialWallUnitOptions);
+                setWallUnitStatus({
+                    isWallUnitSelected: false,
+                    isWallUnitValid: false,
+                });
+                dispatch({ type: "reset-wallUnit", payload: "" });
+                break;
+
+            case "tallUnit":
+                setTallUnitOptions(initialTallUnitOptions);
+                setTallUnitStatus({
+                    isTallUnitSelected: false,
+                    isTallUnitValid: false,
+                });
+                dispatch({ type: "reset-tallUnit", payload: "" });
+                break;
+
+            case "accessory":
+                dispatch({ type: "reset-accessory", payload: "" });
+                break;
+
+            default:
+                throw new Error("case condition not found");
+        }
     };
 
     const handleAddToCart = () => {
@@ -468,6 +1016,9 @@ function EloraConfigurator({
             washbasin: washbasinSku,
             label,
             isDoubleSink,
+            wallUnitSku,
+            tallUnitSku,
+            accessory: accessorySku,
         } = currentConfiguration;
 
         const otherProducts = {
@@ -480,9 +1031,27 @@ function EloraConfigurator({
         const vanityObj = composition.vanities.find(
             (vanity) => vanity.uscode === vanitySku
         );
+
         const washbasinObj = composition.washbasins.find(
             (washbasin) => washbasin.uscode === washbasinSku
         );
+
+        const wallUnitObj = composition.otherProductsAvailable.wallUnits.find(
+            (wallUnit) => wallUnit.uscode === wallUnitSku
+        );
+        wallUnitObj && otherProducts.wallUnit.push(wallUnitObj);
+
+        const tallUnitObj =
+            composition.otherProductsAvailable.tallUnitsLinenClosets.find(
+                (tallUnit) => tallUnit.uscode === tallUnitSku
+            );
+        tallUnitObj && otherProducts.tallUnit.push(tallUnitObj);
+
+        const accessoryObj =
+            composition.otherProductsAvailable.accessories.find(
+                (accessory) => accessory.uscode === accessorySku
+            );
+        accessoryObj && otherProducts.accessory.push(accessoryObj);
 
         getMirrorProductObj(
             composition.otherProductsAvailable.mirrors,
@@ -504,6 +1073,7 @@ function EloraConfigurator({
             grandTotal: grandTotal,
         };
 
+        console.log(shoppingCartObj);
         onAddToCart(shoppingCartObj);
     };
 
@@ -511,6 +1081,8 @@ function EloraConfigurator({
     console.log("composition:", composition);
     console.log("current config:", currentConfiguration);
     console.log("current mirror config:", currentMirrorsConfiguration);
+    console.log("wall unit status:", wallUnitStatus);
+    console.log("tall unit status:", tallUnitStatus);
     console.log("grand total:", grandTotal);
 
     return (
@@ -588,6 +1160,68 @@ function EloraConfigurator({
                     />
                 </ItemPropertiesAccordion>
 
+                {wallUnitOptions && (
+                    <ItemPropertiesAccordion headerTitle={`WALL UNIT 12"`}>
+                        <button
+                            className={classes.clearButton}
+                            onClick={() => handleClearItem("wallUnit")}
+                        >
+                            CLEAR
+                        </button>
+                        <Options
+                            item="wallUnit"
+                            property="mattFinish"
+                            title="SELECT MATT FINISH"
+                            options={wallUnitOptions.mattFinishOptions}
+                            crrOptionSelected={
+                                currentConfiguration.wallUnit?.mattFinish!
+                            }
+                            onOptionSelected={handleOptionSelected}
+                        />
+                        <Options
+                            item="wallUnit"
+                            property="glassFinish"
+                            title="SELECT GLASS FINISH"
+                            options={wallUnitOptions.glassFinishOptions}
+                            crrOptionSelected={
+                                currentConfiguration.wallUnit?.glassFinish!
+                            }
+                            onOptionSelected={handleOptionSelected}
+                        />
+                    </ItemPropertiesAccordion>
+                )}
+
+                {tallUnitOptions && (
+                    <ItemPropertiesAccordion headerTitle={`TALL UNIT 12"`}>
+                        <button
+                            className={classes.clearButton}
+                            onClick={() => handleClearItem("tallUnit")}
+                        >
+                            CLEAR
+                        </button>
+                        <Options
+                            item="tallUnit"
+                            property="mattFinish"
+                            title="SELECT MATT FINISH"
+                            options={tallUnitOptions.mattFinishOptions}
+                            crrOptionSelected={
+                                currentConfiguration.tallUnit?.mattFinish!
+                            }
+                            onOptionSelected={handleOptionSelected}
+                        />
+                        <Options
+                            item="tallUnit"
+                            property="glassFinish"
+                            title="SELECT GLASS FINISH"
+                            options={tallUnitOptions.glassFinishOptions}
+                            crrOptionSelected={
+                                currentConfiguration.tallUnit?.glassFinish!
+                            }
+                            onOptionSelected={handleOptionSelected}
+                        />
+                    </ItemPropertiesAccordion>
+                )}
+
                 <MirrorConfigurator
                     mirrorCabinetOptions={mirrorCabinetOptions}
                     ledMirrorOptions={ledMirrorOptions}
@@ -600,6 +1234,25 @@ function EloraConfigurator({
                     clearMirrorCategory={clearMirrorCategory}
                     handleOptionSelected={handleOptionSelected}
                 ></MirrorConfigurator>
+
+                {accessoryOptions && (
+                    <ItemPropertiesAccordion headerTitle="ACCESSORIES">
+                        <button
+                            className={classes.clearButton}
+                            onClick={() => handleClearItem("accessory")}
+                        >
+                            CLEAR
+                        </button>
+                        <Options
+                            item="accessory"
+                            property="type"
+                            title="SELECT ACCESSORY"
+                            options={accessoryOptions}
+                            crrOptionSelected={currentConfiguration.accessory}
+                            onOptionSelected={handleOptionSelected}
+                        />
+                    </ItemPropertiesAccordion>
+                )}
 
                 <div className={classes.grandTotalAndOrderNowButtonWrapper}>
                     <div className={classes.grandTotalWrapper}>

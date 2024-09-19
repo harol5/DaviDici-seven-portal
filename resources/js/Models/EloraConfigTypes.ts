@@ -8,6 +8,18 @@ type Vanity = {
     glassFinish: string;
 };
 
+type WallUnit = {
+    baseSku: string;
+    mattFinish: string;
+    glassFinish: string;
+};
+
+type TallUnit = {
+    baseSku: string;
+    mattFinish: string;
+    glassFinish: string;
+};
+
 type CurrentConfiguration = {
     label: string;
     vanity: Vanity;
@@ -16,6 +28,14 @@ type CurrentConfiguration = {
     washbasin: string;
     washbasinPrice: number;
     isDoubleSink: boolean;
+    wallUnit: WallUnit | null;
+    wallUnitSku: string;
+    wallUnitPrice: number;
+    tallUnit: TallUnit | null;
+    tallUnitSku: string;
+    tallUnitPrice: number;
+    accessory: string;
+    accessoryPrice: number;
 };
 
 type VanityOptions = {
@@ -24,8 +44,30 @@ type VanityOptions = {
     glassFinishOptions: Option[];
 };
 
-export type { Vanity, CurrentConfiguration, VanityOptions };
+type WallUnitOptions = {
+    baseSku: string;
+    mattFinishOptions: Option[];
+    glassFinishOptions: Option[];
+};
+
+type TallUnitOptions = {
+    baseSku: string;
+    mattFinishOptions: Option[];
+    glassFinishOptions: Option[];
+};
+
+export type {
+    Vanity,
+    WallUnit,
+    TallUnit,
+    CurrentConfiguration,
+    VanityOptions,
+    WallUnitOptions,
+    TallUnitOptions,
+};
 
 export const SkuLengths = {
     vanity: 3,
+    wallUnit: 3,
+    tallUnit: 3,
 };
