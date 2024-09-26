@@ -3,13 +3,14 @@ import classes from "../../../css/product-configurator.module.css";
 import { useEffect, useMemo, useReducer, useState } from "react";
 import type {
     Option,
-    shoppingCartProduct as shoppingCartProductModel,
+    ShoppingCartProduct as shoppingCartProductModel,
 } from "../../Models/ExpressProgramModels";
 import Options from "./Options";
 import ConfigurationName from "./ConfigurationName";
 import { ToastContainer, toast } from "react-toastify";
 import { router } from "@inertiajs/react";
 import { isAlphanumericWithSpaces } from "../../utils/helperFunc";
+import { ProductInventory } from "../../Models/Product";
 
 /**
  * TODO;
@@ -485,6 +486,13 @@ function OtherModelsConfigurator({
             return;
         }
 
+        const otherProducts = {
+            wallUnit: [] as ProductInventory[],
+            tallUnit: [] as ProductInventory[],
+            accessory: [] as ProductInventory[],
+            mirror: [] as ProductInventory[],
+        };
+
         const vanitySku = Object.values(currentConfiguration.vanity).join("-");
         const sideUnitSku = currentConfiguration.sideUnit
             ? Object.values(currentConfiguration.sideUnit).join("-")
@@ -505,11 +513,12 @@ function OtherModelsConfigurator({
         const shoppingCartObj: shoppingCartProductModel = {
             composition: composition,
             description: composition.name,
+            configuration: currentConfiguration,
             label: currentConfiguration.label,
             vanity: vanityObj!,
             sideUnits: sideUnitsObj,
             washbasin: washbasinObj!,
-            otherProducts: [],
+            otherProducts,
             isDoubleSink: currentConfiguration.isDoubleSink,
             isDoubleSideunit: currentConfiguration.isDoubleSideUnit,
             quantity: 1,

@@ -30,6 +30,7 @@ export type OtherItems = {
     tallUnit: ProductInventory[];
     accessory: ProductInventory[];
     mirror: ProductInventory[];
+    drawerBase?: ProductInventory[];
 };
 
 export type ShoppingCartProduct = {

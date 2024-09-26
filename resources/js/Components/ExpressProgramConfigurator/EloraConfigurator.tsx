@@ -144,7 +144,7 @@ function EloraConfigurator({
         const mattFinishOptionsMap = new Map();
         const glassFinishOptionsMap = new Map();
 
-        wallUnits.forEach((wallUnit, index) => {
+        wallUnits.forEach((wallUnit) => {
             const codes = wallUnit.uscode.split("-");
             // the following logic is only for ELORA because each model has a different sku number order.
             // EX: 71-WU-012     -    M23  -   V23
@@ -957,7 +957,6 @@ function EloraConfigurator({
             allFormattedSkus
         );
 
-        console.log(allFormattedSkus);
         router.get("/orders/create-so-num", {
             SKU: allFormattedSkus.join("~"),
         });
