@@ -3,6 +3,7 @@ import * as NewYork from "./NewYorkConfigTypes";
 import * as Mirror from "./MirrorConfigTypes";
 import * as Elora from "./EloraConfigTypes";
 import * as NewBali from "./NewBaliConfigTypes";
+import * as Opera from "./OperaConfigTypes";
 
 type Item =
     | Margi.Vanity
@@ -18,6 +19,10 @@ type Item =
     | Elora.TallUnit
     | NewBali.Vanity
     | NewBali.SideUnit
+    | NewBali.DrawerBase
+    | NewBali.WallUnit
+    | Opera.Vanity
+    | Opera.SideUnit
     | {};
 
 type Model =
@@ -25,18 +30,25 @@ type Model =
     | typeof NewYork.Name
     | typeof Mirror.Name
     | typeof Elora.Name
-    | typeof NewBali.Name;
+    | typeof NewBali.Name
+    | typeof Opera.Name;
 
 type SkuLengthObj =
     | typeof Margi.SkuLengths
     | typeof NewYork.SkuLengths
     | typeof Mirror.SkuLengths
     | typeof Elora.SkuLengths
-    | typeof NewBali.SkuLengths;
+    | typeof NewBali.SkuLengths
+    | typeof Opera.SkuLengths;
 
 type ModelCurrConfig = {
     label: string;
-    vanity: Margi.Vanity | NewYork.Vanity | Elora.Vanity | NewBali.Vanity;
+    vanity:
+        | Margi.Vanity
+        | NewYork.Vanity
+        | Elora.Vanity
+        | NewBali.Vanity
+        | Opera.Vanity;
     vanitySku: string;
     vanityPrice: number;
     washbasin: string;
@@ -52,4 +64,5 @@ export const SkuLengthModels: Record<Model, SkuLengthObj> = {
     MIRROR: Mirror.SkuLengths,
     ELORA: Elora.SkuLengths,
     "NEW BALI": NewBali.SkuLengths,
+    OPERA: Opera.SkuLengths,
 };

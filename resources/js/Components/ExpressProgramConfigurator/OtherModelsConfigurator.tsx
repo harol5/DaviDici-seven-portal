@@ -54,6 +54,7 @@ function OtherModelsConfigurator({
     composition,
     onAddToCart,
 }: OtherModelsConfiguratorProps) {
+    console.log(composition);
     // iterate over vanitites array and analize sku in order to get the valid options to get final sku. -------------|
     const initialVanityOptions: vanityOptions = useMemo(() => {
         let baseSku: string = "";

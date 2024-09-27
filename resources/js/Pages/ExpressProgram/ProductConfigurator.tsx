@@ -6,6 +6,7 @@ import MargiConfigurator from "../../Components/ExpressProgramConfigurator/Margi
 import NewBaliConfigurator from "../../Components/ExpressProgramConfigurator/NewBaliConfigurator";
 import NewYorkConfigurator from "../../Components/ExpressProgramConfigurator/NewYorkConfigurator";
 import EloraConfigurator from "../../Components/ExpressProgramConfigurator/EloraConfigurator";
+import OperaConfigurator from "../../Components/ExpressProgramConfigurator/OperaConfigurator";
 import OtherModelsConfigurator from "../../Components/ExpressProgramConfigurator/OtherModelsConfigurator";
 import { ShoppingCartProduct as shoppingCartProductModel } from "../../Models/ExpressProgramModels";
 import axios from "axios";
@@ -90,6 +91,11 @@ function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
                     />
                 ) : composition.model === "ELORA" ? (
                     <EloraConfigurator
+                        composition={composition}
+                        onAddToCart={handleShoppingCartProduct}
+                    />
+                ) : composition.model === "OPERA" ? (
+                    <OperaConfigurator
                         composition={composition}
                         onAddToCart={handleShoppingCartProduct}
                     />
