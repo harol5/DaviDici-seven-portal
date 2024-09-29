@@ -521,6 +521,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                         .get(size);
 
                     for (const [model, listOfVanities] of modelsMap) {
+                        if (model === "PETRA") continue;
+
                         modelsForFilterMap.set(model, {
                             name: model,
                             url: `https://portal.davidici.com/images/express-program/${model}/${model}.webp`,
@@ -628,6 +630,8 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                     // Iterate over the sink position map (centered, left right, double) to start creating the composition.
                     for (const [position, listOfWasbasins] of crrItems) {
                         for (const [model, itemsMap] of validModels) {
+                            if (model === "PETRA") continue;
+
                             modelsForFilterMap.set(model, {
                                 name: model,
                                 url: `https://portal.davidici.com/images/express-program/${model}/${model}.webp`,

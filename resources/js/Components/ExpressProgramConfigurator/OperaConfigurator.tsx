@@ -1103,8 +1103,6 @@ function OperaConfigurator({
             allFormattedSkus
         );
 
-        console.log(allFormattedSkus);
-
         router.get("/orders/create-so-num", {
             SKU: allFormattedSkus.join("~"),
         });
@@ -1240,14 +1238,6 @@ function OperaConfigurator({
 
         onAddToCart(shoppingCartObj);
     };
-
-    console.log("=== Opera confg render ===");
-    console.log("composition:", composition);
-    console.log("current config:", currentConfiguration);
-    console.log("current mirror config:", currentMirrorsConfiguration);
-    console.log("wall unit status:", wallUnitStatus);
-    console.log("tall unit status:", tallUnitStatus);
-    console.log("grand total:", grandTotal);
 
     return (
         <div className={classes.compositionConfiguratorWrapper}>

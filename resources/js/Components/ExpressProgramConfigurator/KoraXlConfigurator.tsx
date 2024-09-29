@@ -1,56 +1,40 @@
-import { Composition } from "../../Models/Composition";
-import classes from "../../../css/product-configurator.module.css";
 import { useMemo, useReducer, useState } from "react";
+import type { Composition } from "../../Models/Composition";
 import type {
     Option,
     ShoppingCartProduct as shoppingCartProductModel,
 } from "../../Models/ExpressProgramModels";
-import Options from "./Options";
-import ConfigurationName from "./ConfigurationName";
-import { router } from "@inertiajs/react";
+import type {
+    Vanity,
+    VanityOptions,
+    CurrentConfiguration,
+} from "../../Models/KoraXlConfigTypes";
 import {
     getSkuAndPrice,
     isAlphanumericWithSpaces,
 } from "../../utils/helperFunc";
+import { router } from "@inertiajs/react";
 import { ProductInventory } from "../../Models/Product";
+import classes from "../../../css/product-configurator.module.css";
+import ConfigurationName from "./ConfigurationName";
+import Options from "./Options";
+import useMirrorOptions from "../../Hooks/useMirrorOptions";
+import { MirrorCategory } from "../../Models/MirrorConfigTypes";
 import { Model } from "../../Models/ModelConfigTypes";
+import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
+import MirrorConfigurator from "./MirrorConfigurator";
 
-/**
- * TODO;
- * 2. add other products options.
- */
-
-interface OtherModelsConfiguratorProps {
+interface KoraXlConfiguratorProps {
     composition: Composition;
     onAddToCart: (shoppingCartProduct: shoppingCartProductModel) => void;
 }
 
-interface Vanity {
-    baseSku: string;
-    finish: string;
-}
-
-interface CurrentConfiguration {
-    vanity: Vanity;
-    vanitySku: string;
-    vanityPrice: number;
-    isDoubleSink: boolean;
-    washbasin: string;
-    washbasinPrice: number;
-    label: string;
-}
-
-interface vanityOptions {
-    baseSku: string;
-    finishOptions: Option[];
-}
-
-function OtherModelsConfigurator({
+function KoraXlConfigurator({
     composition,
     onAddToCart,
-}: OtherModelsConfiguratorProps) {
-    // iterate over vanitites array and analize sku in order to get the valid options to get final sku. -------------|
-    const initialVanityOptions: vanityOptions = useMemo(() => {
+}: KoraXlConfiguratorProps) {
+    // |===== VANITY =====|
+    const initialVanityOptions: VanityOptions = useMemo(() => {
         let baseSku: string = "";
         const finishOptionsMap = new Map();
 
@@ -90,7 +74,7 @@ function OtherModelsConfigurator({
 
     const [vanityOptions, setVanityOptions] = useState(initialVanityOptions);
 
-    // iterate over washbasin array and created Options array. ----------------------|
+    // |===== WASHBASIN =====| (repeated logic)
     const washbasinOptions: Option[] = useMemo(() => {
         const all: Option[] = [];
         composition.washbasins.forEach((washbasin) => {
@@ -115,20 +99,63 @@ function OtherModelsConfigurator({
         return all;
     }, []);
 
-    // create objetct that will hold current configuration. if only one option, make it default. --------------|
+    // |===== TALL UNIT =====|
+    const tallUnitOptions: Option[] | null = useMemo(() => {
+        const all: Option[] = [];
+        const { tallUnitsLinenClosets } = composition.otherProductsAvailable;
+        if (tallUnitsLinenClosets.length === 0) return null;
+
+        tallUnitsLinenClosets.forEach((tallUnit) => {
+            all.push({
+                code: tallUnit.uscode,
+                imgUrl: `https://${location.hostname}/images/express-program/OPERA/options/${tallUnit.uscode}.webp`,
+                title: tallUnit.descw,
+                validSkus: [tallUnit.uscode],
+                isDisabled: false,
+            });
+        });
+
+        return all;
+    }, []);
+
+    const [tallUnitStatus, setTallUnitStatus] = useState({
+        isTallUnitSelected: false,
+        isTallUnitValid: false,
+    });
+
+    // |====== MIRRORS LOGIC -> get all mirror options ======|
+    const {
+        mirrorCabinetOptions,
+        ledMirrorOptions,
+        openCompMirrorOptions,
+        crrMirrorCategory,
+        currentMirrorsConfiguration,
+        handleSwitchCrrMirrorCategory: updateCurrentMirrorCategory,
+        handleMirrorOptionSelected: updateMirrorOptions,
+        handleResetMirrorConfigurator: resetMirrorConfigurator,
+        handleClearMirrorCategory: clearMirrorCategory,
+        getFormattedMirrorSkus,
+        getMirrorProductObj,
+        isMirrorCabinetConfigValid,
+    } = useMirrorOptions(composition.otherProductsAvailable.mirrors);
+
+    const handleSwitchCrrMirrorCategory = (mirrorCategory: MirrorCategory) => {
+        updateCurrentMirrorCategory(mirrorCategory);
+    };
+
+    // |===== INITIAL CONFIG =====|
     const initialConfiguration: CurrentConfiguration = useMemo(() => {
-        const vanity = {
+        const vanity: Vanity = {
             baseSku: vanityOptions.baseSku,
             finish: vanityOptions.finishOptions[0].code,
         };
 
-        let vanitySkuAndPrice = getSkuAndPrice(
+        const vanitySkuAndPrice = getSkuAndPrice(
             composition.model as Model,
             "vanity",
             vanity,
             composition.vanities
         );
-
         return {
             label: "",
             vanity,
@@ -137,6 +164,8 @@ function OtherModelsConfigurator({
             washbasin: composition.washbasins[0].uscode,
             washbasinPrice: composition.washbasins[0].msrp,
             isDoubleSink: composition.name.includes("DOUBLE"),
+            tallUnit: "",
+            tallUnitPrice: 0,
         };
     }, []);
 
@@ -178,6 +207,25 @@ function OtherModelsConfigurator({
                     washbasinPrice: action.payload as number,
                 };
 
+            case "set-tallUnit-type":
+                return {
+                    ...state,
+                    tallUnit: action.payload as string,
+                };
+
+            case "set-tallUnit-price":
+                return {
+                    ...state,
+                    tallUnitPrice: action.payload as number,
+                };
+
+            case "reset-tallUnit":
+                return {
+                    ...state,
+                    tallUnit: initialConfiguration.tallUnit as string,
+                    tallUnitPrice: initialConfiguration.tallUnitPrice as number,
+                };
+
             case "reset-configurator":
                 return {
                     ...initialConfiguration,
@@ -199,7 +247,51 @@ function OtherModelsConfigurator({
         initialConfiguration
     );
 
-    // |====== Events ======|
+    // |===== GRAND TOTAL =====|
+    const grandTotal = useMemo(() => {
+        const { vanityPrice, washbasinPrice, isDoubleSink, tallUnitPrice } =
+            currentConfiguration;
+
+        const { mirrorCabinetPrice, ledMirrorPrice, openCompMirrorPrice } =
+            currentMirrorsConfiguration;
+
+        /**
+         * in order to allow the user to order or add product to
+         * the shopping cart, they must select the mandatory options.
+         *
+         * for only vanities, user must select all the options that
+         * allow the program to generate a valid sku number
+         *
+         * if the product includes a side unit, user also must select
+         * all the options that allow the program to generate the sku for the side unit.
+         *
+         * following if statement checks that all the conditions mentioned
+         * above are meet.
+         */
+
+        if (vanityPrice === 0) return 0;
+        else {
+            const finalVanityPrice = isDoubleSink
+                ? vanityPrice * 2
+                : vanityPrice;
+
+            const grandTotal =
+                finalVanityPrice +
+                washbasinPrice +
+                tallUnitPrice +
+                mirrorCabinetPrice +
+                ledMirrorPrice +
+                openCompMirrorPrice;
+
+            return grandTotal;
+        }
+    }, [currentConfiguration, currentMirrorsConfiguration]);
+
+    // |===== COMPOSITION NAME =====| (repeated logic)
+    const [isMissingLabel, setIsMissingLabel] = useState(false);
+    const [isInvalidLabel, setIsInvalidLabel] = useState(false);
+
+    // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (
         item: string,
         property: string,
@@ -243,7 +335,6 @@ function OtherModelsConfigurator({
                 payload: skuAndPrice.price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
-
             setVanityOptions(copyOptions);
         }
 
@@ -257,7 +348,7 @@ function OtherModelsConfigurator({
             );
 
             dispatch({
-                type: `set-${item}-type`,
+                type: `set-${item}-${property}`,
                 payload: skuAndPrice.sku,
             });
             dispatch({
@@ -265,11 +356,41 @@ function OtherModelsConfigurator({
                 payload: skuAndPrice.price,
             });
         }
+
+        if (item === "tallUnit") {
+            const skuAndPrice = getSkuAndPrice(
+                composition.model as Model,
+                item,
+                {},
+                composition.otherProductsAvailable.tallUnitsLinenClosets,
+                option
+            );
+
+            dispatch({
+                type: `set-${item}-${property}`,
+                payload: skuAndPrice.sku,
+            });
+            dispatch({
+                type: `set-${item}-price`,
+                payload: skuAndPrice.price,
+            });
+
+            setTallUnitStatus((prev) => ({
+                ...prev,
+                isTallUnitValid: skuAndPrice.price > 0,
+                isTallUnitSelected: true,
+            }));
+        }
+
+        // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
+        updateMirrorOptions(
+            item,
+            property,
+            option,
+            composition.otherProductsAvailable.mirrors
+        );
     };
 
-    // Manage label (repeated logic)
-    const [isMissingLabel, setIsMissingLabel] = useState(false);
-    const [isInvalidLabel, setIsInvalidLabel] = useState(false);
     const handleConfigurationLabel = (name: string) => {
         if (!name) {
             setIsMissingLabel(true);
@@ -288,37 +409,6 @@ function OtherModelsConfigurator({
         dispatch({ type: "set-label", payload: name });
     };
 
-    // Manage grand total.
-    const grandTotal = useMemo(() => {
-        const { vanityPrice, washbasinPrice, isDoubleSink } =
-            currentConfiguration;
-
-        /**
-         * in order to allow the user to order or add product to
-         * the shopping cart, they must select the mandatory options.
-         *
-         * for only vanities, user must select all the options that
-         * allow the program to generate a valid sku number
-         *
-         * if the product includes a side unit, user also must select
-         * all the options that allow the program to generate the sku for the side unit.
-         *
-         * following if statement checks that all the conditions mentioned
-         * above are meet.
-         */
-
-        if (vanityPrice === 0) return 0;
-        else {
-            const finalVanityPrice = isDoubleSink
-                ? vanityPrice * 2
-                : vanityPrice;
-
-            const grandTotal = finalVanityPrice + washbasinPrice;
-
-            return grandTotal;
-        }
-    }, [currentConfiguration]);
-
     const isValidConfiguration = () => {
         if (!currentConfiguration.label) {
             alert("Looks like COMPOSITION NAME is missing!!");
@@ -326,24 +416,41 @@ function OtherModelsConfigurator({
             return false;
         }
 
+        if (
+            tallUnitStatus.isTallUnitSelected &&
+            !tallUnitStatus.isTallUnitValid
+        ) {
+            alert(
+                "Looks like you forgot to select all available TALL UNIT OPTIONS. Either clear the tal unit section or select the missing option(s). "
+            );
+            return false;
+        }
+
+        if (!isMirrorCabinetConfigValid()) {
+            alert(
+                "Looks like you forgot to select all available MIRROR CABINET OPTIONS. Either clear the mirror cabinet section or select the missing option(s). "
+            );
+            return false;
+        }
+
         return true;
     };
 
-    // Manage order now.
     const handleOrderNow = () => {
         if (!isValidConfiguration()) return;
 
         const {
+            label,
             vanitySku,
             washbasin: washbasinSku,
             isDoubleSink,
-            label,
+            tallUnit: tallUnitSku,
         } = currentConfiguration;
 
         const allFormattedSkus: string[] = [];
 
-        const vanityFormattedSku = `${vanitySku}!!${composition.model}${
-            isDoubleSink ? "--2" : "--1"
+        const vanityFormattedSku = `${vanitySku}!!${composition.model}--${
+            isDoubleSink ? "2" : "1"
         }##${label}`;
         allFormattedSkus.push(vanityFormattedSku);
 
@@ -352,6 +459,18 @@ function OtherModelsConfigurator({
             : "";
         washbasinFormattedSku && allFormattedSkus.push(washbasinFormattedSku);
 
+        const tallUnitFormattedSku = tallUnitSku
+            ? `${tallUnitSku}!!${composition.model}--1##${label}`
+            : "";
+        tallUnitFormattedSku && allFormattedSkus.push(tallUnitFormattedSku);
+
+        // ========= VVVV MIRROR (REPEATED LOGIC) ==========VVVVV
+        getFormattedMirrorSkus(
+            composition.model,
+            currentConfiguration.label,
+            allFormattedSkus
+        );
+
         router.get("/orders/create-so-num", {
             SKU: allFormattedSkus.join("~"),
         });
@@ -359,18 +478,38 @@ function OtherModelsConfigurator({
 
     const handleResetConfigurator = () => {
         setVanityOptions(initialVanityOptions);
+        setTallUnitStatus({
+            isTallUnitSelected: false,
+            isTallUnitValid: false,
+        });
+        resetMirrorConfigurator();
         dispatch({ type: "reset-configurator", payload: "" });
     };
 
-    // Creates object for shopping cart.
+    const handleClearItem = (item: string) => {
+        switch (item) {
+            case "tallUnit":
+                setTallUnitStatus({
+                    isTallUnitSelected: false,
+                    isTallUnitValid: false,
+                });
+                dispatch({ type: "reset-tallUnit", payload: "" });
+                break;
+
+            default:
+                throw new Error("case condition not found");
+        }
+    };
+
     const handleAddToCart = () => {
         if (!isValidConfiguration()) return;
 
         const {
+            label,
             vanitySku,
             washbasin: washbasinSku,
             isDoubleSink,
-            label,
+            tallUnit: tallUnitSku,
         } = currentConfiguration;
 
         const otherProducts = {
@@ -386,6 +525,17 @@ function OtherModelsConfigurator({
 
         const washbasinObj = composition.washbasins.find(
             (washbasin) => washbasin.uscode === washbasinSku
+        );
+
+        const tallUnitObj =
+            composition.otherProductsAvailable.tallUnitsLinenClosets.find(
+                (tallUnit) => tallUnit.uscode === tallUnitSku
+            );
+        tallUnitObj && otherProducts.tallUnit.push(tallUnitObj);
+
+        getMirrorProductObj(
+            composition.otherProductsAvailable.mirrors,
+            otherProducts
         );
 
         const shoppingCartObj: shoppingCartProductModel = {
@@ -447,22 +597,61 @@ function OtherModelsConfigurator({
                     isMissingLabel={isMissingLabel}
                     isInvalidLabel={isInvalidLabel}
                 />
-                <Options
-                    item="vanity"
-                    property="finish"
-                    title="SELECT VANITY FINISH"
-                    options={vanityOptions.finishOptions}
-                    crrOptionSelected={currentConfiguration.vanity.finish}
-                    onOptionSelected={handleOptionSelected}
-                />
-                <Options
-                    item="washbasin"
-                    property="type"
-                    title="SELECT WASHBASIN"
-                    options={washbasinOptions}
-                    crrOptionSelected={currentConfiguration.washbasin}
-                    onOptionSelected={handleOptionSelected}
-                />
+
+                <ItemPropertiesAccordion headerTitle="VANITY">
+                    <Options
+                        item="vanity"
+                        property="finish"
+                        title="SELECT VANITY FINISH"
+                        options={vanityOptions.finishOptions}
+                        crrOptionSelected={currentConfiguration.vanity.finish}
+                        onOptionSelected={handleOptionSelected}
+                    />
+                </ItemPropertiesAccordion>
+
+                <ItemPropertiesAccordion headerTitle="WASHBASIN">
+                    <Options
+                        item="washbasin"
+                        property="type"
+                        title="SELECT WASHBASIN"
+                        options={washbasinOptions}
+                        crrOptionSelected={currentConfiguration.washbasin}
+                        onOptionSelected={handleOptionSelected}
+                    />
+                </ItemPropertiesAccordion>
+
+                {tallUnitOptions && (
+                    <ItemPropertiesAccordion headerTitle="TALL UNIT 12">
+                        <button
+                            className={classes.clearButton}
+                            onClick={() => handleClearItem("tallUnit")}
+                        >
+                            CLEAR
+                        </button>
+                        <Options
+                            item="tallUnit"
+                            property="type"
+                            title="SELECT TALL UNIT"
+                            options={tallUnitOptions}
+                            crrOptionSelected={currentConfiguration.tallUnit}
+                            onOptionSelected={handleOptionSelected}
+                        />
+                    </ItemPropertiesAccordion>
+                )}
+
+                <MirrorConfigurator
+                    mirrorCabinetOptions={mirrorCabinetOptions}
+                    ledMirrorOptions={ledMirrorOptions}
+                    openCompMirrorOptions={openCompMirrorOptions}
+                    crrMirrorCategory={crrMirrorCategory}
+                    currentMirrorsConfiguration={currentMirrorsConfiguration}
+                    handleSwitchCrrMirrorCategory={
+                        handleSwitchCrrMirrorCategory
+                    }
+                    clearMirrorCategory={clearMirrorCategory}
+                    handleOptionSelected={handleOptionSelected}
+                ></MirrorConfigurator>
+
                 <div className={classes.grandTotalAndOrderNowButtonWrapper}>
                     <div className={classes.grandTotalWrapper}>
                         <h1 className={classes.label}>Grand Total:</h1>
@@ -478,13 +667,13 @@ function OtherModelsConfigurator({
                         SPECS
                     </a>
                     <button
-                        disabled={grandTotal === 0}
+                        disabled={!grandTotal ? true : false}
                         onClick={handleOrderNow}
                     >
                         ORDER NOW
                     </button>
                     <button
-                        disabled={grandTotal === 0}
+                        disabled={!grandTotal ? true : false}
                         onClick={handleAddToCart}
                     >
                         ADD TO CART
@@ -495,4 +684,4 @@ function OtherModelsConfigurator({
     );
 }
 
-export default OtherModelsConfigurator;
+export default KoraXlConfigurator;

@@ -1,56 +1,37 @@
-import { Composition } from "../../Models/Composition";
-import classes from "../../../css/product-configurator.module.css";
 import { useMemo, useReducer, useState } from "react";
+import type { Composition } from "../../Models/Composition";
 import type {
     Option,
     ShoppingCartProduct as shoppingCartProductModel,
 } from "../../Models/ExpressProgramModels";
-import Options from "./Options";
-import ConfigurationName from "./ConfigurationName";
-import { router } from "@inertiajs/react";
+import type {
+    Vanity,
+    VanityOptions,
+    CurrentConfiguration,
+} from "../../Models/KoraConfigTypes";
 import {
     getSkuAndPrice,
     isAlphanumericWithSpaces,
 } from "../../utils/helperFunc";
+import { router } from "@inertiajs/react";
 import { ProductInventory } from "../../Models/Product";
+import classes from "../../../css/product-configurator.module.css";
+import ConfigurationName from "./ConfigurationName";
+import Options from "./Options";
+import useMirrorOptions from "../../Hooks/useMirrorOptions";
+import { MirrorCategory } from "../../Models/MirrorConfigTypes";
 import { Model } from "../../Models/ModelConfigTypes";
+import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
+import MirrorConfigurator from "./MirrorConfigurator";
 
-/**
- * TODO;
- * 2. add other products options.
- */
-
-interface OtherModelsConfiguratorProps {
+interface KoraConfiguratorProps {
     composition: Composition;
     onAddToCart: (shoppingCartProduct: shoppingCartProductModel) => void;
 }
 
-interface Vanity {
-    baseSku: string;
-    finish: string;
-}
-
-interface CurrentConfiguration {
-    vanity: Vanity;
-    vanitySku: string;
-    vanityPrice: number;
-    isDoubleSink: boolean;
-    washbasin: string;
-    washbasinPrice: number;
-    label: string;
-}
-
-interface vanityOptions {
-    baseSku: string;
-    finishOptions: Option[];
-}
-
-function OtherModelsConfigurator({
-    composition,
-    onAddToCart,
-}: OtherModelsConfiguratorProps) {
-    // iterate over vanitites array and analize sku in order to get the valid options to get final sku. -------------|
-    const initialVanityOptions: vanityOptions = useMemo(() => {
+function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
+    // |===== VANITY =====|
+    const initialVanityOptions: VanityOptions = useMemo(() => {
         let baseSku: string = "";
         const finishOptionsMap = new Map();
 
@@ -90,7 +71,7 @@ function OtherModelsConfigurator({
 
     const [vanityOptions, setVanityOptions] = useState(initialVanityOptions);
 
-    // iterate over washbasin array and created Options array. ----------------------|
+    // |===== WASHBASIN =====| (repeated logic)
     const washbasinOptions: Option[] = useMemo(() => {
         const all: Option[] = [];
         composition.washbasins.forEach((washbasin) => {
@@ -115,14 +96,50 @@ function OtherModelsConfigurator({
         return all;
     }, []);
 
-    // create objetct that will hold current configuration. if only one option, make it default. --------------|
+    // |====== MIRRORS LOGIC -> get all mirror options ======|
+    const {
+        mirrorCabinetOptions,
+        ledMirrorOptions,
+        openCompMirrorOptions,
+        crrMirrorCategory,
+        currentMirrorsConfiguration,
+        handleSwitchCrrMirrorCategory: updateCurrentMirrorCategory,
+        handleMirrorOptionSelected: updateMirrorOptions,
+        handleResetMirrorConfigurator: resetMirrorConfigurator,
+        handleClearMirrorCategory: clearMirrorCategory,
+        getFormattedMirrorSkus,
+        getMirrorProductObj,
+        isMirrorCabinetConfigValid,
+    } = useMirrorOptions(composition.otherProductsAvailable.mirrors);
+
+    const handleSwitchCrrMirrorCategory = (mirrorCategory: MirrorCategory) => {
+        updateCurrentMirrorCategory(mirrorCategory);
+    };
+
+    // |===== ACCESSORIES =====|
+    const accessoryOptions: Option[] | null = useMemo(() => {
+        const { accessories } = composition.otherProductsAvailable;
+        const options: Option[] = [];
+        accessories.forEach((accessory) => {
+            options.push({
+                code: accessory.uscode,
+                imgUrl: `https://${location.hostname}/images/express-program/KORA/${accessory.uscode}.webp`,
+                title: accessory.descw,
+                validSkus: [accessory.uscode],
+                isDisabled: false,
+            });
+        });
+        return options;
+    }, []);
+
+    // |===== INITIAL CONFIG =====|
     const initialConfiguration: CurrentConfiguration = useMemo(() => {
-        const vanity = {
+        const vanity: Vanity = {
             baseSku: vanityOptions.baseSku,
             finish: vanityOptions.finishOptions[0].code,
         };
 
-        let vanitySkuAndPrice = getSkuAndPrice(
+        const vanitySkuAndPrice = getSkuAndPrice(
             composition.model as Model,
             "vanity",
             vanity,
@@ -137,6 +154,8 @@ function OtherModelsConfigurator({
             washbasin: composition.washbasins[0].uscode,
             washbasinPrice: composition.washbasins[0].msrp,
             isDoubleSink: composition.name.includes("DOUBLE"),
+            accessory: "",
+            accessoryPrice: 0,
         };
     }, []);
 
@@ -178,6 +197,25 @@ function OtherModelsConfigurator({
                     washbasinPrice: action.payload as number,
                 };
 
+            case "set-accessory-type":
+                return {
+                    ...state,
+                    accessory: action.payload as string,
+                };
+
+            case "set-accessory-price":
+                return {
+                    ...state,
+                    accessoryPrice: action.payload as number,
+                };
+
+            case "reset-accessory":
+                return {
+                    ...state,
+                    accessory: initialConfiguration.accessory,
+                    accessoryPrice: initialConfiguration.accessoryPrice,
+                };
+
             case "reset-configurator":
                 return {
                     ...initialConfiguration,
@@ -199,7 +237,51 @@ function OtherModelsConfigurator({
         initialConfiguration
     );
 
-    // |====== Events ======|
+    // |===== GRAND TOTAL =====|
+    const grandTotal = useMemo(() => {
+        const { vanityPrice, washbasinPrice, isDoubleSink, accessoryPrice } =
+            currentConfiguration;
+
+        const { mirrorCabinetPrice, ledMirrorPrice, openCompMirrorPrice } =
+            currentMirrorsConfiguration;
+
+        /**
+         * in order to allow the user to order or add product to
+         * the shopping cart, they must select the mandatory options.
+         *
+         * for only vanities, user must select all the options that
+         * allow the program to generate a valid sku number
+         *
+         * if the product includes a side unit, user also must select
+         * all the options that allow the program to generate the sku for the side unit.
+         *
+         * following if statement checks that all the conditions mentioned
+         * above are meet.
+         */
+
+        if (vanityPrice === 0) return 0;
+        else {
+            const finalVanityPrice = isDoubleSink
+                ? vanityPrice * 2
+                : vanityPrice;
+
+            const grandTotal =
+                finalVanityPrice +
+                washbasinPrice +
+                mirrorCabinetPrice +
+                ledMirrorPrice +
+                openCompMirrorPrice +
+                accessoryPrice;
+
+            return grandTotal;
+        }
+    }, [currentConfiguration, currentMirrorsConfiguration]);
+
+    // |===== COMPOSITION NAME =====| (repeated logic)
+    const [isMissingLabel, setIsMissingLabel] = useState(false);
+    const [isInvalidLabel, setIsInvalidLabel] = useState(false);
+
+    // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (
         item: string,
         property: string,
@@ -243,7 +325,6 @@ function OtherModelsConfigurator({
                 payload: skuAndPrice.price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
-
             setVanityOptions(copyOptions);
         }
 
@@ -257,7 +338,7 @@ function OtherModelsConfigurator({
             );
 
             dispatch({
-                type: `set-${item}-type`,
+                type: `set-${item}-${property}`,
                 payload: skuAndPrice.sku,
             });
             dispatch({
@@ -265,11 +346,35 @@ function OtherModelsConfigurator({
                 payload: skuAndPrice.price,
             });
         }
+
+        if (item === "accessory") {
+            const skuAndPrice = getSkuAndPrice(
+                composition.model as Model,
+                item,
+                {},
+                composition.otherProductsAvailable.accessories,
+                option
+            );
+
+            dispatch({
+                type: `set-${item}-${property}`,
+                payload: skuAndPrice.sku,
+            });
+            dispatch({
+                type: `set-${item}-price`,
+                payload: skuAndPrice.price,
+            });
+        }
+
+        // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
+        updateMirrorOptions(
+            item,
+            property,
+            option,
+            composition.otherProductsAvailable.mirrors
+        );
     };
 
-    // Manage label (repeated logic)
-    const [isMissingLabel, setIsMissingLabel] = useState(false);
-    const [isInvalidLabel, setIsInvalidLabel] = useState(false);
     const handleConfigurationLabel = (name: string) => {
         if (!name) {
             setIsMissingLabel(true);
@@ -288,37 +393,6 @@ function OtherModelsConfigurator({
         dispatch({ type: "set-label", payload: name });
     };
 
-    // Manage grand total.
-    const grandTotal = useMemo(() => {
-        const { vanityPrice, washbasinPrice, isDoubleSink } =
-            currentConfiguration;
-
-        /**
-         * in order to allow the user to order or add product to
-         * the shopping cart, they must select the mandatory options.
-         *
-         * for only vanities, user must select all the options that
-         * allow the program to generate a valid sku number
-         *
-         * if the product includes a side unit, user also must select
-         * all the options that allow the program to generate the sku for the side unit.
-         *
-         * following if statement checks that all the conditions mentioned
-         * above are meet.
-         */
-
-        if (vanityPrice === 0) return 0;
-        else {
-            const finalVanityPrice = isDoubleSink
-                ? vanityPrice * 2
-                : vanityPrice;
-
-            const grandTotal = finalVanityPrice + washbasinPrice;
-
-            return grandTotal;
-        }
-    }, [currentConfiguration]);
-
     const isValidConfiguration = () => {
         if (!currentConfiguration.label) {
             alert("Looks like COMPOSITION NAME is missing!!");
@@ -326,24 +400,31 @@ function OtherModelsConfigurator({
             return false;
         }
 
+        if (!isMirrorCabinetConfigValid()) {
+            alert(
+                "Looks like you forgot to select all available MIRROR CABINET OPTIONS. Either clear the mirror cabinet section or select the missing option(s). "
+            );
+            return false;
+        }
+
         return true;
     };
 
-    // Manage order now.
     const handleOrderNow = () => {
         if (!isValidConfiguration()) return;
 
         const {
+            label,
             vanitySku,
             washbasin: washbasinSku,
             isDoubleSink,
-            label,
+            accessory: accessorySku,
         } = currentConfiguration;
 
         const allFormattedSkus: string[] = [];
 
-        const vanityFormattedSku = `${vanitySku}!!${composition.model}${
-            isDoubleSink ? "--2" : "--1"
+        const vanityFormattedSku = `${vanitySku}!!${composition.model}--${
+            isDoubleSink ? "2" : "1"
         }##${label}`;
         allFormattedSkus.push(vanityFormattedSku);
 
@@ -352,6 +433,18 @@ function OtherModelsConfigurator({
             : "";
         washbasinFormattedSku && allFormattedSkus.push(washbasinFormattedSku);
 
+        const accessoryFormattedSku = accessorySku
+            ? `${accessorySku}!!${composition.model}--1##${label}`
+            : "";
+        accessoryFormattedSku && allFormattedSkus.push(accessoryFormattedSku);
+
+        // ========= VVVV MIRROR (REPEATED LOGIC) ==========VVVVV
+        getFormattedMirrorSkus(
+            composition.model,
+            currentConfiguration.label,
+            allFormattedSkus
+        );
+
         router.get("/orders/create-so-num", {
             SKU: allFormattedSkus.join("~"),
         });
@@ -359,18 +452,30 @@ function OtherModelsConfigurator({
 
     const handleResetConfigurator = () => {
         setVanityOptions(initialVanityOptions);
+        resetMirrorConfigurator();
         dispatch({ type: "reset-configurator", payload: "" });
     };
 
-    // Creates object for shopping cart.
+    const handleClearItem = (item: string) => {
+        switch (item) {
+            case "accessory":
+                dispatch({ type: "reset-accessory", payload: "" });
+                break;
+
+            default:
+                throw new Error("case condition not found");
+        }
+    };
+
     const handleAddToCart = () => {
         if (!isValidConfiguration()) return;
 
         const {
+            label,
             vanitySku,
             washbasin: washbasinSku,
             isDoubleSink,
-            label,
+            accessory: accessorySku,
         } = currentConfiguration;
 
         const otherProducts = {
@@ -386,6 +491,17 @@ function OtherModelsConfigurator({
 
         const washbasinObj = composition.washbasins.find(
             (washbasin) => washbasin.uscode === washbasinSku
+        );
+
+        const accessoryObj =
+            composition.otherProductsAvailable.accessories.find(
+                (accessory) => accessory.uscode === accessorySku
+            );
+        accessoryObj && otherProducts.accessory.push(accessoryObj);
+
+        getMirrorProductObj(
+            composition.otherProductsAvailable.mirrors,
+            otherProducts
         );
 
         const shoppingCartObj: shoppingCartProductModel = {
@@ -447,22 +563,60 @@ function OtherModelsConfigurator({
                     isMissingLabel={isMissingLabel}
                     isInvalidLabel={isInvalidLabel}
                 />
-                <Options
-                    item="vanity"
-                    property="finish"
-                    title="SELECT VANITY FINISH"
-                    options={vanityOptions.finishOptions}
-                    crrOptionSelected={currentConfiguration.vanity.finish}
-                    onOptionSelected={handleOptionSelected}
-                />
-                <Options
-                    item="washbasin"
-                    property="type"
-                    title="SELECT WASHBASIN"
-                    options={washbasinOptions}
-                    crrOptionSelected={currentConfiguration.washbasin}
-                    onOptionSelected={handleOptionSelected}
-                />
+                <ItemPropertiesAccordion headerTitle="VANITY">
+                    <Options
+                        item="vanity"
+                        property="finish"
+                        title="SELECT VANITY FINISH"
+                        options={vanityOptions.finishOptions}
+                        crrOptionSelected={currentConfiguration.vanity.finish}
+                        onOptionSelected={handleOptionSelected}
+                    />
+                </ItemPropertiesAccordion>
+
+                <ItemPropertiesAccordion headerTitle="WASHBASIN">
+                    <Options
+                        item="washbasin"
+                        property="type"
+                        title="SELECT WASHBASIN"
+                        options={washbasinOptions}
+                        crrOptionSelected={currentConfiguration.washbasin}
+                        onOptionSelected={handleOptionSelected}
+                    />
+                </ItemPropertiesAccordion>
+
+                <MirrorConfigurator
+                    mirrorCabinetOptions={mirrorCabinetOptions}
+                    ledMirrorOptions={ledMirrorOptions}
+                    openCompMirrorOptions={openCompMirrorOptions}
+                    crrMirrorCategory={crrMirrorCategory}
+                    currentMirrorsConfiguration={currentMirrorsConfiguration}
+                    handleSwitchCrrMirrorCategory={
+                        handleSwitchCrrMirrorCategory
+                    }
+                    clearMirrorCategory={clearMirrorCategory}
+                    handleOptionSelected={handleOptionSelected}
+                ></MirrorConfigurator>
+
+                {accessoryOptions && (
+                    <ItemPropertiesAccordion headerTitle="ACCESSORIES">
+                        <button
+                            className={classes.clearButton}
+                            onClick={() => handleClearItem("accessory")}
+                        >
+                            CLEAR
+                        </button>
+                        <Options
+                            item="accessory"
+                            property="type"
+                            title="SELECT ACCESSORY"
+                            options={accessoryOptions}
+                            crrOptionSelected={currentConfiguration.accessory}
+                            onOptionSelected={handleOptionSelected}
+                        />
+                    </ItemPropertiesAccordion>
+                )}
+
                 <div className={classes.grandTotalAndOrderNowButtonWrapper}>
                     <div className={classes.grandTotalWrapper}>
                         <h1 className={classes.label}>Grand Total:</h1>
@@ -478,13 +632,13 @@ function OtherModelsConfigurator({
                         SPECS
                     </a>
                     <button
-                        disabled={grandTotal === 0}
+                        disabled={!grandTotal ? true : false}
                         onClick={handleOrderNow}
                     >
                         ORDER NOW
                     </button>
                     <button
-                        disabled={grandTotal === 0}
+                        disabled={!grandTotal ? true : false}
                         onClick={handleAddToCart}
                     >
                         ADD TO CART
@@ -495,4 +649,4 @@ function OtherModelsConfigurator({
     );
 }
 
-export default OtherModelsConfigurator;
+export default KoraConfigurator;

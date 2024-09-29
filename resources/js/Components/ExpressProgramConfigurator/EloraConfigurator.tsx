@@ -1072,17 +1072,8 @@ function EloraConfigurator({
             grandTotal: grandTotal,
         };
 
-        console.log(shoppingCartObj);
         onAddToCart(shoppingCartObj);
     };
-
-    console.log("=== elora confg render ===");
-    console.log("composition:", composition);
-    console.log("current config:", currentConfiguration);
-    console.log("current mirror config:", currentMirrorsConfiguration);
-    console.log("wall unit status:", wallUnitStatus);
-    console.log("tall unit status:", tallUnitStatus);
-    console.log("grand total:", grandTotal);
 
     return (
         <div className={classes.compositionConfiguratorWrapper}>
