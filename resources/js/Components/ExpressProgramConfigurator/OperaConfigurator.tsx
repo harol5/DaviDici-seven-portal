@@ -351,6 +351,10 @@ function OperaConfigurator({
             composition.vanities
         );
 
+        const washbasinPrice = composition.washbasins[0].sprice
+            ? composition.washbasins[0].sprice
+            : composition.washbasins[0].msrp;
+
         const sideUnit: SideUnit | null = sideUnitOptions
             ? {
                   baseSku: sideUnitOptions.baseSku,
@@ -399,7 +403,7 @@ function OperaConfigurator({
             vanitySku: vanitySkuAndPrice.sku,
             vanityPrice: vanitySkuAndPrice.price,
             washbasin: composition.washbasins[0].uscode,
-            washbasinPrice: composition.washbasins[0].msrp,
+            washbasinPrice,
             isDoubleSink: composition.name.includes("DOUBLE"),
             sideUnit,
             sideUnitSku: sideUnitSkuAndPrice ? sideUnitSkuAndPrice.sku : "",

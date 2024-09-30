@@ -18,7 +18,10 @@ export const getSkuAndPrice = (
     if (wholeSku) {
         for (const crrProduct of products) {
             if (crrProduct.uscode === wholeSku) {
-                skuAndPrice.price = crrProduct.msrp;
+                skuAndPrice.price = crrProduct.sprice
+                    ? crrProduct.sprice
+                    : crrProduct.msrp;
+
                 skuAndPrice.sku = wholeSku;
                 break;
             }
@@ -50,7 +53,10 @@ export const getSkuAndPrice = (
 
         for (const crrProduct of products) {
             if (crrProduct.uscode === productSku) {
-                skuAndPrice.price = crrProduct.msrp;
+                skuAndPrice.price = crrProduct.sprice
+                    ? crrProduct.sprice
+                    : crrProduct.msrp;
+
                 skuAndPrice.sku = productSku;
                 break;
             }

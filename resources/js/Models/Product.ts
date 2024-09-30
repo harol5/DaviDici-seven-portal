@@ -33,6 +33,7 @@ export type ProductInventory = {
     numbox: number;
     qtyinv: number;
     size: string;
+    sprice: number;
     upc: string;
     uscode: string;
     wk: number;

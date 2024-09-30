@@ -58,6 +58,23 @@ export type OtherProductsAvailable = {
     wallUnits: ProductInventory[];
 };
 
+export type ExpressProgramMaps = {
+    vanitiesAndSideUnitsMap: Map<any, any>;
+    validCompositionSizesMap: Map<any, any>;
+    otherProductsMap: Map<any, any>;
+    sharedItemsMap: Map<any, any>;
+};
+
+export type ExpressProgramData = {
+    initialCompositions: Composition[];
+    initialSizesForFilter: string[];
+    initialFinishesForFilter: FinishObj[];
+    initialSinkPositionsForFilter: SinkPositionObj[];
+    initialModelsForFilter: ModelObj[];
+};
+
+export type ListingType = "regular" | "onSale";
+
 export const ModelsAvailable = {
     BRERA: 1,
     ELORA: 2,

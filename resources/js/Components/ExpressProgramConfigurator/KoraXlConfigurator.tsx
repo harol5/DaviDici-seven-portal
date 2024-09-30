@@ -156,13 +156,18 @@ function KoraXlConfigurator({
             vanity,
             composition.vanities
         );
+
+        const washbasinPrice = composition.washbasins[0].sprice
+            ? composition.washbasins[0].sprice
+            : composition.washbasins[0].msrp;
+
         return {
             label: "",
             vanity,
             vanitySku: vanitySkuAndPrice.sku,
             vanityPrice: vanitySkuAndPrice.price,
             washbasin: composition.washbasins[0].uscode,
-            washbasinPrice: composition.washbasins[0].msrp,
+            washbasinPrice,
             isDoubleSink: composition.name.includes("DOUBLE"),
             tallUnit: "",
             tallUnitPrice: 0,
@@ -639,18 +644,22 @@ function KoraXlConfigurator({
                     </ItemPropertiesAccordion>
                 )}
 
-                <MirrorConfigurator
-                    mirrorCabinetOptions={mirrorCabinetOptions}
-                    ledMirrorOptions={ledMirrorOptions}
-                    openCompMirrorOptions={openCompMirrorOptions}
-                    crrMirrorCategory={crrMirrorCategory}
-                    currentMirrorsConfiguration={currentMirrorsConfiguration}
-                    handleSwitchCrrMirrorCategory={
-                        handleSwitchCrrMirrorCategory
-                    }
-                    clearMirrorCategory={clearMirrorCategory}
-                    handleOptionSelected={handleOptionSelected}
-                ></MirrorConfigurator>
+                {composition.otherProductsAvailable.mirrors.length > 0 && (
+                    <MirrorConfigurator
+                        mirrorCabinetOptions={mirrorCabinetOptions}
+                        ledMirrorOptions={ledMirrorOptions}
+                        openCompMirrorOptions={openCompMirrorOptions}
+                        crrMirrorCategory={crrMirrorCategory}
+                        currentMirrorsConfiguration={
+                            currentMirrorsConfiguration
+                        }
+                        handleSwitchCrrMirrorCategory={
+                            handleSwitchCrrMirrorCategory
+                        }
+                        clearMirrorCategory={clearMirrorCategory}
+                        handleOptionSelected={handleOptionSelected}
+                    ></MirrorConfigurator>
+                )}
 
                 <div className={classes.grandTotalAndOrderNowButtonWrapper}>
                     <div className={classes.grandTotalWrapper}>

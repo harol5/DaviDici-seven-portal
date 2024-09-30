@@ -347,6 +347,10 @@ function EloraConfigurator({
             composition.vanities
         );
 
+        const washbasinPrice = composition.washbasins[0].sprice
+            ? composition.washbasins[0].sprice
+            : composition.washbasins[0].msrp;
+
         const wallUnit: WallUnit | null = wallUnitOptions
             ? {
                   baseSku: wallUnitOptions.baseSku,
@@ -369,7 +373,7 @@ function EloraConfigurator({
             vanitySku: vanitySkuAndPrice.sku,
             vanityPrice: vanitySkuAndPrice.price,
             washbasin: composition.washbasins[0].uscode,
-            washbasinPrice: composition.washbasins[0].msrp,
+            washbasinPrice,
             isDoubleSink: composition.name.includes("DOUBLE"),
             wallUnit,
             wallUnitSku: "",

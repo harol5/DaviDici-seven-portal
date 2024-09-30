@@ -8,16 +8,22 @@ import {
     OtherProductsAvailable,
     ModelsAvailable,
     ModelsAvailableKeys,
+    ExpressProgramMaps,
 } from "../Models/ExpressProgramModels";
 
-function useExpressProgramProducts(rawProducts: ProductInventory[]) {
-    const createProductsTree = () => {
+function useExpressProgramProducts(
+    rawProducts: ProductInventory[],
+    isOnSale = false
+) {
+    const createProductsTree = (): ExpressProgramMaps => {
         const vanitiesAndSideUnitsMap = new Map();
         const otherProductsMap = new Map();
         const validCompositionSizesMap = new Map();
         const sharedItemsMap = new Map();
 
-        rawProducts.forEach((product) => {
+        for (const product of rawProducts) {
+            if (isOnSale && !product.sprice) continue;
+
             if (product.item === "VANITY" || product.item === "SIDE UNIT") {
                 if (!vanitiesAndSideUnitsMap.has(product.item))
                     vanitiesAndSideUnitsMap.set(product.item, new Map());
@@ -126,7 +132,7 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                     sinkPositionsMap.get("CENTERED").push(product);
                 }
             }
-        });
+        }
 
         return {
             vanitiesAndSideUnitsMap,
@@ -237,7 +243,15 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         });
 
         const getStartingPrice = () => {
-            return vanities[0].msrp + washbasins[0].msrp;
+            const vanityPrice = vanities[0].sprice
+                ? vanities[0].sprice
+                : vanities[0].msrp;
+
+            const washbasinPrice = washbasins[0].sprice
+                ? washbasins[0].sprice
+                : washbasins[0].msrp;
+
+            return vanityPrice + washbasinPrice;
         };
 
         // Add constructed composition to array.
@@ -292,7 +306,15 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
             );
 
             const getStartingPrice = () => {
-                return vanities[0].msrp + washbasins[0].msrp;
+                const vanityPrice = vanities[0].sprice
+                    ? vanities[0].sprice
+                    : vanities[0].msrp;
+
+                const washbasinPrice = washbasins[0].sprice
+                    ? washbasins[0].sprice
+                    : washbasins[0].msrp;
+
+                return vanityPrice + washbasinPrice;
             };
 
             // Add constructed composition to array.
@@ -378,8 +400,16 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         }
 
         const getStartingPrice = () => {
-            const vanityMsrp =
-                position === "DOUBLE" ? vanities[0].msrp * 2 : vanities[0].msrp;
+            const vanityPrice = vanities[0].sprice
+                ? vanities[0].sprice
+                : vanities[0].msrp;
+
+            const vanityFinalPrice =
+                position === "DOUBLE" ? vanityPrice * 2 : vanityPrice;
+
+            const washbasinPrice = washbasins[0].sprice
+                ? washbasins[0].sprice
+                : washbasins[0].msrp;
 
             if (sideUnits && sideUnits.length !== 0) {
                 sideUnits.sort(
@@ -387,15 +417,19 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                         a.msrp - b.msrp
                 );
 
-                const sideUnitMsrp =
-                    sinkPositionMeasure === "(12+24+12)"
-                        ? sideUnits[0].msrp * 2
-                        : sideUnits[0].msrp;
+                const sideUnitPrice = sideUnits[0].sprice
+                    ? sideUnits[0].sprice
+                    : sideUnits[0].msrp;
 
-                return vanityMsrp + washbasins[0].msrp + sideUnitMsrp;
+                const sideUnitFinalPrice =
+                    sinkPositionMeasure === "(12+24+12)"
+                        ? sideUnitPrice * 2
+                        : sideUnitPrice;
+
+                return vanityFinalPrice + washbasinPrice + sideUnitFinalPrice;
             }
 
-            return vanityMsrp + washbasins[0].msrp;
+            return vanityFinalPrice + washbasinPrice;
         };
 
         // Add constructed composition to array.
@@ -451,20 +485,31 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
             );
 
             const getStartingPrice = () => {
-                const vanityMsrp =
-                    position === "DOUBLE"
-                        ? vanities[0].msrp * 2
-                        : vanities[0].msrp;
+                const vanityPrice = vanities[0].sprice
+                    ? vanities[0].sprice
+                    : vanities[0].msrp;
+
+                const vanityFinalPrice =
+                    position === "DOUBLE" ? vanityPrice * 2 : vanityPrice;
+
+                const washbasinPrice = washbasins[0].sprice
+                    ? washbasins[0].sprice
+                    : washbasins[0].msrp;
 
                 if (sideUnits.length !== 0) {
                     sideUnits.sort(
                         (a: ProductInventory, b: ProductInventory) =>
                             a.msrp - b.msrp
                     );
-                    return vanityMsrp + washbasins[0].msrp + sideUnits[0].msrp;
+
+                    const sideUnitPrice = sideUnits[0].sprice
+                        ? sideUnits[0].sprice
+                        : sideUnits[0].msrp;
+
+                    return vanityFinalPrice + washbasinPrice + sideUnitPrice;
                 }
 
-                return vanityMsrp + washbasins[0].msrp;
+                return vanityFinalPrice + washbasinPrice;
             };
 
             // Add constructed composition to array.
@@ -488,14 +533,13 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
         }
     };
 
-    return useMemo(() => {
-        // Create map hierchy
+    const getExpressProgramData = (mapsObject: ExpressProgramMaps) => {
         const {
             vanitiesAndSideUnitsMap,
             validCompositionSizesMap,
             otherProductsMap,
             sharedItemsMap,
-        } = createProductsTree();
+        } = mapsObject;
 
         const initialCompositions: Composition[] = [];
         const initialSizesForFilter: string[] = [];
@@ -676,9 +720,14 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
             Object.fromEntries(finishesForFilterMap)
         );
 
-        // Converts finishesForFilterMap values to and array with such values.
+        // Converts modelsForFilterMap values to and array with such values.
         const initialModelsForFilter: ModelObj[] = Object.values(
             Object.fromEntries(modelsForFilterMap)
+        );
+
+        // Converts sink potision set into an array.
+        const initialSinkPositionsForFilter: SinkPositionObj[] = Object.values(
+            Object.fromEntries(sinkPositionsForFilterMap)
         );
 
         initialFinishesForFilter.sort((a: FinishObj, b: FinishObj) => {
@@ -693,11 +742,6 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
                 a.startingPrice - b.startingPrice
         );
 
-        // Converts sink potision set into an array.
-        const initialSinkPositionsForFilter: SinkPositionObj[] = Object.values(
-            Object.fromEntries(sinkPositionsForFilterMap)
-        );
-
         return {
             initialCompositions,
             initialSizesForFilter,
@@ -705,6 +749,10 @@ function useExpressProgramProducts(rawProducts: ProductInventory[]) {
             initialSinkPositionsForFilter,
             initialModelsForFilter,
         };
+    };
+
+    return useMemo(() => {
+        return getExpressProgramData(createProductsTree());
     }, [rawProducts]);
 }
 

@@ -146,13 +146,17 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
             composition.vanities
         );
 
+        const washbasinPrice = composition.washbasins[0].sprice
+            ? composition.washbasins[0].sprice
+            : composition.washbasins[0].msrp;
+
         return {
             label: "",
             vanity,
             vanitySku: vanitySkuAndPrice.sku,
             vanityPrice: vanitySkuAndPrice.price,
             washbasin: composition.washbasins[0].uscode,
-            washbasinPrice: composition.washbasins[0].msrp,
+            washbasinPrice,
             isDoubleSink: composition.name.includes("DOUBLE"),
             accessory: "",
             accessoryPrice: 0,
@@ -522,6 +526,10 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
         onAddToCart(shoppingCartObj);
     };
 
+    console.log("=== KORA ===");
+    console.log("composition:", composition);
+    console.log("current config:", currentConfiguration);
+
     return (
         <div className={classes.compositionConfiguratorWrapper}>
             <section className={classes.leftSideConfiguratorWrapper}>
@@ -585,18 +593,22 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
                     />
                 </ItemPropertiesAccordion>
 
-                <MirrorConfigurator
-                    mirrorCabinetOptions={mirrorCabinetOptions}
-                    ledMirrorOptions={ledMirrorOptions}
-                    openCompMirrorOptions={openCompMirrorOptions}
-                    crrMirrorCategory={crrMirrorCategory}
-                    currentMirrorsConfiguration={currentMirrorsConfiguration}
-                    handleSwitchCrrMirrorCategory={
-                        handleSwitchCrrMirrorCategory
-                    }
-                    clearMirrorCategory={clearMirrorCategory}
-                    handleOptionSelected={handleOptionSelected}
-                ></MirrorConfigurator>
+                {composition.otherProductsAvailable.mirrors.length > 0 && (
+                    <MirrorConfigurator
+                        mirrorCabinetOptions={mirrorCabinetOptions}
+                        ledMirrorOptions={ledMirrorOptions}
+                        openCompMirrorOptions={openCompMirrorOptions}
+                        crrMirrorCategory={crrMirrorCategory}
+                        currentMirrorsConfiguration={
+                            currentMirrorsConfiguration
+                        }
+                        handleSwitchCrrMirrorCategory={
+                            handleSwitchCrrMirrorCategory
+                        }
+                        clearMirrorCategory={clearMirrorCategory}
+                        handleOptionSelected={handleOptionSelected}
+                    ></MirrorConfigurator>
+                )}
 
                 {accessoryOptions && (
                     <ItemPropertiesAccordion headerTitle="ACCESSORIES">

@@ -360,6 +360,10 @@ function NewYorkConfigurator({
             composition.vanities
         );
 
+        const washbasinPrice = composition.washbasins[0].sprice
+            ? composition.washbasins[0].sprice
+            : composition.washbasins[0].msrp;
+
         const sideUnit: SideUnit | null = sideUnitOptions
             ? {
                   baseSku: sideUnitOptions.baseSku,
@@ -411,7 +415,7 @@ function NewYorkConfigurator({
             sideUnitSku: sideUnitSkuAndPrice ? sideUnitSkuAndPrice.sku : "",
             sideUnitPrice: sideUnitSkuAndPrice ? sideUnitSkuAndPrice.price : 0,
             washbasin: composition.washbasins[0].uscode,
-            washbasinPrice: composition.washbasins[0].msrp,
+            washbasinPrice,
             wallUnit,
             wallUnitSku: "",
             wallUnitPrice: 0,

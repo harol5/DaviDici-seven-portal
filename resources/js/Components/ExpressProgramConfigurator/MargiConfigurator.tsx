@@ -411,6 +411,10 @@ function MargiConfigurator({
             composition.vanities
         );
 
+        const washbasinPrice = composition.washbasins[0].sprice
+            ? composition.washbasins[0].sprice
+            : composition.washbasins[0].msrp;
+
         // --- SIDE UNIT---
         let sideUnit: OpenUnit | SideCabinet | null = null;
         let sideUnitType = "";
@@ -500,7 +504,7 @@ function MargiConfigurator({
             sideUnitSku: sideUnitSkuAndPrice.sku,
             sideUnitPrice: sideUnitSkuAndPrice.price,
             washbasin: composition.washbasins[0].uscode,
-            washbasinPrice: composition.washbasins[0].msrp,
+            washbasinPrice,
             wallUnit,
             wallUnitSku: "",
             wallUnitPrice: 0,
