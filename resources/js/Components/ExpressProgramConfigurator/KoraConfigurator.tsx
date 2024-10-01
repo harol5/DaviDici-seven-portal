@@ -526,10 +526,6 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
         onAddToCart(shoppingCartObj);
     };
 
-    console.log("=== KORA ===");
-    console.log("composition:", composition);
-    console.log("current config:", currentConfiguration);
-
     return (
         <div className={classes.compositionConfiguratorWrapper}>
             <section className={classes.leftSideConfiguratorWrapper}>

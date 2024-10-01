@@ -1411,18 +1411,22 @@ function NewYorkConfigurator({
                     </ItemPropertiesAccordion>
                 )}
 
-                <MirrorConfigurator
-                    mirrorCabinetOptions={mirrorCabinetOptions}
-                    ledMirrorOptions={ledMirrorOptions}
-                    openCompMirrorOptions={openCompMirrorOptions}
-                    crrMirrorCategory={crrMirrorCategory}
-                    currentMirrorsConfiguration={currentMirrorsConfiguration}
-                    handleSwitchCrrMirrorCategory={
-                        handleSwitchCrrMirrorCategory
-                    }
-                    clearMirrorCategory={clearMirrorCategory}
-                    handleOptionSelected={handleOptionSelected}
-                ></MirrorConfigurator>
+                {composition.otherProductsAvailable.mirrors.length > 0 && (
+                    <MirrorConfigurator
+                        mirrorCabinetOptions={mirrorCabinetOptions}
+                        ledMirrorOptions={ledMirrorOptions}
+                        openCompMirrorOptions={openCompMirrorOptions}
+                        crrMirrorCategory={crrMirrorCategory}
+                        currentMirrorsConfiguration={
+                            currentMirrorsConfiguration
+                        }
+                        handleSwitchCrrMirrorCategory={
+                            handleSwitchCrrMirrorCategory
+                        }
+                        clearMirrorCategory={clearMirrorCategory}
+                        handleOptionSelected={handleOptionSelected}
+                    ></MirrorConfigurator>
+                )}
 
                 {accessoryOptions && (
                     <ItemPropertiesAccordion headerTitle="ACCESSORIES">

@@ -505,17 +505,6 @@ function useMirrorOptions(mirrors: ProductInventory[]) {
         );
     };
 
-    console.log("==== useMirrorOptions hook ran!! ====");
-    console.log(ledMirrorOptions);
-    console.log(currentMirrorsConfiguration);
-    console.log(
-        "is mirror cabinet active?",
-        mirrorCabinetStatus.isMirrorCabinetSelected
-    );
-    console.log(
-        "is mirror cabinet valid?",
-        mirrorCabinetStatus.isMirrorCabinetValid
-    );
     return {
         mirrorCabinetOptions,
         ledMirrorOptions,

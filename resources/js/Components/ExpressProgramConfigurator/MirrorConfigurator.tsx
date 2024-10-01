@@ -33,6 +33,31 @@ function MirrorConfigurator({
     clearMirrorCategory,
     handleOptionSelected,
 }: MirrorConfiguratorProps) {
+    const isDisplayable = (mirrorCategory: MirrorCategory): boolean => {
+        if (mirrorCategory === "mirrorCabinet") {
+            return (
+                mirrorCabinetOptions.baseSku !== "" &&
+                crrMirrorCategory === mirrorCategory
+            );
+        }
+
+        if (mirrorCategory === "ledMirror") {
+            return (
+                ledMirrorOptions.length > 0 &&
+                crrMirrorCategory === mirrorCategory
+            );
+        }
+
+        if (mirrorCategory === "openCompMirror") {
+            return (
+                openCompMirrorOptions.length > 0 &&
+                crrMirrorCategory === mirrorCategory
+            );
+        }
+
+        return false;
+    };
+
     return (
         <ItemPropertiesAccordion headerTitle="MIRRORS">
             <section className={classes.mirrorCategories}>
@@ -49,32 +74,36 @@ function MirrorConfigurator({
                     >
                         MIRROR CABINETS
                     </button>
-                    <button
-                        className={
-                            crrMirrorCategory === "ledMirror"
-                                ? classes.mirrorCategorySelected
-                                : ""
-                        }
-                        onClick={() =>
-                            handleSwitchCrrMirrorCategory("ledMirror")
-                        }
-                    >
-                        LED MIRRORS
-                    </button>
-                    <button
-                        className={
-                            crrMirrorCategory === "openCompMirror"
-                                ? classes.mirrorCategorySelected
-                                : ""
-                        }
-                        onClick={() =>
-                            handleSwitchCrrMirrorCategory("openCompMirror")
-                        }
-                    >
-                        OPEN COMPARTMENT MIRRORS
-                    </button>
+                    {ledMirrorOptions.length > 0 && (
+                        <button
+                            className={
+                                crrMirrorCategory === "ledMirror"
+                                    ? classes.mirrorCategorySelected
+                                    : ""
+                            }
+                            onClick={() =>
+                                handleSwitchCrrMirrorCategory("ledMirror")
+                            }
+                        >
+                            LED MIRRORS
+                        </button>
+                    )}
+                    {openCompMirrorOptions.length > 0 && (
+                        <button
+                            className={
+                                crrMirrorCategory === "openCompMirror"
+                                    ? classes.mirrorCategorySelected
+                                    : ""
+                            }
+                            onClick={() =>
+                                handleSwitchCrrMirrorCategory("openCompMirror")
+                            }
+                        >
+                            OPEN COMPARTMENT MIRRORS
+                        </button>
+                    )}
                 </div>
-                {crrMirrorCategory === "mirrorCabinet" && (
+                {isDisplayable("mirrorCabinet") && (
                     <div>
                         <button
                             className={classes.clearButton}
@@ -104,7 +133,7 @@ function MirrorConfigurator({
                         />
                     </div>
                 )}
-                {crrMirrorCategory === "ledMirror" && (
+                {isDisplayable("ledMirror") && (
                     <div>
                         <button
                             className={classes.clearButton}
@@ -124,7 +153,7 @@ function MirrorConfigurator({
                         />
                     </div>
                 )}
-                {crrMirrorCategory === "openCompMirror" && (
+                {isDisplayable("openCompMirror") && (
                     <div>
                         <button
                             className={classes.clearButton}

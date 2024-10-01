@@ -193,24 +193,21 @@ function useExpressProgramProducts(
 
             const LacqTops = sharedItemsMap.get("TOP") ?? [];
             const modelTops = itemsMap.get("TOP") ?? [];
+            otherProductsObj.tops = [...modelTops, ...LacqTops];
 
             otherProductsObj.accessories = itemsMap.get("ACCESSORY") ?? [];
 
             otherProductsObj.drawersVanities =
                 itemsMap.get("DRAWER/VANITY") ?? [];
 
-            otherProductsObj.mirrors = sharedItemsMap.get("MIRROR") ?? [];
-
             otherProductsObj.tallUnitsLinenClosets =
                 itemsMap.get("TALL UNIT/LINEN CLOSET") ?? [];
 
-            otherProductsObj.tops = [...modelTops, ...LacqTops];
-
-            otherProductsObj.vesselSinks =
-                sharedItemsMap.get("VESSEL SINK") ?? [];
-
             otherProductsObj.wallUnits = itemsMap.get("WALL UNIT") ?? [];
         }
+
+        otherProductsObj.mirrors = sharedItemsMap.get("MIRROR") ?? [];
+        otherProductsObj.vesselSinks = sharedItemsMap.get("VESSEL SINK") ?? [];
 
         return otherProductsObj;
     };
@@ -540,6 +537,13 @@ function useExpressProgramProducts(
             otherProductsMap,
             sharedItemsMap,
         } = mapsObject;
+
+        console.log("==== useExpressProgramProducts ====");
+        console.log("is on sale?", isOnSale);
+        console.log(vanitiesAndSideUnitsMap);
+        console.log(validCompositionSizesMap);
+        console.log(otherProductsMap);
+        console.log(sharedItemsMap);
 
         const initialCompositions: Composition[] = [];
         const initialSizesForFilter: string[] = [];

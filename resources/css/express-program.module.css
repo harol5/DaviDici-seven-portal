@@ -5,15 +5,29 @@
     margin-top: 2.4em;
 
     .listingTypeButtons {
-        padding: 1em;
-        border-radius: 2px;
+        padding: 1em 2em;
+        border-radius: 4px;
         border: #d1aa68 1px solid;
         color: #d1aa68;
+    }
+
+    .monthlyPromotionButton {
+        animation: smallToLarge 1.2s ease alternate infinite;
     }
 
     .listingSelected {
         background-color: #d1aa68;
         color: white;
+    }
+}
+
+@keyframes smallToLarge {
+    0% {
+        transform: scale(0.9);
+    }
+
+    100% {
+        transform: scale(1.1);
     }
 }
 

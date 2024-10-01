@@ -24,13 +24,40 @@ function ProductsAvailable({ auth, rawProducts }: ProductsAvailableProps) {
 
     console.log(onSaleCompositionsListingData);
 
-    const [crrListingType, setListingType] = useState<ListingType>("regular");
+    const [crrListingType, setListingType] = useState<ListingType>(() => {
+        const { initialCompositions } = onSaleCompositionsListingData;
+
+        let listingType: ListingType = "regular";
+
+        const statefulListingType = localStorage.getItem("listingType");
+
+        if (initialCompositions.length > 0 && statefulListingType)
+            listingType = statefulListingType as ListingType;
+
+        return listingType;
+    });
+
     const handleListingType = (listingType: ListingType) => {
         setListingType(listingType);
+        localStorage.setItem(
+            "statefulFilters",
+            JSON.stringify({
+                crrFilteredSize: "",
+                crrFilteredSinkPosition: "",
+                crrFilteredFinish: "",
+                crrFilteredModel: "",
+            })
+        );
+
+        localStorage.setItem("listingType", listingType);
     };
 
     const getClasses = (listingType: ListingType) => {
-        let baseClass = classes.listingTypeButtons;
+        let baseClass =
+            listingType === "onSale"
+                ? `${classes.listingTypeButtons} ${classes.monthlyPromotionButton}`
+                : classes.listingTypeButtons;
+
         if (crrListingType === listingType)
             baseClass += ` ${classes.listingSelected}`;
         return baseClass;
@@ -46,13 +73,13 @@ function ProductsAvailable({ auth, rawProducts }: ProductsAvailableProps) {
                             className={getClasses("regular")}
                             onClick={() => handleListingType("regular")}
                         >
-                            REGULAR PRICE
+                            FULL INVENTORY
                         </button>
                         <button
                             className={getClasses("onSale")}
                             onClick={() => handleListingType("onSale")}
                         >
-                            ON SALE PRODUCTS!!
+                            MONTHLY SPECIAL!!
                         </button>
                     </article>
                 )}
