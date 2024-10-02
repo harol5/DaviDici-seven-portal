@@ -29,6 +29,7 @@ import useMirrorOptions from "../../Hooks/useMirrorOptions";
 import { MirrorCategory } from "../../Models/MirrorConfigTypes";
 import MirrorConfigurator from "./MirrorConfigurator";
 import { router } from "@inertiajs/react";
+import useAccordionState from "../../Hooks/useAccordionState";
 
 interface NewBaliConfiguratorProps {
     composition: Composition;
@@ -272,7 +273,7 @@ function NewBaliConfigurator({
                 const title = codes[2] === "WU" ? "REGULAR" : "OPEN SHELVES";
                 typeOptionsMap.set(codes[2], {
                     code: codes[2],
-                    imgUrl: `https://${location.hostname}/images/express-program/NEW BALI/options/${codes[2]}.webp`,
+                    imgUrl: `https://${location.hostname}/images/express-program/NEW BALI/options/wall-unit-${title}.webp`,
                     title,
                     validSkus: [],
                     isDisabled: false,
@@ -283,7 +284,7 @@ function NewBaliConfigurator({
             if (!finishOptionsMap.has(codes[3])) {
                 finishOptionsMap.set(codes[3], {
                     code: codes[3],
-                    imgUrl: `https://${location.hostname}/images/express-program/NEW BALI/options/${codes[3]}.webp`,
+                    imgUrl: `https://${location.hostname}/images/express-program/finishes/${wallUnit.finish}.jpg`,
                     title: wallUnit.finish,
                     validSkus: [],
                     isDisabled: false,
@@ -328,6 +329,9 @@ function NewBaliConfigurator({
     const handleSwitchCrrMirrorCategory = (mirrorCategory: MirrorCategory) => {
         updateCurrentMirrorCategory(mirrorCategory);
     };
+
+    // |===== ACCORDION =====|
+    const { accordionState, handleAccordionState } = useAccordionState();
 
     // |===== INITIAL CONFIG =====|
     const initialConfiguration: CurrentConfiguration = useMemo(() => {
@@ -1192,7 +1196,12 @@ function NewBaliConfigurator({
                     isInvalidLabel={isInvalidLabel}
                 />
 
-                <ItemPropertiesAccordion headerTitle="VANITY">
+                <ItemPropertiesAccordion
+                    headerTitle="VANITY"
+                    item="vanity"
+                    isOpen={accordionState.vanity}
+                    onClick={handleAccordionState}
+                >
                     <Options
                         item="vanity"
                         property="finish"
@@ -1212,7 +1221,12 @@ function NewBaliConfigurator({
                 </ItemPropertiesAccordion>
 
                 {sideUnitOptions && (
-                    <ItemPropertiesAccordion headerTitle="SIDE UNIT">
+                    <ItemPropertiesAccordion
+                        headerTitle="SIDE UNIT"
+                        item="sideUnit"
+                        isOpen={accordionState.sideUnit}
+                        onClick={handleAccordionState}
+                    >
                         <Options
                             item="sideUnit"
                             property="finish"
@@ -1226,7 +1240,12 @@ function NewBaliConfigurator({
                     </ItemPropertiesAccordion>
                 )}
 
-                <ItemPropertiesAccordion headerTitle="WASHBASIN">
+                <ItemPropertiesAccordion
+                    headerTitle="WASHBASIN"
+                    item="washbasin"
+                    isOpen={accordionState.washbasin}
+                    onClick={handleAccordionState}
+                >
                     <Options
                         item="washbasin"
                         property="type"
@@ -1238,7 +1257,12 @@ function NewBaliConfigurator({
                 </ItemPropertiesAccordion>
 
                 {drawerBaseOptions && (
-                    <ItemPropertiesAccordion headerTitle="DRAWER BASE">
+                    <ItemPropertiesAccordion
+                        headerTitle="DRAWER BASE"
+                        item="drawerBase"
+                        isOpen={accordionState.drawerBase}
+                        onClick={handleAccordionState}
+                    >
                         <button
                             className={classes.clearButton}
                             onClick={() => handleClearItem("drawerBase")}
@@ -1269,7 +1293,12 @@ function NewBaliConfigurator({
                 )}
 
                 {wallUnitOptions && (
-                    <ItemPropertiesAccordion headerTitle="WALL UNIT">
+                    <ItemPropertiesAccordion
+                        headerTitle="WALL UNIT"
+                        item="wallUnit"
+                        isOpen={accordionState.wallUnit}
+                        onClick={handleAccordionState}
+                    >
                         <button
                             className={classes.clearButton}
                             onClick={() => handleClearItem("wallUnit")}
@@ -1318,11 +1347,13 @@ function NewBaliConfigurator({
                         currentMirrorsConfiguration={
                             currentMirrorsConfiguration
                         }
+                        accordionState={accordionState}
                         handleSwitchCrrMirrorCategory={
                             handleSwitchCrrMirrorCategory
                         }
                         clearMirrorCategory={clearMirrorCategory}
                         handleOptionSelected={handleOptionSelected}
+                        handleAccordionState={handleAccordionState}
                     ></MirrorConfigurator>
                 )}
 

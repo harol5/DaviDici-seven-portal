@@ -27,6 +27,15 @@ type TallUnit = {
     finish: string;
 };
 
+type Item =
+    | "vanity"
+    | "sideUnit"
+    | "washbasin"
+    | "wallUnit"
+    | "tallUnit"
+    | "mirror"
+    | "accessory";
+
 type VanityOptions = {
     baseSku: string;
     handleOptions: Option[];
@@ -75,6 +84,7 @@ type CurrentConfiguration = {
 };
 
 export type {
+    Item,
     Vanity,
     SideUnit,
     WallUnit,

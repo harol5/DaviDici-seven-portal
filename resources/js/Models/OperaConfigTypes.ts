@@ -25,6 +25,15 @@ type DrawerBase = {
     finish: string;
 };
 
+type Item =
+    | "vanity"
+    | "sideUnit"
+    | "washbasin"
+    | "wallUnit"
+    | "tallUnit"
+    | "drawerBase"
+    | "mirror";
+
 type CurrentConfiguration = {
     label: string;
     vanity: Vanity;
@@ -74,6 +83,7 @@ type DrawerBaseOptions = {
 };
 
 export type {
+    Item,
     Vanity,
     VanityOptions,
     SideUnit,

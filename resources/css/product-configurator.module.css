@@ -78,6 +78,10 @@
     box-shadow: 0px 2px 2px 1px #0000001f;
 }
 
+.headerAndOptionsWrapper:first-child {
+    margin-top: 0;
+}
+
 .configurationName {
     display: flex;
     flex-wrap: wrap;

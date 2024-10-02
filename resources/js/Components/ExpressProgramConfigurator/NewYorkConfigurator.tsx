@@ -29,6 +29,7 @@ import { MirrorCategory } from "../../Models/MirrorConfigTypes";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import { Model } from "../../Models/ModelConfigTypes";
 import MirrorConfigurator from "./MirrorConfigurator";
+import useAccordionState from "../../Hooks/useAccordionState";
 
 /**
  * TODO;
@@ -313,7 +314,7 @@ function NewYorkConfigurator({
         accessories.forEach((accessory) => {
             options.push({
                 code: accessory.uscode,
-                imgUrl: `https://${location.hostname}/images/express-program/washbasins/${accessory.uscode}.webp`,
+                imgUrl: `https://${location.hostname}/images/express-program/NEW YORK/options/${accessory.uscode}.webp`,
                 title: accessory.descw,
                 validSkus: [accessory.uscode],
                 isDisabled: false,
@@ -341,6 +342,9 @@ function NewYorkConfigurator({
     const handleSwitchCrrMirrorCategory = (mirrorCategory: MirrorCategory) => {
         updateCurrentMirrorCategory(mirrorCategory);
     };
+
+    // |===== ACCORDION =====|
+    const { accordionState, handleAccordionState } = useAccordionState();
 
     // |===== INITIAL CONFIG =====|
     const initialConfiguration: CurrentConfiguration = useMemo(() => {
@@ -1293,7 +1297,12 @@ function NewYorkConfigurator({
                     isInvalidLabel={isInvalidLabel}
                 />
 
-                <ItemPropertiesAccordion headerTitle="VANITY">
+                <ItemPropertiesAccordion
+                    headerTitle="VANITY"
+                    item="vanity"
+                    isOpen={accordionState.vanity}
+                    onClick={handleAccordionState}
+                >
                     <Options
                         item="vanity"
                         property="finish"
@@ -1313,7 +1322,12 @@ function NewYorkConfigurator({
                 </ItemPropertiesAccordion>
 
                 {sideUnitOptions && (
-                    <ItemPropertiesAccordion headerTitle="SIDE UNIT">
+                    <ItemPropertiesAccordion
+                        headerTitle="SIDE UNIT"
+                        item="sideUnit"
+                        isOpen={accordionState.sideUnit}
+                        onClick={handleAccordionState}
+                    >
                         <Options
                             item="sideUnit"
                             property="handle"
@@ -1338,7 +1352,12 @@ function NewYorkConfigurator({
                     </ItemPropertiesAccordion>
                 )}
 
-                <ItemPropertiesAccordion headerTitle="WASHBASIN">
+                <ItemPropertiesAccordion
+                    headerTitle="WASHBASIN"
+                    item="washbasin"
+                    isOpen={accordionState.washbasin}
+                    onClick={handleAccordionState}
+                >
                     <Options
                         item="washbasin"
                         property="type"
@@ -1350,7 +1369,12 @@ function NewYorkConfigurator({
                 </ItemPropertiesAccordion>
 
                 {wallUnitOptions && (
-                    <ItemPropertiesAccordion headerTitle="WALL UNIT">
+                    <ItemPropertiesAccordion
+                        headerTitle="WALL UNIT"
+                        item="wallUnit"
+                        isOpen={accordionState.wallUnit}
+                        onClick={handleAccordionState}
+                    >
                         <button
                             className={classes.clearButton}
                             onClick={() => handleClearItem("wallUnit")}
@@ -1381,7 +1405,12 @@ function NewYorkConfigurator({
                 )}
 
                 {tallUnitOptions && (
-                    <ItemPropertiesAccordion headerTitle="TALL UNIT">
+                    <ItemPropertiesAccordion
+                        headerTitle="TALL UNIT"
+                        item="tallUnit"
+                        isOpen={accordionState.tallUnit}
+                        onClick={handleAccordionState}
+                    >
                         <button
                             className={classes.clearButton}
                             onClick={() => handleClearItem("tallUnit")}
@@ -1420,16 +1449,23 @@ function NewYorkConfigurator({
                         currentMirrorsConfiguration={
                             currentMirrorsConfiguration
                         }
+                        accordionState={accordionState}
                         handleSwitchCrrMirrorCategory={
                             handleSwitchCrrMirrorCategory
                         }
                         clearMirrorCategory={clearMirrorCategory}
                         handleOptionSelected={handleOptionSelected}
+                        handleAccordionState={handleAccordionState}
                     ></MirrorConfigurator>
                 )}
 
                 {accessoryOptions && (
-                    <ItemPropertiesAccordion headerTitle="ACCESSORIES">
+                    <ItemPropertiesAccordion
+                        headerTitle="ACCESSORIES"
+                        item="accessory"
+                        isOpen={accordionState.accessory}
+                        onClick={handleAccordionState}
+                    >
                         <button
                             className={classes.clearButton}
                             onClick={() => handleClearItem("accessory")}

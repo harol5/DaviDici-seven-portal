@@ -7,7 +7,7 @@ import * as Opera from "./OperaConfigTypes";
 import * as Kora from "./KoraConfigTypes";
 import * as KoraXl from "./KoraXlConfigTypes";
 
-type Item =
+type ItemObj =
     | Margi.Vanity
     | Margi.OpenUnit
     | Margi.WallUnit
@@ -28,6 +28,8 @@ type Item =
     | Kora.Vanity
     | KoraXl.Vanity
     | {};
+
+type Item = Opera.Item | NewYork.Item;
 
 type Model =
     | typeof Margi.Name
@@ -66,7 +68,7 @@ type ModelCurrConfig = {
     isDoubleSink: boolean;
 };
 
-export type { Item, Model, ModelCurrConfig };
+export type { ItemObj, Model, ModelCurrConfig, Item };
 
 export const SkuLengthModels: Record<Model, SkuLengthObj> = {
     MARGI: Margi.SkuLengths,

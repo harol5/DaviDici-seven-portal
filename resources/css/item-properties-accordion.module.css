@@ -7,6 +7,7 @@
         align-items: center;
         padding: 1em;
         border-top: 1px solid #d1aa68;
+        cursor: pointer;
 
         .headerTitle {
             font-size: 1.5rem;
@@ -15,9 +16,21 @@
 
         .triangleDownIcon {
             width: 4%;
+            transition: all 0.3s ease-out;
+        }
+        /*triangleDownIcon*/
+        .rotateTriangle {
+            transform: rotate(180deg);
         }
     }
 
     .propertiesWrapper {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease-out;
+    }
+    /*propertiesWrapper state*/
+    .activeAccordion {
+        max-height: 100vh;
     }
 }

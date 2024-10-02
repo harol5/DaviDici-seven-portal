@@ -73,7 +73,7 @@ function useMirrorOptions(mirrors: ProductInventory[]) {
             if (!sizeOptionsMap.has(`${codes[1]}`))
                 sizeOptionsMap.set(`${codes[1]}`, {
                     code: codes[1],
-                    imgUrl: `https://${location.hostname}/images/express-program/not-image.jpg`,
+                    imgUrl: `https://${location.hostname}/images/express-program/mirrors/mirror-cabinets/${codes[1]}.webp`,
                     title: `${codes[1]}"`,
                     validSkus: [],
                     isDisabled: false,

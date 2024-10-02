@@ -1,4 +1,4 @@
-import { Item, Model, SkuLengthModels } from "../Models/ModelConfigTypes";
+import { ItemObj, Model, SkuLengthModels } from "../Models/ModelConfigTypes";
 import { ProductInventory } from "../Models/Product";
 
 export function isAlphanumericWithSpaces(str: string) {
@@ -8,7 +8,7 @@ export function isAlphanumericWithSpaces(str: string) {
 export const getSkuAndPrice = (
     model: Model,
     item: string,
-    itemObj: Item,
+    itemObj: ItemObj,
     products: ProductInventory[],
     wholeSku?: string
 ) => {

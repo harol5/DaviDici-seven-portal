@@ -6,6 +6,7 @@ import {
     MirrorCategory,
     MirrorConfig,
 } from "../../Models/MirrorConfigTypes";
+import type { Item } from "../../Models/ModelConfigTypes";
 import type { Option } from "../../Models/ExpressProgramModels";
 
 interface MirrorConfiguratorProps {
@@ -14,6 +15,7 @@ interface MirrorConfiguratorProps {
     openCompMirrorOptions: Option[];
     crrMirrorCategory: MirrorCategory;
     currentMirrorsConfiguration: MirrorConfig;
+    accordionState: Record<Item, boolean>;
     handleSwitchCrrMirrorCategory: (mirrorCategory: MirrorCategory) => void;
     clearMirrorCategory: (mirrorCategory: MirrorCategory) => void;
     handleOptionSelected: (
@@ -21,6 +23,7 @@ interface MirrorConfiguratorProps {
         property: string,
         option: string
     ) => void;
+    handleAccordionState: (item: Item) => void;
 }
 
 function MirrorConfigurator({
@@ -29,9 +32,11 @@ function MirrorConfigurator({
     openCompMirrorOptions,
     crrMirrorCategory,
     currentMirrorsConfiguration,
+    accordionState,
     handleSwitchCrrMirrorCategory,
     clearMirrorCategory,
     handleOptionSelected,
+    handleAccordionState,
 }: MirrorConfiguratorProps) {
     const isDisplayable = (mirrorCategory: MirrorCategory): boolean => {
         if (mirrorCategory === "mirrorCabinet") {
@@ -59,7 +64,12 @@ function MirrorConfigurator({
     };
 
     return (
-        <ItemPropertiesAccordion headerTitle="MIRRORS">
+        <ItemPropertiesAccordion
+            headerTitle="MIRRORS"
+            item="mirror"
+            isOpen={accordionState.mirror}
+            onClick={handleAccordionState}
+        >
             <section className={classes.mirrorCategories}>
                 <div className={classes.mirrorCategoriesSwitchers}>
                     <button

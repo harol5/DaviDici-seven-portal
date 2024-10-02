@@ -29,6 +29,7 @@ import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import type { MirrorCategory } from "../../Models/MirrorConfigTypes";
 import { Model } from "../../Models/ModelConfigTypes";
 import MirrorConfigurator from "./MirrorConfigurator";
+import useAccordionState from "../../Hooks/useAccordionState";
 
 interface MargiConfiguratorProps {
     composition: Composition;
@@ -296,7 +297,7 @@ function MargiConfigurator({
             if (!sizeOptionsMap.has(`${codes[2]}`)) {
                 sizeOptionsMap.set(`${codes[2]}`, {
                     code: codes[2],
-                    imgUrl: `https://portal.davidici.com/images/express-program/not-image.jpg`,
+                    imgUrl: `https://${location.hostname}/images/express-program/MARGI/options/wall-unit-${codes[2]}.webp`,
                     title: `WALL UNIT ${codes[2]}"`,
                     validSkus: [],
                     isDisabled: false,
@@ -320,7 +321,7 @@ function MargiConfigurator({
             if (!doorStyleOptionsMap.has(`${codes[3]}`)) {
                 doorStyleOptionsMap.set(`${codes[3]}`, {
                     code: codes[3],
-                    imgUrl: `https://portal.davidici.com/images/express-program/not-image.jpg`,
+                    imgUrl: `https://${location.hostname}/images/express-program/MARGI/options/wall-unit-${doorStyleTitle}.webp`,
                     title: doorStyleTitle,
                     validSkus: [],
                     isDisabled: false,
@@ -387,6 +388,9 @@ function MargiConfigurator({
     const handleSwitchCrrMirrorCategory = (mirrorCategory: MirrorCategory) => {
         updateCurrentMirrorCategory(mirrorCategory);
     };
+
+    // |===== ACCORDION =====|
+    const { accordionState, handleAccordionState } = useAccordionState();
 
     // |===== INITIAL CONFIG =====|
     const initialConfiguration: CurrentConfiguration = useMemo(() => {
@@ -1263,7 +1267,12 @@ function MargiConfigurator({
                     isInvalidLabel={isInvalidLabel}
                 />
 
-                <ItemPropertiesAccordion headerTitle="VANITY">
+                <ItemPropertiesAccordion
+                    headerTitle="VANITY"
+                    item="vanity"
+                    isOpen={accordionState.vanity}
+                    onClick={handleAccordionState}
+                >
                     <Options
                         item="vanity"
                         property="finish"
@@ -1291,7 +1300,12 @@ function MargiConfigurator({
                 </ItemPropertiesAccordion>
 
                 {composition.sideUnits.length !== 0 && (
-                    <ItemPropertiesAccordion headerTitle="SIDE UNIT">
+                    <ItemPropertiesAccordion
+                        headerTitle="SIDE UNIT"
+                        item="sideUnit"
+                        isOpen={accordionState.sideUnit}
+                        onClick={handleAccordionState}
+                    >
                         <SizeUnit
                             composition={composition}
                             currentConfiguration={currentConfiguration}
@@ -1301,7 +1315,12 @@ function MargiConfigurator({
                     </ItemPropertiesAccordion>
                 )}
 
-                <ItemPropertiesAccordion headerTitle="WASHBASIN">
+                <ItemPropertiesAccordion
+                    headerTitle="WASHBASIN"
+                    item="washbasin"
+                    isOpen={accordionState.washbasin}
+                    onClick={handleAccordionState}
+                >
                     <Options
                         item="washbasin"
                         property="type"
@@ -1313,7 +1332,12 @@ function MargiConfigurator({
                 </ItemPropertiesAccordion>
 
                 {wallUnitOptions && (
-                    <ItemPropertiesAccordion headerTitle="WALL UNIT">
+                    <ItemPropertiesAccordion
+                        headerTitle="WALL UNIT"
+                        item="wallUnit"
+                        isOpen={accordionState.wallUnit}
+                        onClick={handleAccordionState}
+                    >
                         <button
                             className={classes.clearButton}
                             onClick={() => handleClearItem("wallUnit")}
@@ -1362,11 +1386,13 @@ function MargiConfigurator({
                         currentMirrorsConfiguration={
                             currentMirrorsConfiguration
                         }
+                        accordionState={accordionState}
                         handleSwitchCrrMirrorCategory={
                             handleSwitchCrrMirrorCategory
                         }
                         clearMirrorCategory={clearMirrorCategory}
                         handleOptionSelected={handleOptionSelected}
+                        handleAccordionState={handleAccordionState}
                     ></MirrorConfigurator>
                 )}
 

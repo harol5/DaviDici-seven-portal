@@ -23,6 +23,7 @@ import { MirrorCategory } from "../../Models/MirrorConfigTypes";
 import { Model } from "../../Models/ModelConfigTypes";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import MirrorConfigurator from "./MirrorConfigurator";
+import useAccordionState from "../../Hooks/useAccordionState";
 
 interface KoraConfiguratorProps {
     composition: Composition;
@@ -240,6 +241,9 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
         reducer,
         initialConfiguration
     );
+
+    // |===== ACCORDION =====|
+    const { accordionState, handleAccordionState } = useAccordionState();
 
     // |===== GRAND TOTAL =====|
     const grandTotal = useMemo(() => {
@@ -567,7 +571,12 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
                     isMissingLabel={isMissingLabel}
                     isInvalidLabel={isInvalidLabel}
                 />
-                <ItemPropertiesAccordion headerTitle="VANITY">
+                <ItemPropertiesAccordion
+                    headerTitle="VANITY"
+                    item="vanity"
+                    isOpen={accordionState.vanity}
+                    onClick={handleAccordionState}
+                >
                     <Options
                         item="vanity"
                         property="finish"
@@ -578,7 +587,12 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
                     />
                 </ItemPropertiesAccordion>
 
-                <ItemPropertiesAccordion headerTitle="WASHBASIN">
+                <ItemPropertiesAccordion
+                    headerTitle="WASHBASIN"
+                    item="washbasin"
+                    isOpen={accordionState.washbasin}
+                    onClick={handleAccordionState}
+                >
                     <Options
                         item="washbasin"
                         property="type"
@@ -598,16 +612,23 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
                         currentMirrorsConfiguration={
                             currentMirrorsConfiguration
                         }
+                        accordionState={accordionState}
                         handleSwitchCrrMirrorCategory={
                             handleSwitchCrrMirrorCategory
                         }
                         clearMirrorCategory={clearMirrorCategory}
                         handleOptionSelected={handleOptionSelected}
+                        handleAccordionState={handleAccordionState}
                     ></MirrorConfigurator>
                 )}
 
                 {accessoryOptions && (
-                    <ItemPropertiesAccordion headerTitle="ACCESSORIES">
+                    <ItemPropertiesAccordion
+                        headerTitle="ACCESSORIES"
+                        item="accessory"
+                        isOpen={accordionState.accessory}
+                        onClick={handleAccordionState}
+                    >
                         <button
                             className={classes.clearButton}
                             onClick={() => handleClearItem("accessory")}

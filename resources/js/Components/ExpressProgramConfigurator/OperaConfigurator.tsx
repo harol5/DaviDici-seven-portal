@@ -29,6 +29,7 @@ import { Model } from "../../Models/ModelConfigTypes";
 import MirrorConfigurator from "./MirrorConfigurator";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import { router } from "@inertiajs/react";
+import useAccordionState from "../../Hooks/useAccordionState";
 
 interface OperaConfiguratorProps {
     composition: Composition;
@@ -188,7 +189,7 @@ function OperaConfigurator({
                 const title = codes[1] === "WU" ? "REGULAR" : "OPEN SHELVES";
                 typeOptionsMap.set(codes[1], {
                     code: codes[1],
-                    imgUrl: `https://${location.hostname}/images/express-program/NEW BALI/options/${codes[1]}.webp`,
+                    imgUrl: `https://${location.hostname}/images/express-program/OPERA/options/wall-unit-${title}.webp`,
                     title,
                     validSkus: [],
                     isDisabled: false,
@@ -199,7 +200,7 @@ function OperaConfigurator({
             if (!sizeOptionsMap.has(codes[2])) {
                 sizeOptionsMap.set(codes[2], {
                     code: codes[2],
-                    imgUrl: `https://${location.hostname}/images/express-program/NEW BALI/options/${codes[2]}.webp`,
+                    imgUrl: `https://${location.hostname}/images/express-program/OPERA/options/wall-unit-${codes[2]}.webp`,
                     title: codes[2],
                     validSkus: [],
                     isDisabled: false,
@@ -210,7 +211,7 @@ function OperaConfigurator({
             if (!finishOptionsMap.has(codes[3])) {
                 finishOptionsMap.set(codes[3], {
                     code: codes[3],
-                    imgUrl: `https://${location.hostname}/images/express-program/NEW BALI/options/${codes[3]}.webp`,
+                    imgUrl: `https://${location.hostname}/images/express-program/finishes/${wallUnit.finish}.jpg`,
                     title: wallUnit.finish,
                     validSkus: [],
                     isDisabled: false,
@@ -678,6 +679,9 @@ function OperaConfigurator({
     const [isMissingLabel, setIsMissingLabel] = useState(false);
     const [isInvalidLabel, setIsInvalidLabel] = useState(false);
 
+    // |===== ACCORDION =====|
+    const { accordionState, handleAccordionState } = useAccordionState();
+
     // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (
         item: string,
@@ -722,7 +726,6 @@ function OperaConfigurator({
                 payload: skuAndPrice.price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
-
             setVanityOptions(copyOptions);
         }
 
@@ -1285,7 +1288,12 @@ function OperaConfigurator({
                     isInvalidLabel={isInvalidLabel}
                 />
 
-                <ItemPropertiesAccordion headerTitle="VANITY">
+                <ItemPropertiesAccordion
+                    headerTitle="VANITY"
+                    item="vanity"
+                    isOpen={accordionState.vanity}
+                    onClick={handleAccordionState}
+                >
                     <Options
                         item="vanity"
                         property="finish"
@@ -1297,7 +1305,12 @@ function OperaConfigurator({
                 </ItemPropertiesAccordion>
 
                 {sideUnitOptions && (
-                    <ItemPropertiesAccordion headerTitle="SIDE UNIT">
+                    <ItemPropertiesAccordion
+                        headerTitle="SIDE UNIT"
+                        item="sideUnit"
+                        isOpen={accordionState.sideUnit}
+                        onClick={handleAccordionState}
+                    >
                         <Options
                             item="sideUnit"
                             property="type"
@@ -1321,7 +1334,12 @@ function OperaConfigurator({
                     </ItemPropertiesAccordion>
                 )}
 
-                <ItemPropertiesAccordion headerTitle="WASHBASIN">
+                <ItemPropertiesAccordion
+                    headerTitle="WASHBASIN"
+                    item="washbasin"
+                    isOpen={accordionState.washbasin}
+                    onClick={handleAccordionState}
+                >
                     <Options
                         item="washbasin"
                         property="type"
@@ -1333,7 +1351,12 @@ function OperaConfigurator({
                 </ItemPropertiesAccordion>
 
                 {wallUnitOptions && (
-                    <ItemPropertiesAccordion headerTitle="WALL UNIT">
+                    <ItemPropertiesAccordion
+                        headerTitle="WALL UNIT"
+                        item="wallUnit"
+                        isOpen={accordionState.wallUnit}
+                        onClick={handleAccordionState}
+                    >
                         <button
                             className={classes.clearButton}
                             onClick={() => handleClearItem("wallUnit")}
@@ -1374,7 +1397,12 @@ function OperaConfigurator({
                 )}
 
                 {tallUnitOptions && (
-                    <ItemPropertiesAccordion headerTitle="TALL UNIT 12">
+                    <ItemPropertiesAccordion
+                        headerTitle="TALL UNIT 12"
+                        item="tallUnit"
+                        isOpen={accordionState.tallUnit}
+                        onClick={handleAccordionState}
+                    >
                         <button
                             className={classes.clearButton}
                             onClick={() => handleClearItem("tallUnit")}
@@ -1393,7 +1421,12 @@ function OperaConfigurator({
                 )}
 
                 {drawerBaseOptions && (
-                    <ItemPropertiesAccordion headerTitle="DRAWER BASE">
+                    <ItemPropertiesAccordion
+                        headerTitle="DRAWER BASE"
+                        item="drawerBase"
+                        isOpen={accordionState.drawerBase}
+                        onClick={handleAccordionState}
+                    >
                         <button
                             className={classes.clearButton}
                             onClick={() => handleClearItem("drawerBase")}
@@ -1432,11 +1465,13 @@ function OperaConfigurator({
                         currentMirrorsConfiguration={
                             currentMirrorsConfiguration
                         }
+                        accordionState={accordionState}
                         handleSwitchCrrMirrorCategory={
                             handleSwitchCrrMirrorCategory
                         }
                         clearMirrorCategory={clearMirrorCategory}
                         handleOptionSelected={handleOptionSelected}
+                        handleAccordionState={handleAccordionState}
                     ></MirrorConfigurator>
                 )}
 

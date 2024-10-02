@@ -23,6 +23,7 @@ import { MirrorCategory } from "../../Models/MirrorConfigTypes";
 import { Model } from "../../Models/ModelConfigTypes";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import MirrorConfigurator from "./MirrorConfigurator";
+import useAccordionState from "../../Hooks/useAccordionState";
 
 interface KoraXlConfiguratorProps {
     composition: Composition;
@@ -108,7 +109,7 @@ function KoraXlConfigurator({
         tallUnitsLinenClosets.forEach((tallUnit) => {
             all.push({
                 code: tallUnit.uscode,
-                imgUrl: `https://${location.hostname}/images/express-program/OPERA/options/${tallUnit.uscode}.webp`,
+                imgUrl: `https://${location.hostname}/images/express-program/KORA XL/${tallUnit.uscode}.webp`,
                 title: tallUnit.descw,
                 validSkus: [tallUnit.uscode],
                 isDisabled: false,
@@ -142,6 +143,9 @@ function KoraXlConfigurator({
     const handleSwitchCrrMirrorCategory = (mirrorCategory: MirrorCategory) => {
         updateCurrentMirrorCategory(mirrorCategory);
     };
+
+    // |===== ACCORDION =====|
+    const { accordionState, handleAccordionState } = useAccordionState();
 
     // |===== INITIAL CONFIG =====|
     const initialConfiguration: CurrentConfiguration = useMemo(() => {
@@ -603,7 +607,12 @@ function KoraXlConfigurator({
                     isInvalidLabel={isInvalidLabel}
                 />
 
-                <ItemPropertiesAccordion headerTitle="VANITY">
+                <ItemPropertiesAccordion
+                    headerTitle="VANITY"
+                    item="vanity"
+                    isOpen={accordionState.vanity}
+                    onClick={handleAccordionState}
+                >
                     <Options
                         item="vanity"
                         property="finish"
@@ -614,7 +623,12 @@ function KoraXlConfigurator({
                     />
                 </ItemPropertiesAccordion>
 
-                <ItemPropertiesAccordion headerTitle="WASHBASIN">
+                <ItemPropertiesAccordion
+                    headerTitle="WASHBASIN"
+                    item="washbasin"
+                    isOpen={accordionState.washbasin}
+                    onClick={handleAccordionState}
+                >
                     <Options
                         item="washbasin"
                         property="type"
@@ -626,7 +640,12 @@ function KoraXlConfigurator({
                 </ItemPropertiesAccordion>
 
                 {tallUnitOptions && (
-                    <ItemPropertiesAccordion headerTitle="TALL UNIT 12">
+                    <ItemPropertiesAccordion
+                        headerTitle="TALL UNIT 12"
+                        item="tallUnit"
+                        isOpen={accordionState.tallUnit}
+                        onClick={handleAccordionState}
+                    >
                         <button
                             className={classes.clearButton}
                             onClick={() => handleClearItem("tallUnit")}
@@ -653,11 +672,13 @@ function KoraXlConfigurator({
                         currentMirrorsConfiguration={
                             currentMirrorsConfiguration
                         }
+                        accordionState={accordionState}
                         handleSwitchCrrMirrorCategory={
                             handleSwitchCrrMirrorCategory
                         }
                         clearMirrorCategory={clearMirrorCategory}
                         handleOptionSelected={handleOptionSelected}
+                        handleAccordionState={handleAccordionState}
                     ></MirrorConfigurator>
                 )}
 

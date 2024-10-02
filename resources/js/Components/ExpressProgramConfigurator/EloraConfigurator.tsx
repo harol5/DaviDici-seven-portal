@@ -27,6 +27,7 @@ import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
 import { MirrorCategory } from "../../Models/MirrorConfigTypes";
 import MirrorConfigurator from "./MirrorConfigurator";
+import useAccordionState from "../../Hooks/useAccordionState";
 
 /**
  * TODO;
@@ -297,7 +298,7 @@ function EloraConfigurator({
         accessories.forEach((accessory) => {
             options.push({
                 code: accessory.uscode,
-                imgUrl: `https://${location.hostname}/images/express-program/washbasins/${accessory.uscode}.webp`,
+                imgUrl: `https://${location.hostname}/images/express-program/ELORA/${accessory.uscode}.webp`,
                 title: accessory.descw,
                 validSkus: [accessory.uscode],
                 isDisabled: false,
@@ -325,6 +326,9 @@ function EloraConfigurator({
     const handleSwitchCrrMirrorCategory = (mirrorCategory: MirrorCategory) => {
         updateCurrentMirrorCategory(mirrorCategory);
     };
+
+    // |===== ACCORDION =====|
+    const { accordionState, handleAccordionState } = useAccordionState();
 
     // |===== INITIAL CONFIG =====|
     const initialConfiguration: CurrentConfiguration = useMemo(() => {
@@ -1120,7 +1124,12 @@ function EloraConfigurator({
                     isMissingLabel={isMissingLabel}
                     isInvalidLabel={isInvalidLabel}
                 />
-                <ItemPropertiesAccordion headerTitle="VANITY">
+                <ItemPropertiesAccordion
+                    headerTitle="VANITY"
+                    item="vanity"
+                    isOpen={accordionState.vanity}
+                    onClick={handleAccordionState}
+                >
                     <Options
                         item="vanity"
                         property="mattFinish"
@@ -1143,7 +1152,12 @@ function EloraConfigurator({
                     />
                 </ItemPropertiesAccordion>
 
-                <ItemPropertiesAccordion headerTitle="WASHBASIN">
+                <ItemPropertiesAccordion
+                    headerTitle="WASHBASIN"
+                    item="washbasin"
+                    isOpen={accordionState.washbasin}
+                    onClick={handleAccordionState}
+                >
                     <Options
                         item="washbasin"
                         property="type"
@@ -1155,7 +1169,12 @@ function EloraConfigurator({
                 </ItemPropertiesAccordion>
 
                 {wallUnitOptions && (
-                    <ItemPropertiesAccordion headerTitle={`WALL UNIT 12"`}>
+                    <ItemPropertiesAccordion
+                        headerTitle={`WALL UNIT 12"`}
+                        item="wallUnit"
+                        isOpen={accordionState.wallUnit}
+                        onClick={handleAccordionState}
+                    >
                         <button
                             className={classes.clearButton}
                             onClick={() => handleClearItem("wallUnit")}
@@ -1186,7 +1205,12 @@ function EloraConfigurator({
                 )}
 
                 {tallUnitOptions && (
-                    <ItemPropertiesAccordion headerTitle={`TALL UNIT 12"`}>
+                    <ItemPropertiesAccordion
+                        headerTitle={`TALL UNIT 12"`}
+                        item="tallUnit"
+                        isOpen={accordionState.tallUnit}
+                        onClick={handleAccordionState}
+                    >
                         <button
                             className={classes.clearButton}
                             onClick={() => handleClearItem("tallUnit")}
@@ -1225,16 +1249,23 @@ function EloraConfigurator({
                         currentMirrorsConfiguration={
                             currentMirrorsConfiguration
                         }
+                        accordionState={accordionState}
                         handleSwitchCrrMirrorCategory={
                             handleSwitchCrrMirrorCategory
                         }
                         clearMirrorCategory={clearMirrorCategory}
                         handleOptionSelected={handleOptionSelected}
+                        handleAccordionState={handleAccordionState}
                     ></MirrorConfigurator>
                 )}
 
                 {accessoryOptions && (
-                    <ItemPropertiesAccordion headerTitle="ACCESSORIES">
+                    <ItemPropertiesAccordion
+                        headerTitle="ACCESSORIES"
+                        item="accessory"
+                        isOpen={accordionState.accessory}
+                        onClick={handleAccordionState}
+                    >
                         <button
                             className={classes.clearButton}
                             onClick={() => handleClearItem("accessory")}
