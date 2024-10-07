@@ -1,6 +1,6 @@
 import type { Composition } from "../Models/Composition";
 import classes from "../../css/express-program.module.css";
-import type { ProductInventory } from "../Models/Product";
+import type { FinishObj } from "../Models/ExpressProgramModels";
 import { router } from "@inertiajs/react";
 import { useMemo } from "react";
 
@@ -71,10 +71,7 @@ function Finish({
     finishObj,
 }: {
     composition: Composition;
-    finishObj: {
-        finish: string;
-        url: string;
-    };
+    finishObj: FinishObj;
 }) {
     const formatFinishLabel = useMemo(() => {
         if (composition.model === "ELORA" && finishObj.finish.includes("-")) {

@@ -14,7 +14,7 @@ import { Product as ProductModel } from "../../Models/Product";
 import User from "../../Models/User";
 
 interface OrderPaymentProps {
-    auth?: User;
+    auth: User;
     order: OrderModel;
     deliveryInfo: DeliveryInfoModel[];
     depositInfo?: {
