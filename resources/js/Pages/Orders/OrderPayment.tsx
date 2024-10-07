@@ -222,8 +222,8 @@ function OrderPayment({
             <OrderLayout order={order} crrOrderOption="payment">
                 {isTransactionApproved && (
                     <div className="absolute bg-gray-200/50 backdrop-blur-sm mt-6 p-5">
-                        {/* <h1 className="">Payment submitted</h1> */}
-                        <h1 className="">Currently in development...</h1>
+                        <h1 className="">Payment submitted</h1>
+                        {/* <h1 className="">Currently in development...</h1> */}
                     </div>
                 )}
                 {!isTransactionApproved && (
