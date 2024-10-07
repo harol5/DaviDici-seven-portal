@@ -16,6 +16,10 @@ class ExpressProgramController extends Controller
 {
     public function all(Request $request){
         $message = $request->session()->get('message');
+        $input = $request->all();
+        $listingType;
+
+        array_key_exists('listing-type',$input) ? $listingType = $input['listing-type'] : $listingType = 'fullInventory';
         
         // call foxpro program to get items in stock
         $response = FoxproApi::call([
@@ -28,7 +32,8 @@ class ExpressProgramController extends Controller
             return Inertia::render('ExpressProgram/ProductsAvailable',
                 [                       
                     'rawProducts' => $response['rows'],
-                    'message' => $message                   
+                    'message' => $message,
+                    'listingType' => $listingType,                 
                 ]
             );
         }
