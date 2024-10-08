@@ -24,7 +24,23 @@ function useAccordionState() {
         setAccordionState(updatedAccordionState);
     };
 
-    return { accordionState, handleAccordionState };
+    const handleOrderedAccordion = (item: Item, nextItem: Item) => {
+        const orderedAccordion = {
+            vanity: false,
+            sideUnit: false,
+            washbasin: false,
+            wallUnit: false,
+            tallUnit: false,
+            drawerBase: false,
+            mirror: false,
+            accessory: false,
+        };
+        orderedAccordion[item] = false;
+        orderedAccordion[nextItem] = true;
+        setAccordionState(orderedAccordion);
+    };
+
+    return { accordionState, handleAccordionState, handleOrderedAccordion };
 }
 
 export default useAccordionState;

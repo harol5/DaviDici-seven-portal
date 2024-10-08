@@ -66,16 +66,24 @@
 
 .clearButton {
     width: calc(100% - 1.4rem * 2);
-    margin: 0 1.4rem;
+    margin: 1.2rem;
+    margin-bottom: 0.4rem;
     padding: 0.3em 0;
     box-shadow: 0px 0px 2px 2px #0000001f;
 }
+.clearButton:hover {
+    background-color: #d1ab68d0;
+    color: white;
+}
 
-.headerAndOptionsWrapper,
-.configurationName {
-    margin: 1.4rem;
+.headerAndOptionsWrapper {
+    /* margin: 1rem 0; */
     padding: 0.8rem 1rem;
-    box-shadow: 0px 2px 2px 1px #0000001f;
+}
+
+.configurationName {
+    margin: 1rem 0;
+    padding: 0.8rem 1rem;
 }
 
 .headerAndOptionsWrapper:first-child {
@@ -107,7 +115,7 @@
 }
 
 .title {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     color: #d1aa68;
 }
 

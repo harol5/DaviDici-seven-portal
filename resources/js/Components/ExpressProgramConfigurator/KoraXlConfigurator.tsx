@@ -20,7 +20,7 @@ import ConfigurationName from "./ConfigurationName";
 import Options from "./Options";
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
 import { MirrorCategory } from "../../Models/MirrorConfigTypes";
-import { Model } from "../../Models/ModelConfigTypes";
+import { Item, Model } from "../../Models/ModelConfigTypes";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import MirrorConfigurator from "./MirrorConfigurator";
 import useAccordionState from "../../Hooks/useAccordionState";
@@ -145,7 +145,10 @@ function KoraXlConfigurator({
     };
 
     // |===== ACCORDION =====|
-    const { accordionState, handleAccordionState } = useAccordionState();
+    const { accordionState, handleAccordionState, handleOrderedAccordion } =
+        useAccordionState();
+
+    const accordionsOrder = ["vanity", "washbasin", "tallUnit", "mirror"];
 
     // |===== INITIAL CONFIG =====|
     const initialConfiguration: CurrentConfiguration = useMemo(() => {
@@ -331,24 +334,31 @@ function KoraXlConfigurator({
                 property as keyof typeof vanityCurrentConfiguration
             ] = option;
 
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 vanityCurrentConfiguration,
                 composition.vanities
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({ type: `set-${item}-sku`, payload: sku });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setVanityOptions(copyOptions);
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex && price > 0) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         if (item === "washbasin") {
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -358,16 +368,23 @@ function KoraXlConfigurator({
 
             dispatch({
                 type: `set-${item}-${property}`,
-                payload: skuAndPrice.sku,
+                payload: sku,
             });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         if (item === "tallUnit") {
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -377,18 +394,26 @@ function KoraXlConfigurator({
 
             dispatch({
                 type: `set-${item}-${property}`,
-                payload: skuAndPrice.sku,
+                payload: sku,
             });
+
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
 
             setTallUnitStatus((prev) => ({
                 ...prev,
-                isTallUnitValid: skuAndPrice.price > 0,
+                isTallUnitValid: price > 0,
                 isTallUnitSelected: true,
             }));
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex && price > 0) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|

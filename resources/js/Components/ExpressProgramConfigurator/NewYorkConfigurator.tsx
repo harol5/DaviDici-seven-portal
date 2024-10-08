@@ -27,7 +27,7 @@ import {
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
 import { MirrorCategory } from "../../Models/MirrorConfigTypes";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
-import { Model } from "../../Models/ModelConfigTypes";
+import { Item, Model } from "../../Models/ModelConfigTypes";
 import MirrorConfigurator from "./MirrorConfigurator";
 import useAccordionState from "../../Hooks/useAccordionState";
 
@@ -344,7 +344,18 @@ function NewYorkConfigurator({
     };
 
     // |===== ACCORDION =====|
-    const { accordionState, handleAccordionState } = useAccordionState();
+    const { accordionState, handleAccordionState, handleOrderedAccordion } =
+        useAccordionState();
+
+    const accordionsOrder = [
+        "vanity",
+        "sideUnit",
+        "washbasin",
+        "wallUnit",
+        "tallUnit",
+        "accessory",
+        "mirror",
+    ];
 
     // |===== INITIAL CONFIG =====|
     const initialConfiguration: CurrentConfiguration = useMemo(() => {
@@ -735,20 +746,27 @@ function NewYorkConfigurator({
                 property as keyof typeof vanityCurrentConfiguration
             ] = option;
 
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 vanityCurrentConfiguration,
                 composition.vanities
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({ type: `set-${item}-sku`, payload: sku });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setVanityOptions(copyOptions);
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex && price > 0) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         if (item === "sideUnit") {
@@ -793,24 +811,31 @@ function NewYorkConfigurator({
                 property as keyof typeof sideUnitCurrentConfiguration
             ] = option;
 
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 sideUnitCurrentConfiguration,
                 composition.sideUnits
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({ type: `set-${item}-sku`, payload: sku });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setSideUnitOptions(copyOptions);
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex && price > 0) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         if (item === "washbasin") {
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -820,12 +845,20 @@ function NewYorkConfigurator({
 
             dispatch({
                 type: `set-${item}-${property}`,
-                payload: skuAndPrice.sku,
+                payload: sku,
             });
+
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         if (item === "wallUnit") {
@@ -870,24 +903,24 @@ function NewYorkConfigurator({
                 property as keyof typeof wallUnitCurrentConfig
             ] = option;
 
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 wallUnitCurrentConfig,
                 composition.otherProductsAvailable.wallUnits
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({ type: `set-${item}-sku`, payload: sku });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setWallUnitOptions(copyOptions);
 
             setWallUnitStatus((prev) => ({
                 ...prev,
-                isWallUnitValid: skuAndPrice.price > 0,
+                isWallUnitValid: price > 0,
             }));
 
             !wallUnitStatus.isWallUnitSelected &&
@@ -895,6 +928,13 @@ function NewYorkConfigurator({
                     ...prev,
                     isWallUnitSelected: true,
                 }));
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex && price > 0) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         if (item === "tallUnit") {
@@ -940,24 +980,24 @@ function NewYorkConfigurator({
                 property as keyof typeof tallUnitCurrentConfig
             ] = option;
 
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 tallUnitCurrentConfig,
                 composition.otherProductsAvailable.tallUnitsLinenClosets
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({ type: `set-${item}-sku`, payload: sku });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setTallUnitOptions(copyOptions);
 
             setTallUnitStatus((prev) => ({
                 ...prev,
-                isTallUnitValid: skuAndPrice.price > 0,
+                isTallUnitValid: price > 0,
             }));
 
             !tallUnitStatus.isTallUnitSelected &&
@@ -965,10 +1005,17 @@ function NewYorkConfigurator({
                     ...prev,
                     isTallUnitSelected: true,
                 }));
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex && price > 0) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         if (item === "accessory") {
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -978,12 +1025,20 @@ function NewYorkConfigurator({
 
             dispatch({
                 type: `set-${item}-${property}`,
-                payload: skuAndPrice.sku,
+                payload: sku,
             });
+
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex && price > 0) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
@@ -1440,25 +1495,6 @@ function NewYorkConfigurator({
                     </ItemPropertiesAccordion>
                 )}
 
-                {composition.otherProductsAvailable.mirrors.length > 0 && (
-                    <MirrorConfigurator
-                        mirrorCabinetOptions={mirrorCabinetOptions}
-                        ledMirrorOptions={ledMirrorOptions}
-                        openCompMirrorOptions={openCompMirrorOptions}
-                        crrMirrorCategory={crrMirrorCategory}
-                        currentMirrorsConfiguration={
-                            currentMirrorsConfiguration
-                        }
-                        accordionState={accordionState}
-                        handleSwitchCrrMirrorCategory={
-                            handleSwitchCrrMirrorCategory
-                        }
-                        clearMirrorCategory={clearMirrorCategory}
-                        handleOptionSelected={handleOptionSelected}
-                        handleAccordionState={handleAccordionState}
-                    ></MirrorConfigurator>
-                )}
-
                 {accessoryOptions && (
                     <ItemPropertiesAccordion
                         headerTitle="ACCESSORIES"
@@ -1481,6 +1517,25 @@ function NewYorkConfigurator({
                             onOptionSelected={handleOptionSelected}
                         />
                     </ItemPropertiesAccordion>
+                )}
+
+                {composition.otherProductsAvailable.mirrors.length > 0 && (
+                    <MirrorConfigurator
+                        mirrorCabinetOptions={mirrorCabinetOptions}
+                        ledMirrorOptions={ledMirrorOptions}
+                        openCompMirrorOptions={openCompMirrorOptions}
+                        crrMirrorCategory={crrMirrorCategory}
+                        currentMirrorsConfiguration={
+                            currentMirrorsConfiguration
+                        }
+                        accordionState={accordionState}
+                        handleSwitchCrrMirrorCategory={
+                            handleSwitchCrrMirrorCategory
+                        }
+                        clearMirrorCategory={clearMirrorCategory}
+                        handleOptionSelected={handleOptionSelected}
+                        handleAccordionState={handleAccordionState}
+                    ></MirrorConfigurator>
                 )}
 
                 <div className={classes.grandTotalAndOrderNowButtonWrapper}>

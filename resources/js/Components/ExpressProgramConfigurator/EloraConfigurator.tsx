@@ -22,7 +22,7 @@ import {
     WallUnit,
     WallUnitOptions,
 } from "../../Models/EloraConfigTypes";
-import { Model } from "../../Models/ModelConfigTypes";
+import { Item, Model } from "../../Models/ModelConfigTypes";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
 import { MirrorCategory } from "../../Models/MirrorConfigTypes";
@@ -328,7 +328,17 @@ function EloraConfigurator({
     };
 
     // |===== ACCORDION =====|
-    const { accordionState, handleAccordionState } = useAccordionState();
+    const { accordionState, handleAccordionState, handleOrderedAccordion } =
+        useAccordionState();
+
+    const accordionsOrder = [
+        "vanity",
+        "washbasin",
+        "wallUnit",
+        "tallUnit",
+        "accessory",
+        "mirror",
+    ];
 
     // |===== INITIAL CONFIG =====|
     const initialConfiguration: CurrentConfiguration = useMemo(() => {
@@ -656,25 +666,32 @@ function EloraConfigurator({
                 property as keyof typeof vanityCurrentConfiguration
             ] = option;
 
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 vanityCurrentConfiguration,
                 composition.vanities
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({ type: `set-${item}-sku`, payload: sku });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex && price > 0) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
 
             setVanityOptions(copyOptions);
         }
 
         if (item === "washbasin") {
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -684,12 +701,19 @@ function EloraConfigurator({
 
             dispatch({
                 type: `set-${item}-${property}`,
-                payload: skuAndPrice.sku,
+                payload: sku,
             });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         if (item === "wallUnit") {
@@ -762,6 +786,13 @@ function EloraConfigurator({
                     ...prev,
                     isWallUnitSelected: true,
                 }));
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex && price > 0) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         if (item === "tallUnit") {
@@ -833,10 +864,17 @@ function EloraConfigurator({
                     ...prev,
                     isTallUnitSelected: true,
                 }));
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex && price > 0) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         if (item === "accessory") {
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -846,12 +884,19 @@ function EloraConfigurator({
 
             dispatch({
                 type: `set-${item}-${property}`,
-                payload: skuAndPrice.sku,
+                payload: sku,
             });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex && price > 0) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
@@ -1240,25 +1285,6 @@ function EloraConfigurator({
                     </ItemPropertiesAccordion>
                 )}
 
-                {composition.otherProductsAvailable.mirrors.length > 0 && (
-                    <MirrorConfigurator
-                        mirrorCabinetOptions={mirrorCabinetOptions}
-                        ledMirrorOptions={ledMirrorOptions}
-                        openCompMirrorOptions={openCompMirrorOptions}
-                        crrMirrorCategory={crrMirrorCategory}
-                        currentMirrorsConfiguration={
-                            currentMirrorsConfiguration
-                        }
-                        accordionState={accordionState}
-                        handleSwitchCrrMirrorCategory={
-                            handleSwitchCrrMirrorCategory
-                        }
-                        clearMirrorCategory={clearMirrorCategory}
-                        handleOptionSelected={handleOptionSelected}
-                        handleAccordionState={handleAccordionState}
-                    ></MirrorConfigurator>
-                )}
-
                 {accessoryOptions && (
                     <ItemPropertiesAccordion
                         headerTitle="ACCESSORIES"
@@ -1281,6 +1307,25 @@ function EloraConfigurator({
                             onOptionSelected={handleOptionSelected}
                         />
                     </ItemPropertiesAccordion>
+                )}
+
+                {composition.otherProductsAvailable.mirrors.length > 0 && (
+                    <MirrorConfigurator
+                        mirrorCabinetOptions={mirrorCabinetOptions}
+                        ledMirrorOptions={ledMirrorOptions}
+                        openCompMirrorOptions={openCompMirrorOptions}
+                        crrMirrorCategory={crrMirrorCategory}
+                        currentMirrorsConfiguration={
+                            currentMirrorsConfiguration
+                        }
+                        accordionState={accordionState}
+                        handleSwitchCrrMirrorCategory={
+                            handleSwitchCrrMirrorCategory
+                        }
+                        clearMirrorCategory={clearMirrorCategory}
+                        handleOptionSelected={handleOptionSelected}
+                        handleAccordionState={handleAccordionState}
+                    ></MirrorConfigurator>
                 )}
 
                 <div className={classes.grandTotalAndOrderNowButtonWrapper}>

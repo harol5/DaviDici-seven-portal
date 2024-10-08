@@ -25,7 +25,7 @@ import type {
 } from "../../Models/OperaConfigTypes";
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
 import { MirrorCategory } from "../../Models/MirrorConfigTypes";
-import { Model } from "../../Models/ModelConfigTypes";
+import { Item, Model } from "../../Models/ModelConfigTypes";
 import MirrorConfigurator from "./MirrorConfigurator";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import { router } from "@inertiajs/react";
@@ -680,7 +680,17 @@ function OperaConfigurator({
     const [isInvalidLabel, setIsInvalidLabel] = useState(false);
 
     // |===== ACCORDION =====|
-    const { accordionState, handleAccordionState } = useAccordionState();
+    const { accordionState, handleAccordionState, handleOrderedAccordion } =
+        useAccordionState();
+
+    const accordionsOrder = [
+        "vanity",
+        "sideUnit",
+        "washbasin",
+        "wallUnit",
+        "tallUnit",
+        "mirror",
+    ];
 
     // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (
@@ -713,20 +723,27 @@ function OperaConfigurator({
                 property as keyof typeof vanityCurrentConfiguration
             ] = option;
 
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 vanityCurrentConfiguration,
                 composition.vanities
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({ type: `set-${item}-sku`, payload: sku });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setVanityOptions(copyOptions);
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex && price > 0) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         if (item === "sideUnit") {
@@ -770,24 +787,31 @@ function OperaConfigurator({
                 property as keyof typeof sideUnitCurrentConfiguration
             ] = option;
 
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 sideUnitCurrentConfiguration,
                 composition.sideUnits
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({ type: `set-${item}-sku`, payload: sku });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setSideUnitOptions(copyOptions);
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex && price > 0) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         if (item === "washbasin") {
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -797,12 +821,20 @@ function OperaConfigurator({
 
             dispatch({
                 type: `set-${item}-${property}`,
-                payload: skuAndPrice.sku,
+                payload: sku,
             });
+
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         if (item === "wallUnit") {
@@ -860,24 +892,24 @@ function OperaConfigurator({
                 property as keyof typeof wallUnitCurrentConfiguration
             ] = option;
 
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 wallUnitCurrentConfiguration,
                 composition.otherProductsAvailable.wallUnits
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({ type: `set-${item}-sku`, payload: sku });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setWallUnitOptions(copyOptions);
 
             setWallUnitStatus((prev) => ({
                 ...prev,
-                isWallUnitValid: skuAndPrice.price > 0,
+                isWallUnitValid: price > 0,
             }));
 
             !wallUnitStatus.isWallUnitSelected &&
@@ -885,10 +917,17 @@ function OperaConfigurator({
                     ...prev,
                     isWallUnitSelected: true,
                 }));
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex && price > 0) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         if (item === "tallUnit") {
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -898,18 +937,26 @@ function OperaConfigurator({
 
             dispatch({
                 type: `set-${item}-${property}`,
-                payload: skuAndPrice.sku,
+                payload: sku,
             });
+
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
 
             setTallUnitStatus((prev) => ({
                 ...prev,
-                isTallUnitValid: skuAndPrice.price > 0,
+                isTallUnitValid: price > 0,
                 isTallUnitSelected: true,
             }));
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex && price > 0) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         if (item === "drawerBase") {
@@ -953,24 +1000,24 @@ function OperaConfigurator({
                 property as keyof typeof drawerBaseCurrentConfiguration
             ] = option;
 
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 drawerBaseCurrentConfiguration,
                 composition.otherProductsAvailable.drawersVanities
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({ type: `set-${item}-sku`, payload: sku });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setDrawerBaseOptions(copyOptions);
 
             setDrawerBaseStatus((prev) => ({
                 ...prev,
-                isDrawerBaseValid: skuAndPrice.price > 0,
+                isDrawerBaseValid: price > 0,
             }));
 
             !drawerBaseStatus.isDrawerBaseSelected &&
@@ -978,6 +1025,13 @@ function OperaConfigurator({
                     ...prev,
                     isDrawerBaseSelected: true,
                 }));
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex && price > 0) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|

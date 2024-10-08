@@ -27,7 +27,7 @@ import {
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import type { MirrorCategory } from "../../Models/MirrorConfigTypes";
-import { Model } from "../../Models/ModelConfigTypes";
+import { Item, Model } from "../../Models/ModelConfigTypes";
 import MirrorConfigurator from "./MirrorConfigurator";
 import useAccordionState from "../../Hooks/useAccordionState";
 
@@ -390,7 +390,16 @@ function MargiConfigurator({
     };
 
     // |===== ACCORDION =====|
-    const { accordionState, handleAccordionState } = useAccordionState();
+    const { accordionState, handleAccordionState, handleOrderedAccordion } =
+        useAccordionState();
+
+    const accordionsOrder = [
+        "vanity",
+        "sideUnit",
+        "washbasin",
+        "wallUnit",
+        "mirror",
+    ];
 
     // |===== INITIAL CONFIG =====|
     const initialConfiguration: CurrentConfiguration = useMemo(() => {
@@ -792,21 +801,28 @@ function MargiConfigurator({
                 property as keyof typeof vanityCurrentConfiguration
             ] = option;
 
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 vanityCurrentConfiguration,
                 composition.vanities
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({ type: `set-${item}-sku`, payload: sku });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
 
             setVanityOptions(copyOptions);
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex && price > 0) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         if (item === "sideUnit") {
@@ -837,7 +853,7 @@ function MargiConfigurator({
                     property as keyof typeof copyCurrentConfiguration
                 ] = option;
 
-                const skuAndPrice = getSkuAndPrice(
+                const { sku, price } = getSkuAndPrice(
                     composition.model as Model,
                     "openUnit",
                     copyCurrentConfiguration,
@@ -846,17 +862,24 @@ function MargiConfigurator({
 
                 dispatch({
                     type: `set-${item}-sku`,
-                    payload: skuAndPrice.sku,
+                    payload: sku,
                 });
                 dispatch({
                     type: `set-${item}-price`,
-                    payload: skuAndPrice.price,
+                    payload: price,
                 });
                 dispatch({
                     type: `set-${item}-${property}`,
                     payload: `${option}`,
                 });
                 setSideUnitOptions(copyOptions);
+
+                const lastIndex = accordionsOrder.length - 1;
+                const itemIndex = accordionsOrder.indexOf(item);
+                if (itemIndex !== lastIndex && price > 0) {
+                    const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                    handleOrderedAccordion(item, nextItem);
+                }
             }
 
             if (composition.sideUnits[0].descw.includes("16")) {
@@ -904,7 +927,7 @@ function MargiConfigurator({
                     property as keyof typeof copyCurrentConfiguration
                 ] = option;
 
-                const skuAndPrice = getSkuAndPrice(
+                const { sku, price } = getSkuAndPrice(
                     composition.model as Model,
                     "sideCabinet",
                     copyCurrentConfiguration,
@@ -913,17 +936,24 @@ function MargiConfigurator({
 
                 dispatch({
                     type: `set-${item}-sku`,
-                    payload: skuAndPrice.sku,
+                    payload: sku,
                 });
                 dispatch({
                     type: `set-${item}-price`,
-                    payload: skuAndPrice.price,
+                    payload: price,
                 });
                 dispatch({
                     type: `set-${item}-${property}`,
                     payload: `${option}`,
                 });
                 setSideUnitOptions(copyOptions);
+
+                const lastIndex = accordionsOrder.length - 1;
+                const itemIndex = accordionsOrder.indexOf(item);
+                if (itemIndex !== lastIndex && price > 0) {
+                    const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                    handleOrderedAccordion(item, nextItem);
+                }
             }
         }
 
@@ -980,7 +1010,7 @@ function MargiConfigurator({
                 property as keyof typeof copyCurrentConfiguration
             ] = option;
 
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 "wallUnit",
                 copyCurrentConfiguration,
@@ -989,18 +1019,18 @@ function MargiConfigurator({
 
             dispatch({
                 type: `set-${item}-sku`,
-                payload: skuAndPrice.sku,
+                payload: sku,
             });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setWallUnitOptions(copyOptions);
 
             setWallUnitStatus((prev) => ({
                 ...prev,
-                isWallUnitValid: skuAndPrice.price > 0,
+                isWallUnitValid: price > 0,
             }));
 
             !wallUnitStatus.isWallUnitSelected &&
@@ -1008,10 +1038,17 @@ function MargiConfigurator({
                     ...prev,
                     isWallUnitSelected: true,
                 }));
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex && price > 0) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         if (item === "washbasin") {
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -1021,12 +1058,20 @@ function MargiConfigurator({
 
             dispatch({
                 type: `set-${item}-type`,
-                payload: skuAndPrice.sku,
+                payload: sku,
             });
+
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|

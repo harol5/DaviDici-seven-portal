@@ -20,7 +20,7 @@ import ConfigurationName from "./ConfigurationName";
 import Options from "./Options";
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
 import { MirrorCategory } from "../../Models/MirrorConfigTypes";
-import { Model } from "../../Models/ModelConfigTypes";
+import { Item, Model } from "../../Models/ModelConfigTypes";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import MirrorConfigurator from "./MirrorConfigurator";
 import useAccordionState from "../../Hooks/useAccordionState";
@@ -97,6 +97,22 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
         return all;
     }, []);
 
+    // |===== ACCESSORIES =====|
+    const accessoryOptions: Option[] | null = useMemo(() => {
+        const { accessories } = composition.otherProductsAvailable;
+        const options: Option[] = [];
+        accessories.forEach((accessory) => {
+            options.push({
+                code: accessory.uscode,
+                imgUrl: `https://${location.hostname}/images/express-program/KORA/${accessory.uscode}.webp`,
+                title: accessory.descw,
+                validSkus: [accessory.uscode],
+                isDisabled: false,
+            });
+        });
+        return options;
+    }, []);
+
     // |====== MIRRORS LOGIC -> get all mirror options ======|
     const {
         mirrorCabinetOptions,
@@ -116,22 +132,6 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
     const handleSwitchCrrMirrorCategory = (mirrorCategory: MirrorCategory) => {
         updateCurrentMirrorCategory(mirrorCategory);
     };
-
-    // |===== ACCESSORIES =====|
-    const accessoryOptions: Option[] | null = useMemo(() => {
-        const { accessories } = composition.otherProductsAvailable;
-        const options: Option[] = [];
-        accessories.forEach((accessory) => {
-            options.push({
-                code: accessory.uscode,
-                imgUrl: `https://${location.hostname}/images/express-program/KORA/${accessory.uscode}.webp`,
-                title: accessory.descw,
-                validSkus: [accessory.uscode],
-                isDisabled: false,
-            });
-        });
-        return options;
-    }, []);
 
     // |===== INITIAL CONFIG =====|
     const initialConfiguration: CurrentConfiguration = useMemo(() => {
@@ -243,7 +243,10 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
     );
 
     // |===== ACCORDION =====|
-    const { accordionState, handleAccordionState } = useAccordionState();
+    const { accordionState, handleAccordionState, handleOrderedAccordion } =
+        useAccordionState();
+
+    const accordionsOrder = ["vanity", "washbasin", "accessory", "mirror"];
 
     // |===== GRAND TOTAL =====|
     const grandTotal = useMemo(() => {
@@ -320,24 +323,31 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
                 property as keyof typeof vanityCurrentConfiguration
             ] = option;
 
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 vanityCurrentConfiguration,
                 composition.vanities
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({ type: `set-${item}-sku`, payload: sku });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setVanityOptions(copyOptions);
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex && price > 0) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         if (item === "washbasin") {
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -347,16 +357,23 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
 
             dispatch({
                 type: `set-${item}-${property}`,
-                payload: skuAndPrice.sku,
+                payload: sku,
             });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         if (item === "accessory") {
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -366,12 +383,19 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
 
             dispatch({
                 type: `set-${item}-${property}`,
-                payload: skuAndPrice.sku,
+                payload: sku,
             });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
+
+            const lastIndex = accordionsOrder.length - 1;
+            const itemIndex = accordionsOrder.indexOf(item);
+            if (itemIndex !== lastIndex && price > 0) {
+                const nextItem = accordionsOrder[itemIndex + 1] as Item;
+                handleOrderedAccordion(item, nextItem);
+            }
         }
 
         // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
@@ -603,25 +627,6 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
                     />
                 </ItemPropertiesAccordion>
 
-                {composition.otherProductsAvailable.mirrors.length > 0 && (
-                    <MirrorConfigurator
-                        mirrorCabinetOptions={mirrorCabinetOptions}
-                        ledMirrorOptions={ledMirrorOptions}
-                        openCompMirrorOptions={openCompMirrorOptions}
-                        crrMirrorCategory={crrMirrorCategory}
-                        currentMirrorsConfiguration={
-                            currentMirrorsConfiguration
-                        }
-                        accordionState={accordionState}
-                        handleSwitchCrrMirrorCategory={
-                            handleSwitchCrrMirrorCategory
-                        }
-                        clearMirrorCategory={clearMirrorCategory}
-                        handleOptionSelected={handleOptionSelected}
-                        handleAccordionState={handleAccordionState}
-                    ></MirrorConfigurator>
-                )}
-
                 {accessoryOptions && (
                     <ItemPropertiesAccordion
                         headerTitle="ACCESSORIES"
@@ -644,6 +649,25 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
                             onOptionSelected={handleOptionSelected}
                         />
                     </ItemPropertiesAccordion>
+                )}
+
+                {composition.otherProductsAvailable.mirrors.length > 0 && (
+                    <MirrorConfigurator
+                        mirrorCabinetOptions={mirrorCabinetOptions}
+                        ledMirrorOptions={ledMirrorOptions}
+                        openCompMirrorOptions={openCompMirrorOptions}
+                        crrMirrorCategory={crrMirrorCategory}
+                        currentMirrorsConfiguration={
+                            currentMirrorsConfiguration
+                        }
+                        accordionState={accordionState}
+                        handleSwitchCrrMirrorCategory={
+                            handleSwitchCrrMirrorCategory
+                        }
+                        clearMirrorCategory={clearMirrorCategory}
+                        handleOptionSelected={handleOptionSelected}
+                        handleAccordionState={handleAccordionState}
+                    ></MirrorConfigurator>
                 )}
 
                 <div className={classes.grandTotalAndOrderNowButtonWrapper}>
