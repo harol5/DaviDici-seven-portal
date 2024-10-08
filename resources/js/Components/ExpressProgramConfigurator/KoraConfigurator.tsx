@@ -12,6 +12,7 @@ import type {
 import {
     getSkuAndPrice,
     isAlphanumericWithSpaces,
+    scrollToView,
 } from "../../utils/helperFunc";
 import { router } from "@inertiajs/react";
 import { ProductInventory } from "../../Models/Product";
@@ -429,6 +430,7 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
         if (!currentConfiguration.label) {
             alert("Looks like COMPOSITION NAME is missing!!");
             setIsMissingLabel(true);
+            scrollToView("compositionNameWrapper");
             return false;
         }
 
@@ -436,6 +438,7 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
             alert(
                 "Looks like you forgot to select all available MIRROR CABINET OPTIONS. Either clear the mirror cabinet section or select the missing option(s). "
             );
+            scrollToView("mirror");
             return false;
         }
 

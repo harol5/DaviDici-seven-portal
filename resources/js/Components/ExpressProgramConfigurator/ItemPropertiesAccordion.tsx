@@ -30,7 +30,7 @@ function ItemPropertiesAccordion({
     };
 
     return (
-        <section className={classes.itemPropertiesAccordion}>
+        <section className={classes.itemPropertiesAccordion} id={item}>
             <div
                 className={classes.itemPropertiesHeader}
                 onClick={() => handleAccordionState(item)}

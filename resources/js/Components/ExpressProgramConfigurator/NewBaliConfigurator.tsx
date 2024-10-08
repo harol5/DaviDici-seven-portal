@@ -10,6 +10,7 @@ import ConfigurationName from "./ConfigurationName";
 import {
     getSkuAndPrice,
     isAlphanumericWithSpaces,
+    scrollToView,
 } from "../../utils/helperFunc";
 import { ProductInventory } from "../../Models/Product";
 import type {
@@ -1000,6 +1001,7 @@ function NewBaliConfigurator({
         if (!currentConfiguration.label) {
             alert("Looks like COMPOSITION NAME is missing!!");
             setIsMissingLabel(true);
+            scrollToView("compositionNameWrapper");
             return false;
         }
 
@@ -1010,6 +1012,7 @@ function NewBaliConfigurator({
             alert(
                 "Looks like you forgot to select all available WALL UNIT OPTIONS. Either clear the wall unit section or select the missing option(s). "
             );
+            scrollToView("wallUnit");
             return false;
         }
 
@@ -1020,6 +1023,7 @@ function NewBaliConfigurator({
             alert(
                 "Looks like you forgot to select all available DRAWER BASE OPTIONS. Either clear the tal unit section or select the missing option(s). "
             );
+            scrollToView("drawerBase");
             return false;
         }
 
@@ -1027,6 +1031,7 @@ function NewBaliConfigurator({
             alert(
                 "Looks like you forgot to select all available MIRROR CABINET OPTIONS. Either clear the mirror cabinet section or select the missing option(s). "
             );
+            scrollToView("mirror");
             return false;
         }
 

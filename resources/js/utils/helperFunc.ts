@@ -1,4 +1,9 @@
-import { ItemObj, Model, SkuLengthModels } from "../Models/ModelConfigTypes";
+import {
+    Item,
+    ItemObj,
+    Model,
+    SkuLengthModels,
+} from "../Models/ModelConfigTypes";
 import { ProductInventory } from "../Models/Product";
 
 export function isAlphanumericWithSpaces(str: string) {
@@ -72,4 +77,13 @@ export const getSkuAndPrice = (
     console.log(skuAndPrice);
 
     return skuAndPrice;
+};
+
+export const scrollToView = (item: Item | "compositionNameWrapper") => {
+    const element = document.getElementById(item);
+    if (element) {
+        element.scrollIntoView({
+            behavior: "smooth",
+        });
+    }
 };

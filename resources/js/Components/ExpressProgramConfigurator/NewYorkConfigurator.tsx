@@ -11,6 +11,7 @@ import { router } from "@inertiajs/react";
 import {
     isAlphanumericWithSpaces,
     getSkuAndPrice,
+    scrollToView,
 } from "../../utils/helperFunc";
 import { ProductInventory } from "../../Models/Product";
 import {
@@ -1072,6 +1073,7 @@ function NewYorkConfigurator({
         if (!currentConfiguration.label) {
             alert("Looks like COMPOSITION NAME is missing!!");
             setIsMissingLabel(true);
+            scrollToView("compositionNameWrapper");
             return false;
         }
 
@@ -1082,6 +1084,7 @@ function NewYorkConfigurator({
             alert(
                 "Looks like you forgot to select all available WALL UNIT OPTIONS. Either clear the wall unit section or select the missing option(s). "
             );
+            scrollToView("wallUnit");
             return false;
         }
 
@@ -1092,6 +1095,7 @@ function NewYorkConfigurator({
             alert(
                 "Looks like you forgot to select all available TALL UNIT OPTIONS. Either clear the tal unit section or select the missing option(s). "
             );
+            scrollToView("tallUnit");
             return false;
         }
 
@@ -1099,6 +1103,7 @@ function NewYorkConfigurator({
             alert(
                 "Looks like you forgot to select all available MIRROR CABINET OPTIONS. Either clear the mirror cabinet section or select the missing option(s). "
             );
+            scrollToView("mirror");
             return false;
         }
 
@@ -1430,6 +1435,11 @@ function NewYorkConfigurator({
                         isOpen={accordionState.wallUnit}
                         onClick={handleAccordionState}
                     >
+                        <img
+                            className="w-[40%] mx-auto mt-0"
+                            src={`https://${location.hostname}/images/express-program/NEW YORK/options/wall-unit.webp`}
+                            alt="image of wall unit"
+                        />
                         <button
                             className={classes.clearButton}
                             onClick={() => handleClearItem("wallUnit")}
@@ -1466,6 +1476,11 @@ function NewYorkConfigurator({
                         isOpen={accordionState.tallUnit}
                         onClick={handleAccordionState}
                     >
+                        <img
+                            className="w-[25%] mx-auto mt-4"
+                            src={`https://${location.hostname}/images/express-program/NEW YORK/options/tall-unit.webp`}
+                            alt="image of tall unit"
+                        />
                         <button
                             className={classes.clearButton}
                             onClick={() => handleClearItem("tallUnit")}

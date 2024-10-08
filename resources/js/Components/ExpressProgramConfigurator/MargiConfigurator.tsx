@@ -11,6 +11,7 @@ import { router } from "@inertiajs/react";
 import {
     isAlphanumericWithSpaces,
     getSkuAndPrice,
+    scrollToView,
 } from "../../utils/helperFunc";
 import { ProductInventory } from "../../Models/Product";
 import {
@@ -1105,6 +1106,7 @@ function MargiConfigurator({
         if (!currentConfiguration.label) {
             alert("Looks like COMPOSITION NAME is missing!!");
             setIsMissingLabel(true);
+            scrollToView("compositionNameWrapper");
             return false;
         }
 
@@ -1115,6 +1117,7 @@ function MargiConfigurator({
             alert(
                 "Looks like you forgot to select all available WALL UNIT OPTIONS. Either clear the wall unit section or select the missing option(s). "
             );
+            scrollToView("wallUnit");
             return false;
         }
 
@@ -1122,6 +1125,7 @@ function MargiConfigurator({
             alert(
                 "Looks like you forgot to select all available MIRROR CABINET OPTIONS. Either clear the mirror cabinet section or select the missing option(s). "
             );
+            scrollToView("mirror");
             return false;
         }
 

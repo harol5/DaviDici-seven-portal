@@ -12,6 +12,7 @@ import type {
 import {
     getSkuAndPrice,
     isAlphanumericWithSpaces,
+    scrollToView,
 } from "../../utils/helperFunc";
 import { router } from "@inertiajs/react";
 import { ProductInventory } from "../../Models/Product";
@@ -447,6 +448,7 @@ function KoraXlConfigurator({
         if (!currentConfiguration.label) {
             alert("Looks like COMPOSITION NAME is missing!!");
             setIsMissingLabel(true);
+            scrollToView("compositionNameWrapper");
             return false;
         }
 
@@ -457,6 +459,7 @@ function KoraXlConfigurator({
             alert(
                 "Looks like you forgot to select all available TALL UNIT OPTIONS. Either clear the tal unit section or select the missing option(s). "
             );
+            scrollToView("tallUnit");
             return false;
         }
 
@@ -464,6 +467,7 @@ function KoraXlConfigurator({
             alert(
                 "Looks like you forgot to select all available MIRROR CABINET OPTIONS. Either clear the mirror cabinet section or select the missing option(s). "
             );
+            scrollToView("mirror");
             return false;
         }
 

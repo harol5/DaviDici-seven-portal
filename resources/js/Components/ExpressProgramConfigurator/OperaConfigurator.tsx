@@ -10,6 +10,7 @@ import ConfigurationName from "./ConfigurationName";
 import {
     getSkuAndPrice,
     isAlphanumericWithSpaces,
+    scrollToView,
 } from "../../utils/helperFunc";
 import { ProductInventory } from "../../Models/Product";
 import type {
@@ -1065,6 +1066,7 @@ function OperaConfigurator({
         if (!currentConfiguration.label) {
             alert("Looks like COMPOSITION NAME is missing!!");
             setIsMissingLabel(true);
+            scrollToView("compositionNameWrapper");
             return false;
         }
 
@@ -1075,6 +1077,7 @@ function OperaConfigurator({
             alert(
                 "Looks like you forgot to select all available WALL UNIT OPTIONS. Either clear the wall unit section or select the missing option(s). "
             );
+            scrollToView("wallUnit");
             return false;
         }
 
@@ -1083,8 +1086,9 @@ function OperaConfigurator({
             !drawerBaseStatus.isDrawerBaseValid
         ) {
             alert(
-                "Looks like you forgot to select all available DRAWER BASE OPTIONS. Either clear the tal unit section or select the missing option(s). "
+                "Looks like you forgot to select all available DRAWER BASE OPTIONS. Either clear the tal unit section or select the missing option(s)."
             );
+            scrollToView("drawerBase");
             return false;
         }
 
@@ -1093,15 +1097,17 @@ function OperaConfigurator({
             !tallUnitStatus.isTallUnitValid
         ) {
             alert(
-                "Looks like you forgot to select all available TALL UNIT OPTIONS. Either clear the tal unit section or select the missing option(s). "
+                "Looks like you forgot to select all available TALL UNIT OPTIONS. Either clear the tal unit section or select the missing option(s)."
             );
+            scrollToView("tallUnit");
             return false;
         }
 
         if (!isMirrorCabinetConfigValid()) {
             alert(
-                "Looks like you forgot to select all available MIRROR CABINET OPTIONS. Either clear the mirror cabinet section or select the missing option(s). "
+                "Looks like you forgot to select all available MIRROR CABINET OPTIONS. Either clear the mirror cabinet section or select the missing option(s)."
             );
+            scrollToView("mirror");
             return false;
         }
 
