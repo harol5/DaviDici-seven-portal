@@ -1,6 +1,7 @@
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import Options from "./Options";
 import classes from "../../../css/product-configurator.module.css";
+import classesItemAccordion from "../../../css/item-properties-accordion.module.css";
 import {
     MirrorCabinetsOptions,
     MirrorCategory,
@@ -16,6 +17,7 @@ interface MirrorConfiguratorProps {
     crrMirrorCategory: MirrorCategory;
     currentMirrorsConfiguration: MirrorConfig;
     accordionState: Record<Item, boolean>;
+    accordionsOrder: string[];
     handleSwitchCrrMirrorCategory: (mirrorCategory: MirrorCategory) => void;
     clearMirrorCategory: (mirrorCategory: MirrorCategory) => void;
     handleOptionSelected: (
@@ -24,6 +26,11 @@ interface MirrorConfiguratorProps {
         option: string
     ) => void;
     handleAccordionState: (item: Item) => void;
+    handleOrderedAccordion: (
+        item: Item,
+        accordionsOrder: any,
+        type: "previous" | "next"
+    ) => void;
 }
 
 function MirrorConfigurator({
@@ -33,10 +40,12 @@ function MirrorConfigurator({
     crrMirrorCategory,
     currentMirrorsConfiguration,
     accordionState,
+    accordionsOrder,
     handleSwitchCrrMirrorCategory,
     clearMirrorCategory,
     handleOptionSelected,
     handleAccordionState,
+    handleOrderedAccordion,
 }: MirrorConfiguratorProps) {
     const isDisplayable = (mirrorCategory: MirrorCategory): boolean => {
         if (mirrorCategory === "mirrorCabinet") {
@@ -69,6 +78,8 @@ function MirrorConfigurator({
             item="mirror"
             isOpen={accordionState.mirror}
             onClick={handleAccordionState}
+            buttons={"none"}
+            accordionsOrder={[]}
         >
             <section className={classes.mirrorCategories}>
                 <div className={classes.mirrorCategoriesSwitchers}>
@@ -115,12 +126,6 @@ function MirrorConfigurator({
                 </div>
                 {isDisplayable("mirrorCabinet") && (
                     <div>
-                        <button
-                            className={classes.clearButton}
-                            onClick={() => clearMirrorCategory("mirrorCabinet")}
-                        >
-                            CLEAR
-                        </button>
                         <Options
                             item="mirrorCabinet"
                             property="size"
@@ -141,16 +146,36 @@ function MirrorConfigurator({
                             }
                             onOptionSelected={handleOptionSelected}
                         />
+                        <section
+                            className={`${classesItemAccordion.itemPropertiesAccordion} ${classesItemAccordion.accordionButtonsWrapper}`}
+                        >
+                            <>
+                                <button
+                                    className={`${classesItemAccordion.nextButton} ${classesItemAccordion.groupedTwo}`}
+                                    onClick={() =>
+                                        handleOrderedAccordion(
+                                            "mirror",
+                                            accordionsOrder,
+                                            "previous"
+                                        )
+                                    }
+                                >
+                                    PREVIOUS
+                                </button>
+                                <button
+                                    className={`${classesItemAccordion.clearButton} ${classesItemAccordion.groupedTwo}`}
+                                    onClick={() =>
+                                        clearMirrorCategory("mirrorCabinet")
+                                    }
+                                >
+                                    CLEAR
+                                </button>
+                            </>
+                        </section>
                     </div>
                 )}
                 {isDisplayable("ledMirror") && (
                     <div>
-                        <button
-                            className={classes.clearButton}
-                            onClick={() => clearMirrorCategory("ledMirror")}
-                        >
-                            CLEAR
-                        </button>
                         <Options
                             item="ledMirror"
                             property="type"
@@ -161,18 +186,36 @@ function MirrorConfigurator({
                             }
                             onOptionSelected={handleOptionSelected}
                         />
+                        <section
+                            className={`${classesItemAccordion.itemPropertiesAccordion} ${classesItemAccordion.accordionButtonsWrapper}`}
+                        >
+                            <>
+                                <button
+                                    className={`${classesItemAccordion.nextButton} ${classesItemAccordion.groupedTwo}`}
+                                    onClick={() =>
+                                        handleOrderedAccordion(
+                                            "mirror",
+                                            accordionsOrder,
+                                            "previous"
+                                        )
+                                    }
+                                >
+                                    PREVIOUS
+                                </button>
+                                <button
+                                    className={`${classesItemAccordion.clearButton} ${classesItemAccordion.groupedTwo}`}
+                                    onClick={() =>
+                                        clearMirrorCategory("ledMirror")
+                                    }
+                                >
+                                    CLEAR
+                                </button>
+                            </>
+                        </section>
                     </div>
                 )}
                 {isDisplayable("openCompMirror") && (
                     <div>
-                        <button
-                            className={classes.clearButton}
-                            onClick={() =>
-                                clearMirrorCategory("openCompMirror")
-                            }
-                        >
-                            CLEAR
-                        </button>
                         <Options
                             item="openCompMirror"
                             property="type"
@@ -183,6 +226,32 @@ function MirrorConfigurator({
                             }
                             onOptionSelected={handleOptionSelected}
                         />
+                        <section
+                            className={`${classesItemAccordion.itemPropertiesAccordion} ${classesItemAccordion.accordionButtonsWrapper}`}
+                        >
+                            <>
+                                <button
+                                    className={`${classesItemAccordion.nextButton} ${classesItemAccordion.groupedTwo}`}
+                                    onClick={() =>
+                                        handleOrderedAccordion(
+                                            "mirror",
+                                            accordionsOrder,
+                                            "previous"
+                                        )
+                                    }
+                                >
+                                    PREVIOUS
+                                </button>
+                                <button
+                                    className={`${classesItemAccordion.clearButton} ${classesItemAccordion.groupedTwo}`}
+                                    onClick={() =>
+                                        clearMirrorCategory("openCompMirror")
+                                    }
+                                >
+                                    CLEAR
+                                </button>
+                            </>
+                        </section>
                     </div>
                 )}
             </section>

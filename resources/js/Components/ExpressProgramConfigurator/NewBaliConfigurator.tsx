@@ -335,14 +335,18 @@ function NewBaliConfigurator({
     const { accordionState, handleAccordionState, handleOrderedAccordion } =
         useAccordionState();
 
-    const accordionsOrder = [
-        "vanity",
-        "sideUnit",
-        "washbasin",
-        "drawerBase",
-        "wallUnit",
-        "mirror",
-    ];
+    const accordionsOrder = useMemo(() => {
+        let arr: string[] = ["vanity"];
+        sideUnitOptions ? arr.push("sideUnit") : null;
+        arr.push("washbasin");
+        drawerBaseOptions ? arr.push("drawerBase") : null;
+        wallUnitOptions ? arr.push("wallUnit") : null;
+        composition.otherProductsAvailable.mirrors.length > 0
+            ? arr.push("mirror")
+            : null;
+
+        return arr;
+    }, []);
 
     // |===== INITIAL CONFIG =====|
     const initialConfiguration: CurrentConfiguration = useMemo(() => {
@@ -740,13 +744,6 @@ function NewBaliConfigurator({
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setVanityOptions(copyOptions);
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "sideUnit") {
@@ -771,13 +768,6 @@ function NewBaliConfigurator({
                 payload: price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "washbasin") {
@@ -798,13 +788,6 @@ function NewBaliConfigurator({
                 type: `set-${item}-price`,
                 payload: price,
             });
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "drawerBase") {
@@ -873,13 +856,6 @@ function NewBaliConfigurator({
                     ...prev,
                     isDrawerBaseSelected: true,
                 }));
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "wallUnit") {
@@ -961,13 +937,6 @@ function NewBaliConfigurator({
                     ...prev,
                     isWallUnitSelected: true,
                 }));
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
@@ -1198,13 +1167,6 @@ function NewBaliConfigurator({
         onAddToCart(shoppingCartObj);
     };
 
-    console.log("=== new bali confg render ===");
-    console.log("composition:", composition);
-    console.log("current config:", currentConfiguration);
-    console.log("wall unit status:", wallUnitStatus);
-    console.log("tall unit status:", drawerBaseStatus);
-    console.log("grand total:", grandTotal);
-
     return (
         <div className={classes.compositionConfiguratorWrapper}>
             <section className={classes.leftSideConfiguratorWrapper}>
@@ -1252,6 +1214,9 @@ function NewBaliConfigurator({
                     item="vanity"
                     isOpen={accordionState.vanity}
                     onClick={handleAccordionState}
+                    buttons={"next"}
+                    accordionsOrder={accordionsOrder}
+                    onNavigation={handleOrderedAccordion}
                 >
                     <Options
                         item="vanity"
@@ -1277,6 +1242,9 @@ function NewBaliConfigurator({
                         item="sideUnit"
                         isOpen={accordionState.sideUnit}
                         onClick={handleAccordionState}
+                        buttons={"next and previous"}
+                        accordionsOrder={accordionsOrder}
+                        onNavigation={handleOrderedAccordion}
                     >
                         <Options
                             item="sideUnit"
@@ -1296,6 +1264,9 @@ function NewBaliConfigurator({
                     item="washbasin"
                     isOpen={accordionState.washbasin}
                     onClick={handleAccordionState}
+                    buttons={"next and previous"}
+                    accordionsOrder={accordionsOrder}
+                    onNavigation={handleOrderedAccordion}
                 >
                     <Options
                         item="washbasin"
@@ -1313,13 +1284,11 @@ function NewBaliConfigurator({
                         item="drawerBase"
                         isOpen={accordionState.drawerBase}
                         onClick={handleAccordionState}
+                        buttons={"next, clear and previous"}
+                        accordionsOrder={accordionsOrder}
+                        onNavigation={handleOrderedAccordion}
+                        onClear={handleClearItem}
                     >
-                        <button
-                            className={classes.clearButton}
-                            onClick={() => handleClearItem("drawerBase")}
-                        >
-                            CLEAR
-                        </button>
                         <Options
                             item="drawerBase"
                             property="drawer"
@@ -1349,13 +1318,11 @@ function NewBaliConfigurator({
                         item="wallUnit"
                         isOpen={accordionState.wallUnit}
                         onClick={handleAccordionState}
+                        buttons={"next, clear and previous"}
+                        accordionsOrder={accordionsOrder}
+                        onNavigation={handleOrderedAccordion}
+                        onClear={handleClearItem}
                     >
-                        <button
-                            className={classes.clearButton}
-                            onClick={() => handleClearItem("wallUnit")}
-                        >
-                            CLEAR
-                        </button>
                         <Options
                             item="wallUnit"
                             property="size"
@@ -1399,12 +1366,14 @@ function NewBaliConfigurator({
                             currentMirrorsConfiguration
                         }
                         accordionState={accordionState}
+                        accordionsOrder={accordionsOrder}
                         handleSwitchCrrMirrorCategory={
                             handleSwitchCrrMirrorCategory
                         }
                         clearMirrorCategory={clearMirrorCategory}
                         handleOptionSelected={handleOptionSelected}
                         handleAccordionState={handleAccordionState}
+                        handleOrderedAccordion={handleOrderedAccordion}
                     ></MirrorConfigurator>
                 )}
 

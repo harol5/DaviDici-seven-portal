@@ -101,6 +101,8 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
     // |===== ACCESSORIES =====|
     const accessoryOptions: Option[] | null = useMemo(() => {
         const { accessories } = composition.otherProductsAvailable;
+        if (accessories.length === 0) return null;
+
         const options: Option[] = [];
         accessories.forEach((accessory) => {
             options.push({
@@ -247,7 +249,15 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
     const { accordionState, handleAccordionState, handleOrderedAccordion } =
         useAccordionState();
 
-    const accordionsOrder = ["vanity", "washbasin", "accessory", "mirror"];
+    const accordionsOrder = useMemo(() => {
+        let arr: string[] = ["vanity", "washbasin"];
+        accessoryOptions ? arr.push("accessory") : null;
+        composition.otherProductsAvailable.mirrors.length > 0
+            ? arr.push("mirror")
+            : null;
+
+        return arr;
+    }, []);
 
     // |===== GRAND TOTAL =====|
     const grandTotal = useMemo(() => {
@@ -323,7 +333,9 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
             vanityCurrentConfiguration[
                 property as keyof typeof vanityCurrentConfiguration
             ] = option;
-
+            console.log("==== kora vanity current config ====");
+            console.log(vanityCurrentConfiguration);
+            console.log(composition);
             const { sku, price } = getSkuAndPrice(
                 composition.model as Model,
                 item,
@@ -338,13 +350,6 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setVanityOptions(copyOptions);
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "washbasin") {
@@ -364,13 +369,6 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
                 type: `set-${item}-price`,
                 payload: price,
             });
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "accessory") {
@@ -390,13 +388,6 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
                 type: `set-${item}-price`,
                 payload: price,
             });
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
@@ -603,6 +594,9 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
                     item="vanity"
                     isOpen={accordionState.vanity}
                     onClick={handleAccordionState}
+                    buttons={"next"}
+                    accordionsOrder={accordionsOrder}
+                    onNavigation={handleOrderedAccordion}
                 >
                     <Options
                         item="vanity"
@@ -619,6 +613,9 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
                     item="washbasin"
                     isOpen={accordionState.washbasin}
                     onClick={handleAccordionState}
+                    buttons={"next and previous"}
+                    accordionsOrder={accordionsOrder}
+                    onNavigation={handleOrderedAccordion}
                 >
                     <Options
                         item="washbasin"
@@ -636,13 +633,11 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
                         item="accessory"
                         isOpen={accordionState.accessory}
                         onClick={handleAccordionState}
+                        buttons={"next, clear and previous"}
+                        accordionsOrder={accordionsOrder}
+                        onNavigation={handleOrderedAccordion}
+                        onClear={handleClearItem}
                     >
-                        <button
-                            className={classes.clearButton}
-                            onClick={() => handleClearItem("accessory")}
-                        >
-                            CLEAR
-                        </button>
                         <Options
                             item="accessory"
                             property="type"
@@ -670,7 +665,9 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
                         clearMirrorCategory={clearMirrorCategory}
                         handleOptionSelected={handleOptionSelected}
                         handleAccordionState={handleAccordionState}
-                    ></MirrorConfigurator>
+                        accordionsOrder={accordionsOrder}
+                        handleOrderedAccordion={handleOrderedAccordion}
+                    />
                 )}
 
                 <div className={classes.grandTotalAndOrderNowButtonWrapper}>

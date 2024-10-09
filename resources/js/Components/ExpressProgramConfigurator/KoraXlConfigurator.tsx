@@ -149,7 +149,15 @@ function KoraXlConfigurator({
     const { accordionState, handleAccordionState, handleOrderedAccordion } =
         useAccordionState();
 
-    const accordionsOrder = ["vanity", "washbasin", "tallUnit", "mirror"];
+    const accordionsOrder = useMemo(() => {
+        let arr: string[] = ["vanity", "washbasin"];
+        tallUnitOptions ? arr.push("tallUnit") : null;
+        composition.otherProductsAvailable.mirrors.length > 0
+            ? arr.push("mirror")
+            : null;
+
+        return arr;
+    }, []);
 
     // |===== INITIAL CONFIG =====|
     const initialConfiguration: CurrentConfiguration = useMemo(() => {
@@ -349,13 +357,6 @@ function KoraXlConfigurator({
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setVanityOptions(copyOptions);
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "washbasin") {
@@ -375,13 +376,6 @@ function KoraXlConfigurator({
                 type: `set-${item}-price`,
                 payload: price,
             });
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "tallUnit") {
@@ -408,13 +402,6 @@ function KoraXlConfigurator({
                 isTallUnitValid: price > 0,
                 isTallUnitSelected: true,
             }));
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
@@ -641,6 +628,9 @@ function KoraXlConfigurator({
                     item="vanity"
                     isOpen={accordionState.vanity}
                     onClick={handleAccordionState}
+                    buttons={"next"}
+                    accordionsOrder={accordionsOrder}
+                    onNavigation={handleOrderedAccordion}
                 >
                     <Options
                         item="vanity"
@@ -657,6 +647,9 @@ function KoraXlConfigurator({
                     item="washbasin"
                     isOpen={accordionState.washbasin}
                     onClick={handleAccordionState}
+                    buttons={"next and previous"}
+                    accordionsOrder={accordionsOrder}
+                    onNavigation={handleOrderedAccordion}
                 >
                     <Options
                         item="washbasin"
@@ -670,17 +663,15 @@ function KoraXlConfigurator({
 
                 {tallUnitOptions && (
                     <ItemPropertiesAccordion
-                        headerTitle="TALL UNIT 12"
+                        headerTitle="TALL UNIT"
                         item="tallUnit"
                         isOpen={accordionState.tallUnit}
                         onClick={handleAccordionState}
+                        buttons={"next, clear and previous"}
+                        accordionsOrder={accordionsOrder}
+                        onNavigation={handleOrderedAccordion}
+                        onClear={handleClearItem}
                     >
-                        <button
-                            className={classes.clearButton}
-                            onClick={() => handleClearItem("tallUnit")}
-                        >
-                            CLEAR
-                        </button>
                         <Options
                             item="tallUnit"
                             property="type"
@@ -702,12 +693,14 @@ function KoraXlConfigurator({
                             currentMirrorsConfiguration
                         }
                         accordionState={accordionState}
+                        accordionsOrder={accordionsOrder}
                         handleSwitchCrrMirrorCategory={
                             handleSwitchCrrMirrorCategory
                         }
                         clearMirrorCategory={clearMirrorCategory}
                         handleOptionSelected={handleOptionSelected}
                         handleAccordionState={handleAccordionState}
+                        handleOrderedAccordion={handleOrderedAccordion}
                     ></MirrorConfigurator>
                 )}
 

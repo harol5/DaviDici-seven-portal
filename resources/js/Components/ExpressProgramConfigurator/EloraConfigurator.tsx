@@ -23,7 +23,7 @@ import {
     WallUnit,
     WallUnitOptions,
 } from "../../Models/EloraConfigTypes";
-import { Item, Model } from "../../Models/ModelConfigTypes";
+import { Model } from "../../Models/ModelConfigTypes";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
 import { MirrorCategory } from "../../Models/MirrorConfigTypes";
@@ -680,14 +680,6 @@ function EloraConfigurator({
                 payload: price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
-
             setVanityOptions(copyOptions);
         }
 
@@ -708,13 +700,6 @@ function EloraConfigurator({
                 type: `set-${item}-price`,
                 payload: price,
             });
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "wallUnit") {
@@ -787,13 +772,6 @@ function EloraConfigurator({
                     ...prev,
                     isWallUnitSelected: true,
                 }));
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "tallUnit") {
@@ -865,13 +843,6 @@ function EloraConfigurator({
                     ...prev,
                     isTallUnitSelected: true,
                 }));
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "accessory") {
@@ -891,13 +862,6 @@ function EloraConfigurator({
                 type: `set-${item}-price`,
                 payload: price,
             });
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
@@ -1179,6 +1143,9 @@ function EloraConfigurator({
                     item="vanity"
                     isOpen={accordionState.vanity}
                     onClick={handleAccordionState}
+                    buttons={"next"}
+                    accordionsOrder={accordionsOrder}
+                    onNavigation={handleOrderedAccordion}
                 >
                     <Options
                         item="vanity"
@@ -1207,6 +1174,9 @@ function EloraConfigurator({
                     item="washbasin"
                     isOpen={accordionState.washbasin}
                     onClick={handleAccordionState}
+                    buttons={"next and previous"}
+                    accordionsOrder={accordionsOrder}
+                    onNavigation={handleOrderedAccordion}
                 >
                     <Options
                         item="washbasin"
@@ -1220,22 +1190,20 @@ function EloraConfigurator({
 
                 {wallUnitOptions && (
                     <ItemPropertiesAccordion
-                        headerTitle={`WALL UNIT 12"`}
+                        headerTitle={`WALL UNIT 12X31`}
                         item="wallUnit"
                         isOpen={accordionState.wallUnit}
                         onClick={handleAccordionState}
+                        buttons={"next, clear and previous"}
+                        accordionsOrder={accordionsOrder}
+                        onNavigation={handleOrderedAccordion}
+                        onClear={handleClearItem}
                     >
                         <img
                             className="w-[40%] mx-auto mt-4"
                             src={`https://${location.hostname}/images/express-program/ELORA/wall-unit.webp`}
                             alt="image of wall unit"
                         />
-                        <button
-                            className={classes.clearButton}
-                            onClick={() => handleClearItem("wallUnit")}
-                        >
-                            CLEAR
-                        </button>
                         <Options
                             item="wallUnit"
                             property="mattFinish"
@@ -1261,22 +1229,20 @@ function EloraConfigurator({
 
                 {tallUnitOptions && (
                     <ItemPropertiesAccordion
-                        headerTitle={`TALL UNIT 12"`}
+                        headerTitle={`TALL UNIT 12X63`}
                         item="tallUnit"
                         isOpen={accordionState.tallUnit}
                         onClick={handleAccordionState}
+                        buttons={"next, clear and previous"}
+                        accordionsOrder={accordionsOrder}
+                        onNavigation={handleOrderedAccordion}
+                        onClear={handleClearItem}
                     >
                         <img
                             className="w-[40%] mx-auto mt-4"
                             src={`https://${location.hostname}/images/express-program/ELORA/tall-unit.webp`}
                             alt="image of wall unit"
                         />
-                        <button
-                            className={classes.clearButton}
-                            onClick={() => handleClearItem("tallUnit")}
-                        >
-                            CLEAR
-                        </button>
                         <Options
                             item="tallUnit"
                             property="mattFinish"
@@ -1306,13 +1272,11 @@ function EloraConfigurator({
                         item="accessory"
                         isOpen={accordionState.accessory}
                         onClick={handleAccordionState}
+                        buttons={"next, clear and previous"}
+                        accordionsOrder={accordionsOrder}
+                        onNavigation={handleOrderedAccordion}
+                        onClear={handleClearItem}
                     >
-                        <button
-                            className={classes.clearButton}
-                            onClick={() => handleClearItem("accessory")}
-                        >
-                            CLEAR
-                        </button>
                         <Options
                             item="accessory"
                             property="type"
@@ -1334,12 +1298,14 @@ function EloraConfigurator({
                             currentMirrorsConfiguration
                         }
                         accordionState={accordionState}
+                        accordionsOrder={accordionsOrder}
                         handleSwitchCrrMirrorCategory={
                             handleSwitchCrrMirrorCategory
                         }
                         clearMirrorCategory={clearMirrorCategory}
                         handleOptionSelected={handleOptionSelected}
                         handleAccordionState={handleAccordionState}
+                        handleOrderedAccordion={handleOrderedAccordion}
                     ></MirrorConfigurator>
                 )}
 

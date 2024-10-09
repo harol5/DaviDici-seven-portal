@@ -24,7 +24,12 @@ function useAccordionState() {
         setAccordionState(updatedAccordionState);
     };
 
-    const handleOrderedAccordion = (item: Item, nextItem: Item) => {
+    const handleOrderedAccordion = (
+        item: Item,
+        accordionsOrder: any,
+        type: "previous" | "next"
+    ) => {
+        const itemIndex = accordionsOrder.indexOf(item);
         const orderedAccordion = {
             vanity: false,
             sideUnit: false,
@@ -35,8 +40,18 @@ function useAccordionState() {
             mirror: false,
             accessory: false,
         };
+
+        if (type === "previous") {
+            const previousItem = accordionsOrder[itemIndex - 1] as Item;
+            orderedAccordion[previousItem] = true;
+        }
+
+        if (type === "next") {
+            const nextItem = accordionsOrder[itemIndex + 1] as Item;
+            orderedAccordion[nextItem] = true;
+        }
+
         orderedAccordion[item] = false;
-        orderedAccordion[nextItem] = true;
         setAccordionState(orderedAccordion);
     };
 

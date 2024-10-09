@@ -394,13 +394,17 @@ function MargiConfigurator({
     const { accordionState, handleAccordionState, handleOrderedAccordion } =
         useAccordionState();
 
-    const accordionsOrder = [
-        "vanity",
-        "sideUnit",
-        "washbasin",
-        "wallUnit",
-        "mirror",
-    ];
+    const accordionsOrder = useMemo(() => {
+        let arr: string[] = ["vanity"];
+        sideUnitOptions ? arr.push("sideUnit") : null;
+        arr.push("washbasin");
+        wallUnitOptions ? arr.push("wallUnit") : null;
+        composition.otherProductsAvailable.mirrors.length > 0
+            ? arr.push("mirror")
+            : null;
+
+        return arr;
+    }, []);
 
     // |===== INITIAL CONFIG =====|
     const initialConfiguration: CurrentConfiguration = useMemo(() => {
@@ -817,13 +821,6 @@ function MargiConfigurator({
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
 
             setVanityOptions(copyOptions);
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "sideUnit") {
@@ -874,13 +871,6 @@ function MargiConfigurator({
                     payload: `${option}`,
                 });
                 setSideUnitOptions(copyOptions);
-
-                const lastIndex = accordionsOrder.length - 1;
-                const itemIndex = accordionsOrder.indexOf(item);
-                if (itemIndex !== lastIndex && price > 0) {
-                    const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                    handleOrderedAccordion(item, nextItem);
-                }
             }
 
             if (composition.sideUnits[0].descw.includes("16")) {
@@ -948,13 +938,6 @@ function MargiConfigurator({
                     payload: `${option}`,
                 });
                 setSideUnitOptions(copyOptions);
-
-                const lastIndex = accordionsOrder.length - 1;
-                const itemIndex = accordionsOrder.indexOf(item);
-                if (itemIndex !== lastIndex && price > 0) {
-                    const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                    handleOrderedAccordion(item, nextItem);
-                }
             }
         }
 
@@ -1039,13 +1022,6 @@ function MargiConfigurator({
                     ...prev,
                     isWallUnitSelected: true,
                 }));
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "washbasin") {
@@ -1066,13 +1042,6 @@ function MargiConfigurator({
                 type: `set-${item}-price`,
                 payload: price,
             });
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
@@ -1266,14 +1235,6 @@ function MargiConfigurator({
         onAddToCart(shoppingCartObj);
     };
 
-    console.log("=== margi confg render ===");
-    console.log("composition:", composition);
-    console.log("current config:", currentConfiguration);
-    console.log("current mirror config:", currentMirrorsConfiguration);
-    console.log("is wall unit active?", wallUnitStatus.isWallUnitSelected);
-    console.log("is wall unit valid?", wallUnitStatus.isWallUnitValid);
-    console.log("grand total:", grandTotal);
-
     return (
         <div className={classes.compositionConfiguratorWrapper}>
             <section className={classes.leftSideConfiguratorWrapper}>
@@ -1321,6 +1282,9 @@ function MargiConfigurator({
                     item="vanity"
                     isOpen={accordionState.vanity}
                     onClick={handleAccordionState}
+                    buttons={"next"}
+                    accordionsOrder={accordionsOrder}
+                    onNavigation={handleOrderedAccordion}
                 >
                     <Options
                         item="vanity"
@@ -1354,6 +1318,9 @@ function MargiConfigurator({
                         item="sideUnit"
                         isOpen={accordionState.sideUnit}
                         onClick={handleAccordionState}
+                        buttons={"next and previous"}
+                        accordionsOrder={accordionsOrder}
+                        onNavigation={handleOrderedAccordion}
                     >
                         <SizeUnit
                             composition={composition}
@@ -1369,6 +1336,9 @@ function MargiConfigurator({
                     item="washbasin"
                     isOpen={accordionState.washbasin}
                     onClick={handleAccordionState}
+                    buttons={"next and previous"}
+                    accordionsOrder={accordionsOrder}
+                    onNavigation={handleOrderedAccordion}
                 >
                     <Options
                         item="washbasin"
@@ -1386,13 +1356,11 @@ function MargiConfigurator({
                         item="wallUnit"
                         isOpen={accordionState.wallUnit}
                         onClick={handleAccordionState}
+                        buttons={"next, clear and previous"}
+                        accordionsOrder={accordionsOrder}
+                        onNavigation={handleOrderedAccordion}
+                        onClear={handleClearItem}
                     >
-                        <button
-                            className={classes.clearButton}
-                            onClick={() => handleClearItem("wallUnit")}
-                        >
-                            CLEAR
-                        </button>
                         <Options
                             item="wallUnit"
                             property="size"
@@ -1436,12 +1404,14 @@ function MargiConfigurator({
                             currentMirrorsConfiguration
                         }
                         accordionState={accordionState}
+                        accordionsOrder={accordionsOrder}
                         handleSwitchCrrMirrorCategory={
                             handleSwitchCrrMirrorCategory
                         }
                         clearMirrorCategory={clearMirrorCategory}
                         handleOptionSelected={handleOptionSelected}
                         handleAccordionState={handleAccordionState}
+                        handleOrderedAccordion={handleOrderedAccordion}
                     ></MirrorConfigurator>
                 )}
 

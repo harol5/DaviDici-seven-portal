@@ -309,8 +309,10 @@ function NewYorkConfigurator({
     });
 
     // |===== ACCESSORIES =====|
-    const accessoryOptions: Option[] = useMemo(() => {
+    const accessoryOptions: Option[] | null = useMemo(() => {
         const { accessories } = composition.otherProductsAvailable;
+        if (accessories.length === 0) return null;
+
         const options: Option[] = [];
         accessories.forEach((accessory) => {
             options.push({
@@ -348,15 +350,19 @@ function NewYorkConfigurator({
     const { accordionState, handleAccordionState, handleOrderedAccordion } =
         useAccordionState();
 
-    const accordionsOrder = [
-        "vanity",
-        "sideUnit",
-        "washbasin",
-        "wallUnit",
-        "tallUnit",
-        "accessory",
-        "mirror",
-    ];
+    const accordionsOrder = useMemo(() => {
+        let arr: string[] = ["vanity"];
+        sideUnitOptions ? arr.push("sideUnit") : null;
+        arr.push("washbasin");
+        wallUnitOptions ? arr.push("wallUnit") : null;
+        tallUnitOptions ? arr.push("tallUnit") : null;
+        accessoryOptions ? arr.push("accessory") : null;
+        composition.otherProductsAvailable.mirrors.length > 0
+            ? arr.push("mirror")
+            : null;
+
+        return arr;
+    }, []);
 
     // |===== INITIAL CONFIG =====|
     const initialConfiguration: CurrentConfiguration = useMemo(() => {
@@ -761,13 +767,6 @@ function NewYorkConfigurator({
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setVanityOptions(copyOptions);
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "sideUnit") {
@@ -826,13 +825,6 @@ function NewYorkConfigurator({
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setSideUnitOptions(copyOptions);
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "washbasin") {
@@ -853,13 +845,6 @@ function NewYorkConfigurator({
                 type: `set-${item}-price`,
                 payload: price,
             });
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "wallUnit") {
@@ -929,13 +914,6 @@ function NewYorkConfigurator({
                     ...prev,
                     isWallUnitSelected: true,
                 }));
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "tallUnit") {
@@ -1006,13 +984,6 @@ function NewYorkConfigurator({
                     ...prev,
                     isTallUnitSelected: true,
                 }));
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "accessory") {
@@ -1033,13 +1004,6 @@ function NewYorkConfigurator({
                 type: `set-${item}-price`,
                 payload: price,
             });
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
@@ -1362,6 +1326,9 @@ function NewYorkConfigurator({
                     item="vanity"
                     isOpen={accordionState.vanity}
                     onClick={handleAccordionState}
+                    buttons={"next"}
+                    accordionsOrder={accordionsOrder}
+                    onNavigation={handleOrderedAccordion}
                 >
                     <Options
                         item="vanity"
@@ -1387,6 +1354,9 @@ function NewYorkConfigurator({
                         item="sideUnit"
                         isOpen={accordionState.sideUnit}
                         onClick={handleAccordionState}
+                        buttons={"next and previous"}
+                        accordionsOrder={accordionsOrder}
+                        onNavigation={handleOrderedAccordion}
                     >
                         <Options
                             item="sideUnit"
@@ -1417,6 +1387,9 @@ function NewYorkConfigurator({
                     item="washbasin"
                     isOpen={accordionState.washbasin}
                     onClick={handleAccordionState}
+                    buttons={"next and previous"}
+                    accordionsOrder={accordionsOrder}
+                    onNavigation={handleOrderedAccordion}
                 >
                     <Options
                         item="washbasin"
@@ -1434,18 +1407,16 @@ function NewYorkConfigurator({
                         item="wallUnit"
                         isOpen={accordionState.wallUnit}
                         onClick={handleAccordionState}
+                        buttons={"next, clear and previous"}
+                        accordionsOrder={accordionsOrder}
+                        onNavigation={handleOrderedAccordion}
+                        onClear={handleClearItem}
                     >
                         <img
                             className="w-[40%] mx-auto mt-0"
                             src={`https://${location.hostname}/images/express-program/NEW YORK/options/wall-unit.webp`}
                             alt="image of wall unit"
                         />
-                        <button
-                            className={classes.clearButton}
-                            onClick={() => handleClearItem("wallUnit")}
-                        >
-                            CLEAR
-                        </button>
                         <Options
                             item="wallUnit"
                             property="handle"
@@ -1475,18 +1446,16 @@ function NewYorkConfigurator({
                         item="tallUnit"
                         isOpen={accordionState.tallUnit}
                         onClick={handleAccordionState}
+                        buttons={"next, clear and previous"}
+                        accordionsOrder={accordionsOrder}
+                        onNavigation={handleOrderedAccordion}
+                        onClear={handleClearItem}
                     >
                         <img
                             className="w-[25%] mx-auto mt-4"
                             src={`https://${location.hostname}/images/express-program/NEW YORK/options/tall-unit.webp`}
                             alt="image of tall unit"
                         />
-                        <button
-                            className={classes.clearButton}
-                            onClick={() => handleClearItem("tallUnit")}
-                        >
-                            CLEAR
-                        </button>
                         <Options
                             item="tallUnit"
                             property="handle"
@@ -1516,13 +1485,11 @@ function NewYorkConfigurator({
                         item="accessory"
                         isOpen={accordionState.accessory}
                         onClick={handleAccordionState}
+                        buttons={"next, clear and previous"}
+                        accordionsOrder={accordionsOrder}
+                        onNavigation={handleOrderedAccordion}
+                        onClear={handleClearItem}
                     >
-                        <button
-                            className={classes.clearButton}
-                            onClick={() => handleClearItem("accessory")}
-                        >
-                            CLEAR
-                        </button>
                         <Options
                             item="accessory"
                             property="type"
@@ -1544,12 +1511,14 @@ function NewYorkConfigurator({
                             currentMirrorsConfiguration
                         }
                         accordionState={accordionState}
+                        accordionsOrder={accordionsOrder}
                         handleSwitchCrrMirrorCategory={
                             handleSwitchCrrMirrorCategory
                         }
                         clearMirrorCategory={clearMirrorCategory}
                         handleOptionSelected={handleOptionSelected}
                         handleAccordionState={handleAccordionState}
+                        handleOrderedAccordion={handleOrderedAccordion}
                     ></MirrorConfigurator>
                 )}
 

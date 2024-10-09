@@ -26,7 +26,7 @@ import type {
 } from "../../Models/OperaConfigTypes";
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
 import { MirrorCategory } from "../../Models/MirrorConfigTypes";
-import { Item, Model } from "../../Models/ModelConfigTypes";
+import { Model } from "../../Models/ModelConfigTypes";
 import MirrorConfigurator from "./MirrorConfigurator";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import { router } from "@inertiajs/react";
@@ -684,14 +684,18 @@ function OperaConfigurator({
     const { accordionState, handleAccordionState, handleOrderedAccordion } =
         useAccordionState();
 
-    const accordionsOrder = [
-        "vanity",
-        "sideUnit",
-        "washbasin",
-        "wallUnit",
-        "tallUnit",
-        "mirror",
-    ];
+    const accordionsOrder = useMemo(() => {
+        let arr: string[] = ["vanity"];
+        sideUnitOptions ? arr.push("sideUnit") : null;
+        arr.push("washbasin");
+        wallUnitOptions ? arr.push("wallUnit") : null;
+        tallUnitOptions ? arr.push("tallUnit") : null;
+        composition.otherProductsAvailable.mirrors.length > 0
+            ? arr.push("mirror")
+            : null;
+
+        return arr;
+    }, []);
 
     // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (
@@ -738,13 +742,6 @@ function OperaConfigurator({
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setVanityOptions(copyOptions);
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "sideUnit") {
@@ -802,13 +799,6 @@ function OperaConfigurator({
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setSideUnitOptions(copyOptions);
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "washbasin") {
@@ -829,13 +819,6 @@ function OperaConfigurator({
                 type: `set-${item}-price`,
                 payload: price,
             });
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "wallUnit") {
@@ -918,13 +901,6 @@ function OperaConfigurator({
                     ...prev,
                     isWallUnitSelected: true,
                 }));
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "tallUnit") {
@@ -951,13 +927,6 @@ function OperaConfigurator({
                 isTallUnitValid: price > 0,
                 isTallUnitSelected: true,
             }));
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         if (item === "drawerBase") {
@@ -1026,13 +995,6 @@ function OperaConfigurator({
                     ...prev,
                     isDrawerBaseSelected: true,
                 }));
-
-            const lastIndex = accordionsOrder.length - 1;
-            const itemIndex = accordionsOrder.indexOf(item);
-            if (itemIndex !== lastIndex && price > 0) {
-                const nextItem = accordionsOrder[itemIndex + 1] as Item;
-                handleOrderedAccordion(item, nextItem);
-            }
         }
 
         // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
@@ -1353,6 +1315,9 @@ function OperaConfigurator({
                     item="vanity"
                     isOpen={accordionState.vanity}
                     onClick={handleAccordionState}
+                    buttons={"next"}
+                    accordionsOrder={accordionsOrder}
+                    onNavigation={handleOrderedAccordion}
                 >
                     <Options
                         item="vanity"
@@ -1370,6 +1335,9 @@ function OperaConfigurator({
                         item="sideUnit"
                         isOpen={accordionState.sideUnit}
                         onClick={handleAccordionState}
+                        buttons={"next and previous"}
+                        accordionsOrder={accordionsOrder}
+                        onNavigation={handleOrderedAccordion}
                     >
                         <Options
                             item="sideUnit"
@@ -1399,6 +1367,9 @@ function OperaConfigurator({
                     item="washbasin"
                     isOpen={accordionState.washbasin}
                     onClick={handleAccordionState}
+                    buttons={"next and previous"}
+                    accordionsOrder={accordionsOrder}
+                    onNavigation={handleOrderedAccordion}
                 >
                     <Options
                         item="washbasin"
@@ -1416,13 +1387,11 @@ function OperaConfigurator({
                         item="wallUnit"
                         isOpen={accordionState.wallUnit}
                         onClick={handleAccordionState}
+                        buttons={"next, clear and previous"}
+                        accordionsOrder={accordionsOrder}
+                        onNavigation={handleOrderedAccordion}
+                        onClear={handleClearItem}
                     >
-                        <button
-                            className={classes.clearButton}
-                            onClick={() => handleClearItem("wallUnit")}
-                        >
-                            CLEAR
-                        </button>
                         <Options
                             item="wallUnit"
                             property="type"
@@ -1458,17 +1427,15 @@ function OperaConfigurator({
 
                 {tallUnitOptions && (
                     <ItemPropertiesAccordion
-                        headerTitle="TALL UNIT 12"
+                        headerTitle="TALL UNIT 12X63"
                         item="tallUnit"
                         isOpen={accordionState.tallUnit}
                         onClick={handleAccordionState}
+                        buttons={"next, clear and previous"}
+                        accordionsOrder={accordionsOrder}
+                        onNavigation={handleOrderedAccordion}
+                        onClear={handleClearItem}
                     >
-                        <button
-                            className={classes.clearButton}
-                            onClick={() => handleClearItem("tallUnit")}
-                        >
-                            CLEAR
-                        </button>
                         <Options
                             item="tallUnit"
                             property="type"
@@ -1486,13 +1453,11 @@ function OperaConfigurator({
                         item="drawerBase"
                         isOpen={accordionState.drawerBase}
                         onClick={handleAccordionState}
+                        buttons={"next, clear and previous"}
+                        accordionsOrder={accordionsOrder}
+                        onNavigation={handleOrderedAccordion}
+                        onClear={handleClearItem}
                     >
-                        <button
-                            className={classes.clearButton}
-                            onClick={() => handleClearItem("drawerBase")}
-                        >
-                            CLEAR
-                        </button>
                         <Options
                             item="drawerBase"
                             property="size"
@@ -1526,12 +1491,14 @@ function OperaConfigurator({
                             currentMirrorsConfiguration
                         }
                         accordionState={accordionState}
+                        accordionsOrder={accordionsOrder}
                         handleSwitchCrrMirrorCategory={
                             handleSwitchCrrMirrorCategory
                         }
                         clearMirrorCategory={clearMirrorCategory}
                         handleOptionSelected={handleOptionSelected}
                         handleAccordionState={handleAccordionState}
+                        handleOrderedAccordion={handleOrderedAccordion}
                     ></MirrorConfigurator>
                 )}
 

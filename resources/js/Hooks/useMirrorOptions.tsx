@@ -74,7 +74,7 @@ function useMirrorOptions(mirrors: ProductInventory[]) {
                 sizeOptionsMap.set(`${codes[1]}`, {
                     code: codes[1],
                     imgUrl: `https://${location.hostname}/images/express-program/mirrors/mirror-cabinets/${codes[1]}.webp`,
-                    title: `${codes[1]}"`,
+                    title: `${codes[1].substring(1)} inches`,
                     validSkus: [],
                     isDisabled: false,
                 });
