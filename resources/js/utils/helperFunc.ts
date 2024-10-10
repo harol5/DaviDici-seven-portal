@@ -17,7 +17,11 @@ export const getSkuAndPrice = (
     products: ProductInventory[],
     wholeSku?: string
 ) => {
-    const skuAndPrice = { sku: "", price: 0 };
+    const skuAndPrice = {
+        sku: "",
+        price: 0,
+        product: null as ProductInventory | null,
+    };
     const skuLengths = SkuLengthModels[model];
 
     if (wholeSku) {
@@ -28,6 +32,7 @@ export const getSkuAndPrice = (
                     : crrProduct.msrp;
 
                 skuAndPrice.sku = wholeSku;
+                skuAndPrice.product = crrProduct;
                 break;
             }
         }
@@ -63,6 +68,7 @@ export const getSkuAndPrice = (
                     : crrProduct.msrp;
 
                 skuAndPrice.sku = productSku;
+                skuAndPrice.product = crrProduct;
                 break;
             }
         }

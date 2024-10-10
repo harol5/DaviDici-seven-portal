@@ -54,8 +54,10 @@
 }
 
 .leftSideConfiguratorWrapper .compositionImageWrapper {
+    position: relative;
     width: 100%;
     margin: 15px auto;
+    border: #d1aa68 1px solid;
 }
 
 .leftSideConfiguratorWrapper .compositionImageWrapper img {

@@ -24,13 +24,14 @@ import type {
     WallUnit,
     WallUnitOptions,
 } from "../../Models/NewBaliConfigTypes";
-import { Item, Model } from "../../Models/ModelConfigTypes";
+import { ItemFoxPro, Model } from "../../Models/ModelConfigTypes";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
 import { MirrorCategory } from "../../Models/MirrorConfigTypes";
 import MirrorConfigurator from "./MirrorConfigurator";
 import { router } from "@inertiajs/react";
 import useAccordionState from "../../Hooks/useAccordionState";
+import ConfigurationBreakdown from "./ConfigurationBreakdown";
 
 interface NewBaliConfiguratorProps {
     composition: Composition;
@@ -123,15 +124,6 @@ function NewBaliConfigurator({
                 validSkus: [washbasin.uscode],
                 isDisabled: false,
             });
-        });
-
-        // adds option to remove washbasin.
-        all.push({
-            code: "",
-            imgUrl: `https://${location.hostname}/images/express-program/washbasins/no-sink.webp`,
-            title: "NO WASHBASIN",
-            validSkus: [""],
-            isDisabled: false,
         });
 
         return all;
@@ -369,9 +361,13 @@ function NewBaliConfigurator({
             composition.vanities
         );
 
-        const washbasinPrice = composition.washbasins[0].sprice
-            ? composition.washbasins[0].sprice
-            : composition.washbasins[0].msrp;
+        const washbasinSkuAndPrice = getSkuAndPrice(
+            composition.model as Model,
+            "washbasin",
+            {},
+            composition.washbasins,
+            composition.washbasins[0].uscode
+        );
 
         const sideUnit: SideUnit | null = sideUnitOptions
             ? {
@@ -411,13 +407,22 @@ function NewBaliConfigurator({
               }
             : null;
 
+        const currentProducts: ProductInventory[] = [];
+        vanitySkuAndPrice.product !== null &&
+            currentProducts.push(vanitySkuAndPrice.product);
+        washbasinSkuAndPrice.product !== null &&
+            currentProducts.push(washbasinSkuAndPrice.product);
+        if (sideUnitSkuAndPrice && sideUnitSkuAndPrice.product) {
+            currentProducts.push(sideUnitSkuAndPrice.product);
+        }
+
         return {
             label: "",
             vanity,
             vanitySku: vanitySkuAndPrice.sku,
             vanityPrice: vanitySkuAndPrice.price,
-            washbasin: composition.washbasins[0].uscode,
-            washbasinPrice,
+            washbasin: washbasinSkuAndPrice.sku,
+            washbasinPrice: washbasinSkuAndPrice.price,
             isDoubleSink: composition.name.includes("DOUBLE"),
             sideUnit,
             sideUnitSku: sideUnitSkuAndPrice ? sideUnitSkuAndPrice.sku : "",
@@ -428,12 +433,13 @@ function NewBaliConfigurator({
             wallUnit,
             wallUnitSku: "",
             wallUnitPrice: 0,
+            currentProducts,
         };
     }, []);
 
     const reducer = (
         state: CurrentConfiguration,
-        action: { type: string; payload: string | number }
+        action: { type: string; payload: string | number | ProductInventory[] }
     ) => {
         switch (action.type) {
             case "set-vanity-drawer":
@@ -485,6 +491,13 @@ function NewBaliConfigurator({
                 return {
                     ...state,
                     washbasinPrice: action.payload as number,
+                };
+
+            case "reset-washbasin":
+                return {
+                    ...state,
+                    washbasin: "",
+                    washbasinPrice: 0,
                 };
 
             case "set-sideUnit-finish":
@@ -597,6 +610,12 @@ function NewBaliConfigurator({
                     wallUnitPrice: initialConfiguration.wallUnitPrice,
                 };
 
+            case "update-current-products":
+                return {
+                    ...state,
+                    currentProducts: action.payload as ProductInventory[],
+                };
+
             case "reset-configurator":
                 return {
                     ...initialConfiguration,
@@ -671,6 +690,34 @@ function NewBaliConfigurator({
     const [isMissingLabel, setIsMissingLabel] = useState(false);
     const [isInvalidLabel, setIsInvalidLabel] = useState(false);
 
+    // |===== HELPER FUNC =====|
+    const updateCurrentProducts = (
+        item: ItemFoxPro,
+        action: "update" | "remove",
+        product?: ProductInventory
+    ) => {
+        const updatedCurrentProducts = structuredClone(
+            currentConfiguration.currentProducts
+        );
+        const index = updatedCurrentProducts.findIndex(
+            (product) => product.item === item
+        );
+
+        if (action === "update" && product) {
+            if (index !== -1) updatedCurrentProducts[index] = product;
+            else updatedCurrentProducts.push(product);
+        }
+
+        if (action === "remove" && index !== -1) {
+            updatedCurrentProducts.splice(index, 1);
+        }
+
+        dispatch({
+            type: `update-current-products`,
+            payload: updatedCurrentProducts,
+        });
+    };
+
     // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (
         item: string,
@@ -730,7 +777,7 @@ function NewBaliConfigurator({
                 property as keyof typeof vanityCurrentConfiguration
             ] = option;
 
-            const { sku, price } = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 vanityCurrentConfiguration,
@@ -744,6 +791,10 @@ function NewBaliConfigurator({
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setVanityOptions(copyOptions);
+
+            if (product) {
+                updateCurrentProducts("VANITY", "update", product);
+            }
         }
 
         if (item === "sideUnit") {
@@ -755,7 +806,7 @@ function NewBaliConfigurator({
                 property as keyof typeof sideUnitCurrentConfiguration
             ] = option;
 
-            const { sku, price } = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 sideUnitCurrentConfiguration,
@@ -768,10 +819,14 @@ function NewBaliConfigurator({
                 payload: price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
+
+            if (product) {
+                updateCurrentProducts("SIDE UNIT", "update", product);
+            }
         }
 
         if (item === "washbasin") {
-            const { sku, price } = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -788,6 +843,10 @@ function NewBaliConfigurator({
                 type: `set-${item}-price`,
                 payload: price,
             });
+
+            if (product) {
+                updateCurrentProducts("WASHBASIN/SINK", "update", product);
+            }
         }
 
         if (item === "drawerBase") {
@@ -831,7 +890,7 @@ function NewBaliConfigurator({
                 property as keyof typeof drawerBaseCurrentConfiguration
             ] = option;
 
-            const { sku, price } = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 drawerBaseCurrentConfiguration,
@@ -856,6 +915,10 @@ function NewBaliConfigurator({
                     ...prev,
                     isDrawerBaseSelected: true,
                 }));
+
+            if (product) {
+                updateCurrentProducts("DRAWER/VANITY", "update", product);
+            }
         }
 
         if (item === "wallUnit") {
@@ -912,7 +975,7 @@ function NewBaliConfigurator({
                 property as keyof typeof wallUnitCurrentConfig
             ] = option;
 
-            const { sku, price } = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 wallUnitCurrentConfig,
@@ -937,6 +1000,10 @@ function NewBaliConfigurator({
                     ...prev,
                     isWallUnitSelected: true,
                 }));
+
+            if (product) {
+                updateCurrentProducts("WALL UNIT", "update", product);
+            }
         }
 
         // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
@@ -1069,11 +1136,21 @@ function NewBaliConfigurator({
         });
         resetMirrorConfigurator();
         dispatch({ type: "reset-configurator", payload: "" });
+        dispatch({
+            type: `update-current-products`,
+            payload: initialConfiguration.currentProducts,
+        });
     };
 
     const handleClearItem = (item: string) => {
         switch (item) {
+            case "washbasin":
+                updateCurrentProducts("WASHBASIN/SINK", "remove");
+                dispatch({ type: "reset-washbasin", payload: "" });
+                break;
+
             case "wallUnit":
+                updateCurrentProducts("WALL UNIT", "remove");
                 setWallUnitOptions(initialWallUnitOptions);
                 setWallUnitStatus({
                     isWallUnitSelected: false,
@@ -1083,6 +1160,7 @@ function NewBaliConfigurator({
                 break;
 
             case "drawerBase":
+                updateCurrentProducts("DRAWER/VANITY", "remove");
                 setDrawerBaseOptions(initialDrawerBaseOptions);
                 setDrawerBaseStatus({
                     isDrawerBaseSelected: false,
@@ -1199,6 +1277,16 @@ function NewBaliConfigurator({
                                 "https://portal.davidici.com/images/express-program/not-image.jpg";
                         }}
                     />
+                    <ConfigurationBreakdown
+                        productsConfigurator={
+                            currentConfiguration.currentProducts
+                        }
+                        mirrorProductsConfigurator={
+                            currentMirrorsConfiguration.currentProducts
+                        }
+                        isDoubleSink={currentConfiguration.isDoubleSink}
+                        isDoubleSideUnit={false}
+                    />
                 </section>
             </section>
             <section className={classes.rightSideConfiguratorWrapper}>
@@ -1264,9 +1352,10 @@ function NewBaliConfigurator({
                     item="washbasin"
                     isOpen={accordionState.washbasin}
                     onClick={handleAccordionState}
-                    buttons={"next and previous"}
+                    buttons={"next, clear and previous"}
                     accordionsOrder={accordionsOrder}
                     onNavigation={handleOrderedAccordion}
+                    onClear={handleClearItem}
                 >
                     <Options
                         item="washbasin"

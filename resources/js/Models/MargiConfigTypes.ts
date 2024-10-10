@@ -1,4 +1,5 @@
 import type { Option } from "./ExpressProgramModels";
+import { ProductInventory } from "./Product";
 
 export const Name = "MARGI";
 
@@ -67,6 +68,7 @@ type CurrentConfiguration = {
     wallUnit: WallUnit | null;
     wallUnitSku: string;
     wallUnitPrice: number;
+    currentProducts: ProductInventory[];
 };
 
 export const SkuLengths = {

@@ -26,11 +26,12 @@ import type {
 } from "../../Models/OperaConfigTypes";
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
 import { MirrorCategory } from "../../Models/MirrorConfigTypes";
-import { Model } from "../../Models/ModelConfigTypes";
+import { ItemFoxPro, Model } from "../../Models/ModelConfigTypes";
 import MirrorConfigurator from "./MirrorConfigurator";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import { router } from "@inertiajs/react";
 import useAccordionState from "../../Hooks/useAccordionState";
+import ConfigurationBreakdown from "./ConfigurationBreakdown";
 
 interface OperaConfiguratorProps {
     composition: Composition;
@@ -93,15 +94,6 @@ function OperaConfigurator({
                 validSkus: [washbasin.uscode],
                 isDisabled: false,
             });
-        });
-
-        // adds option to remove washbasin.
-        all.push({
-            code: "",
-            imgUrl: `https://portal.davidici.com/images/express-program/washbasins/no-sink.webp`,
-            title: "NO WASHBASIN",
-            validSkus: [""],
-            isDisabled: false,
         });
 
         return all;
@@ -353,9 +345,13 @@ function OperaConfigurator({
             composition.vanities
         );
 
-        const washbasinPrice = composition.washbasins[0].sprice
-            ? composition.washbasins[0].sprice
-            : composition.washbasins[0].msrp;
+        const washbasinSkuAndPrice = getSkuAndPrice(
+            composition.model as Model,
+            "washbasin",
+            {},
+            composition.washbasins,
+            composition.washbasins[0].uscode
+        );
 
         const sideUnit: SideUnit | null = sideUnitOptions
             ? {
@@ -399,13 +395,22 @@ function OperaConfigurator({
               }
             : null;
 
+        const currentProducts: ProductInventory[] = [];
+        vanitySkuAndPrice.product !== null &&
+            currentProducts.push(vanitySkuAndPrice.product);
+        washbasinSkuAndPrice.product !== null &&
+            currentProducts.push(washbasinSkuAndPrice.product);
+        if (sideUnitSkuAndPrice && sideUnitSkuAndPrice.product) {
+            currentProducts.push(sideUnitSkuAndPrice.product);
+        }
+
         return {
             label: "",
             vanity,
             vanitySku: vanitySkuAndPrice.sku,
             vanityPrice: vanitySkuAndPrice.price,
-            washbasin: composition.washbasins[0].uscode,
-            washbasinPrice,
+            washbasin: washbasinSkuAndPrice.sku,
+            washbasinPrice: washbasinSkuAndPrice.price,
             isDoubleSink: composition.name.includes("DOUBLE"),
             sideUnit,
             sideUnitSku: sideUnitSkuAndPrice ? sideUnitSkuAndPrice.sku : "",
@@ -419,12 +424,13 @@ function OperaConfigurator({
             drawerBase,
             drawerBaseSku: "",
             drawerBasePrice: 0,
+            currentProducts,
         };
     }, []);
 
     const reducer = (
         state: CurrentConfiguration,
-        action: { type: string; payload: string | number }
+        action: { type: string; payload: string | number | ProductInventory[] }
     ) => {
         switch (action.type) {
             case "set-vanity-finish":
@@ -458,6 +464,13 @@ function OperaConfigurator({
                 return {
                     ...state,
                     washbasinPrice: action.payload as number,
+                };
+
+            case "reset-washbasin":
+                return {
+                    ...state,
+                    washbasin: "",
+                    washbasinPrice: 0,
                 };
 
             case "set-sideUnit-type":
@@ -599,6 +612,12 @@ function OperaConfigurator({
                         initialConfiguration.drawerBasePrice as number,
                 };
 
+            case "update-current-products":
+                return {
+                    ...state,
+                    currentProducts: action.payload as ProductInventory[],
+                };
+
             case "reset-configurator":
                 return {
                     ...initialConfiguration,
@@ -697,6 +716,34 @@ function OperaConfigurator({
         return arr;
     }, []);
 
+    // |===== HELPER FUNC =====|
+    const updateCurrentProducts = (
+        item: ItemFoxPro,
+        action: "update" | "remove",
+        product?: ProductInventory
+    ) => {
+        const updatedCurrentProducts = structuredClone(
+            currentConfiguration.currentProducts
+        );
+        const index = updatedCurrentProducts.findIndex(
+            (product) => product.item === item
+        );
+
+        if (action === "update" && product) {
+            if (index !== -1) updatedCurrentProducts[index] = product;
+            else updatedCurrentProducts.push(product);
+        }
+
+        if (action === "remove" && index !== -1) {
+            updatedCurrentProducts.splice(index, 1);
+        }
+
+        dispatch({
+            type: `update-current-products`,
+            payload: updatedCurrentProducts,
+        });
+    };
+
     // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (
         item: string,
@@ -728,7 +775,7 @@ function OperaConfigurator({
                 property as keyof typeof vanityCurrentConfiguration
             ] = option;
 
-            const { sku, price } = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 vanityCurrentConfiguration,
@@ -742,6 +789,9 @@ function OperaConfigurator({
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setVanityOptions(copyOptions);
+            if (product) {
+                updateCurrentProducts("VANITY", "update", product);
+            }
         }
 
         if (item === "sideUnit") {
@@ -785,7 +835,7 @@ function OperaConfigurator({
                 property as keyof typeof sideUnitCurrentConfiguration
             ] = option;
 
-            const { sku, price } = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 sideUnitCurrentConfiguration,
@@ -799,10 +849,13 @@ function OperaConfigurator({
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setSideUnitOptions(copyOptions);
+            if (product) {
+                updateCurrentProducts("SIDE UNIT", "update", product);
+            }
         }
 
         if (item === "washbasin") {
-            const { sku, price } = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -819,6 +872,10 @@ function OperaConfigurator({
                 type: `set-${item}-price`,
                 payload: price,
             });
+
+            if (product) {
+                updateCurrentProducts("WASHBASIN/SINK", "update", product);
+            }
         }
 
         if (item === "wallUnit") {
@@ -876,7 +933,7 @@ function OperaConfigurator({
                 property as keyof typeof wallUnitCurrentConfiguration
             ] = option;
 
-            const { sku, price } = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 wallUnitCurrentConfiguration,
@@ -901,10 +958,14 @@ function OperaConfigurator({
                     ...prev,
                     isWallUnitSelected: true,
                 }));
+
+            if (product) {
+                updateCurrentProducts("WALL UNIT", "update", product);
+            }
         }
 
         if (item === "tallUnit") {
-            const { sku, price } = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -927,6 +988,14 @@ function OperaConfigurator({
                 isTallUnitValid: price > 0,
                 isTallUnitSelected: true,
             }));
+
+            if (product) {
+                updateCurrentProducts(
+                    "TALL UNIT/LINEN CLOSET",
+                    "update",
+                    product
+                );
+            }
         }
 
         if (item === "drawerBase") {
@@ -970,7 +1039,7 @@ function OperaConfigurator({
                 property as keyof typeof drawerBaseCurrentConfiguration
             ] = option;
 
-            const { sku, price } = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 drawerBaseCurrentConfiguration,
@@ -995,6 +1064,10 @@ function OperaConfigurator({
                     ...prev,
                     isDrawerBaseSelected: true,
                 }));
+
+            if (product) {
+                updateCurrentProducts("DRAWER/VANITY", "update", product);
+            }
         }
 
         // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
@@ -1156,11 +1229,21 @@ function OperaConfigurator({
         });
         resetMirrorConfigurator();
         dispatch({ type: "reset-configurator", payload: "" });
+        dispatch({
+            type: `update-current-products`,
+            payload: initialConfiguration.currentProducts,
+        });
     };
 
     const handleClearItem = (item: string) => {
         switch (item) {
+            case "washbasin":
+                updateCurrentProducts("WASHBASIN/SINK", "remove");
+                dispatch({ type: "reset-washbasin", payload: "" });
+                break;
+
             case "wallUnit":
+                updateCurrentProducts("WALL UNIT", "remove");
                 setWallUnitOptions(initialWallUnitOptions);
                 setWallUnitStatus({
                     isWallUnitSelected: false,
@@ -1170,6 +1253,7 @@ function OperaConfigurator({
                 break;
 
             case "tallUnit":
+                updateCurrentProducts("TALL UNIT/LINEN CLOSET", "remove");
                 setTallUnitStatus({
                     isTallUnitSelected: false,
                     isTallUnitValid: false,
@@ -1178,6 +1262,7 @@ function OperaConfigurator({
                 break;
 
             case "drawerBase":
+                updateCurrentProducts("DRAWER/VANITY", "remove");
                 setDrawerBaseOptions(initialDrawerBaseOptions);
                 setDrawerBaseStatus({
                     isDrawerBaseSelected: false,
@@ -1300,6 +1385,16 @@ function OperaConfigurator({
                                 "https://portal.davidici.com/images/express-program/not-image.jpg";
                         }}
                     />
+                    <ConfigurationBreakdown
+                        productsConfigurator={
+                            currentConfiguration.currentProducts
+                        }
+                        mirrorProductsConfigurator={
+                            currentMirrorsConfiguration.currentProducts
+                        }
+                        isDoubleSink={currentConfiguration.isDoubleSink}
+                        isDoubleSideUnit={currentConfiguration.isDoubleSideUnit}
+                    />
                 </section>
             </section>
             <section className={classes.rightSideConfiguratorWrapper}>
@@ -1367,9 +1462,10 @@ function OperaConfigurator({
                     item="washbasin"
                     isOpen={accordionState.washbasin}
                     onClick={handleAccordionState}
-                    buttons={"next and previous"}
+                    buttons={"next, clear and previous"}
                     accordionsOrder={accordionsOrder}
                     onNavigation={handleOrderedAccordion}
+                    onClear={handleClearItem}
                 >
                     <Options
                         item="washbasin"

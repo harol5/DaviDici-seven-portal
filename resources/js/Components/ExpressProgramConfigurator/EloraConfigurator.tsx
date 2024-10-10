@@ -23,12 +23,13 @@ import {
     WallUnit,
     WallUnitOptions,
 } from "../../Models/EloraConfigTypes";
-import { Model } from "../../Models/ModelConfigTypes";
+import { ItemFoxPro, Model } from "../../Models/ModelConfigTypes";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
 import { MirrorCategory } from "../../Models/MirrorConfigTypes";
 import MirrorConfigurator from "./MirrorConfigurator";
 import useAccordionState from "../../Hooks/useAccordionState";
+import ConfigurationBreakdown from "./ConfigurationBreakdown";
 
 /**
  * TODO;
@@ -122,15 +123,6 @@ function EloraConfigurator({
                 validSkus: [washbasin.uscode],
                 isDisabled: false,
             });
-        });
-
-        // adds option to remove washbasin.
-        all.push({
-            code: "",
-            imgUrl: `https://portal.davidici.com/images/express-program/washbasins/no-sink.webp`,
-            title: "NO WASHBASIN",
-            validSkus: [""],
-            isDisabled: false,
         });
 
         return all;
@@ -293,8 +285,10 @@ function EloraConfigurator({
     });
 
     // |===== ACCESSORIES =====|
-    const accessoryOptions: Option[] = useMemo(() => {
+    const accessoryOptions: Option[] | null = useMemo(() => {
         const { accessories } = composition.otherProductsAvailable;
+        if (accessories.length === 0) return null;
+
         const options: Option[] = [];
         accessories.forEach((accessory) => {
             options.push({
@@ -332,14 +326,18 @@ function EloraConfigurator({
     const { accordionState, handleAccordionState, handleOrderedAccordion } =
         useAccordionState();
 
-    const accordionsOrder = [
-        "vanity",
-        "washbasin",
-        "wallUnit",
-        "tallUnit",
-        "accessory",
-        "mirror",
-    ];
+    const accordionsOrder = useMemo(() => {
+        let arr: string[] = ["vanity"];
+        arr.push("washbasin");
+        wallUnitOptions ? arr.push("wallUnit") : null;
+        tallUnitOptions ? arr.push("tallUnit") : null;
+        accessoryOptions ? arr.push("accessory") : null;
+        composition.otherProductsAvailable.mirrors.length > 0
+            ? arr.push("mirror")
+            : null;
+
+        return arr;
+    }, []);
 
     // |===== INITIAL CONFIG =====|
     const initialConfiguration: CurrentConfiguration = useMemo(() => {
@@ -362,9 +360,19 @@ function EloraConfigurator({
             composition.vanities
         );
 
-        const washbasinPrice = composition.washbasins[0].sprice
-            ? composition.washbasins[0].sprice
-            : composition.washbasins[0].msrp;
+        const washbasinSkuAndPrice = getSkuAndPrice(
+            composition.model as Model,
+            "washbasin",
+            {},
+            composition.washbasins,
+            composition.washbasins[0].uscode
+        );
+
+        const currentProducts: ProductInventory[] = [];
+        vanitySkuAndPrice.product !== null &&
+            currentProducts.push(vanitySkuAndPrice.product);
+        washbasinSkuAndPrice.product !== null &&
+            currentProducts.push(washbasinSkuAndPrice.product);
 
         const wallUnit: WallUnit | null = wallUnitOptions
             ? {
@@ -387,8 +395,8 @@ function EloraConfigurator({
             vanity,
             vanitySku: vanitySkuAndPrice.sku,
             vanityPrice: vanitySkuAndPrice.price,
-            washbasin: composition.washbasins[0].uscode,
-            washbasinPrice,
+            washbasin: washbasinSkuAndPrice.sku,
+            washbasinPrice: washbasinSkuAndPrice.price,
             isDoubleSink: composition.name.includes("DOUBLE"),
             wallUnit,
             wallUnitSku: "",
@@ -398,12 +406,13 @@ function EloraConfigurator({
             tallUnitPrice: 0,
             accessory: "",
             accessoryPrice: 0,
+            currentProducts,
         };
     }, []);
 
     const reducer = (
         state: CurrentConfiguration,
-        action: { type: string; payload: string | number }
+        action: { type: string; payload: string | number | ProductInventory[] }
     ) => {
         switch (action.type) {
             case "set-vanity-mattFinish":
@@ -436,6 +445,16 @@ function EloraConfigurator({
                     vanityPrice: action.payload as number,
                 };
 
+            case "reset-vanity":
+                return {
+                    ...state,
+                    vanity: {
+                        ...(initialConfiguration.vanity as Vanity),
+                    },
+                    vanitySku: initialConfiguration.vanitySku,
+                    vanityPrice: initialConfiguration.vanityPrice,
+                };
+
             case "set-washbasin-type":
                 return {
                     ...state,
@@ -446,6 +465,13 @@ function EloraConfigurator({
                 return {
                     ...state,
                     washbasinPrice: action.payload as number,
+                };
+
+            case "reset-washbasin":
+                return {
+                    ...state,
+                    washbasin: "",
+                    washbasinPrice: 0,
                 };
 
             case "set-wallUnit-mattFinish":
@@ -547,6 +573,12 @@ function EloraConfigurator({
                     accessoryPrice: initialConfiguration.accessoryPrice,
                 };
 
+            case "update-current-products":
+                return {
+                    ...state,
+                    currentProducts: action.payload as ProductInventory[],
+                };
+
             case "reset-configurator":
                 return {
                     ...initialConfiguration,
@@ -620,6 +652,34 @@ function EloraConfigurator({
     const [isMissingLabel, setIsMissingLabel] = useState(false);
     const [isInvalidLabel, setIsInvalidLabel] = useState(false);
 
+    // |===== HELPER FUNC =====|
+    const updateCurrentProducts = (
+        item: ItemFoxPro,
+        action: "update" | "remove",
+        product?: ProductInventory
+    ) => {
+        const updatedCurrentProducts = structuredClone(
+            currentConfiguration.currentProducts
+        );
+        const index = updatedCurrentProducts.findIndex(
+            (product) => product.item === item
+        );
+
+        if (action === "update" && product) {
+            if (index !== -1) updatedCurrentProducts[index] = product;
+            else updatedCurrentProducts.push(product);
+        }
+
+        if (action === "remove" && index !== -1) {
+            updatedCurrentProducts.splice(index, 1);
+        }
+
+        dispatch({
+            type: `update-current-products`,
+            payload: updatedCurrentProducts,
+        });
+    };
+
     // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (
         item: string,
@@ -667,7 +727,7 @@ function EloraConfigurator({
                 property as keyof typeof vanityCurrentConfiguration
             ] = option;
 
-            const { sku, price } = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 vanityCurrentConfiguration,
@@ -681,10 +741,14 @@ function EloraConfigurator({
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setVanityOptions(copyOptions);
+
+            if (product) {
+                updateCurrentProducts("VANITY", "update", product);
+            }
         }
 
         if (item === "washbasin") {
-            const { sku, price } = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -700,6 +764,10 @@ function EloraConfigurator({
                 type: `set-${item}-price`,
                 payload: price,
             });
+
+            if (product) {
+                updateCurrentProducts("WASHBASIN/SINK", "update", product);
+            }
         }
 
         if (item === "wallUnit") {
@@ -745,7 +813,7 @@ function EloraConfigurator({
                 property as keyof typeof wallUnitCurrentConfiguration
             ] = option;
 
-            const { sku, price } = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 wallUnitCurrentConfiguration,
@@ -772,6 +840,10 @@ function EloraConfigurator({
                     ...prev,
                     isWallUnitSelected: true,
                 }));
+
+            if (product) {
+                updateCurrentProducts("WALL UNIT", "update", product);
+            }
         }
 
         if (item === "tallUnit") {
@@ -817,7 +889,7 @@ function EloraConfigurator({
                 property as keyof typeof tallUnitCurrentConfiguration
             ] = option;
 
-            const { sku, price } = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 tallUnitCurrentConfiguration,
@@ -843,10 +915,18 @@ function EloraConfigurator({
                     ...prev,
                     isTallUnitSelected: true,
                 }));
+
+            if (product) {
+                updateCurrentProducts(
+                    "TALL UNIT/LINEN CLOSET",
+                    "update",
+                    product
+                );
+            }
         }
 
         if (item === "accessory") {
-            const { sku, price } = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -858,10 +938,15 @@ function EloraConfigurator({
                 type: `set-${item}-${property}`,
                 payload: sku,
             });
+
             dispatch({
                 type: `set-${item}-price`,
                 payload: price,
             });
+
+            if (product) {
+                updateCurrentProducts("ACCESSORY", "update", product);
+            }
         }
 
         // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
@@ -998,11 +1083,27 @@ function EloraConfigurator({
         });
         resetMirrorConfigurator();
         dispatch({ type: "reset-configurator", payload: "" });
+        dispatch({
+            type: `update-current-products`,
+            payload: initialConfiguration.currentProducts,
+        });
     };
 
     const handleClearItem = (item: string) => {
         switch (item) {
+            case "vanity":
+                updateCurrentProducts("VANITY", "remove");
+                setVanityOptions(initialVanityOptions);
+                dispatch({ type: "reset-vanity", payload: "" });
+                break;
+
+            case "washbasin":
+                updateCurrentProducts("WASHBASIN/SINK", "remove");
+                dispatch({ type: "reset-washbasin", payload: "" });
+                break;
+
             case "wallUnit":
+                updateCurrentProducts("WALL UNIT", "remove");
                 setWallUnitOptions(initialWallUnitOptions);
                 setWallUnitStatus({
                     isWallUnitSelected: false,
@@ -1012,6 +1113,7 @@ function EloraConfigurator({
                 break;
 
             case "tallUnit":
+                updateCurrentProducts("TALL UNIT/LINEN CLOSET", "remove");
                 setTallUnitOptions(initialTallUnitOptions);
                 setTallUnitStatus({
                     isTallUnitSelected: false,
@@ -1021,6 +1123,7 @@ function EloraConfigurator({
                 break;
 
             case "accessory":
+                updateCurrentProducts("ACCESSORY", "remove");
                 dispatch({ type: "reset-accessory", payload: "" });
                 break;
 
@@ -1129,6 +1232,16 @@ function EloraConfigurator({
                                 "https://portal.davidici.com/images/express-program/not-image.jpg";
                         }}
                     />
+                    <ConfigurationBreakdown
+                        productsConfigurator={
+                            currentConfiguration.currentProducts
+                        }
+                        mirrorProductsConfigurator={
+                            currentMirrorsConfiguration.currentProducts
+                        }
+                        isDoubleSink={currentConfiguration.isDoubleSink}
+                        isDoubleSideUnit={false}
+                    />
                 </section>
             </section>
             <section className={classes.rightSideConfiguratorWrapper}>
@@ -1143,9 +1256,10 @@ function EloraConfigurator({
                     item="vanity"
                     isOpen={accordionState.vanity}
                     onClick={handleAccordionState}
-                    buttons={"next"}
+                    buttons={"next and clear"}
                     accordionsOrder={accordionsOrder}
                     onNavigation={handleOrderedAccordion}
+                    onClear={handleClearItem}
                 >
                     <Options
                         item="vanity"
@@ -1174,9 +1288,10 @@ function EloraConfigurator({
                     item="washbasin"
                     isOpen={accordionState.washbasin}
                     onClick={handleAccordionState}
-                    buttons={"next and previous"}
+                    buttons={"next, clear and previous"}
                     accordionsOrder={accordionsOrder}
                     onNavigation={handleOrderedAccordion}
+                    onClear={handleClearItem}
                 >
                     <Options
                         item="washbasin"

@@ -1,4 +1,5 @@
 import { Option } from "./ExpressProgramModels";
+import { ProductInventory } from "./Product";
 
 export const Name = "ELORA";
 
@@ -36,6 +37,7 @@ type CurrentConfiguration = {
     tallUnitPrice: number;
     accessory: string;
     accessoryPrice: number;
+    currentProducts: ProductInventory[];
 };
 
 type VanityOptions = {

@@ -10,6 +10,7 @@ import {
     MirrorConfig,
 } from "../Models/MirrorConfigTypes";
 import { getSkuAndPrice } from "../utils/helperFunc";
+import { ItemFoxPro } from "../Models/ModelConfigTypes";
 
 function useMirrorOptions(mirrors: ProductInventory[]) {
     const createMirrorsMap = (): MirrorCategoriesObj => {
@@ -186,12 +187,13 @@ function useMirrorOptions(mirrors: ProductInventory[]) {
             ledMirrorPrice: 0,
             openCompMirror: "",
             openCompMirrorPrice: 0,
+            currentProducts: [],
         };
     }, []);
 
     const reducer = (
         state: MirrorConfig,
-        action: { type: string; payload: string | number }
+        action: { type: string; payload: string | number | ProductInventory[] }
     ) => {
         switch (action.type) {
             // |===vvvvvv SAME MIRROR CASES FOR ALL MODELS VVVVV===|
@@ -275,6 +277,12 @@ function useMirrorOptions(mirrors: ProductInventory[]) {
                         initialMirrorsConfig.openCompMirrorPrice,
                 };
 
+            case "update-current-products":
+                return {
+                    ...state,
+                    currentProducts: action.payload as ProductInventory[],
+                };
+
             case "reset-mirror-configurator":
                 return {
                     ...initialMirrorsConfig,
@@ -289,6 +297,37 @@ function useMirrorOptions(mirrors: ProductInventory[]) {
         reducer,
         initialMirrorsConfig
     );
+
+    // |===== HELPER FUNC =====|
+    const updateCurrentProducts = (
+        item: ItemFoxPro,
+        action: "update" | "remove",
+        product?: ProductInventory
+    ) => {
+        const updatedCurrentProducts = structuredClone(
+            currentMirrorsConfiguration.currentProducts
+        );
+        const index = updatedCurrentProducts.findIndex(
+            (product) => product.item === item
+        );
+
+        if (action === "update" && product) {
+            if (index !== -1) updatedCurrentProducts[index] = product;
+            else updatedCurrentProducts.push(product);
+        }
+
+        if (action === "remove" && index !== -1) {
+            updatedCurrentProducts.splice(index, 1);
+        }
+
+        console.log("=== updateCurrentProducts ===");
+        console.log(updatedCurrentProducts);
+
+        dispatch({
+            type: `update-current-products`,
+            payload: updatedCurrentProducts,
+        });
+    };
 
     const handleMirrorOptionSelected = (
         item: string,
@@ -335,17 +374,17 @@ function useMirrorOptions(mirrors: ProductInventory[]) {
                 property as keyof typeof mirrorCabinetCurrentConfiguration
             ] = option;
 
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 Name,
                 item,
                 mirrorCabinetCurrentConfiguration,
                 mirrorsInventory
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({ type: `set-${item}-sku`, payload: sku });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
 
@@ -358,12 +397,16 @@ function useMirrorOptions(mirrors: ProductInventory[]) {
 
             setMirrorCabinetStatus((prev) => ({
                 ...prev,
-                isMirrorCabinetValid: skuAndPrice.price > 0,
+                isMirrorCabinetValid: price > 0,
             }));
+
+            if (product) {
+                updateCurrentProducts("MIRROR", "update", product);
+            }
         }
 
         if (item === "ledMirror") {
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 Name,
                 item,
                 {},
@@ -373,16 +416,20 @@ function useMirrorOptions(mirrors: ProductInventory[]) {
 
             dispatch({
                 type: `set-${item}-type`,
-                payload: skuAndPrice.sku === "none" ? "" : skuAndPrice.sku,
+                payload: sku === "none" ? "" : sku,
             });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
+
+            if (product) {
+                updateCurrentProducts("MIRROR", "update", product);
+            }
         }
 
         if (item === "openCompMirror") {
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 Name,
                 item,
                 {},
@@ -392,12 +439,16 @@ function useMirrorOptions(mirrors: ProductInventory[]) {
 
             dispatch({
                 type: `set-${item}-type`,
-                payload: skuAndPrice.sku === "none" ? "" : skuAndPrice.sku,
+                payload: sku === "none" ? "" : sku,
             });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
+
+            if (product) {
+                updateCurrentProducts("MIRROR", "update", product);
+            }
         }
     };
 
@@ -427,6 +478,7 @@ function useMirrorOptions(mirrors: ProductInventory[]) {
     const handleClearMirrorCategory = (mirrorCategory: MirrorCategory) => {
         switch (mirrorCategory) {
             case "mirrorCabinet":
+                updateCurrentProducts("MIRROR", "remove");
                 setMirrorCabinetOptions(initialMirrorCabinetOptions);
                 setMirrorCabinetStatus({
                     isMirrorCabinetSelected: false,
@@ -436,10 +488,12 @@ function useMirrorOptions(mirrors: ProductInventory[]) {
                 break;
 
             case "ledMirror":
+                updateCurrentProducts("MIRROR", "remove");
                 dispatch({ type: "reset-ledMirror", payload: "" });
                 break;
 
             case "openCompMirror":
+                updateCurrentProducts("MIRROR", "remove");
                 dispatch({ type: "reset-openCompMirror", payload: "" });
                 break;
 

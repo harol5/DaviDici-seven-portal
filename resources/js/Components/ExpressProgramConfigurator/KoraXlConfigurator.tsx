@@ -21,10 +21,11 @@ import ConfigurationName from "./ConfigurationName";
 import Options from "./Options";
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
 import { MirrorCategory } from "../../Models/MirrorConfigTypes";
-import { Item, Model } from "../../Models/ModelConfigTypes";
+import { ItemFoxPro, Model } from "../../Models/ModelConfigTypes";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import MirrorConfigurator from "./MirrorConfigurator";
 import useAccordionState from "../../Hooks/useAccordionState";
+import ConfigurationBreakdown from "./ConfigurationBreakdown";
 
 interface KoraXlConfiguratorProps {
     composition: Composition;
@@ -87,15 +88,6 @@ function KoraXlConfigurator({
                 validSkus: [washbasin.uscode],
                 isDisabled: false,
             });
-        });
-
-        // adds option to remove washbasin.
-        all.push({
-            code: "",
-            imgUrl: `https://portal.davidici.com/images/express-program/washbasins/no-sink.webp`,
-            title: "NO WASHBASIN",
-            validSkus: [""],
-            isDisabled: false,
         });
 
         return all;
@@ -173,26 +165,37 @@ function KoraXlConfigurator({
             composition.vanities
         );
 
-        const washbasinPrice = composition.washbasins[0].sprice
-            ? composition.washbasins[0].sprice
-            : composition.washbasins[0].msrp;
+        const washbasinSkuAndPrice = getSkuAndPrice(
+            composition.model as Model,
+            "washbasin",
+            {},
+            composition.washbasins,
+            composition.washbasins[0].uscode
+        );
+
+        const currentProducts: ProductInventory[] = [];
+        vanitySkuAndPrice.product !== null &&
+            currentProducts.push(vanitySkuAndPrice.product);
+        washbasinSkuAndPrice.product !== null &&
+            currentProducts.push(washbasinSkuAndPrice.product);
 
         return {
             label: "",
             vanity,
             vanitySku: vanitySkuAndPrice.sku,
             vanityPrice: vanitySkuAndPrice.price,
-            washbasin: composition.washbasins[0].uscode,
-            washbasinPrice,
+            washbasin: washbasinSkuAndPrice.sku,
+            washbasinPrice: washbasinSkuAndPrice.price,
             isDoubleSink: composition.name.includes("DOUBLE"),
             tallUnit: "",
             tallUnitPrice: 0,
+            currentProducts,
         };
     }, []);
 
     const reducer = (
         state: CurrentConfiguration,
-        action: { type: string; payload: string | number }
+        action: { type: string; payload: string | number | ProductInventory[] }
     ) => {
         switch (action.type) {
             case "set-vanity-finish":
@@ -228,6 +231,13 @@ function KoraXlConfigurator({
                     washbasinPrice: action.payload as number,
                 };
 
+            case "reset-washbasin":
+                return {
+                    ...state,
+                    washbasin: "",
+                    washbasinPrice: 0,
+                };
+
             case "set-tallUnit-type":
                 return {
                     ...state,
@@ -245,6 +255,12 @@ function KoraXlConfigurator({
                     ...state,
                     tallUnit: initialConfiguration.tallUnit as string,
                     tallUnitPrice: initialConfiguration.tallUnitPrice as number,
+                };
+
+            case "update-current-products":
+                return {
+                    ...state,
+                    currentProducts: action.payload as ProductInventory[],
                 };
 
             case "reset-configurator":
@@ -312,6 +328,34 @@ function KoraXlConfigurator({
     const [isMissingLabel, setIsMissingLabel] = useState(false);
     const [isInvalidLabel, setIsInvalidLabel] = useState(false);
 
+    // |===== HELPER FUNC =====|
+    const updateCurrentProducts = (
+        item: ItemFoxPro,
+        action: "update" | "remove",
+        product?: ProductInventory
+    ) => {
+        const updatedCurrentProducts = structuredClone(
+            currentConfiguration.currentProducts
+        );
+        const index = updatedCurrentProducts.findIndex(
+            (product) => product.item === item
+        );
+
+        if (action === "update" && product) {
+            if (index !== -1) updatedCurrentProducts[index] = product;
+            else updatedCurrentProducts.push(product);
+        }
+
+        if (action === "remove" && index !== -1) {
+            updatedCurrentProducts.splice(index, 1);
+        }
+
+        dispatch({
+            type: `update-current-products`,
+            payload: updatedCurrentProducts,
+        });
+    };
+
     // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (
         item: string,
@@ -343,7 +387,7 @@ function KoraXlConfigurator({
                 property as keyof typeof vanityCurrentConfiguration
             ] = option;
 
-            const { sku, price } = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 vanityCurrentConfiguration,
@@ -357,10 +401,14 @@ function KoraXlConfigurator({
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setVanityOptions(copyOptions);
+
+            if (product) {
+                updateCurrentProducts("VANITY", "update", product);
+            }
         }
 
         if (item === "washbasin") {
-            const { sku, price } = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -376,10 +424,14 @@ function KoraXlConfigurator({
                 type: `set-${item}-price`,
                 payload: price,
             });
+
+            if (product) {
+                updateCurrentProducts("WASHBASIN/SINK", "update", product);
+            }
         }
 
         if (item === "tallUnit") {
-            const { sku, price } = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -402,6 +454,14 @@ function KoraXlConfigurator({
                 isTallUnitValid: price > 0,
                 isTallUnitSelected: true,
             }));
+
+            if (product) {
+                updateCurrentProducts(
+                    "TALL UNIT/LINEN CLOSET",
+                    "update",
+                    product
+                );
+            }
         }
 
         // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
@@ -509,11 +569,21 @@ function KoraXlConfigurator({
         });
         resetMirrorConfigurator();
         dispatch({ type: "reset-configurator", payload: "" });
+        dispatch({
+            type: `update-current-products`,
+            payload: initialConfiguration.currentProducts,
+        });
     };
 
     const handleClearItem = (item: string) => {
         switch (item) {
+            case "washbasin":
+                updateCurrentProducts("WASHBASIN/SINK", "remove");
+                dispatch({ type: "reset-washbasin", payload: "" });
+                break;
+
             case "tallUnit":
+                updateCurrentProducts("TALL UNIT/LINEN CLOSET", "remove");
                 setTallUnitStatus({
                     isTallUnitSelected: false,
                     isTallUnitValid: false,
@@ -613,6 +683,16 @@ function KoraXlConfigurator({
                                 "https://portal.davidici.com/images/express-program/not-image.jpg";
                         }}
                     />
+                    <ConfigurationBreakdown
+                        productsConfigurator={
+                            currentConfiguration.currentProducts
+                        }
+                        mirrorProductsConfigurator={
+                            currentMirrorsConfiguration.currentProducts
+                        }
+                        isDoubleSink={currentConfiguration.isDoubleSink}
+                        isDoubleSideUnit={false}
+                    />
                 </section>
             </section>
             <section className={classes.rightSideConfiguratorWrapper}>
@@ -647,9 +727,10 @@ function KoraXlConfigurator({
                     item="washbasin"
                     isOpen={accordionState.washbasin}
                     onClick={handleAccordionState}
-                    buttons={"next and previous"}
+                    buttons={"next, clear and previous"}
                     accordionsOrder={accordionsOrder}
                     onNavigation={handleOrderedAccordion}
+                    onClear={handleClearItem}
                 >
                     <Options
                         item="washbasin"

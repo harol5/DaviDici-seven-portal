@@ -1,4 +1,5 @@
 import type { Option } from "./ExpressProgramModels";
+import { ProductInventory } from "./Product";
 
 export const Name = "KORA";
 
@@ -14,6 +15,7 @@ type CurrentConfiguration = {
     isDoubleSink: boolean;
     accessory: string;
     accessoryPrice: number;
+    currentProducts: ProductInventory[];
 };
 
 type VanityOptions = {
