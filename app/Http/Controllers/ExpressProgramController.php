@@ -90,4 +90,34 @@ class ExpressProgramController extends Controller
             
         return response(['message' => 'shopping cart updated', 'status' => 201])->header('Content-Type', 'application/json');
     }
+
+    public function fileForm(){
+        return Inertia::render('Media');
+    }
+
+    public function storeImages(Request $request) {
+        $request->validate([
+            'textValue' => 'required|string',
+            'images.*' => 'required|image|mimes:webp|max:2048',
+        ]);
+
+        // Handle the uploaded files
+        $uploadedFiles = $request->file('images');
+        $uploadedPaths = [];
+
+        foreach ($uploadedFiles as $file) {
+            // Store the files and get the path
+            // $path = $file->store('images', 'public');            
+            $path = $file->store('/images/resource', ['disk' => 'my_files']);
+            $uploadedPaths[] = $path;
+        }
+
+        // Optionally, you can save the file paths to the database
+
+        // Return a response
+        return response()->json([
+            'message' => 'Files uploaded successfully',
+            'uploadedPaths' => $uploadedPaths,
+        ]);
+    }
 }
