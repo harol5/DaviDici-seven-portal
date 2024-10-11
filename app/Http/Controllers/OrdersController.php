@@ -584,11 +584,7 @@ class OrdersController extends Controller
             'keep_session' => false,
         ]);
 
-        if (!array_key_exists('rows', $paymentInfo)) {
-            return false;
-        } else {
-            return true;
-        }
+        return !array_key_exists('rows', $paymentInfo);        
     }
 
     public function isDeliveryInfoSave($orderNumber)
@@ -598,12 +594,7 @@ class OrdersController extends Controller
             'params' => [$orderNumber],
             'keep_session' => false,
         ]);
-
-        if (array_key_exists('rows', $deliveryInfo) && $deliveryInfo['rows'][0]['deldate']) {
-            return true;
-        } else {
-            return false;
-        }
+        return array_key_exists('rows', $deliveryInfo) && $deliveryInfo['rows'][0]['deldate'];        
     }
 
     public function getAccessToken()
