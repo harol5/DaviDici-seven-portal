@@ -21,11 +21,13 @@ import ConfigurationName from "./ConfigurationName";
 import Options from "./Options";
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
 import { MirrorCategory } from "../../Models/MirrorConfigTypes";
-import { Item, ItemFoxPro, Model } from "../../Models/ModelConfigTypes";
+import { ItemFoxPro, Model } from "../../Models/ModelConfigTypes";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import MirrorConfigurator from "./MirrorConfigurator";
 import useAccordionState from "../../Hooks/useAccordionState";
 import ConfigurationBreakdown from "./ConfigurationBreakdown";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
 interface KoraConfiguratorProps {
     composition: Composition;
@@ -346,6 +348,20 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
             payload: updatedCurrentProducts,
         });
     };
+
+    // |===== COMPOSITION IMAGES =====|
+    const { data: compositionImages } = useQuery({
+        queryKey: ["modelImageCompositionData"],
+        queryFn: () =>
+            axios
+                .get(
+                    `/express-program/composition-images?model=${composition.model.toLocaleLowerCase()}`
+                )
+                .then((res) => res.data),
+    });
+
+    console.log("==== TESTING REACT QUERY ====");
+    console.log(compositionImages);
 
     // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (

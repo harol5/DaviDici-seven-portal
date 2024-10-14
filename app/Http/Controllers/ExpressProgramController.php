@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Inertia\Inertia;
 use App\FoxproApi\FoxproApi;
+use App\Models\ModelCompositionImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -97,7 +98,7 @@ class ExpressProgramController extends Controller
 
     public function storeImages(Request $request) {
         $request->validate([
-            'textValue' => 'required|string',
+            'model' => 'required|string',
             'images.*' => 'required|image|mimes:webp|max:2048',
         ]);
 
@@ -105,23 +106,31 @@ class ExpressProgramController extends Controller
         $uploadedFiles = $request->file('images');
         $uploadedPaths = [];
 
-        foreach ($uploadedFiles as $file) {
-            // Store the files and get the path
-            // $path = $file->store('images', 'public');
+        foreach ($uploadedFiles as $file) {                        
             $name = $file->getClientOriginalName();      
             $path = $file->store('/images/resource', ['disk' => 'my_files']);
 
-            
-
+            ModelCompositionImage::create([
+                'composition_name' => $name,
+                'model' => $request->all()['model'],
+                'image_url' => $path,
+            ]);
             $uploadedPaths[] = $path;
         }
-
-        // Optionally, you can save the file paths to the database
 
         // Return a response
         return response()->json([
             'message' => 'Files uploaded successfully',
             'uploadedPaths' => $uploadedPaths,
         ]);
+    }
+
+    public function getModelCompositionImages(Request $request) {
+        $model = $request->all()['model'];
+        $images = ModelCompositionImage::select('composition_name','image_url')->where('model', $model)->get();
+
+        return response()->json([
+            'images' => $images,            
+        ]); 
     }
 }

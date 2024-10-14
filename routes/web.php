@@ -20,6 +20,7 @@ Route::get('/users/welcome', [UserController::class, 'welcome']);
 // Express Program routes
 Route::get('/express-program', [ExpressProgramController::class, 'all']);
 Route::post('/express-program/set-product', [ExpressProgramController::class, 'setProduct']);
+Route::get('/express-program/composition-images', [ExpressProgramController::class, 'getModelCompositionImages']);
 Route::get('/express-program/{product}', [ExpressProgramController::class, 'productConfigurator'])->name('expressProgram.product');
 Route::get('/express-program/shopping-cart/products', [ExpressProgramController::class, 'getShoppingCart']);
 Route::post('/express-program/shopping-cart/update', [ExpressProgramController::class, 'updateShoppingCart']);

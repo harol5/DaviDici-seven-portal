@@ -212,7 +212,7 @@
 }
 
 .optionDisabled .imageAndOverlayWrapper .imageOverlay::before {
-    content: "OUT OF STOCK";
+    content: "NOT AVAILABLE";
     color: #000000;
     font-size: 0.6rem;
     text-align: center;
@@ -233,7 +233,7 @@
 }
 
 .finishOption.optionDisabled .imageAndOverlayWrapper .imageOverlay::before {
-    content: "OUT OF STOCK";
+    content: "NOT AVAILABLE";
     font-size: 0.6rem;
     color: #000000;
     position: absolute;
