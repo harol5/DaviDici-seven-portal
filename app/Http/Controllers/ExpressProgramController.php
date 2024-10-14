@@ -107,8 +107,12 @@ class ExpressProgramController extends Controller
 
         foreach ($uploadedFiles as $file) {
             // Store the files and get the path
-            // $path = $file->store('images', 'public');            
+            // $path = $file->store('images', 'public');
+            $name = $file->getClientOriginalName();      
             $path = $file->store('/images/resource', ['disk' => 'my_files']);
+
+            
+
             $uploadedPaths[] = $path;
         }
 

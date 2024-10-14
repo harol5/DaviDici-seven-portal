@@ -71,7 +71,7 @@ function MirrorConfigurator({
 
         return false;
     };
-
+    console.log(ledMirrorOptions);
     return (
         <ItemPropertiesAccordion
             headerTitle="MIRRORS"

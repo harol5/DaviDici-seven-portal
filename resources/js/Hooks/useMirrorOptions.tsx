@@ -112,7 +112,7 @@ function useMirrorOptions(mirrors: ProductInventory[]) {
         ledMirrors.forEach((ledMirror) => {
             all.push({
                 code: ledMirror.uscode,
-                imgUrl: `https://${location.hostname}/images/express-program/not-image.jpg`,
+                imgUrl: `https://${location.hostname}/images/express-program/mirrors/led-mirrors/${ledMirror.uscode}.webp`,
                 title: ledMirror.descw,
                 validSkus: [ledMirror.uscode],
                 isDisabled: false,
@@ -127,7 +127,7 @@ function useMirrorOptions(mirrors: ProductInventory[]) {
         openCompMirrors.forEach((openCompMirror) => {
             all.push({
                 code: openCompMirror.uscode,
-                imgUrl: `https://${location.hostname}/images/express-program/not-image.jpg`,
+                imgUrl: `https://${location.hostname}/images/express-program/mirrors/open-comp/${openCompMirror.uscode}.webp`,
                 title: openCompMirror.descw,
                 validSkus: [openCompMirror.uscode],
                 isDisabled: false,
