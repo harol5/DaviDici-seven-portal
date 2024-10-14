@@ -66,17 +66,16 @@ function ProductExpressProgramCard({
 
 export default ProductExpressProgramCard;
 
-function Finish({
-    composition,
-    finishObj,
-}: {
+interface FinishProps {
     composition: Composition;
     finishObj: {
         finish: string;
         url: string;
     };
-}) {
-    const formatFinishLabel = useMemo(() => {
+}
+
+function Finish({ composition, finishObj }: FinishProps) {
+    const formatFinishLabel = () => {
         if (composition.model === "ELORA" && finishObj.finish.includes("-")) {
             return finishObj.finish.split("-")[0].replace("MATT LACQ. ", "");
         }
@@ -99,11 +98,12 @@ function Finish({
         }
 
         return finishObj.finish;
-    }, []);
+    };
+
     return (
         <div className={classes.finish}>
             <img src={finishObj.url} />
-            <p>{formatFinishLabel}</p>
+            <p>{formatFinishLabel()}</p>
         </div>
     );
 }

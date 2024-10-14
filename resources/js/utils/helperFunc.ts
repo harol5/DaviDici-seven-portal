@@ -49,13 +49,6 @@ export const getSkuAndPrice = (
             itemCodesArray.length !==
             skuLengths[item as keyof typeof skuLengths]
         ) {
-            console.log("======= New getSkuAndPrice func ========");
-            console.log(SkuLengthModels);
-            console.log(model);
-            console.log(item);
-            console.log(itemObj);
-            console.log(skuLengths);
-            console.log(skuAndPrice);
             return skuAndPrice;
         }
 
@@ -73,14 +66,6 @@ export const getSkuAndPrice = (
             }
         }
     }
-
-    console.log("======= New getSkuAndPrice func ========");
-    console.log(SkuLengthModels);
-    console.log(model);
-    console.log(item);
-    console.log(itemObj);
-    console.log(skuLengths);
-    console.log(skuAndPrice);
 
     return skuAndPrice;
 };
