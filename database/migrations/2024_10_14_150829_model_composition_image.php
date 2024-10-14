@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('composition_name');
-            $table->string('model');
-            $table->timestamps();
+        Schema::create('model_composition_image', function (Blueprint $table) {            
+            $table->string('composition_name')->primary();
+            $table->string('model')->index('model');
+            $table->string('image_url');            
         });
     }
 
@@ -24,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('model_composition_image');
     }
 };

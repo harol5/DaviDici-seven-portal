@@ -45,7 +45,11 @@ function useMirrorOptions(mirrors: ProductInventory[]) {
                 mirrorsMap.get("openCompMirrors").push(mirror);
             }
 
-            if (ledMirrorModels[mirror.model as keyof typeof ledMirrorModels]) {
+            if (
+                ledMirrorModels[mirror.model as keyof typeof ledMirrorModels] ||
+                mirror.uscode === "20-LD-V2036-NE-US" ||
+                mirror.uscode === "20-LD-R36-NE-US"
+            ) {
                 mirrorsMap.get("ledMirrors").push(mirror);
             }
         });
