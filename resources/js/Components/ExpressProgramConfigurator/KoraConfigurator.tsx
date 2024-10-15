@@ -26,8 +26,6 @@ import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import MirrorConfigurator from "./MirrorConfigurator";
 import useAccordionState from "../../Hooks/useAccordionState";
 import ConfigurationBreakdown from "./ConfigurationBreakdown";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import useImagesComposition from "../../Hooks/useImagesComposition";
 
 interface KoraConfiguratorProps {
@@ -351,11 +349,18 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
     };
 
     // |===== COMPOSITION IMAGES =====|
-    useImagesComposition(
+    const imageUrls = useImagesComposition(
         composition.model as Model,
+        currentConfiguration.vanitySku,
+        currentConfiguration.isDoubleSink,
+        false,
+        "",
+        false,
         currentConfiguration.currentProducts,
         currentMirrorsConfiguration.currentProducts
     );
+
+    console.log(imageUrls);
 
     // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (
