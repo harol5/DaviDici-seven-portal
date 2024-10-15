@@ -567,7 +567,7 @@ class OrdersController extends Controller
     }
 
     public function testApi()
-    {                            
+    {                      
         // return Inertia::render('Test',['response' => $response]);
         return response(['response' => $response])->header('Content-Type', 'application/json');
     }

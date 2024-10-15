@@ -351,7 +351,11 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
     };
 
     // |===== COMPOSITION IMAGES =====|
-    useImagesComposition(composition.model as Model);
+    useImagesComposition(
+        composition.model as Model,
+        currentConfiguration.currentProducts,
+        currentMirrorsConfiguration.currentProducts
+    );
 
     // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (

@@ -4,16 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Inertia\Inertia;
+use App\Mail\RegisterMail;
+use Illuminate\Support\Str;
 use App\FoxproApi\FoxproApi;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\RegisterMail;
+use Illuminate\Support\Facades\Session;
 
 class UserController extends Controller
 {
@@ -41,7 +42,12 @@ class UserController extends Controller
             'password' => 'required',
         ]);
 
-        if (auth()->attempt($formFields)) {
+        $credentials = [
+            'email' => Str::lower($request->input('email')),
+            'password' => $request->input('password'),
+        ];
+
+        if (auth()->attempt($credentials)) {
             $request->session()->regenerate();
             $defaultIntendedUrl = session()->has('location') ? '/' . session('location') : '/orders';
             return redirect()->intended($defaultIntendedUrl)->with('message', 'You are now logged in!');
