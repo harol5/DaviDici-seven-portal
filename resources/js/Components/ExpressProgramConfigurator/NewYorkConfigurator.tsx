@@ -111,7 +111,6 @@ function NewYorkConfigurator({
                 isDisabled: false,
             });
         });
-
         return all;
     }, []);
 

@@ -28,6 +28,7 @@ import useAccordionState from "../../Hooks/useAccordionState";
 import ConfigurationBreakdown from "./ConfigurationBreakdown";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import useImagesComposition from "../../Hooks/useImagesComposition";
 
 interface KoraConfiguratorProps {
     composition: Composition;
@@ -350,18 +351,7 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
     };
 
     // |===== COMPOSITION IMAGES =====|
-    const { data: compositionImages } = useQuery({
-        queryKey: ["modelImageCompositionData"],
-        queryFn: () =>
-            axios
-                .get(
-                    `/express-program/composition-images?model=${composition.model.toLocaleLowerCase()}`
-                )
-                .then((res) => res.data),
-    });
-
-    console.log("==== TESTING REACT QUERY ====");
-    console.log(compositionImages);
+    useImagesComposition(composition.model as Model);
 
     // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (
