@@ -108,7 +108,7 @@ class ExpressProgramController extends Controller
 
         foreach ($uploadedFiles as $file) {                        
             $name = $file->getClientOriginalName();      
-            $path = $file->store('/images/express_program');
+            $path = $file->store('/images/express_program','public');
             // $path = $file->store('/images/resource', ['disk' => 'my_files']);
 
             ModelCompositionImage::create([
