@@ -155,11 +155,11 @@ function CompositionsListing({ data }: CompositionsListingProps) {
             sizesForFilterSet.add(composition.size);
             sinkPositionsForFilterMap.set(composition.sinkPosition, {
                 name: composition.sinkPosition,
-                url: `https://portal.davidici.com/images/express-program/sink-position/${composition.sinkPosition}.webp`,
+                url: `https://${location.hostname}/images/express-program/sink-position/${composition.sinkPosition}.webp`,
             });
             modelsForFilterMap.set(composition.model, {
                 name: composition.model,
-                url: `https://portal.davidici.com/images/express-program/${composition.model}/${composition.model}.webp`,
+                url: `https://${location.hostname}/images/express-program/${composition.model}/${composition.model}.webp`,
             });
             composition.finishes.forEach((finishObj) =>
                 finishesForFilterMap.set(finishObj.finish, finishObj)

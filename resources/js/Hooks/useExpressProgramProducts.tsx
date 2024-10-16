@@ -255,7 +255,7 @@ function useExpressProgramProducts(
         compositions.push({
             model: model,
             name: `${model} ${size}" Incl a ${washbasins[0].model} SINK`,
-            compositionImage: `https://portal.davidici.com/images/express-program/${model}/${size}.webp`,
+            compositionImage: `https://${location.hostname}/images/express-program/${model}/${size}.webp`,
             size: size,
             sinkPosition: sinkPositionMeasure,
             startingPrice: getStartingPrice(),
@@ -433,7 +433,7 @@ function useExpressProgramProducts(
         compositions.push({
             model: model,
             name: `${model} ${size}" ${sinkPositionMeasure} Incl a ${washbasins[0].model} ${position} SINK`,
-            compositionImage: `https://portal.davidici.com/images/express-program/${model}/${sinkPositionMeasure} ${position} SINK.webp`,
+            compositionImage: `https://${location.hostname}/images/express-program/${model}/${sinkPositionMeasure} ${position} SINK.webp`,
             size: size,
             sinkPosition: position,
             startingPrice: getStartingPrice(),
@@ -566,7 +566,7 @@ function useExpressProgramProducts(
 
                         modelsForFilterMap.set(model, {
                             name: model,
-                            url: `https://portal.davidici.com/images/express-program/${model}/${model}.webp`,
+                            url: `https://${location.hostname}/images/express-program/${model}/${model}.webp`,
                         });
 
                         // MARGI is a special case because it's also classified by door style. this means,
@@ -639,13 +639,6 @@ function useExpressProgramProducts(
                                     validModels.set(model, new Map());
 
                                 validModels.get(model).set("SIDE UNIT", value);
-
-                                // if (
-                                //     model === "NEW YORK" &&
-                                //     sinkPositionMeasure === "(24+12+24)"
-                                // ) {
-                                //     console.log(validModels);
-                                // }
                             }
                         } else {
                             // Once we got the valid model from the side units,
@@ -655,12 +648,6 @@ function useExpressProgramProducts(
 
                             // IMPORTANT!! - "value" could be an array or a map(MARGI <door style, arr>).
                             for (const [model, value] of modelsMap) {
-                                // if (
-                                //     model === "NEW YORK" &&
-                                //     sinkPositionMeasure === "(24+12+24)"
-                                // )
-                                //     continue;
-
                                 //we can get only vanities that can be pair with a side unit.
                                 if (!validModels.has(model)) continue;
                                 validModels.get(model).set("VANITY", value);
@@ -675,7 +662,7 @@ function useExpressProgramProducts(
 
                             modelsForFilterMap.set(model, {
                                 name: model,
-                                url: `https://portal.davidici.com/images/express-program/${model}/${model}.webp`,
+                                url: `https://${location.hostname}/images/express-program/${model}/${model}.webp`,
                             });
 
                             if (model === "MARGI")

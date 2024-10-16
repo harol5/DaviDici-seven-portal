@@ -5,17 +5,21 @@ import { ProductInventory } from "../Models/Product";
 import { useMemo } from "react";
 
 /**
- * TODO:
- * 1, come up with a format for images that has double sink or double side units.
+ * images that have double sink, vanity sku will be named as follows:
+ * 68-VB-024D-P1-OR-double
  *
- * images that include double sink will have at the end of the vanity sku "**2"
- * for example: 56-VB-024-RR**2~other_skus...
+ * images that have vanity position will be named as follows:
+ * 68-VB-024D-P1-left
+ * 68-VB-024D-P1-right
+ *
+ *
  */
 
 function useImagesComposition(
     model: Model,
     vanitySku: string,
     isDoubleSink: boolean,
+    sinkPosition: string,
     hasSideUnit: boolean,
     sideUnitSku: string,
     isDoubleSideUnit: boolean,
@@ -33,19 +37,24 @@ function useImagesComposition(
     });
 
     return useMemo(() => {
-        console.log("==== useImagesComposition (useMemo ran!!) ====");
-        console.log("composition images:", compositionImages);
-        console.log("vanity sku:", vanitySku);
-        console.log("has side unit:", hasSideUnit);
-        console.log("side unit sku:", sideUnitSku);
-
-        if (!vanitySku || (hasSideUnit && !sideUnitSku))
-            return ["not image for this config (display deafult image)"];
+        if (!vanitySku || (hasSideUnit && !sideUnitSku)) return [];
 
         const skus: string[] = [];
 
-        skus.push(`(?=.*${vanitySku})`);
-        hasSideUnit && skus.push(`(?=.*${sideUnitSku})`);
+        const finalVanitySku = isDoubleSink
+            ? `${vanitySku}-double`
+            : sinkPosition === "LEFT" || sinkPosition === "RIGHT"
+            ? `${vanitySku}-${sinkPosition}`
+            : vanitySku;
+
+        hasSideUnit &&
+            skus.push(
+                `(?=.*${
+                    isDoubleSideUnit ? sideUnitSku + "-double" : sideUnitSku
+                })`
+            );
+
+        skus.push(`(?=.*${finalVanitySku})`);
 
         for (const product of currentProducts) {
             if (product.item === "VANITY" || product.item === "SIDE UNIT")
@@ -63,23 +72,13 @@ function useImagesComposition(
 
         if (compositionImages) {
             const { images } = compositionImages;
-
             images.forEach((image: any) => {
                 const name: string = image["composition_name"];
-
-                if (skusRegex.test(name)) {
-                    console.log("== checking image name ==");
-                    console.log("At least one string from the set is present.");
-                    console.log("image name:", name);
-                    console.log("current skus:", skus);
-                    imageUrls.push(image["image_url"]);
-                }
+                if (skusRegex.test(name)) imageUrls.push(image["image_url"]);
             });
         }
 
-        return imageUrls.length === 0
-            ? ["not image for this config (display deafult image)"]
-            : imageUrls;
+        return imageUrls.length === 0 ? [] : imageUrls;
     }, [
         currentProducts,
         currentMirrors,
@@ -90,3 +89,18 @@ function useImagesComposition(
 }
 
 export default useImagesComposition;
+
+// console.log("==== useImagesComposition (useMemo ran!!) ====");
+// console.log("composition images:", compositionImages);
+// console.log("vanity sku:", vanitySku);
+// console.log("has side unit:", hasSideUnit);
+// console.log("side unit sku:", sideUnitSku);
+// console.log("is double sink?", isDoubleSink);
+// console.log("sink position", sinkPosition);
+// console.log("is double side unit", isDoubleSideUnit);
+// console.log("final vanity sku:", finalVanitySku);
+// console.log("skus array for regex:", skus);
+// console.log("== checking image name ==");
+// console.log("At least one string from the set is present.");
+// console.log("image name:", name);
+// console.log("current skus:", skus);

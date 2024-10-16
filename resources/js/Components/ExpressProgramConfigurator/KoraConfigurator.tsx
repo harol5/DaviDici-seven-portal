@@ -27,6 +27,7 @@ import MirrorConfigurator from "./MirrorConfigurator";
 import useAccordionState from "../../Hooks/useAccordionState";
 import ConfigurationBreakdown from "./ConfigurationBreakdown";
 import useImagesComposition from "../../Hooks/useImagesComposition";
+import ImageSlider from "./ImageSlider";
 
 interface KoraConfiguratorProps {
     composition: Composition;
@@ -353,14 +354,13 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
         composition.model as Model,
         currentConfiguration.vanitySku,
         currentConfiguration.isDoubleSink,
+        composition.sinkPosition,
         false,
         "",
         false,
         currentConfiguration.currentProducts,
         currentMirrorsConfiguration.currentProducts
     );
-
-    console.log(imageUrls);
 
     // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (
@@ -651,14 +651,9 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
                     </button>
                 </section>
                 <section className={classes.compositionImageWrapper}>
-                    <img
-                        src={composition.compositionImage}
-                        alt="product image"
-                        onError={(e) => {
-                            (e.target as HTMLImageElement).onerror = null;
-                            (e.target as HTMLImageElement).src =
-                                "https://portal.davidici.com/images/express-program/not-image.jpg";
-                        }}
+                    <ImageSlider
+                        imageUrls={imageUrls}
+                        defaultImage={composition.compositionImage}
                     />
                     <ConfigurationBreakdown
                         productsConfigurator={

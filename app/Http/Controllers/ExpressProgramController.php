@@ -127,7 +127,7 @@ class ExpressProgramController extends Controller
 
     public function getModelCompositionImages(Request $request) {
         $model = $request->all()['model'];
-        $images = ModelCompositionImage::select('composition_name','image_url')->where('model', $model)->get();
+        $images = ModelCompositionImage::select('composition_name','image_url')->where('model', $model)->orderBy('composition_name')->get();
 
         return response()->json([
             'images' => $images,            

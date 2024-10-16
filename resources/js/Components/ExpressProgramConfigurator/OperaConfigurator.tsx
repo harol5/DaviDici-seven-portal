@@ -32,6 +32,7 @@ import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import { router } from "@inertiajs/react";
 import useAccordionState from "../../Hooks/useAccordionState";
 import ConfigurationBreakdown from "./ConfigurationBreakdown";
+import useImagesComposition from "../../Hooks/useImagesComposition";
 
 interface OperaConfiguratorProps {
     composition: Composition;
@@ -743,6 +744,21 @@ function OperaConfigurator({
             payload: updatedCurrentProducts,
         });
     };
+
+    // |===== COMPOSITION IMAGES =====|
+    const imageUrls = useImagesComposition(
+        composition.model as Model,
+        currentConfiguration.vanitySku,
+        currentConfiguration.isDoubleSink,
+        composition.sinkPosition,
+        sideUnitOptions ? true : false,
+        currentConfiguration.sideUnitSku,
+        currentConfiguration.isDoubleSideUnit,
+        currentConfiguration.currentProducts,
+        currentMirrorsConfiguration.currentProducts
+    );
+
+    console.log(imageUrls);
 
     // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (

@@ -6,6 +6,7 @@ import axios from "axios";
 function Media({ auth }: { auth: User }) {
     const [model, setModel] = useState("");
     const [files, setFiles] = useState<FileList | null>(null);
+    const [response, setResponse] = useState("");
 
     const handleTextChange = (e: ChangeEvent<HTMLSelectElement>) => {
         setModel(e.target.value);
@@ -42,11 +43,14 @@ function Media({ auth }: { auth: User }) {
             .then((response) => {
                 // Handle success (optional: redirect or show a success message)
                 console.log(response.data);
-                // Inertia.visit("/some-route"); // Example inertia visit
+                setResponse("ok");
+                setModel("");
+                setFiles(null);
             })
             .catch((error) => {
                 // Handle error (optional: display an error message)
                 console.error("There was an error uploading the files", error);
+                setResponse("error");
             });
     };
 
@@ -84,6 +88,14 @@ function Media({ auth }: { auth: User }) {
                 </div>
                 <button type="submit">Submit</button>
             </form>
+            {response === "ok" && (
+                <p className="text-green-600">Images uploaded successfully!</p>
+            )}
+            {response === "error" && (
+                <p className="text-red-600">
+                    Error on the server. DO NOT TRY to upload any pictures
+                </p>
+            )}
         </UserAuthenticatedLayout>
     );
 }
