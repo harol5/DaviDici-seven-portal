@@ -39,7 +39,7 @@ function ImageSlider({ imageUrls, defaultImage }: ImageSlider) {
                     {imageUrls.map((image, index) => (
                         <img
                             key={index}
-                            src={`https://${location.hostname}/${image}`}
+                            src={`https://${location.hostname}/storage/${image}`}
                             className={
                                 crrImageIndex === index
                                     ? classes.display
