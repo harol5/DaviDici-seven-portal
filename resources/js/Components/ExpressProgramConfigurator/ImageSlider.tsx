@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import classes from "../../../css/image-slider.module.css";
 import Modal from "../Modal";
 
-interface ImageSlider {
+interface ImageSliderProps {
     imageUrls: string[];
     defaultImage: string;
 }
 
-function ImageSlider({ imageUrls, defaultImage }: ImageSlider) {
+function ImageSlider({ imageUrls, defaultImage }: ImageSliderProps) {
     const [crrImageIndex, setCrrImageIndex] = useState(0);
     const [openCompositionImageModal, setOpenCompositionImageModal] =
         useState(false);
@@ -79,9 +79,12 @@ function ImageSlider({ imageUrls, defaultImage }: ImageSlider) {
                         </div>
                     </>
                 )}
-                {/* <button onClick={() => setOpenCompositionImageModal(true)}>
-                    open big
-                </button> */}
+                <img
+                    className={classes.expandImageIcon}
+                    src={`https://${location.hostname}/images/expand.svg`}
+                    onClick={() => setOpenCompositionImageModal(true)}
+                    alt="expand image"
+                />
             </div>
             <Modal
                 show={openCompositionImageModal}
@@ -89,7 +92,7 @@ function ImageSlider({ imageUrls, defaultImage }: ImageSlider) {
                 customClass={classes.imageSliderModal}
             >
                 <button onClick={() => setOpenCompositionImageModal(false)}>
-                    close
+                    Close
                 </button>
                 <div className={classes.imageSlider}>
                     {imageUrls.length === 0 && (
