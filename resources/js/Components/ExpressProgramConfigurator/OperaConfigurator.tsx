@@ -746,17 +746,17 @@ function OperaConfigurator({
     };
 
     // |===== COMPOSITION IMAGES =====|
-    const imageUrls = useImagesComposition(
-        composition.model as Model,
-        currentConfiguration.vanitySku,
-        currentConfiguration.isDoubleSink,
-        composition.sinkPosition,
-        sideUnitOptions ? true : false,
-        currentConfiguration.sideUnitSku,
-        currentConfiguration.isDoubleSideUnit,
-        currentConfiguration.currentProducts,
-        currentMirrorsConfiguration.currentProducts
-    );
+    const imageUrls = useImagesComposition({
+        model: composition.model as Model,
+        vanitySku: currentConfiguration.vanitySku,
+        isDoubleSink: currentConfiguration.isDoubleSink,
+        sinkPosition: composition.sinkPosition,
+        hasSideUnit: sideUnitOptions ? true : false,
+        sideUnitSku: currentConfiguration.sideUnitSku,
+        isDoubleSideUnit: currentConfiguration.isDoubleSideUnit,
+        currentProducts: currentConfiguration.currentProducts,
+        currentMirrors: currentMirrorsConfiguration.currentProducts,
+    });
 
     console.log(imageUrls);
 

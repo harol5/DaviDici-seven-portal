@@ -350,17 +350,17 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
     };
 
     // |===== COMPOSITION IMAGES =====|
-    const imageUrls = useImagesComposition(
-        composition.model as Model,
-        currentConfiguration.vanitySku,
-        currentConfiguration.isDoubleSink,
-        composition.sinkPosition,
-        false,
-        "",
-        false,
-        currentConfiguration.currentProducts,
-        currentMirrorsConfiguration.currentProducts
-    );
+    const imageUrls = useImagesComposition({
+        model: composition.model as Model,
+        vanitySku: currentConfiguration.vanitySku,
+        isDoubleSink: currentConfiguration.isDoubleSink,
+        sinkPosition: composition.sinkPosition,
+        hasSideUnit: false,
+        sideUnitSku: "",
+        isDoubleSideUnit: false,
+        currentProducts: currentConfiguration.currentProducts,
+        currentMirrors: currentMirrorsConfiguration.currentProducts,
+    });
 
     // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (

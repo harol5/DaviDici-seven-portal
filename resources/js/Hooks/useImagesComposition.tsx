@@ -15,17 +15,29 @@ import { useMemo } from "react";
  *
  */
 
-function useImagesComposition(
-    model: Model,
-    vanitySku: string,
-    isDoubleSink: boolean,
-    sinkPosition: string,
-    hasSideUnit: boolean,
-    sideUnitSku: string,
-    isDoubleSideUnit: boolean,
-    currentProducts: ProductInventory[],
-    currentMirrors: ProductInventory[]
-) {
+interface useImagesCompositionProps {
+    model: Model;
+    vanitySku: string;
+    isDoubleSink: boolean;
+    sinkPosition: string;
+    hasSideUnit: boolean;
+    sideUnitSku: string;
+    isDoubleSideUnit: boolean;
+    currentProducts: ProductInventory[];
+    currentMirrors: ProductInventory[];
+}
+
+function useImagesComposition({
+    model,
+    vanitySku,
+    isDoubleSink,
+    sinkPosition,
+    hasSideUnit,
+    sideUnitSku,
+    isDoubleSideUnit,
+    currentProducts,
+    currentMirrors,
+}: useImagesCompositionProps) {
     const { data: compositionImages } = useQuery({
         queryKey: ["modelImagesCompositionData"],
         queryFn: () =>
