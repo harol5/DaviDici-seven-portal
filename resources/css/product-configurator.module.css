@@ -298,7 +298,7 @@
 }
 
 @media (max-width: 1600px) {
-    .leftSideConfiguratorWrapper .compositionImageWrapper img {
+    .leftSideConfiguratorWrapper .compositionImageWrapper > img {
         width: 85%;
     }
 }
