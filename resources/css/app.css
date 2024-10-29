@@ -1082,3 +1082,22 @@ main {
         margin: 2.2em 0;
     }
 }
+
+@media print {
+    nav {
+        border: none;
+    }
+    .nav-links {
+        display: none;
+    }
+    .settings-wrapper {
+        display: none;
+    }
+
+    .nav-logo {
+        width: 500px;
+    }
+    .homeAndNavLogoWrapper .home-logo {
+        display: none;
+    }
+}

@@ -349,3 +349,38 @@
         width: 30%;
     }
 }
+
+@media print {
+    .configurationName {
+        display: none;
+    }
+
+    .leftSideConfiguratorWrapper .backButtonAndNameWrapper {
+        justify-content: center;
+    }
+
+    .backButtonWrapper img,
+    .backButtonWrapper p {
+        display: none;
+    }
+
+    .resetButton {
+        display: none;
+    }
+
+    .leftSideConfiguratorWrapper .compositionImageWrapper {
+        border: none;
+    }
+
+    .grandTotalAndOrderNowButtonWrapper {
+        position: static;
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .grandTotalAndOrderNowButtonWrapper button,
+    .grandTotalAndOrderNowButtonWrapper .specsLink {
+        display: none;
+    }
+}

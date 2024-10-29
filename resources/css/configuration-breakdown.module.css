@@ -78,3 +78,19 @@
         }
     }
 }
+
+@media print {
+    .breakdownWrapper {
+        position: static;
+
+        .configurationBreakdown {
+            .configurationBreakdownContent {
+                padding: 0;
+            }
+        }
+
+        .breakdownButton {
+            display: none;
+        }
+    }
+}

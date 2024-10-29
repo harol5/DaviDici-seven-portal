@@ -67,3 +67,9 @@
         border: #d1aa68 1px solid;
     }
 }
+
+@media print {
+    .expandImageIcon {
+        display: none;
+    }
+}

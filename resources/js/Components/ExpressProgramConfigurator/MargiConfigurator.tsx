@@ -1328,6 +1328,12 @@ function MargiConfigurator({
                     <h1>{composition.name}</h1>
                     <button
                         className={classes.resetButton}
+                        onClick={() => print()}
+                    >
+                        PRINT
+                    </button>
+                    <button
+                        className={classes.resetButton}
                         onClick={handleResetConfigurator}
                     >
                         RESET

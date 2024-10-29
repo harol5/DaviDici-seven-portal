@@ -67,7 +67,7 @@ function ConfigurationBreakdown({
                     src={`https://${location.hostname}/images/arrow-down.svg`}
                     alt="triangle pointing down"
                 />
-                current config
+                Current Config
                 <img
                     className={getTriangleIconClasses()}
                     src={`https://${location.hostname}/images/arrow-down.svg`}

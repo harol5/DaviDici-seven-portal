@@ -27,6 +27,9 @@ function OrderDetails({
     rawProducts,
     isPaymentSubmitted,
 }: OrderDetailsProps) {
+    console.log("==========");
+    console.log(rawOrder);
+    console.log(rawProducts);
     const formatOrder = () => {
         const subtotal = Number.parseFloat(rawOrder.subtotal as string);
         const totcredit = Number.parseFloat(rawOrder.totcredit as string);
@@ -34,6 +37,7 @@ function OrderDetails({
 
         return { ...rawOrder, subtotal, totcredit, total };
     };
+
     const formatProducts = () => {
         return rawProducts.filter(
             (product) => product.item !== "3% Credit Card Charge"
