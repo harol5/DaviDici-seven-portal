@@ -35,6 +35,8 @@ Route::middleware(['auth','auth.session'])->group(function () {
     Route::post('/users/add-to-portal/add', [UserController::class, 'addUserToPortal']);
     Route::get('/media', [ExpressProgramController::class, 'fileForm']);
     Route::post('/media/upload-images', [ExpressProgramController::class, 'storeImages']);
+    Route::get('/media/images', [ExpressProgramController::class, 'getAllCompositionImages']);
+    Route::post('/media/images/delete', [ExpressProgramController::class, 'deleteImages']);
 
     // Owner only endpoints.    
     Route::get('/register/salesperson', [UserController::class, 'registerSalesPerson'])->name('user.register.salesperson');

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 
 
 class ExpressProgramController extends Controller
@@ -134,4 +135,29 @@ class ExpressProgramController extends Controller
             'images' => $images,            
         ]); 
     }
+
+    // get all images.
+    public function getAllCompositionImages() {
+        $images = ModelCompositionImage::all();
+
+        return response()->json([
+            'images' => $images,            
+        ]); 
+    }
+
+    // delete image.
+    public function deleteImages(Request $request) {
+        $name = $request->all()['name'];
+        $imageUrl = $request->all()['url'];
+
+        $res = ModelCompositionImage::destroy($name);        
+        Storage::delete('public/' . $imageUrl);
+
+        return response()->json([
+            'deleted' => $res,            
+        ]); 
+    }
+
+
+    // replace image (if image with same name is uploaded);
 }

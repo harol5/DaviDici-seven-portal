@@ -56,7 +56,7 @@ function useImagesComposition({
         const finalVanitySku = isDoubleSink
             ? `${vanitySku}-double`
             : sinkPosition === "LEFT" || sinkPosition === "RIGHT"
-            ? `${vanitySku}-${sinkPosition}`
+            ? `${vanitySku}-${sinkPosition.toLowerCase()}`
             : vanitySku;
 
         hasSideUnit &&
