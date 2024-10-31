@@ -123,7 +123,15 @@ function useExpressProgramProducts(
                     if (sinkConfig) {
                         if (!sinkPosition.has(sinkConfig[0]))
                             sinkPosition.set(sinkConfig[0], []);
+
                         sinkPosition.get(sinkConfig[0]).push(product);
+
+                        if (sinkConfig[0] === "CENTERED") {
+                            if (!sinkPositionsMap.has("CENTERED"))
+                                sinkPositionsMap.set("CENTERED", []);
+
+                            sinkPositionsMap.get("CENTERED").push(product);
+                        }
                     }
                 } else {
                     if (!sinkPositionsMap.has("CENTERED"))
@@ -133,7 +141,10 @@ function useExpressProgramProducts(
                 }
             }
         }
-
+        console.log(vanitiesAndSideUnitsMap);
+        console.log(otherProductsMap);
+        console.log(validCompositionSizesMap);
+        console.log(sharedItemsMap);
         return {
             vanitiesAndSideUnitsMap,
             validCompositionSizesMap,

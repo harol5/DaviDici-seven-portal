@@ -59,14 +59,14 @@ function useImagesComposition({
             ? `${vanitySku}-${sinkPosition.toLowerCase()}`
             : vanitySku;
 
+        skus.push(`(?=.*${finalVanitySku})`);
+
         hasSideUnit &&
             skus.push(
                 `(?=.*${
                     isDoubleSideUnit ? sideUnitSku + "-double" : sideUnitSku
                 })`
             );
-
-        skus.push(`(?=.*${finalVanitySku})`);
 
         for (const product of currentProducts) {
             if (product.item === "VANITY" || product.item === "SIDE UNIT")
@@ -84,10 +84,27 @@ function useImagesComposition({
 
         if (compositionImages) {
             const { images } = compositionImages;
-            images.forEach((image: any) => {
+
+            // console.log(skusRegex);
+            // console.log(images);
+
+            for (const image of images) {
                 const name: string = image["composition_name"];
-                if (skusRegex.test(name)) imageUrls.push(image["image_url"]);
-            });
+
+                // console.log("=========");
+                // console.log(image);
+                // console.log(skusRegex.test(name));
+
+                if (skusRegex.test(name)) {
+                    if (
+                        !hasSideUnit &&
+                        (name.includes("left") || name.includes("right"))
+                    )
+                        continue;
+
+                    imageUrls.push(image["image_url"]);
+                }
+            }
         }
 
         return imageUrls.length === 0 ? [] : imageUrls;
