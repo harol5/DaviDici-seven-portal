@@ -141,10 +141,7 @@ function useExpressProgramProducts(
                 }
             }
         }
-        console.log(vanitiesAndSideUnitsMap);
-        console.log(otherProductsMap);
-        console.log(validCompositionSizesMap);
-        console.log(sharedItemsMap);
+
         return {
             vanitiesAndSideUnitsMap,
             validCompositionSizesMap,
@@ -255,17 +252,29 @@ function useExpressProgramProducts(
                 ? vanities[0].sprice
                 : vanities[0].msrp;
 
-            const washbasinPrice = washbasins[0].sprice
-                ? washbasins[0].sprice
-                : washbasins[0].msrp;
+            let washbasinPrice = 0;
+            if (washbasins.length !== 0) {
+                washbasinPrice = washbasins[0].sprice
+                    ? washbasins[0].sprice
+                    : washbasins[0].msrp;
+            }
 
             return vanityPrice + washbasinPrice;
+        };
+
+        const getName = () => {
+            let base = `${model} ${size}"`;
+            base +=
+                washbasins.length !== 0
+                    ? ` Incl a ${washbasins[0].model} SINK`
+                    : "";
+            return base;
         };
 
         // Add constructed composition to array.
         compositions.push({
             model: model,
-            name: `${model} ${size}" Incl a ${washbasins[0].model} SINK`,
+            name: getName(),
             compositionImage: `https://${location.hostname}/images/express-program/${model}/${size}.webp`,
             size: size,
             sinkPosition: sinkPositionMeasure,
@@ -554,6 +563,30 @@ function useExpressProgramProducts(
         const finishesForFilterMap = new Map();
         const sinkPositionsForFilterMap = new Map<string, SinkPositionObj>();
         const modelsForFilterMap = new Map<string, ModelObj>();
+
+        // ONLY FOR THOSE MODELS THAT HAVE INTEGRATED SINK
+        if (vanitiesAndSideUnitsMap.get("VANITY").has("20")) {
+            initialSizesForFilter.push("20");
+            const modelsMap = vanitiesAndSideUnitsMap.get("VANITY").get("20");
+            for (const [model, products] of modelsMap) {
+                modelsForFilterMap.set(model, {
+                    name: model,
+                    url: `https://${location.hostname}/images/express-program/${model}/${model}.webp`,
+                });
+                generateCenteredSinkCompositions(
+                    products,
+                    finishesForFilterMap,
+                    sinkPositionsForFilterMap,
+                    initialCompositions,
+                    model,
+                    "20",
+                    "CENTERED",
+                    [],
+                    otherProductsMap,
+                    sharedItemsMap
+                );
+            }
+        }
 
         // Traverse throght validCompositionSizesMap so we can create all possible compositions.
         // SIZE -> SINK SET UP -> SINK POSITION.

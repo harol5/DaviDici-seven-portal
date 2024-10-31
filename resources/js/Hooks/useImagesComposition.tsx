@@ -49,7 +49,8 @@ function useImagesComposition({
     });
 
     return useMemo(() => {
-        if (!vanitySku || (hasSideUnit && !sideUnitSku)) return [];
+        // if (!vanitySku || (hasSideUnit && !sideUnitSku)) return [];
+        if (!vanitySku) return [];
 
         const skus: string[] = [];
 
@@ -63,9 +64,9 @@ function useImagesComposition({
 
         hasSideUnit &&
             skus.push(
-                `(?=.*${
+                `(.*${
                     isDoubleSideUnit ? sideUnitSku + "-double" : sideUnitSku
-                })`
+                })?`
             );
 
         for (const product of currentProducts) {
