@@ -40,7 +40,7 @@ export type ShoppingCartProduct = {
     label: string;
     vanity: ProductInventory;
     sideUnits: ProductInventory[];
-    washbasin: ProductInventory;
+    washbasin: ProductInventory | null;
     otherProducts: OtherItems;
     isDoubleSink: boolean;
     isDoubleSideunit: boolean;

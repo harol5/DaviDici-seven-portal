@@ -149,6 +149,7 @@ function ShoppingCart({
 
             SKU.push(skusArr.join("~"));
         });
+
         router.get("/orders/create-so-num", {
             SKU: SKU.join("~"),
             isShoppingCart: true,

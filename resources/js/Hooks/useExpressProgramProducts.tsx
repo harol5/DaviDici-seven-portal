@@ -164,6 +164,10 @@ function useExpressProgramProducts(
                 finish = vanity.finish.replace("/", "-");
             }
 
+            if (finish === "MATT LACQ. WHITE-INDIGO") {
+                finish = "MATT LACQ. INDIGO";
+            }
+
             const finishObj = {
                 type: vanity.fintype,
                 finish: finish,
@@ -569,6 +573,7 @@ function useExpressProgramProducts(
             initialSizesForFilter.push("20");
             const modelsMap = vanitiesAndSideUnitsMap.get("VANITY").get("20");
             for (const [model, products] of modelsMap) {
+                if (model === "MINI" || model === "FLORA 20") continue;
                 modelsForFilterMap.set(model, {
                     name: model,
                     url: `https://${location.hostname}/images/express-program/${model}/${model}.webp`,

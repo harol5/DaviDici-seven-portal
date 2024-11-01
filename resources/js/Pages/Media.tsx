@@ -114,6 +114,7 @@ function Media({ auth }: { auth: User }) {
                             <option value="new bali">new bali</option>
                             <option value="new york">new york</option>
                             <option value="opera">opera</option>
+                            <option value="raffaello">raffaello</option>
                         </select>
                     </div>
                     <div>
@@ -160,6 +161,7 @@ function Media({ auth }: { auth: User }) {
                             <option value="new bali">new bali</option>
                             <option value="new york">new york</option>
                             <option value="opera">opera</option>
+                            <option value="raffaello">raffaello</option>
                         </select>
                     </div>
                     <div className="flex justify-center overflow-auto flex-wrap">

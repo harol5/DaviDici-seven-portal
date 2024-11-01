@@ -14,6 +14,11 @@ import {
 } from "../../utils/helperFunc";
 import { ProductInventory } from "../../Models/Product";
 import { Model } from "../../Models/ModelConfigTypes";
+import useImagesComposition from "../../Hooks/useImagesComposition";
+import ImageSlider from "./ImageSlider";
+import ConfigurationBreakdown from "./ConfigurationBreakdown";
+import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
+import useAccordionState from "../../Hooks/useAccordionState";
 
 /**
  * TODO;
@@ -29,6 +34,7 @@ interface CurrentConfiguration {
     vanity: string;
     vanityPrice: number;
     label: string;
+    currentProducts: ProductInventory[];
 }
 
 function OtherModelsConfigurator({
@@ -38,7 +44,7 @@ function OtherModelsConfigurator({
     // iterate over vanitites array and analize sku in order to get the valid options to get final sku. -------------|
     const initialVanityOptions = useMemo(() => {
         const all: Option[] = [];
-        composition.vanities.forEach((vanity, index) => {
+        composition.vanities.forEach((vanity) => {
             all.push({
                 code: vanity.uscode,
                 imgUrl: `https://${location.hostname}/images/express-program/${composition.model}/${vanity.uscode}.webp`,
@@ -61,14 +67,15 @@ function OtherModelsConfigurator({
             composition.vanities,
             vanityOptions[0].code
         );
-        console.log("===initialConfiguration====");
-        console.log(composition);
-        console.log(vanityOptions);
+        const currentProducts: ProductInventory[] = [];
+        skuAndPrice.product !== null &&
+            currentProducts.push(skuAndPrice.product);
 
         return {
             label: "",
             vanity: skuAndPrice.sku,
             vanityPrice: skuAndPrice.price,
+            currentProducts,
         };
     }, []);
 
@@ -110,6 +117,28 @@ function OtherModelsConfigurator({
         initialConfiguration
     );
 
+    // |===== COMPOSITION IMAGES =====|
+    const imageUrls = useImagesComposition({
+        model: composition.model as Model,
+        vanitySku: currentConfiguration.vanity,
+        isDoubleSink: false,
+        sinkPosition: composition.sinkPosition,
+        hasSideUnit: false,
+        sideUnitSku: "",
+        isDoubleSideUnit: false,
+        currentProducts: currentConfiguration.currentProducts,
+        currentMirrors: [],
+    });
+
+    // |===== ACCORDION =====|
+    const { accordionState, handleAccordionState, handleOrderedAccordion } =
+        useAccordionState();
+
+    const accordionsOrder = useMemo(() => {
+        let arr: string[] = ["vanity"];
+        return arr;
+    }, []);
+
     // |====== Events ======|
     const handleOptionSelected = (
         item: string,
@@ -122,25 +151,6 @@ function OtherModelsConfigurator({
                 item,
                 {},
                 composition.vanities,
-                option
-            );
-
-            dispatch({
-                type: `set-${item}-type`,
-                payload: skuAndPrice.sku,
-            });
-            dispatch({
-                type: `set-${item}-price`,
-                payload: skuAndPrice.price,
-            });
-        }
-
-        if (item === "washbasin") {
-            const skuAndPrice = getSkuAndPrice(
-                composition.model as Model,
-                item,
-                {},
-                composition.washbasins,
                 option
             );
 
@@ -257,13 +267,16 @@ function OtherModelsConfigurator({
             label,
             vanity: vanityObj!,
             sideUnits: [],
-            washbasin: {} as ProductInventory,
+            washbasin: null,
             otherProducts,
             isDoubleSink: false,
             isDoubleSideunit: false,
             quantity: 1,
             grandTotal: grandTotal,
         };
+
+        console.log("=== handleAddToCart ===");
+        console.log(shoppingCartObj);
 
         onAddToCart(shoppingCartObj);
     };
@@ -285,20 +298,29 @@ function OtherModelsConfigurator({
                     <h1>{composition.name}</h1>
                     <button
                         className={classes.resetButton}
+                        onClick={() => print()}
+                    >
+                        PRINT
+                    </button>
+                    <button
+                        className={classes.resetButton}
                         onClick={handleResetConfigurator}
                     >
                         RESET
                     </button>
                 </section>
                 <section className={classes.compositionImageWrapper}>
-                    <img
-                        src={composition.compositionImage}
-                        alt="product image"
-                        onError={(e) => {
-                            (e.target as HTMLImageElement).onerror = null;
-                            (e.target as HTMLImageElement).src =
-                                "https://portal.davidici.com/images/express-program/not-image.jpg";
-                        }}
+                    <ImageSlider
+                        imageUrls={imageUrls}
+                        defaultImage={composition.compositionImage}
+                    />
+                    <ConfigurationBreakdown
+                        productsConfigurator={
+                            currentConfiguration.currentProducts
+                        }
+                        mirrorProductsConfigurator={[]}
+                        isDoubleSink={false}
+                        isDoubleSideUnit={false}
                     />
                 </section>
             </section>
@@ -309,14 +331,25 @@ function OtherModelsConfigurator({
                     isMissingLabel={isMissingLabel}
                     isInvalidLabel={isInvalidLabel}
                 />
-                <Options
+                <ItemPropertiesAccordion
+                    headerTitle="VANITY"
                     item="vanity"
-                    property="type"
-                    title="SELECT VANITY"
-                    options={vanityOptions}
-                    crrOptionSelected={currentConfiguration.vanity}
-                    onOptionSelected={handleOptionSelected}
-                />
+                    isOpen={accordionState.vanity}
+                    onClick={handleAccordionState}
+                    buttons={"none"}
+                    accordionsOrder={accordionsOrder}
+                    onNavigation={handleOrderedAccordion}
+                >
+                    <Options
+                        item="vanity"
+                        property="type"
+                        title="SELECT VANITY"
+                        options={vanityOptions}
+                        crrOptionSelected={currentConfiguration.vanity}
+                        onOptionSelected={handleOptionSelected}
+                    />
+                </ItemPropertiesAccordion>
+
                 <div className={classes.grandTotalAndOrderNowButtonWrapper}>
                     <div className={classes.grandTotalWrapper}>
                         <h1 className={classes.label}>Grand Total:</h1>

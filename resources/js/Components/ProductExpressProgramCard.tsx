@@ -40,7 +40,10 @@ function ProductExpressProgramCard({
                         <div className={classes.nameAndPriceWrapper}>
                             <h1 className={classes.compositionName}>
                                 {splitedCompositionName[0]} <br />
-                                Incl{splitedCompositionName[1]}
+                                {composition.model === "RAFFAELLO"
+                                    ? ""
+                                    : "Incl"}
+                                {splitedCompositionName[1]}
                             </h1>
                             <p className={classes.startingPriceLabel}>
                                 Starting at ${composition.startingPrice}
