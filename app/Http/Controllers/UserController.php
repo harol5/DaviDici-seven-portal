@@ -522,9 +522,13 @@ class UserController extends Controller
     public function updatePassword(Request $request)
     {
         $data = $request->all();
-        
-        // will return 0 if could not find user with that email.
-        $queryResponse = User::where('email', $data['email'])->update(['password' => bcrypt($data['password'])]);
+
+        if (!array_key_exists('email',$data) || !array_key_exists('password',$data)) {
+            return response(['message' => 'missing information'])->header('Content-Type', 'application/json');
+        }
+                
+        // will return 0 if could not find user with that email.        
+        $queryResponse = User::where('email', Str::lower($data['email']))->update(['password' => bcrypt($data['password'])]);
 
         if ($queryResponse === 0) {
             return response(['message' => 'no user found'])->header('Content-Type', 'application/json');    
