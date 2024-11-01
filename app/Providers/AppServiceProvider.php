@@ -25,6 +25,10 @@ class AppServiceProvider extends ServiceProvider
             return $user->role === 3478;
         });
 
+        Gate::define('generate-token', function (User $user) {
+            return $user->role === 3478;
+        });
+
         Gate::define('create-salesperson', function (User $user) {
             return $user->role === 3478 || $user->role === 1919;
         });

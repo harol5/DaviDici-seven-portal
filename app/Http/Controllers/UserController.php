@@ -256,6 +256,7 @@ class UserController extends Controller
         if (Gate::allows('create-salesperson')) {
             return Inertia::render('Users/SalesPersonRegister');
         }
+
         abort(403);
     }
 
@@ -506,5 +507,29 @@ class UserController extends Controller
         Log::error("=VVVVV===ERROR REQUESTING DATA FROM FOXPRO. function: SAVESLMNINFO ====VVVVV");
         Log::error($saveSalepersonInfoResponse);
         return redirect('/orders')->with(['message' => 'something went wrong. Please contact support']);;
+    }
+
+    public function generateToken(Request $request)
+    {
+        if (Gate::allows('generate-token')) {
+            $token = $request->user()->createToken('seven_configurator');        
+            return response(['token' => $token->plainTextToken])->header('Content-Type', 'application/json');
+        }
+        
+        abort(403);
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $data = $request->all();
+        
+        // will return 0 if could not find user with that email.
+        $queryResponse = User::where('email', $data['email'])->update(['password' => bcrypt($data['password'])]);
+
+        if ($queryResponse === 0) {
+            return response(['message' => 'no user found'])->header('Content-Type', 'application/json');    
+        }
+
+        return response(['message' => 'user updated'])->header('Content-Type', 'application/json');
     }
 }
