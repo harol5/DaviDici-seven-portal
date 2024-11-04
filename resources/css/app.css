@@ -55,7 +55,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: 400px;
+    height: 430px;
 }
 
 #LogoDiv {
@@ -91,6 +91,7 @@
     border: 0px;
     font-size: 1.15em;
     cursor: pointer;
+    width: 30%;
 }
 
 /*===========NAVBAR STYLING==============*/

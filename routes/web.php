@@ -11,6 +11,10 @@ use App\Http\Controllers\ExpressProgramController;
 Route::get('/', [UserController::class, 'login'])->name('login');
 
 Route::post('/auth', [UserController::class, 'authenticate']);
+Route::post('/users/forgot-pwd', [UserController::class, 'sendChangePwdEmail']);
+Route::post('/users/update/pwd/handle', [UserController::class, 'handleChangePwd']);
+Route::get('/users/update/pwd/{email}', [UserController::class, 'changePwdForm'])->name('user.change-pwd');
+
 
 // Only admin routes or by signed url.
 Route::get('/register', [UserController::class, 'register'])->name('user.register');
@@ -28,9 +32,7 @@ Route::post('/express-program/shopping-cart/update', [ExpressProgramController::
 Route::middleware(['auth','auth.session'])->group(function () {
 
     // Admin only endpoints.
-    Route::post('/users/invite', [UserController::class, 'sendInvitation']);
-    Route::get('/users/change-password', [UserController::class, 'showFormChangePassword']);
-    Route::post('/users/change-password/handle', [UserController::class, 'ChangePassword']);
+    Route::post('/users/invite', [UserController::class, 'sendInvitation']);    
     Route::get('/users/add-to-portal', [UserController::class, 'showFormAddUserToPortal']);
     Route::post('/users/add-to-portal/add', [UserController::class, 'addUserToPortal']);
     Route::get('/media', [ExpressProgramController::class, 'fileForm']);

@@ -1,19 +1,27 @@
 import { useEffect, useState } from "react";
 
-function FlashMessage({ message }: { message: string }) {
+function FlashMessage({
+    message,
+    time = 3000,
+}: {
+    message: string;
+    time?: number;
+}) {
     const [flashMessage, setMessage] = useState(message);
 
     useEffect(() => {
-        if (flashMessage) {
+        if (message) {
+            setMessage(message);
+
             const timeout = setTimeout(() => {
                 setMessage("");
-            }, 3000);
+            }, time);
 
             return () => {
                 clearTimeout(timeout);
             };
         }
-    }, [flashMessage]);
+    }, [message]);
 
     return flashMessage ? (
         <div

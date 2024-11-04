@@ -21,8 +21,7 @@ class UserController extends Controller
     // Show login form ----------
     public function login(Request $request)
     {
-        $message = $request->session()->get('message');
-
+        $message = $request->session()->get('message');        
         $location = $request->query('location', '');
         if ($location) $request->session()->flash('location', $location);
 
@@ -192,12 +191,6 @@ class UserController extends Controller
         $name = $request->session()->get('name');
         $error = $request->session()->get('error');
         return Inertia::render('Welcome', ['name' => $name, 'error' => $error]);
-    }
-
-    // show change password form (admin only) ------------
-    public function showFormChangePassword()
-    {
-        return Inertia::render('Users/ChangePassword');
     }
 
     // Change user password (admin only) ----------------------
@@ -519,6 +512,7 @@ class UserController extends Controller
         abort(403);
     }
 
+    // for SEVEN configurator Only!!
     public function updatePassword(Request $request)
     {
         $data = $request->all();
@@ -535,5 +529,81 @@ class UserController extends Controller
         }
 
         return response(['message' => 'user updated'])->header('Content-Type', 'application/json');
+    }
+
+    public function sendChangePwdEmail(Request $request)
+    {
+        $formFields = $request->validate([
+            'email' => ['required', 'email'],            
+        ]);       
+        
+        $queryResponse = User::where('email', Str::lower($formFields['email']))->first();
+
+        if ($queryResponse) {            
+            // generate url
+            $url = URL::temporarySignedRoute(
+                'user.change-pwd',
+                now()->addMinutes(20),
+                ['email' => $queryResponse->email],
+            );
+
+            // create email template                
+            $options = [
+                'from' => 'not-reply@mg.davidici.com',
+                'to' => $queryResponse->email,
+                'subject' => 'Davidici - Request: Change password',
+                'html' => view('emails.setNewUserPassword', ['name' => $queryResponse->first_name, 'url' => $url])->render(),
+            ];
+
+            // send email
+            $response = Http::withHeaders([
+                'Authorization' => 'Basic ' . base64_encode('api' . ':' . env('MAILGUN_SECRET')),
+            ])->asMultipart()->post(env('MAILGUN_ENDPOINT'), $options);
+
+            if ($response->successful()) {
+                return redirect('/')->with('message', 'Email sent!!, Please check your inbox.');
+            }
+            
+            logFoxproError('mailgun error', 'sendChangePwdEmail', [], $response);
+            return redirect('/')->with('message', 'we could not send the email with the link, Please contact support.');
+        }
+        
+        return redirect('/')->with('message', 'An error has occurred!!. try later');
+        
+    }
+
+    public function changePwdForm(Request $request)
+    {           
+        if ($request->hasValidSignature()) {
+            $email = $request->route('email');                    
+            $message = $request->session()->get('message');
+            return Inertia::render('Users/ChangePassword',['message' => $message,'email'=>$email]);
+        }
+
+        abort(403);
+    }
+
+    public function handleChangePwd(Request $request)
+    {
+        $formFields = $request->validate([            
+            'password' => 'required|confirmed|min:6'
+        ]);            
+        $data = $request->all();        
+        $user = User::where('email', Str::lower($data['email']))->first();
+
+        // Result: Password Updated Successfully || User Name or User Email not found
+        $foxproResponse = FoxproApi::call([
+            'action' => 'ChangePW',
+            'params' => [$user->username, $user->email, $data['password']],
+            'keep_session' => false,
+        ]);        
+
+        if ( array_key_exists('Result',$foxproResponse) && $foxproResponse['Result'] === 'Password Updated Successfully') {
+            $queryResponse = User::where('email', Str::lower($user->email))->update(['password' => bcrypt($data['password'])]); 
+            return back()->with('message', 'password changed');  
+        }        
+
+        logFoxproError('ChangePW', 'handleChangePwd', [$user->username,$user->email], $foxproResponse);
+        return back()->with('message', 'Could not change password, Please contact support');        
     }
 }
