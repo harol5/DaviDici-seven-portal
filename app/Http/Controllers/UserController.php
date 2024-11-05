@@ -600,7 +600,18 @@ class UserController extends Controller
 
         if ( array_key_exists('Result',$foxproResponse) && $foxproResponse['Result'] === 'Password Updated Successfully') {
             $queryResponse = User::where('email', Str::lower($user->email))->update(['password' => bcrypt($data['password'])]); 
-            return back()->with('message', 'password changed');  
+
+            $credentials = [
+                'email' => Str::lower($user->email),
+                'password' => $data['password'],
+            ];
+
+            if (auth()->attempt($credentials)) {
+                $request->session()->regenerate();
+                $defaultIntendedUrl = session()->has('location') ? '/' . session('location') : '/orders';
+                return redirect()->intended($defaultIntendedUrl)->with('message', 'You are now logged in!');
+            }
+            // return back()->with('message', 'password changed');  
         }        
 
         logFoxproError('ChangePW', 'handleChangePwd', [$user->username,$user->email], $foxproResponse);
