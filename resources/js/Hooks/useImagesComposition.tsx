@@ -103,6 +103,8 @@ function useImagesComposition({
                     )
                         continue;
 
+                    if (!isDoubleSink && name.includes("double")) continue;
+
                     imageUrls.push(image["image_url"]);
                 }
             }
