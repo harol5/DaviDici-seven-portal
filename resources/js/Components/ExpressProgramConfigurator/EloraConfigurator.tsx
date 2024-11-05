@@ -30,6 +30,8 @@ import { MirrorCategory } from "../../Models/MirrorConfigTypes";
 import MirrorConfigurator from "./MirrorConfigurator";
 import useAccordionState from "../../Hooks/useAccordionState";
 import ConfigurationBreakdown from "./ConfigurationBreakdown";
+import useImagesComposition from "../../Hooks/useImagesComposition";
+import ImageSlider from "./ImageSlider";
 
 /**
  * TODO;
@@ -679,6 +681,19 @@ function EloraConfigurator({
         });
     };
 
+    // |===== COMPOSITION IMAGES =====|
+    const imageUrls = useImagesComposition({
+        model: composition.model as Model,
+        vanitySku: currentConfiguration.vanitySku,
+        isDoubleSink: currentConfiguration.isDoubleSink,
+        sinkPosition: composition.sinkPosition,
+        hasSideUnit: false,
+        sideUnitSku: "",
+        isDoubleSideUnit: false,
+        currentProducts: currentConfiguration.currentProducts,
+        currentMirrors: currentMirrorsConfiguration.currentProducts,
+    });
+
     // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (
         item: string,
@@ -1228,14 +1243,9 @@ function EloraConfigurator({
                     </button>
                 </section>
                 <section className={classes.compositionImageWrapper}>
-                    <img
-                        src={composition.compositionImage}
-                        alt="product image"
-                        onError={(e) => {
-                            (e.target as HTMLImageElement).onerror = null;
-                            (e.target as HTMLImageElement).src =
-                                "https://portal.davidici.com/images/express-program/not-image.jpg";
-                        }}
+                    <ImageSlider
+                        imageUrls={imageUrls}
+                        defaultImage={composition.compositionImage}
                     />
                     <ConfigurationBreakdown
                         productsConfigurator={
