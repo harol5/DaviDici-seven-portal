@@ -152,18 +152,28 @@ function CompositionsListing({ data }: CompositionsListingProps) {
         const sizesForFilterSet = new Set<string>();
 
         filteredComposition.forEach((composition) => {
-            sizesForFilterSet.add(composition.size);
-            sinkPositionsForFilterMap.set(composition.sinkPosition, {
-                name: composition.sinkPosition,
-                url: `https://${location.hostname}/images/express-program/sink-position/${composition.sinkPosition}.webp`,
-            });
-            modelsForFilterMap.set(composition.model, {
-                name: composition.model,
-                url: `https://${location.hostname}/images/express-program/${composition.model}/${composition.model}.webp`,
-            });
-            composition.finishes.forEach((finishObj) =>
-                finishesForFilterMap.set(finishObj.finish, finishObj)
-            );
+            if (composition.model === "MIRRORS") {
+                modelsForFilterMap.set("MIRRORS", {
+                    name: "MIRRORS",
+                    url: `https://${location.hostname}/images/express-program/mirrors/main.webp`,
+                });
+            } else {
+                sizesForFilterSet.add(composition.size);
+
+                sinkPositionsForFilterMap.set(composition.sinkPosition, {
+                    name: composition.sinkPosition,
+                    url: `https://${location.hostname}/images/express-program/sink-position/${composition.sinkPosition}.webp`,
+                });
+
+                modelsForFilterMap.set(composition.model, {
+                    name: composition.model,
+                    url: `https://${location.hostname}/images/express-program/${composition.model}/${composition.model}.webp`,
+                });
+
+                composition.finishes.forEach((finishObj) =>
+                    finishesForFilterMap.set(finishObj.finish, finishObj)
+                );
+            }
         });
 
         setFinishesForFilter(

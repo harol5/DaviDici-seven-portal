@@ -224,6 +224,48 @@ function useExpressProgramProducts(
         return otherProductsObj;
     };
 
+    const generateMirrorsCompositionObj = (
+        compositions: Composition[],
+        otherProducts: Map<string, Map<string, ProductInventory[]>>,
+        sharedItemsMap: Map<string, ProductInventory[]>
+    ) => {
+        const getStartingPrice = () => {
+            const mirrors = sharedItemsMap.get("MIRROR")!;
+            let mirrorStartingPrice = 0;
+
+            if (mirrors) {
+                mirrors.sort(
+                    (a: ProductInventory, b: ProductInventory) =>
+                        a.msrp - b.msrp
+                );
+
+                mirrorStartingPrice = mirrors[0].sprice
+                    ? mirrors[0].sprice
+                    : mirrors[0].msrp;
+            }
+
+            return mirrorStartingPrice;
+        };
+
+        compositions.push({
+            model: "MIRRORS",
+            name: "MIRRORS",
+            compositionImage: `https://${location.hostname}/images/express-program/mirrors/main.webp`,
+            size: "",
+            sinkPosition: "",
+            startingPrice: getStartingPrice(),
+            vanities: [],
+            finishes: [],
+            sideUnits: [],
+            washbasins: [],
+            otherProductsAvailable: generateOtherProductsObj(
+                otherProducts,
+                sharedItemsMap,
+                "MIRRORS"
+            ),
+        });
+    };
+
     const generateCenteredSinkCompositions = (
         listOfVanities: ProductInventory[],
         finishesForFilterMap: Map<string, FinishObj>,
@@ -747,6 +789,17 @@ function useExpressProgramProducts(
                 }
             }
         }
+
+        // creates object for mirrors.
+        modelsForFilterMap.set("MIRRORS", {
+            name: "MIRRORS",
+            url: `https://${location.hostname}/images/express-program/mirrors/main.webp`,
+        });
+        generateMirrorsCompositionObj(
+            initialCompositions,
+            otherProductsMap,
+            sharedItemsMap
+        );
 
         // Converts finishesForFilterMap values to and array with such values.
         const initialFinishesForFilter: FinishObj[] = Object.values(

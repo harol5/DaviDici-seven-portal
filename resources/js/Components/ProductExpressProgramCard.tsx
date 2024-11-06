@@ -1,8 +1,6 @@
 import type { Composition } from "../Models/Composition";
 import classes from "../../css/express-program.module.css";
-import type { ProductInventory } from "../Models/Product";
 import { router } from "@inertiajs/react";
-import { useMemo } from "react";
 
 interface ProductExpressProgramCardProps {
     composition: Composition;
@@ -40,7 +38,8 @@ function ProductExpressProgramCard({
                         <div className={classes.nameAndPriceWrapper}>
                             <h1 className={classes.compositionName}>
                                 {splitedCompositionName[0]} <br />
-                                {composition.model === "RAFFAELLO"
+                                {composition.model === "RAFFAELLO" ||
+                                composition.model === "MIRRORS"
                                     ? ""
                                     : "Incl"}
                                 {splitedCompositionName[1]}

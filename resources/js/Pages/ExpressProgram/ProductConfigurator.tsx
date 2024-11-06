@@ -9,6 +9,7 @@ import EloraConfigurator from "../../Components/ExpressProgramConfigurator/Elora
 import OperaConfigurator from "../../Components/ExpressProgramConfigurator/OperaConfigurator";
 import KoraConfigurator from "../../Components/ExpressProgramConfigurator/KoraConfigurator";
 import KoraXlConfigurator from "../../Components/ExpressProgramConfigurator/KoraXlConfigurator";
+import MirrorsOnlyConfigurator from "../../Components/ExpressProgramConfigurator/MirrorsOnlyConfigurator";
 import OtherModelsConfigurator from "../../Components/ExpressProgramConfigurator/OtherModelsConfigurator";
 import { ShoppingCartProduct as shoppingCartProductModel } from "../../Models/ExpressProgramModels";
 import axios from "axios";
@@ -108,6 +109,11 @@ function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
                     />
                 ) : composition.model === "KORA XL" ? (
                     <KoraXlConfigurator
+                        composition={composition}
+                        onAddToCart={handleShoppingCartProduct}
+                    />
+                ) : composition.model === "MIRRORS" ? (
+                    <MirrorsOnlyConfigurator
                         composition={composition}
                         onAddToCart={handleShoppingCartProduct}
                     />

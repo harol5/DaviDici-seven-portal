@@ -103,15 +103,17 @@ function ShoppingCart({
             const doubleItemFinalQty = `--${productConfig.quantity * 2}`;
             const singleItemFinalQty = `--${productConfig.quantity * 1}`;
 
-            skusArr.push(
-                `${productConfig.vanity.uscode}!!${
-                    productConfig.composition.model
-                }${
-                    productConfig.isDoubleSink
-                        ? doubleItemFinalQty
-                        : singleItemFinalQty
-                }##${productConfig.label}`
-            );
+            if (productConfig.vanity) {
+                skusArr.push(
+                    `${productConfig.vanity.uscode}!!${
+                        productConfig.composition.model
+                    }${
+                        productConfig.isDoubleSink
+                            ? doubleItemFinalQty
+                            : singleItemFinalQty
+                    }##${productConfig.label}`
+                );
+            }
 
             if (productConfig.washbasin) {
                 skusArr.push(

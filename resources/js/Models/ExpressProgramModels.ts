@@ -38,7 +38,7 @@ export type ShoppingCartProduct = {
     configuration: any;
     description: string;
     label: string;
-    vanity: ProductInventory;
+    vanity: ProductInventory | null;
     sideUnits: ProductInventory[];
     washbasin: ProductInventory | null;
     otherProducts: OtherItems;
