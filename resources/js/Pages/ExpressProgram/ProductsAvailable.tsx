@@ -2,24 +2,50 @@ import UserAuthenticatedLayout from "../../Layouts/UserAuthenticatedLayout";
 import User from "../../Models/User";
 import useExpressProgramProducts from "../../Hooks/useExpressProgramProducts";
 import type { ProductInventory } from "../../Models/Product";
-import type { ListingType } from "../../Models/ExpressProgramModels";
+import type {
+    FinishObj,
+    ListingType,
+    ModelObj,
+    SinkPositionObj,
+} from "../../Models/ExpressProgramModels";
 import CompositionsListing from "./CompositionsListing";
 import classes from "../../../css/express-program.module.css";
 import { router } from "@inertiajs/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { Composition } from "../../Models/Composition";
 
 interface ProductsAvailableProps {
     auth: User;
-    rawProducts: ProductInventory[];
     message?: string;
     listingType: ListingType;
 }
 
-function ProductsAvailable({
-    auth,
-    rawProducts,
-    listingType,
-}: ProductsAvailableProps) {
+interface ExpressProgramData {
+    initialCompositions: Composition[];
+    initialSizesForFilter: string[];
+    initialFinishesForFilter: FinishObj[];
+    initialSinkPositionsForFilter: SinkPositionObj[];
+    initialModelsForFilter: ModelObj[];
+}
+
+function ProductsAvailable({ auth, listingType }: ProductsAvailableProps) {
+    const { data: rawProducts } = useQuery({
+        queryKey: ["expressProgramRawProductsData"],
+        queryFn: () =>
+            axios
+                .get(`/express-program/products`)
+                .then((res) => res.data.rawProducts),
+    });
+
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        if (!rawProducts) return;
+        setIsLoading(false);
+    }, [rawProducts]);
+
     const regularCompositionsListingData =
         useExpressProgramProducts(rawProducts);
 
@@ -27,8 +53,6 @@ function ProductsAvailable({
         rawProducts,
         true
     );
-
-    const [isLoading, setIsLoading] = useState(false);
 
     const handleListingType = (listingType: ListingType) => {
         localStorage.setItem(
@@ -78,11 +102,20 @@ function ProductsAvailable({
         return baseClass;
     };
 
+    const [shoppingCartCount, setShoppingCartCount] = useState(0);
+    const handleShoppingCartCount = (count: number) => {
+        setShoppingCartCount(count);
+    };
+
     return (
-        <UserAuthenticatedLayout auth={auth} crrPage="express program">
+        <UserAuthenticatedLayout
+            auth={auth}
+            crrPage="express program"
+            shoppingCartSize={shoppingCartCount}
+        >
             <div className="main-content-wrapper">
-                {onSaleCompositionsListingData.initialCompositions.length >
-                    0 && (
+                {onSaleCompositionsListingData &&
+                onSaleCompositionsListingData.initialCompositions.length > 0 ? (
                     <article className={classes.listingTypeButtonsWrapper}>
                         <button
                             className={getClasses("fullInventory")}
@@ -97,6 +130,8 @@ function ProductsAvailable({
                             MONTHLY SPECIAL!!
                         </button>
                     </article>
+                ) : (
+                    <></>
                 )}
 
                 {isLoading && (
@@ -114,13 +149,19 @@ function ProductsAvailable({
                     <>
                         {listingType === "fullInventory" && (
                             <CompositionsListing
-                                data={regularCompositionsListingData}
+                                data={
+                                    regularCompositionsListingData as ExpressProgramData
+                                }
+                                onShoppingCartCount={handleShoppingCartCount}
                             />
                         )}
 
                         {listingType === "onSale" && (
                             <CompositionsListing
-                                data={onSaleCompositionsListingData}
+                                data={
+                                    onSaleCompositionsListingData as ExpressProgramData
+                                }
+                                onShoppingCartCount={handleShoppingCartCount}
                             />
                         )}
                     </>

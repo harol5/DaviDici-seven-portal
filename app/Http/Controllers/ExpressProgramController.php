@@ -24,25 +24,43 @@ class ExpressProgramController extends Controller
         array_key_exists('listing-type',$input) ? $listingType = $input['listing-type'] : $listingType = 'fullInventory';
         
         // call foxpro program to get items in stock
+        // $response = FoxproApi::call([
+        //     'action' => 'GETINVSTOCK',
+        //     'params' => ['','','','S'],
+        //     'keep_session' => false,
+        // ]);
+                                                                    
+        // if($response['status'] === 201){
+        //     return Inertia::render('ExpressProgram/ProductsAvailable',
+        //         [                                           
+        //             'message' => $message,
+        //             'listingType' => $listingType,                 
+        //         ]
+        //     );
+        // }
+
+        return Inertia::render('ExpressProgram/ProductsAvailable',
+                [                                           
+                    'message' => $message,
+                    'listingType' => $listingType,                 
+                ]
+            );                                        
+    }
+
+    public function getExpressProgramProducts()
+    {
         $response = FoxproApi::call([
             'action' => 'GETINVSTOCK',
             'params' => ['','','','S'],
             'keep_session' => false,
         ]);
-                                                                    
+
         if($response['status'] === 201){
-            return Inertia::render('ExpressProgram/ProductsAvailable',
-                [                       
-                    'rawProducts' => $response['rows'],
-                    'message' => $message,
-                    'listingType' => $listingType,                 
-                ]
-            );
+            return response(['rawProducts' => $response['rows'], 'status' => 201])->header('Content-Type', 'application/json');
         }
-        
-        logFoxproError('getStockProducts','all', ['param1'], $response);
-        return back()->with(['message' => 'Something went wrong. please contact support']);
-                
+
+        logFoxproError('GETINVSTOCK','getExpressProgramProducts', [], $response);
+        return response(['rawProducts' => [], 'status' => 500])->header('Content-Type', 'application/json');
     }
 
     public function setProduct(Request $request){

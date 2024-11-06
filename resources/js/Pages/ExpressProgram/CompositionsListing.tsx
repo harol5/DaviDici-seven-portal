@@ -23,9 +23,13 @@ interface StatefulFilterObj {
 
 interface CompositionsListingProps {
     data: ExpressProgramData;
+    onShoppingCartCount: (count: number) => void;
 }
 
-function CompositionsListing({ data }: CompositionsListingProps) {
+function CompositionsListing({
+    data,
+    onShoppingCartCount: handleShoppingCartCount,
+}: CompositionsListingProps) {
     const {
         initialCompositions,
         initialSizesForFilter,
@@ -256,6 +260,10 @@ function CompositionsListing({ data }: CompositionsListingProps) {
                         localStorage.setItem(
                             "shoppingCartProduct",
                             JSON.stringify(null)
+                        );
+
+                        handleShoppingCartCount(
+                            shoppingCartProductsServer.length
                         );
                     } catch (err) {}
                 };

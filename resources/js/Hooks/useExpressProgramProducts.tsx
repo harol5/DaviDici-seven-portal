@@ -838,6 +838,8 @@ function useExpressProgramProducts(
     };
 
     return useMemo(() => {
+        if (!rawProducts) return;
+
         return getExpressProgramData(createProductsTree());
     }, [rawProducts]);
 }
