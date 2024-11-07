@@ -21,23 +21,7 @@ class ExpressProgramController extends Controller
         $input = $request->all();
         $listingType;
 
-        array_key_exists('listing-type',$input) ? $listingType = $input['listing-type'] : $listingType = 'fullInventory';
-        
-        // call foxpro program to get items in stock
-        // $response = FoxproApi::call([
-        //     'action' => 'GETINVSTOCK',
-        //     'params' => ['','','','S'],
-        //     'keep_session' => false,
-        // ]);
-                                                                    
-        // if($response['status'] === 201){
-        //     return Inertia::render('ExpressProgram/ProductsAvailable',
-        //         [                                           
-        //             'message' => $message,
-        //             'listingType' => $listingType,                 
-        //         ]
-        //     );
-        // }
+        array_key_exists('listing-type',$input) ? $listingType = $input['listing-type'] : $listingType = 'fullInventory';                
 
         return Inertia::render('ExpressProgram/ProductsAvailable',
                 [                                           
