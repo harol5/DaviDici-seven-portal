@@ -13,16 +13,40 @@ import BankAccountForm from "../../Components/BankAccountForm";
 import { Product as ProductModel } from "../../Models/Product";
 import User from "../../Models/User";
 
+/**
+ * TODO:
+ *
+ * in foxpro:
+ *
+ * 1. when first payment (deposit) is submitted, is the order marked as approved?
+ *
+ * 2. after deposit is paid, the program that give info about payment info (getpercentdeposit)
+ * does not return a value for credit card fee.
+ *
+ * 3. is the deposit need always requiered? if not, can i use the "saveCR" program to approved orders?
+ *
+ * 4. when the remaining amount is being pay, the getpercentdeposit program returns as it depneeded value the
+ * amount remaining after deposit but as a negative number.
+ *
+ * 5. looks like when a order was a aprove and then that order is deleted, when using the same order number,
+ * the dollar amounts are very off.
+ *
+ * in intuit:
+ *
+ * 1. how to automate the process of refreshing access token?
+ *
+ */
+
 interface OrderPaymentProps {
     auth: User;
     order: OrderModel;
     deliveryInfo: DeliveryInfoModel[];
     depositInfo?: {
-        percdep: number;
-        percos: number;
-        depneeded: number;
-        totcod: number;
-        ccchg: number;
+        percdep: number; // % deposit
+        percos: number; //
+        depneeded: number; // deposit needed $
+        totcod: number; // total
+        ccchg: number; // credit card fee
     };
 }
 
@@ -32,11 +56,15 @@ function OrderPayment({
     deliveryInfo,
     depositInfo,
 }: OrderPaymentProps) {
+    console.log("==== OrderPayment ====");
+    console.log("Order:", order);
+    console.log("Delivery Info:", deliveryInfo);
+    console.log("Deposit Info:", depositInfo);
+
     const [crrPaymentMethod, setCrrPaymentMethod] = useState<
         "credit card" | "bank account"
     >("credit card");
     const [isLoading, setIsLoading] = useState(false);
-    const [isTransactionApproved, setIsTransactionApproved] = useState(true); // set true for first version
     const [bankValidationErrors, setBankErrors] = useState({});
     const [cardValidationErrors, setCardErrors] = useState({});
 
@@ -62,17 +90,33 @@ function OrderPayment({
 
         // const grandTotal = Number.parseFloat(order.total as string) + fee;
 
-        const fee = depositInfo?.ccchg;
-        const grandTotal = depositInfo?.depneeded! + depositInfo?.ccchg!;
+        // const fee = depositInfo?.ccchg;
 
-        return { fee, grandTotal };
+        let subTotal = depositInfo?.depneeded!;
+
+        const extraFee =
+            crrPaymentMethod === "credit card" ? depositInfo?.ccchg! : 0;
+
+        // if totcredit !== 0 and order.submitted !== null, means the deposit has been paid.
+        if (Number.parseInt(order.totcredit as string) > 0 && order.submitted) {
+            subTotal = depositInfo?.totcod!;
+        }
+
+        const grandTotal = subTotal + extraFee;
+
+        return { fee: depositInfo?.ccchg, grandTotal, subTotal };
     }, [crrPaymentMethod]);
+
+    const [isTransactionApproved, setIsTransactionApproved] = useState(
+        () => finalTotal.grandTotal === 0
+    ); // set true for first version
 
     const handleCardSubmit = async (e: FormEvent, state: CardInfoModel) => {
         e.preventDefault();
 
         try {
             setIsLoading(true);
+
             const getToken = await axios.post(
                 "https://sandbox.api.intuit.com/quickbooks/v4/payments/tokens",
                 { card: state },
@@ -97,14 +141,15 @@ function OrderPayment({
                         },
                         token: token,
                     },
-
                     foxproInfo: {
-                        amountPaid: depositInfo?.depneeded,
+                        amountPaid: finalTotal.subTotal,
                     },
                 }
             );
 
-            console.log("charges response (Intuit):", response);
+            console.log("-- token (Intuit) -- :", getToken);
+            console.log("-- charges response (Intuit) -- :", response);
+
             if (response.data.status === 400) {
                 const errors = response.data.intuitRes.errors;
                 console.log("invalid information:", errors);
@@ -156,6 +201,7 @@ function OrderPayment({
             return true;
         }
     };
+
     const handleBankSubmit = async (e: FormEvent, state: BankInfoModel) => {
         e.preventDefault();
         const info = { ...state, amount: finalTotal.grandTotal };

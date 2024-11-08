@@ -19,7 +19,9 @@ type Action = {
 };
 
 function CreditCardForm({ handleSubmit, errors }: CreditCardFormProps) {
-    console.log(errors);
+    console.log("=== CreditCardForm ===");
+    console.log("Errors:", errors);
+
     const card: CardInfoModel = {
         number: "",
         expMonth: "",

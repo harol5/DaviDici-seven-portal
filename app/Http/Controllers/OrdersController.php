@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
+use App\Services\OAuthTokenService;
 
 class OrdersController extends Controller
 {
@@ -298,7 +299,7 @@ class OrdersController extends Controller
             'action' => 'getpercentdeposit',
             'params' => [$userEmail, $orderNumber],
             'keep_session' => false,
-        ]);
+        ]);        
 
         if ($deliveryInfo['status'] === 201 && $depositInfo['status'] === 201) {
             return Inertia::render('Orders/OrderPayment', [
@@ -311,6 +312,7 @@ class OrdersController extends Controller
         if ($deliveryInfo['status'] === 500) {
             logFoxproError('GetDeliveryInfo', 'orderPayment', [$orderNumber], $deliveryInfo);
         }
+
         if ($depositInfo['status'] === 500) {
             logFoxproError('getpercentdeposit', 'orderPayment', [$userEmail, $orderNumber], $depositInfo);
         }
@@ -322,17 +324,31 @@ class OrdersController extends Controller
     // Creates a transaction.
     public function createCharge(Request $request)
     {
+
+        info("=== createCharge ===");
+
         $info = $request->all();
         $js_data = json_encode($info['info']);
         $uuidTransaction = (string) Str::uuid();
         $orderNumber = getOrderNumberFromPath($request->path());
 
+        $accessToken = OAuthTokenService::getAccessToken();
+
+        if (!$accessToken) {
+            return response(['intuitRes' => "no access token!!"])->header('Content-Type', 'application/json');
+        }
+
+        info('access token:');
+        info($accessToken);
+
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . env('INTUIT_AUTH_TOKEN'),
+            'Authorization' => 'Bearer ' . $accessToken,
             'Content-Type' => 'application/json',
             'Request-Id' => $uuidTransaction,
         ])->withBody($js_data)->post('https://sandbox.api.intuit.com/quickbooks/v4/payments/charges');
 
+        info("intuit charge endpoint response:");        
+        info($response->body());
 
         if ($response->successful()) {
 
@@ -343,12 +359,16 @@ class OrdersController extends Controller
                 'params' => [$orderNumber, 'CC', $info['foxproInfo']['amountPaid'], '05/22/2024', 'harol rojas', '1234567890000', '12/24', '123'],
                 'keep_session' => false,
             ]);
+            
+            info("foxpro cash receipt res:");
+            info($cashReceiptRes);
 
             return response(['intuitRes' => $response->json(), 'status' => $response->status(), 'cashRes' => $cashReceiptRes])->header('Content-Type', 'application/json');
+
         } else if ($response->clientError()) {
             // 401 -> access token expired!!
             if ($response->status() === 401) {
-                $this->getAccessToken();
+                info("the access token provided to hcarge endpoint is expired!! status: 401");        
             }
 
             // 400 -> invalid information!!
@@ -619,7 +639,7 @@ class OrdersController extends Controller
             'Accept' => 'application/json',
             'Authorization' => $auth,
             'Content-Type' => 'application/x-www-form-urlencoded',
-        ])->withBody($data, 'application/x-www-form-urlencoded')->post(env('INTUIT_REFRESH_URL'));
+        ])->withBody($data, 'application/x-www-form-urlencoded')->post(env('INTUIT_TOKEN_URL'));
 
         info('--vvvvv-- response from access token request --vvvvv--');
         info($auth);

@@ -34,6 +34,7 @@ function OrderDetails({
 
         return { ...rawOrder, subtotal, totcredit, total };
     };
+
     const formatProducts = () => {
         return rawProducts.filter(
             (product) => product.item !== "3% Credit Card Charge"

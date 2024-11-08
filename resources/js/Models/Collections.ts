@@ -11,4 +11,6 @@ export const collections = [
     "ORIALI",
     "PETRA",
     "FLORA",
+    "RAFFAELLO",
+    "MIRRORS",
 ];
