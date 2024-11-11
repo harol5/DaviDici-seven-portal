@@ -351,14 +351,13 @@ class OrdersController extends Controller
         info($response->body());
 
         if ($response->successful()) {
-
             // "Result" : "Info Updated Successfully" |
-            $cashReceiptRes = FoxproApi::call([
-                'action' => 'SaveCR',
-                // get amount without credit card fee.
-                'params' => [$orderNumber, 'CC', $info['foxproInfo']['amountPaid'], '05/22/2024', 'harol rojas', '1234567890000', '12/24', '123'],
-                'keep_session' => false,
-            ]);
+            // $cashReceiptRes = FoxproApi::call([
+            //     'action' => 'SaveCR',
+            //     // get amount without credit card fee.
+            //     'params' => [$orderNumber, 'CC', $info['foxproInfo']['amountPaid'], '05/22/2024', 'harol rojas', '1234567890000', '12/24', '123'],
+            //     'keep_session' => false,
+            // ]);
             
             info("foxpro cash receipt res:");
             info($cashReceiptRes);
@@ -589,7 +588,7 @@ class OrdersController extends Controller
     public function testApi()
     {                            
         // return Inertia::render('Test',['response' => $response]);
-        return response(['response' => $response])->header('Content-Type', 'application/json');
+        // return response(['response' => $response])->header('Content-Type', 'application/json');
     }
 
 

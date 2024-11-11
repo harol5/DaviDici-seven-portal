@@ -21,7 +21,7 @@ import User from "../../Models/User";
  * 1. when first payment (deposit) is submitted, is the order marked as approved?
  *
  * 2. after deposit is paid, the program that give info about payment info (getpercentdeposit)
- * does not return a value for credit card fee.
+ * does not return a value for credit card fee. FIXED.
  *
  * 3. is the deposit need always requiered? if not, can i use the "saveCR" program to approved orders?
  *
