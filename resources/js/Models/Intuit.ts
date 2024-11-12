@@ -8,7 +8,7 @@ type ErrorIntuit = {
 };
 
 type ErrorIntuitFinal = {
-    code: "PMT-4000";
+    code: "PMT-4000" | "PMT-6000";
     detail:
         | "card.cvc"
         | "card.expyear"

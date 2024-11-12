@@ -25,7 +25,7 @@ class IntuitController extends Controller
                'state' => env('INTUIT_AUTH_STATE'),
           ];
 
-          $authorizationRequestUrl = $baseUrl . '?' . http_build_query($params, null, '&', PHP_QUERY_RFC1738);
+          $authorizationRequestUrl = $baseUrl . '?' . http_build_query($params, "null", '&', PHP_QUERY_RFC1738);
 
           info('=== connectToIntuit ===');
           info($authorizationRequestUrl);
@@ -71,6 +71,7 @@ class IntuitController extends Controller
                          'access_token' => $tokens['access_token'],
                          'refresh_token' => $tokens['refresh_token'],
                          'expires_at' => Carbon::now()->addSeconds($tokens['expires_in']),
+                         'company_id' => $intuitInfo['realmId'],
                     ]);
 
                     info('auth token saved:');

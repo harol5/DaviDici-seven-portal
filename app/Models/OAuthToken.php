@@ -17,6 +17,7 @@ class OAuthToken extends Model
     protected $fillable = [
         'access_token',
         'refresh_token',
-        'expires_at',        
+        'expires_at',
+        'company_id'        
     ];
 }

@@ -1,9 +1,10 @@
-import { FormEvent, useReducer } from "react";
+import { FormEvent, useMemo, useReducer } from "react";
 import type { BankInfo as BankInfoModel } from "../Models/BankInfo";
+import { ErrorIntuit } from "../Models/Intuit";
 
-interface CreditCardFormProps {
+interface BankAccountFormProps {
     handleSubmit: (e: FormEvent, state: BankInfoModel) => void;
-    errors: any;
+    errors: ErrorIntuit[] | null;
 }
 
 type Action = {
@@ -18,7 +19,16 @@ type Action = {
     payload: string;
 };
 
-function BankAccountForm({ handleSubmit, errors }: CreditCardFormProps) {
+function BankAccountForm({ handleSubmit, errors }: BankAccountFormProps) {
+    const crrErrors = useMemo(() => {
+        return errors
+            ? errors.reduce<Record<string, ErrorIntuit>>((acc, error) => {
+                  acc[error.detail ?? error.code] = error;
+                  return acc;
+              }, {})
+            : null;
+    }, [errors]);
+
     const eCheck: BankInfoModel = {
         bankAccount: {
             name: "",
@@ -80,6 +90,10 @@ function BankAccountForm({ handleSubmit, errors }: CreditCardFormProps) {
 
     const [state, dispatch] = useReducer(reducer, eCheck);
 
+    console.log("=== BankAccountForm ===");
+    console.log("Errors:", errors);
+    console.log("current Errors:", crrErrors);
+
     return (
         <form id="payment-form" onSubmit={(e) => handleSubmit(e, state)}>
             <div className="flex gap-3 flex-col mb-2">
@@ -115,8 +129,8 @@ function BankAccountForm({ handleSubmit, errors }: CreditCardFormProps) {
                         value={state.bankAccount.accountNumber}
                         id="account-number"
                         required
-                        min={4}
-                        max={17}
+                        minLength={4}
+                        maxLength={17}
                         onChange={(e) => {
                             dispatch({
                                 type: "set-accountNumber",
@@ -162,7 +176,11 @@ function BankAccountForm({ handleSubmit, errors }: CreditCardFormProps) {
                     <label htmlFor="routing-number" className="mb-1">
                         Routing number:
                     </label>
-                    {errors.routingNumber && <p>{errors.routingNumber}</p>}
+                    {crrErrors && crrErrors["bankAccount.routingNumber"] ? (
+                        <p className="text-red-500">
+                            {crrErrors["bankAccount.routingNumber"].moreInfo}
+                        </p>
+                    ) : null}
                     <input
                         className="px-[0.2em] border border-black rounded"
                         type="tel"
@@ -170,8 +188,8 @@ function BankAccountForm({ handleSubmit, errors }: CreditCardFormProps) {
                         value={state.bankAccount.routingNumber}
                         id="routing-number"
                         required
-                        min={9}
-                        max={9}
+                        minLength={9}
+                        maxLength={9}
                         onChange={(e) => {
                             dispatch({
                                 type: "set-routingNumber",
@@ -185,15 +203,15 @@ function BankAccountForm({ handleSubmit, errors }: CreditCardFormProps) {
                     <label htmlFor="phone" className="mb-1">
                         Phone number:
                     </label>
-                    {errors.phone && <p>{errors.phone}</p>}
+                    {/* {errors.phone && <p>{errors.phone}</p>} */}
                     <input
                         type="tel"
                         className="px-[0.2em] border border-black rounded"
                         name="phone"
                         value={state.bankAccount.phone}
                         id="phone"
-                        min={10}
-                        max={10}
+                        minLength={10}
+                        maxLength={10}
                         required
                         onChange={(e) => {
                             dispatch({

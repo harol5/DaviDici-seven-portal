@@ -335,6 +335,7 @@ class OrdersController extends Controller
         $orderNumber = getOrderNumberFromPath($request->path());
 
         $accessToken = OAuthTokenService::getAccessToken();
+        $companyId = OAuthTokenService::getCompanyId();
 
         if (!$accessToken) {
             return response(['intuitRes' => "no access token!!"])->header('Content-Type', 'application/json');
@@ -342,6 +343,8 @@ class OrdersController extends Controller
 
         info('access token:');
         info($accessToken);
+        info('company id:');
+        info($companyId);
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $accessToken,
@@ -352,7 +355,20 @@ class OrdersController extends Controller
         info("intuit charge endpoint response:");        
         info($response->body());
 
-        if ($response->successful()) {
+
+        $comapnyInfoEndpoint = "https://sandbox-quickbooks.api.intuit.com/v3/company/$companyId/companyinfo/$companyId?minorversion=3";
+        $response2 = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $accessToken,
+            'Content-Type' => 'text/plain',            
+        ])->get($comapnyInfoEndpoint);
+
+        info("intuit compani info response:");        
+        info($comapnyInfoEndpoint);
+        info($response2->status());
+        info($response2->body());
+
+
+        if ($response->successful()) {            
             // "Result" : "Info Updated Successfully" |
             // $cashReceiptRes = FoxproApi::call([
             //     'action' => 'SaveCR',
@@ -366,17 +382,15 @@ class OrdersController extends Controller
             
             return response(['intuitRes' => $response->json(), 'status' => $response->status(), 'cashRes' => "testing"])->header('Content-Type', 'application/json');
 
-        } else if ($response->clientError()) {
+        } else {
             // 401 -> access token expired!!
             if ($response->status() === 401) {
-                info("the access token provided to hcarge endpoint is expired!! status: 401");        
-                return response(['intuitRes' => "the access token provided to hcarge endpoint is expired!! status: 401" , 'status' => $response->status()])->header('Content-Type', 'application/json');
-            }
-
-            // 400 -> invalid information!!
+                logErrorDetails('createCharge','OrdersController','intuit access token expired',$response->body(), $request->user()->email);
+                return response(['intuitRes' => "the access token provided to charge endpoint is expired!! status: 401" , 'status' => $response->status()])->header('Content-Type', 'application/json');
+            }            
+            
+            logErrorDetails('createCharge','OrdersController','intuit charge request not successful',$response->body(), $request->user()->email);
             return response(['intuitRes' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');
-        } else {
-            return response(['intuitRes' => "something else happened"])->header('Content-Type', 'application/json');
         }
     }
 
@@ -387,24 +401,38 @@ class OrdersController extends Controller
         $js_data = json_encode($info);
         $uuidTransaction = (string) Str::uuid();
         $orderNumber = getOrderNumberFromPath($request->path());
+        $accessToken = OAuthTokenService::getAccessToken();
+
+        info("=== createBankCharge ===");
 
         $response = Http::withHeaders([
-            'Authorization' => env('INTUIT_AUTH_TOKEN'),
+            'Authorization' => 'Bearer ' . $accessToken,
             'Content-Type' => 'application/json',
             'Request-Id' => $uuidTransaction,
         ])->withBody($js_data)->post('https://sandbox.api.intuit.com/quickbooks/v4/payments/echecks');
 
+        info('cash echeck response:');
+        info($response->body());
+
         if ($response->successful()) {
+            // $cashReceiptRes = FoxproApi::call([
+            //     'action' => 'SaveCR',
+            //     // get amount without credit card fee.
+            //     'params' => [$orderNumber, 'CC', $info['foxproInfo']['amountPaid'], '05/22/2024', 'harol rojas', '1234567890000', '12/24', '123'],
+            //     'keep_session' => false,
+            // ]);
+            // info($cashReceiptRes);
+            
             return response(['intuitRes' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');
-        } else if ($response->clientError()) {
-            // 401 -> access token expired!!            
-            // $this->getAccessToken();
-
-            // 400 -> invalid information!!
-
+        }else {
+            // 401 -> access token expired!!
+            if ($response->status() === 401) {
+                logErrorDetails('createBankCharge','OrdersController','intuit access token expired',$response->body(), $request->user()->email);
+                return response(['intuitRes' => "the access token provided to charge endpoint is expired!! status: 401" , 'status' => $response->status()])->header('Content-Type', 'application/json');
+            }            
+            
+            logErrorDetails('createBankCharge','OrdersController','intuit charge request not successful',$response->body(), $request->user()->email);
             return response(['intuitRes' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');
-        } else {
-            return response(['intuitRes' => "something else happened"])->header('Content-Type', 'application/json');
         }
     }
 
@@ -414,19 +442,29 @@ class OrdersController extends Controller
         $info = $request->all();
         $uuidTransaction = (string) Str::uuid();
         $orderNumber = getOrderNumberFromPath($request->path());
+        $accessToken = OAuthTokenService::getAccessToken();
+
+        info("=== createBankCharge ===");
 
         $response = Http::withHeaders([
-            'Authorization' => env('INTUIT_AUTH_TOKEN'),
+            'Authorization' => 'Bearer ' . $accessToken,
             'Request-Id' => $uuidTransaction,
         ])->get('https://sandbox.api.intuit.com/quickbooks/v4/payments/echecks/' . $info['id']);
 
+        info('status echeck response:');
+        info($response->body());
+
         if ($response->successful()) {
             return response(['intuitRes' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');
-        } else if ($response->clientError()) {
-            // 401 -> access token expired!!
-            return response(['intuitRes' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');
         } else {
-            return response(['intuitRes' => "something else happened"])->header('Content-Type', 'application/json');
+            // 401 -> access token expired!!
+            if ($response->status() === 401) {
+                logErrorDetails('getStatusCheck','OrdersController','intuit access token expired',$response->body(), $request->user()->email);
+                return response(['intuitRes' => "the access token provided to charge endpoint is expired!! status: 401" , 'status' => $response->status()])->header('Content-Type', 'application/json');
+            }            
+            
+            logErrorDetails('getStatusCheck','OrdersController','intuit charge request not successful',$response->body(), $request->user()->email);
+            return response(['intuitRes' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');
         }
     }
 

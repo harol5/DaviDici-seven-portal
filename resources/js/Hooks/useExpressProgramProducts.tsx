@@ -538,13 +538,6 @@ function useExpressProgramProducts(
             sharedItemsMap,
         } = mapsObject;
 
-        console.log("==== useExpressProgramProducts ====");
-        console.log("is on sale?", isOnSale);
-        console.log(vanitiesAndSideUnitsMap);
-        console.log(validCompositionSizesMap);
-        console.log(otherProductsMap);
-        console.log(sharedItemsMap);
-
         const initialCompositions: Composition[] = [];
         const initialSizesForFilter: string[] = [];
         const finishesForFilterMap = new Map();

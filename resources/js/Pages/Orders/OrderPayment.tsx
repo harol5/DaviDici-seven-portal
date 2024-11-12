@@ -65,11 +65,16 @@ function OrderPayment({
     const [crrPaymentMethod, setCrrPaymentMethod] = useState<
         "credit card" | "bank account"
     >("credit card");
-    const [isLoading, setIsLoading] = useState(false);
-    const [bankValidationErrors, setBankErrors] = useState({});
+
+    const [bankValidationErrors, setBankErrors] = useState<
+        ErrorIntuit[] | null
+    >(null);
+
     const [cardValidationErrors, setCardErrors] = useState<
         ErrorIntuit[] | null
     >(null);
+
+    const [isLoading, setIsLoading] = useState(false);
 
     const deliveryFee = useMemo(() => {
         const crrDeliveryType = deliveryInfo[0].dtype;
@@ -85,15 +90,6 @@ function OrderPayment({
         //     crrPaymentMethod === "credit card"
         //         ? Math.round((order.total as number) * 0.03)
         //         : 0;
-
-        // const fee =
-        //     crrPaymentMethod === "credit card"
-        //         ? Math.round(depositInfo?.depneeded! * 0.03)
-        //         : 0;
-
-        // const grandTotal = Number.parseFloat(order.total as string) + fee;
-
-        // const fee = depositInfo?.ccchg;
 
         let subTotal = depositInfo?.depneeded!;
 
@@ -155,22 +151,30 @@ function OrderPayment({
 
             if (response.data.status === 400) {
                 const errors = response.data.intuitRes.errors;
-                console.log("invalid information:", errors);
                 setIsLoading(false);
                 setCardErrors(errors);
                 return;
             }
 
             if (response.data.status === 401) {
-                console.log("token expired!!:", response);
+                setIsLoading(false);
+                return;
+            }
+
+            if (response.data.status === 500) {
+                const errors = response.data.intuitRes.errors;
+                setCardErrors(errors);
                 setIsLoading(false);
                 return;
             }
 
             if (response.data.intuitRes.status === "CAPTURED") {
-                setIsLoading(false);
                 setIsTransactionApproved(true);
                 toast.success("Transaction approved!!");
+            }
+
+            if (response.data.intuitRes.status === "DECLINED") {
+                toast.error("Transaction declined!!");
             }
 
             setIsLoading(false);
@@ -191,28 +195,35 @@ function OrderPayment({
     };
 
     const isValidBankInfo = (info: BankInfoModel): boolean => {
-        let crrErrors = { routingNumber: "", phone: "" };
-        if (info.bankAccount.routingNumber.length !== 9) {
-            crrErrors.routingNumber = "routing number must be 9 digits long";
-        }
-        if (info.bankAccount.phone.length !== 10) {
-            crrErrors.phone = "phone number must be 10 digits long";
-        }
+        return false;
 
-        if (crrErrors.phone || crrErrors.routingNumber) {
-            setBankErrors(crrErrors);
-            return false;
-        } else {
-            setBankErrors({ routingNumber: "", phone: "" });
-            return true;
-        }
+        // let crrErrors = { routingNumber: "", phone: "" };
+        // if (info.bankAccount.routingNumber.length !== 9) {
+        //     crrErrors.routingNumber = "routing number must be 9 digits long";
+        // }
+        // if (info.bankAccount.phone.length !== 10) {
+        //     crrErrors.phone = "phone number must be 10 digits long";
+        // }
+
+        // if (crrErrors.phone || crrErrors.routingNumber) {
+        //     setBankErrors(crrErrors);
+        //     return false;
+        // } else {
+        //     setBankErrors({ routingNumber: "", phone: "" });
+        //     return true;
+        // }
     };
 
     const handleBankSubmit = async (e: FormEvent, state: BankInfoModel) => {
         e.preventDefault();
-        const info = { ...state, amount: finalTotal.grandTotal };
 
-        if (!isValidBankInfo(info)) return;
+        // const info = { ...state, amount: finalTotal.grandTotal.toFixed(2) };
+        const info = { ...state, amount: 4.44 };
+
+        console.log("-- handleBankSubmit --");
+        console.log(info);
+
+        // if (!isValidBankInfo(info)) return;
 
         try {
             setIsLoading(true);
@@ -221,11 +232,12 @@ function OrderPayment({
                 `/orders/${order.ordernum}/products/payment-bank`,
                 info
             );
-            console.log("create charge", data);
+            console.log("create charge:", data);
 
             if (data.status === 400) {
                 setIsLoading(false);
                 const errors = data.intuitRes.errors;
+                setBankErrors(errors);
                 console.log(errors);
             }
 
@@ -236,8 +248,14 @@ function OrderPayment({
                 );
             }
 
-            if (data.intuitRes.status === "PENDING") {
-                console.log("first status pending ran!!");
+            if (data.intuitRes.status === "DECLINED") {
+                toast.error("Transaction declined!!");
+            }
+
+            if (
+                data.intuitRes.status === "PENDING" ||
+                data.intuitRes.status === "SUCCEEDED"
+            ) {
                 const id = data.intuitRes.id;
 
                 const { data: checkStatus } = await axios.post(
@@ -245,24 +263,25 @@ function OrderPayment({
                     { id }
                 );
 
+                console.log("status charge:", checkStatus);
+
                 if (checkStatus.intuitRes.status === "SUCCEEDED") {
-                    setIsTransactionApproved(true);
+                    // setIsTransactionApproved(true);
                     toast.success("Transaction approved!!");
-                    console.log("SUCCEEDED", checkStatus);
                 }
 
                 if (checkStatus.intuitRes.status === "PENDING") {
-                    setIsTransactionApproved(true);
+                    // setIsTransactionApproved(true);
                     toast.success("Transaction approved!!");
-                    console.log("PENDING", checkStatus);
                 }
 
                 if (checkStatus.intuitRes.status === "DECLINED") {
                     toast.error("Transaction declined!!");
-                    console.log("DECLINED", checkStatus);
                 }
             }
+
             setIsLoading(false);
+            setBankErrors(null);
         } catch (err) {
             console.log(err);
             setIsLoading(false);
@@ -275,7 +294,6 @@ function OrderPayment({
                 {isTransactionApproved && (
                     <div className="absolute bg-gray-200/50 backdrop-blur-sm mt-6 p-5">
                         <h1 className="">Payment submitted</h1>
-                        {/* <h1 className="">Currently in development...</h1> */}
                     </div>
                 )}
                 {!isTransactionApproved && (
@@ -378,9 +396,10 @@ function OrderPayment({
                                             ? "border-b border-davidiciGold px-5 py-1 shadow-sm shadow-davidiciGold transition-shadow hover:shadow-none cursor-pointer"
                                             : "px-5 py-1 cursor-pointer"
                                     }
-                                    onClick={() =>
-                                        setCrrPaymentMethod("credit card")
-                                    }
+                                    onClick={() => {
+                                        setCrrPaymentMethod("credit card");
+                                        setBankErrors(null);
+                                    }}
                                 >
                                     Credit
                                 </p>
@@ -390,9 +409,10 @@ function OrderPayment({
                                             ? "border-b border-davidiciGold px-5 py-1 cursor-pointer"
                                             : "px-5 py-1 cursor-pointer"
                                     }
-                                    onClick={() =>
-                                        setCrrPaymentMethod("bank account")
-                                    }
+                                    onClick={() => {
+                                        setCrrPaymentMethod("bank account");
+                                        setCardErrors(null);
+                                    }}
                                 >
                                     Bank account
                                 </p>

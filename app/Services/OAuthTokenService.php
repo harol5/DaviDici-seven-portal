@@ -25,10 +25,10 @@ class OAuthTokenService
 
           info('prevoius token invalid!!');
 
-          return self::refreshToken($token->refresh_token);
+          return self::refreshToken($token->refresh_token, $token->company_id);
      }
 
-     public static function refreshToken($refreshToken)
+     public static function refreshToken($refreshToken, $companyId)
      {       
           info('== refreshToken called!! ==');
 
@@ -61,6 +61,7 @@ class OAuthTokenService
                     'access_token' => $tokens['access_token'],
                     'refresh_token' => $tokens['refresh_token'],
                     'expires_at' => Carbon::now()->addSeconds($tokens['expires_in']),
+                    'company_id' => $companyId,
                ]);
 
                info('auth token saved:');
@@ -71,5 +72,18 @@ class OAuthTokenService
                info('intuit refresh token failed!!');
                return '';
           }                     
+     }
+
+     public static function getCompanyId()
+     {
+          info('== getCompanyId called!! ==');
+
+          $token = OAuthToken::latest()->first();
+
+          info('token returned by database:');
+          info($token);
+
+          return $token->company_id;
+          
      }
 }

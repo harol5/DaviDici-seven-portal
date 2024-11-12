@@ -20,16 +20,10 @@ type Action = {
 };
 
 function CreditCardForm({ handleSubmit, errors }: CreditCardFormProps) {
-    console.log("=== CreditCardForm ===");
-    console.log("Errors:", errors);
-
     const crrErrors = useMemo(() => {
-        // console.log(crrErrors["card.cvc"]);
-        // console.log(crrErrors["card.number"]);
-
         return errors
             ? errors.reduce<Record<string, ErrorIntuit>>((acc, error) => {
-                  acc[error.detail] = error;
+                  acc[error.detail ?? error.code] = error;
                   return acc;
               }, {})
             : null;
@@ -87,6 +81,10 @@ function CreditCardForm({ handleSubmit, errors }: CreditCardFormProps) {
     };
 
     const [state, dispatch] = useReducer(reducer, card);
+
+    console.log("=== CreditCardForm ===");
+    console.log("Errors:", errors);
+    console.log("current Errors:", crrErrors);
 
     return (
         <form id="payment-form" onSubmit={(e) => handleSubmit(e, state)}>
@@ -248,6 +246,12 @@ function CreditCardForm({ handleSubmit, errors }: CreditCardFormProps) {
                     />
                 </div>
             </div>
+
+            {crrErrors && crrErrors["PMT-6000"] ? (
+                <p className="text-red-500">
+                    Service unavailable at this time, Please try again later.
+                </p>
+            ) : null}
 
             <div className="flex justify-center mt-5">
                 <button
