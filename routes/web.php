@@ -39,8 +39,10 @@ Route::middleware(['auth','auth.session'])->group(function () {
     Route::get('/media', [ExpressProgramController::class, 'fileForm']);
     Route::post('/media/upload-images', [ExpressProgramController::class, 'storeImages']);
     Route::get('/media/images', [ExpressProgramController::class, 'getAllCompositionImages']);
-    Route::post('/media/images/delete', [ExpressProgramController::class, 'deleteImages']);
+    Route::post('/media/images/delete', [ExpressProgramController::class, 'deleteImages']);    
     Route::get('/tokens/create', [UserController::class, 'generateToken']);
+    Route::get('/users/admin/pwd-form', [UserController::class, 'changePwdAdminForm']);
+    Route::post('/users/admin/pwd', [UserController::class, 'changePasswordAdmin']);
 
 
     // Owner only endpoints.    

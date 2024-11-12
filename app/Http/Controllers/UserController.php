@@ -194,13 +194,31 @@ class UserController extends Controller
     }
 
     // Change user password (admin only) ----------------------
-    public function ChangePassword(Request $request)
+    public function changePwdAdminForm(Request $request)
     {
-        $data = $request->all();
+        if (Gate::allows('admin-only')) {
+            $message = $request->session()->get('message');        
 
-        User::where('email', $data['email'])->update(['password' => bcrypt($data['password'])]);
+            return Inertia::render('Users/ChangePasswordAdm', ['message' => $message]);
+        }
 
-        back()->with('message', "done");
+        abort(403);        
+    }
+
+    public function changePasswordAdmin(Request $request)
+    {
+        $formFields = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => 'required',
+        ]);        
+    
+        $queryResponse = User::where('email', Str::lower($formFields['email']))->update(['password' => bcrypt($formFields['password'])]);        
+
+        if ($queryResponse === 0) {
+            back()->with('message', "user not found");
+        }
+
+        back()->with('message', "password updated");
     }
 
     // Show user portal (admin only) (user exits already in foxpro) -----------
