@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use App\Services\OAuthTokenService;
 
+use App\Services\TestingService;
+
 class OrdersController extends Controller
 {
     // Show all orders.    
@@ -358,16 +360,17 @@ class OrdersController extends Controller
             //     'params' => [$orderNumber, 'CC', $info['foxproInfo']['amountPaid'], '05/22/2024', 'harol rojas', '1234567890000', '12/24', '123'],
             //     'keep_session' => false,
             // ]);
-            
-            info("foxpro cash receipt res:");
-            info($cashReceiptRes);
+            // info($cashReceiptRes);
 
-            return response(['intuitRes' => $response->json(), 'status' => $response->status(), 'cashRes' => $cashReceiptRes])->header('Content-Type', 'application/json');
+            info("foxpro cash receipt res:");
+            
+            return response(['intuitRes' => $response->json(), 'status' => $response->status(), 'cashRes' => "testing"])->header('Content-Type', 'application/json');
 
         } else if ($response->clientError()) {
             // 401 -> access token expired!!
             if ($response->status() === 401) {
                 info("the access token provided to hcarge endpoint is expired!! status: 401");        
+                return response(['intuitRes' => "the access token provided to hcarge endpoint is expired!! status: 401" , 'status' => $response->status()])->header('Content-Type', 'application/json');
             }
 
             // 400 -> invalid information!!
@@ -585,10 +588,12 @@ class OrdersController extends Controller
         }
     }
 
-    public function testApi()
+    public function testApi(TestingService $testingService)
     {                            
         // return Inertia::render('Test',['response' => $response]);
         // return response(['response' => $response])->header('Content-Type', 'application/json');
+
+        return response(['response' => $testingService->getUniqueInstanceId()])->header('Content-Type', 'application/json');
     }
 
 

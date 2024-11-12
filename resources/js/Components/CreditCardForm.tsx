@@ -1,9 +1,10 @@
-import { FormEvent, useReducer } from "react";
+import { FormEvent, useMemo, useReducer } from "react";
 import type { CardInfo as CardInfoModel } from "../Models/CardInfo";
+import { ErrorIntuit } from "../Models/Intuit";
 
 interface CreditCardFormProps {
     handleSubmit: (e: FormEvent, state: CardInfoModel) => void;
-    errors: any;
+    errors: ErrorIntuit[] | null;
 }
 
 type Action = {
@@ -21,6 +22,18 @@ type Action = {
 function CreditCardForm({ handleSubmit, errors }: CreditCardFormProps) {
     console.log("=== CreditCardForm ===");
     console.log("Errors:", errors);
+
+    const crrErrors = useMemo(() => {
+        // console.log(crrErrors["card.cvc"]);
+        // console.log(crrErrors["card.number"]);
+
+        return errors
+            ? errors.reduce<Record<string, ErrorIntuit>>((acc, error) => {
+                  acc[error.detail] = error;
+                  return acc;
+              }, {})
+            : null;
+    }, [errors]);
 
     const card: CardInfoModel = {
         number: "",
@@ -99,6 +112,14 @@ function CreditCardForm({ handleSubmit, errors }: CreditCardFormProps) {
                             });
                         }}
                     />
+                    {crrErrors && crrErrors["card.number"] ? (
+                        <p className="text-red-500">
+                            {crrErrors["card.number"].message ===
+                            "card.number is invalid."
+                                ? "invalid number"
+                                : ""}
+                        </p>
+                    ) : null}
                 </div>
 
                 <div className="flex flex-col items-center">
@@ -141,6 +162,20 @@ function CreditCardForm({ handleSubmit, errors }: CreditCardFormProps) {
                             }}
                         />
                     </div>
+                    {crrErrors && crrErrors["card.expyear"] ? (
+                        <p className="text-red-500">
+                            {crrErrors["card.expyear"].moreInfo}
+                        </p>
+                    ) : null}
+                    {crrErrors && crrErrors["card.expmonth"] ? (
+                        <p className="text-red-500">
+                            {crrErrors["card.expmonth"].moreInfo}
+                        </p>
+                    ) : null}
+                    {crrErrors &&
+                    crrErrors["card.ExpirationMonth/ExpirationYear"] ? (
+                        <p className="text-red-500">{"Invalid information."}</p>
+                    ) : null}
                 </div>
 
                 <div className="flex flex-col items-center">
@@ -163,6 +198,11 @@ function CreditCardForm({ handleSubmit, errors }: CreditCardFormProps) {
                             });
                         }}
                     />
+                    {crrErrors && crrErrors["card.cvc"] ? (
+                        <p className="text-red-500">
+                            {crrErrors["card.cvc"].moreInfo}
+                        </p>
+                    ) : null}
                 </div>
             </div>
 

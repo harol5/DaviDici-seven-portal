@@ -6,6 +6,12 @@ use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
+// -- PRACTICING MIDDLEWRE AND SERVICE CONTAINER BINDINGS -- MUST DELETE!!!! --
+use App\Services\TestingService;
+use App\Services\TestingServiceTwo;
+use Illuminate\Http\Request;
+// ----
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -14,6 +20,9 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         //
+        $this->app->singleton(TestingService::class, function ($app) {
+            return new TestingService(new Request(), new TestingServiceTwo());
+        });
     }
 
     /**

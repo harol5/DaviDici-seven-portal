@@ -9,6 +9,12 @@ use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\ExpressProgramController;
 use App\Http\Controllers\IntuitController;
 
+// -- PRACTICING MIDDLEWRE AND SERVICE CONTAINER BINDINGS -- MUST DELETE!!!! --
+use App\Services\TestingService;
+use App\Http\Middleware\TestMiddleware;
+// --
+
+
 Route::get('/', [UserController::class, 'login'])->name('login');
 
 Route::post('/auth', [UserController::class, 'authenticate']);
@@ -74,5 +80,8 @@ Route::middleware(['auth','auth.session'])->group(function () {
 });
 
 //===========TESTING ROUTE================//
-Route::get('/testing', [OrdersController::class, 'testApi']);
+Route::get('/testing', [OrdersController::class, 'testApi'])->middleware(TestMiddleware::class);
+// Route::get('/testing', function(TestingService $test){
+//     return response(['response' => $test->getRequestParams()])->header('Content-Type', 'application/json');
+// });
 

@@ -11,6 +11,7 @@ import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import BankAccountForm from "../../Components/BankAccountForm";
 import { Product as ProductModel } from "../../Models/Product";
+import { ErrorIntuit } from "../../Models/Intuit";
 import User from "../../Models/User";
 
 /**
@@ -66,7 +67,9 @@ function OrderPayment({
     >("credit card");
     const [isLoading, setIsLoading] = useState(false);
     const [bankValidationErrors, setBankErrors] = useState({});
-    const [cardValidationErrors, setCardErrors] = useState({});
+    const [cardValidationErrors, setCardErrors] = useState<
+        ErrorIntuit[] | null
+    >(null);
 
     const deliveryFee = useMemo(() => {
         const crrDeliveryType = deliveryInfo[0].dtype;
@@ -154,6 +157,7 @@ function OrderPayment({
                 const errors = response.data.intuitRes.errors;
                 console.log("invalid information:", errors);
                 setIsLoading(false);
+                setCardErrors(errors);
                 return;
             }
 
@@ -170,11 +174,13 @@ function OrderPayment({
             }
 
             setIsLoading(false);
+            setCardErrors(null);
         } catch (error) {
             if (axios.isAxiosError(error)) {
+                console.log(error);
                 console.log(error.response?.data);
                 if (error.response?.data.errors) {
-                    const errors = error.response.data.errors;
+                    const errors: ErrorIntuit[] = error.response.data.errors;
                     setCardErrors(errors);
                 }
             } else {
