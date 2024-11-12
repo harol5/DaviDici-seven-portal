@@ -10,9 +10,6 @@ interface ChangePasswordAdmProps {
 }
 
 function ChangePasswordAdm({ auth, message }: ChangePasswordAdmProps) {
-    console.log("=== ChangePasswordAdm ===");
-    console.log(message);
-
     const { setData, post, errors, data, reset } = useForm({
         email: "",
         password: "",
