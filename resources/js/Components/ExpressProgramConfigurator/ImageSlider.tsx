@@ -91,7 +91,10 @@ function ImageSlider({ imageUrls, defaultImage }: ImageSliderProps) {
                 onClose={() => setOpenCompositionImageModal(false)}
                 customClass={classes.imageSliderModal}
             >
-                <button onClick={() => setOpenCompositionImageModal(false)}>
+                <button
+                    className="bg-davidiciGold/70 px-1 border border-davidiciGold text-lg text-white"
+                    onClick={() => setOpenCompositionImageModal(false)}
+                >
                     Close
                 </button>
                 <div className={classes.imageSlider}>
