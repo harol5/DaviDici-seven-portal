@@ -16,18 +16,21 @@ class IntuitController extends Controller
 {
      public function connectToIntuit()
      {
-          $baseUrl = 'https://appcenter.intuit.com/connect/oauth2';          
-          $params = [
-               'client_id' => env('INTUIT_CLIENT_ID'),
-               'scope' => 'com.intuit.quickbooks.payment',
-               'redirect_uri' => env('INTUIT_REDIRECT_URL'),
-               'response_type' => 'code',
-               'state' => env('INTUIT_AUTH_STATE'),
-          ];
+          if (Gate::allows('admin-only')) {
+               $baseUrl = 'https://appcenter.intuit.com/connect/oauth2';          
+               $params = [
+                    'client_id' => env('INTUIT_CLIENT_ID'),
+                    'scope' => 'com.intuit.quickbooks.payment',
+                    'redirect_uri' => env('INTUIT_REDIRECT_URL'),
+                    'response_type' => 'code',
+                    'state' => env('INTUIT_AUTH_STATE'),
+               ];
 
-          $authorizationRequestUrl = $baseUrl . '?' . http_build_query($params, "null", '&', PHP_QUERY_RFC1738);          
+               $authorizationRequestUrl = $baseUrl . '?' . http_build_query($params, "null", '&', PHP_QUERY_RFC1738);          
 
-          return Inertia::render('Intuit/Connect', ['authUrl' => $authorizationRequestUrl]);
+               return Inertia::render('Intuit/Connect', ['authUrl' => $authorizationRequestUrl]);
+          }
+          abort(403);             
      }
 
      public function handleIntuitRedirect(Request $request)
@@ -74,7 +77,6 @@ class IntuitController extends Controller
                $companyId = OAuthTokenService::getCompanyId();    
                return response(['companyID' => $companyId, 'status' => 201])->header('Content-Type', 'application/json');
           }
-
           abort(403);                  
      }
 }
