@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Carbon;
 use App\Models\OAuthToken;
 use Illuminate\Support\Facades\Crypt;
+use App\Services\OAuthTokenService;
 
 
 class IntuitController extends Controller
@@ -64,5 +65,15 @@ class IntuitController extends Controller
                logErrorDetails("handleIntuitRedirect","IntuitController",'redirect responds from intuit did not include code, state or state was tampered.',$intuitInfo,'admin');
                return redirect('/orders')->with(['message' => 'redirect responds from intuit did not include code, state or state was tampered.']);
           }                    
+     }
+
+     public function getCompanyId()
+     {
+          if (Gate::allows('admin-only')) {
+               $companyId = OAuthTokenService::getCompanyId();    
+               return response(['companyID' => $companyId, 'status' => 201])->header('Content-Type', 'application/json');
+          }
+
+          abort(403);                  
      }
 }

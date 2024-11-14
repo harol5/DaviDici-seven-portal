@@ -52,15 +52,8 @@ class OAuthTokenService
      }
 
      public static function getCompanyId()
-     {
-          info('== getCompanyId called!! ==');
-
-          $token = OAuthToken::latest()->first();
-
-          info('token returned by database:');
-          info($token);
-
-          return $token->company_id;
-          
+     {          
+          $token = OAuthToken::latest()->first();          
+          return Crypt::decryptString($token->company_id);                    
      }
 }
