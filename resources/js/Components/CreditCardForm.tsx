@@ -82,10 +82,6 @@ function CreditCardForm({ handleSubmit, errors }: CreditCardFormProps) {
 
     const [state, dispatch] = useReducer(reducer, card);
 
-    console.log("=== CreditCardForm ===");
-    console.log("Errors:", errors);
-    console.log("current Errors:", crrErrors);
-
     return (
         <form id="payment-form" onSubmit={(e) => handleSubmit(e, state)}>
             <div className="flex gap-3 mb-2">
@@ -213,6 +209,7 @@ function CreditCardForm({ handleSubmit, errors }: CreditCardFormProps) {
                         className="px-[0.2em] border border-black rounded"
                         type="text"
                         name="name"
+                        required
                         value={state.name}
                         id="name"
                         onChange={(e) => {

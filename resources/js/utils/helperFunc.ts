@@ -73,3 +73,10 @@ export const getSkuAndPrice = (
 
     return skuAndPrice;
 };
+
+export const getFormattedDate = () => {
+    const today = new Date();
+    return `${String(today.getMonth() + 1).padStart(2, "0")}/${String(
+        today.getDate()
+    ).padStart(2, "0")}/${today.getFullYear()}`;
+};

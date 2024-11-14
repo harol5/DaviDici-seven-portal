@@ -1,3 +1,8 @@
+export const intuitMaskTokenUrl =
+    import.meta.env.MODE === "development"
+        ? "https://sandbox.api.intuit.com"
+        : "https://api.intuit.com";
+
 type ErrorIntuit = {
     code: string;
     detail: string;

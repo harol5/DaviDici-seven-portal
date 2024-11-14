@@ -7,7 +7,6 @@ interface ConnectProps {
 }
 
 function Connect({ auth, authUrl }: ConnectProps) {
-    console.log(authUrl);
     return (
         <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <a href={authUrl} className="bg-green-500 text-white p-3">

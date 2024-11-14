@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use App\Services\OAuthTokenService;
+use Illuminate\Support\Facades\App;
 
 use App\Services\TestingService;
 
@@ -288,7 +289,7 @@ class OrdersController extends Controller
         // throw 404 if order number does not exist
         $order = $request->all();
         $orderNumber = getOrderNumberFromPath($request->path());
-        $userEmail = auth()->user()->attributesToArray()['email'];
+        $userEmail = auth()->user()->attributesToArray()['email'];                
 
         $deliveryInfo = FoxproApi::call([
             'action' => 'GetDeliveryInfo',
@@ -325,62 +326,42 @@ class OrdersController extends Controller
 
     // Creates a transaction.
     public function createCharge(Request $request)
-    {
-
-        info("=== createCharge ===");
-
+    {        
         $info = $request->all();
         $js_data = json_encode($info['info']);
         $uuidTransaction = (string) Str::uuid();
         $orderNumber = getOrderNumberFromPath($request->path());
 
-        $accessToken = OAuthTokenService::getAccessToken();
-        $companyId = OAuthTokenService::getCompanyId();
-
+        $accessToken = OAuthTokenService::getAccessToken();    
         if (!$accessToken) {
-            return response(['intuitRes' => "no access token!!"])->header('Content-Type', 'application/json');
-        }
-
-        info('access token:');
-        info($accessToken);
-        info('company id:');
-        info($companyId);
+            logErrorDetails('createCharge','OrdersController','empty access token','none', $request->user()->email);
+            return response(['intuitRes' => 'empty access token. refresh failed.', 'status' => 501])->header('Content-Type', 'application/json');
+        }         
+        
+        $intuitApiUrl = App::environment('production') ? env('INTUIT_API_URL') : env('INTUIT_SANDBOX_API_URL');
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $accessToken,
             'Content-Type' => 'application/json',
             'Request-Id' => $uuidTransaction,
-        ])->withBody($js_data)->post('https://sandbox.api.intuit.com/quickbooks/v4/payments/charges');
-
-        info("intuit charge endpoint response:");        
-        info($response->body());
-
-
-        $comapnyInfoEndpoint = "https://sandbox-quickbooks.api.intuit.com/v3/company/$companyId/companyinfo/$companyId?minorversion=3";
-        $response2 = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $accessToken,
-            'Content-Type' => 'text/plain',            
-        ])->get($comapnyInfoEndpoint);
-
-        info("intuit compani info response:");        
-        info($comapnyInfoEndpoint);
-        info($response2->status());
-        info($response2->body());
-
+        ])->withBody($js_data)->post($intuitApiUrl .'/quickbooks/v4/payments/charges');
 
         if ($response->successful()) {            
+            $foxproInfo = $info['foxproInfo'];
+            info("foxproInfo:");
+            info($foxproInfo);            
+
             // "Result" : "Info Updated Successfully" |
-            // $cashReceiptRes = FoxproApi::call([
-            //     'action' => 'SaveCR',
-            //     // get amount without credit card fee.
-            //     'params' => [$orderNumber, 'CC', $info['foxproInfo']['amountPaid'], '05/22/2024', 'harol rojas', '1234567890000', '12/24', '123'],
-            //     'keep_session' => false,
-            // ]);
-            // info($cashReceiptRes);
+            $cashReceiptRes = FoxproApi::call([
+                'action' => 'SaveCR',                
+                'params' => [$orderNumber, 'CC', $foxproInfo['amountPaid'], $foxproInfo['date'], $foxproInfo['nameOnCard'], $foxproInfo['cc'], $foxproInfo['expDate'], $foxproInfo['cvc']],
+                'keep_session' => false,
+            ]);
 
             info("foxpro cash receipt res:");
+            info($cashReceiptRes);            
             
-            return response(['intuitRes' => $response->json(), 'status' => $response->status(), 'cashRes' => "testing"])->header('Content-Type', 'application/json');
+            return response(['intuitRes' => $response->json(), 'status' => $response->status(), 'cashRes' => $cashReceiptRes])->header('Content-Type', 'application/json');
 
         } else {
             // 401 -> access token expired!!
@@ -398,40 +379,40 @@ class OrdersController extends Controller
     public function createBankCharge(Request $request)
     {
         $info = $request->all();
-        $js_data = json_encode($info);
+        $intuitInfo = json_encode($info['intuitInfo']);
         $uuidTransaction = (string) Str::uuid();
         $orderNumber = getOrderNumberFromPath($request->path());
-        $accessToken = OAuthTokenService::getAccessToken();
 
-        info("=== createBankCharge ===");
+        $accessToken = OAuthTokenService::getAccessToken();
+        if (!$accessToken) {
+            logErrorDetails('createBankCharge','OrdersController','empty access token','none', $request->user()->email);
+            return response(['intuitRes' => 'empty access token. refresh failed.', 'status' => 501])->header('Content-Type', 'application/json');
+        }        
+
+        $intuitApiUrl = App::environment('production') ? env('INTUIT_API_URL') : env('INTUIT_SANDBOX_API_URL');
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $accessToken,
             'Content-Type' => 'application/json',
             'Request-Id' => $uuidTransaction,
-        ])->withBody($js_data)->post('https://sandbox.api.intuit.com/quickbooks/v4/payments/echecks');
-
-        info('cash echeck response:');
-        info($response->body());
+        ])->withBody($intuitInfo)->post($intuitApiUrl .'/quickbooks/v4/payments/echecks');
 
         if ($response->successful()) {
-            // $cashReceiptRes = FoxproApi::call([
-            //     'action' => 'SaveCR',
-            //     // get amount without credit card fee.
-            //     'params' => [$orderNumber, 'CC', $info['foxproInfo']['amountPaid'], '05/22/2024', 'harol rojas', '1234567890000', '12/24', '123'],
-            //     'keep_session' => false,
-            // ]);
-            // info($cashReceiptRes);
+            $foxproInfo = $info['foxproInfo'];                      
+            $cashReceiptRes = FoxproApi::call([
+                'action' => 'SaveCR',                
+                'params' => [$orderNumber, 'CH', $foxproInfo['amountPaid'], $foxproInfo['date'], $foxproInfo['name'], $foxproInfo['checkNumber'], $foxproInfo['routingNumber'], $foxproInfo['accountNumber']],
+                'keep_session' => false,
+            ]);            
             
-            return response(['intuitRes' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');
-        }else {
-            // 401 -> access token expired!!
+            return response(['intuitRes' => $response->json(), 'status' => $response->status(), 'cashRes' => $cashReceiptRes])->header('Content-Type', 'application/json');
+        }else {            
             if ($response->status() === 401) {
                 logErrorDetails('createBankCharge','OrdersController','intuit access token expired',$response->body(), $request->user()->email);
                 return response(['intuitRes' => "the access token provided to charge endpoint is expired!! status: 401" , 'status' => $response->status()])->header('Content-Type', 'application/json');
             }            
             
-            logErrorDetails('createBankCharge','OrdersController','intuit charge request not successful',$response->body(), $request->user()->email);
+            logErrorDetails('createBankCharge','OrdersController','intuit echeck request not successful',$response->body(), $request->user()->email);
             return response(['intuitRes' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');
         }
     }
@@ -440,30 +421,31 @@ class OrdersController extends Controller
     public function getStatusCheck(Request $request)
     {
         $info = $request->all();
-        $uuidTransaction = (string) Str::uuid();
-        $orderNumber = getOrderNumberFromPath($request->path());
+        $uuidTransaction = (string) Str::uuid();        
         $accessToken = OAuthTokenService::getAccessToken();
 
-        info("=== createBankCharge ===");
+        if (!$accessToken) {
+            logErrorDetails('getStatusCheck','OrdersController','empty access token','none', $request->user()->email);
+            return response(['intuitRes' => 'empty access token. refresh failed.', 'status' => 501])->header('Content-Type', 'application/json');
+        }        
+
+        $intuitApiUrl = App::environment('production') ? env('INTUIT_API_URL') : env('INTUIT_SANDBOX_API_URL');
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $accessToken,
             'Request-Id' => $uuidTransaction,
-        ])->get('https://sandbox.api.intuit.com/quickbooks/v4/payments/echecks/' . $info['id']);
-
-        info('status echeck response:');
-        info($response->body());
+        ])->get($intuitApiUrl . '/quickbooks/v4/payments/echecks/' . $info['id']);
+        
 
         if ($response->successful()) {
             return response(['intuitRes' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');
-        } else {
-            // 401 -> access token expired!!
+        } else {            
             if ($response->status() === 401) {
                 logErrorDetails('getStatusCheck','OrdersController','intuit access token expired',$response->body(), $request->user()->email);
                 return response(['intuitRes' => "the access token provided to charge endpoint is expired!! status: 401" , 'status' => $response->status()])->header('Content-Type', 'application/json');
             }            
             
-            logErrorDetails('getStatusCheck','OrdersController','intuit charge request not successful',$response->body(), $request->user()->email);
+            logErrorDetails('getStatusCheck','OrdersController','intuit echeck status request not successful',$response->body(), $request->user()->email);
             return response(['intuitRes' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');
         }
     }
@@ -624,6 +606,28 @@ class OrdersController extends Controller
 
             return redirect('/orders')->with('message', 'Order Number ' . $data['newOrderNum'] . ' created!!');
         }
+    }
+
+    // only use when user does not require a deposit.
+    public function approveOrder(Request $request)
+    {
+        $info = $request->all();                
+        $orderNumber = getOrderNumberFromPath($request->path());
+        $user = $request->user()->first_name;        
+
+        // 'Result' => 'you did not specify the amount' | 'Info Updated Successfully'
+        $cashReceiptRes = FoxproApi::call([
+            'action' => 'SaveCR',            
+            'params' => [$orderNumber, 'CC', $info['amountPaid'], $info['date'], $user, '0000000000000', '00/00', '000'],
+            'keep_session' => false,
+        ]);        
+
+        if (array_key_exists('Result', $cashReceiptRes) && $cashReceiptRes['Result'] === "Info Updated Successfully") {
+            return response(['cashRes' => 'order approved', 'status' => 201])->header('Content-Type', 'application/json');
+        }
+
+        logFoxproError('foxprop:SaveCR controllerFunc:approveOrder','OrderController',[$orderNumber, 'CC', $info['amountPaid'], $info['date'], $user, '0000000000000', '00/00', '000'],$cashReceiptRes);
+        return response(['cashRes' => 'could not approve order.', 'status' => 500])->header('Content-Type', 'application/json');        
     }
 
     public function testApi(TestingService $testingService)

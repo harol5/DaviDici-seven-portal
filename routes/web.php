@@ -16,6 +16,8 @@ use App\Http\Middleware\TestMiddleware;
 
 
 Route::get('/', [UserController::class, 'login'])->name('login');
+Route::get('/EULA', [UserController::class, 'EULA']);
+Route::get('/privacy-policy', [UserController::class, 'privacyPolicy']);
 
 Route::post('/auth', [UserController::class, 'authenticate']);
 
@@ -41,6 +43,9 @@ Route::middleware(['auth','auth.session'])->group(function () {
     Route::post('/users/add-to-portal/add', [UserController::class, 'addUserToPortal']);
     Route::get('/intuit', [IntuitController::class, 'connectToIntuit']);
     Route::get('/intuit/redirect', [IntuitController::class, 'handleIntuitRedirect']);
+
+    //===========TESTING ROUTE================//
+    Route::get('/testing', [OrdersController::class, 'testApi'])->middleware(TestMiddleware::class);
 
     // Owner only endpoints.    
     Route::get('/register/salesperson', [UserController::class, 'registerSalesPerson'])->name('user.register.salesperson');
@@ -68,7 +73,8 @@ Route::middleware(['auth','auth.session'])->group(function () {
     Route::post('/orders/{orderNumber}/products/delivery', [OrdersController::class, 'saveDeliveryInfo']);
     Route::post('/orders/{orderNumber}/products/payment', [OrdersController::class, 'createCharge']);
     Route::post('/orders/{orderNumber}/products/payment-bank', [OrdersController::class, 'createBankCharge']);
-    Route::post('/orders/{orderNumber}/products/payment-bank/status', [OrdersController::class, 'getStatusCheck']);    
+    Route::post('/orders/{orderNumber}/products/payment-bank/status', [OrdersController::class, 'getStatusCheck']);   
+    Route::post('/orders/{orderNumber}/products/approve', [OrdersController::class, 'approveOrder']); 
 
     // Inventory routes.
     Route::get('/inventory', function(){        
@@ -79,9 +85,4 @@ Route::middleware(['auth','auth.session'])->group(function () {
     Route::post('/logout', [UserController::class, 'logout']);
 });
 
-//===========TESTING ROUTE================//
-Route::get('/testing', [OrdersController::class, 'testApi'])->middleware(TestMiddleware::class);
-// Route::get('/testing', function(TestingService $test){
-//     return response(['response' => $test->getRequestParams()])->header('Content-Type', 'application/json');
-// });
 

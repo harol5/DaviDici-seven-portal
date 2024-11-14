@@ -5,33 +5,22 @@ namespace App\Services;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Carbon;
 use App\Models\OAuthToken;
+use Illuminate\Support\Facades\Crypt;
 
 class OAuthTokenService
 {
      public static function getAccessToken()
-     {
-          info('== getAccessToken called!! ==');
+     {          
+          $token = OAuthToken::latest()->first();          
+          if ($token && Carbon::now()->lt(Carbon::parse($token->expires_at))) {                              
+               return Crypt::decryptString($token->access_token);               
+          }                    
 
-          $token = OAuthToken::latest()->first();
-
-          info('token returned by database:');
-          info($token);
-
-          if ($token && Carbon::now()->lt(Carbon::parse($token->expires_at))) {
-               info('prevoius token retrived valid!! returning...');
-
-               return $token->access_token;
-          }          
-
-          info('prevoius token invalid!!');
-
-          return self::refreshToken($token->refresh_token, $token->company_id);
+          return self::refreshToken(Crypt::decryptString($token->refresh_token), $token->company_id);
      }
 
      public static function refreshToken($refreshToken, $companyId)
-     {       
-          info('== refreshToken called!! ==');
-
+     {                 
           $clientId = env('INTUIT_CLIENT_ID');
           $clientSecret = env('INTUIT_CLIENT_SECRECT');          
 
@@ -46,30 +35,18 @@ class OAuthTokenService
 
           if ($response->successful()) {                    
                $collection = $response->collect();
-               $tokens = $collection->all();
-
-               info('intuit refresh token info:');
-               info($tokens);                    
-               info('current time:');
-               info(Carbon::now()); 
-               info('token expires at:');
-               info(Carbon::now()->addSeconds($tokens['expires_in'])); 
-               
-
-               // now save info to o_auth model
-               $authToken = OAuthToken::create([
-                    'access_token' => $tokens['access_token'],
-                    'refresh_token' => $tokens['refresh_token'],
+               $tokens = $collection->all();                              
+                  
+               OAuthToken::create([
+                    'access_token' => Crypt::encryptString($tokens['access_token']),
+                    'refresh_token' => Crypt::encryptString($tokens['refresh_token']),
                     'expires_at' => Carbon::now()->addSeconds($tokens['expires_in']),
                     'company_id' => $companyId,
-               ]);
-
-               info('auth token saved:');
-               info($authToken);                
+               ]);                                                    
 
                return $tokens['access_token'];
           } else {
-               info('intuit refresh token failed!!');
+               logErrorDetails('refreshToken', 'OAuthTokenService','refresh token request not successful.',$response->body(),'admin');
                return '';
           }                     
      }
