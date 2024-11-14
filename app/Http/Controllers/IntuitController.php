@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 use App\Models\OAuthToken;
 use Illuminate\Support\Facades\Crypt;
 use App\Services\OAuthTokenService;
+use Illuminate\Support\Facades\Gate;
 
 
 class IntuitController extends Controller
