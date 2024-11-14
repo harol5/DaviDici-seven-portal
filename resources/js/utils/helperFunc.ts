@@ -1,4 +1,9 @@
-import { ItemObj, Model, SkuLengthModels } from "../Models/ModelConfigTypes";
+import {
+    Item,
+    ItemObj,
+    Model,
+    SkuLengthModels,
+} from "../Models/ModelConfigTypes";
 import { ProductInventory } from "../Models/Product";
 
 export function isAlphanumericWithSpaces(str: string) {
@@ -12,7 +17,11 @@ export const getSkuAndPrice = (
     products: ProductInventory[],
     wholeSku?: string
 ) => {
-    const skuAndPrice = { sku: "", price: 0 };
+    const skuAndPrice = {
+        sku: "",
+        price: 0,
+        product: null as ProductInventory | null,
+    };
     const skuLengths = SkuLengthModels[model];
 
     if (wholeSku) {
@@ -23,6 +32,7 @@ export const getSkuAndPrice = (
                     : crrProduct.msrp;
 
                 skuAndPrice.sku = wholeSku;
+                skuAndPrice.product = crrProduct;
                 break;
             }
         }
@@ -39,13 +49,6 @@ export const getSkuAndPrice = (
             itemCodesArray.length !==
             skuLengths[item as keyof typeof skuLengths]
         ) {
-            console.log("======= New getSkuAndPrice func ========");
-            console.log(SkuLengthModels);
-            console.log(model);
-            console.log(item);
-            console.log(itemObj);
-            console.log(skuLengths);
-            console.log(skuAndPrice);
             return skuAndPrice;
         }
 
@@ -58,25 +61,29 @@ export const getSkuAndPrice = (
                     : crrProduct.msrp;
 
                 skuAndPrice.sku = productSku;
+                skuAndPrice.product = crrProduct;
                 break;
             }
         }
     }
 
-    console.log("======= New getSkuAndPrice func ========");
-    console.log(SkuLengthModels);
-    console.log(model);
-    console.log(item);
-    console.log(itemObj);
-    console.log(skuLengths);
-    console.log(skuAndPrice);
-
     return skuAndPrice;
 };
+
 
 export const getFormattedDate = () => {
     const today = new Date();
     return `${String(today.getMonth() + 1).padStart(2, "0")}/${String(
         today.getDate()
     ).padStart(2, "0")}/${today.getFullYear()}`;
+  
+};
+
+export const scrollToView = (item: Item | "compositionNameWrapper") => {
+    const element = document.getElementById(item);
+    if (element) {
+        element.scrollIntoView({
+            behavior: "smooth",
+        });
+    }
 };

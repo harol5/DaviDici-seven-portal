@@ -1,0 +1,96 @@
+.breakdownWrapper {
+    width: 100%;
+    position: absolute;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .configurationBreakdown {
+        width: 100%;
+        max-height: 0;
+        overflow: hidden;
+        background-color: #0000009e;
+        transition: max-height 0.4s ease-out;
+
+        .configurationBreakdownContent {
+            padding: 1.4em;
+            background-color: white;
+            margin: 2.4em;
+            margin-bottom: 1.4em;
+            margin-top: 1.4em;
+
+            .headerTitle {
+                color: #d1aa68;
+                font-size: 1.3rem;
+            }
+
+            .breakdownCard {
+                padding: 1rem 0;
+                border-bottom: #d1aa68 dashed 1px;
+
+                .item {
+                    color: #d1aa68;
+                }
+                .breakdownCardContent {
+                    display: flex;
+                    justify-content: space-between;
+
+                    .description {
+                        flex-basis: 50%;
+                    }
+
+                    .sku {
+                        flex-basis: 40%;
+                        text-align: center;
+                    }
+
+                    .price {
+                        flex-basis: 10%;
+                        text-align: end;
+                    }
+                }
+            }
+        }
+    }
+    .configurationBreakdown.activeBreakdown {
+        max-height: 100vh;
+    }
+
+    .breakdownButton {
+        display: flex;
+        background-color: #d1aa68;
+        color: white;
+        width: 20%;
+        border-radius: 0% 0% 100% 100%;
+        border: 1px solid black;
+        border-top: 0;
+        padding: 0.1em 0 0.5em;
+        box-shadow: 0px 2px 1px 1px rgba(0, 0, 0, 0.257);
+
+        .triangleDownIcon {
+            width: 13%;
+            transition: all 0.25s ease-out;
+        }
+        /*triangleDownIcon*/
+        .rotateTriangle {
+            transform: rotate(180deg);
+        }
+    }
+}
+
+@media print {
+    .breakdownWrapper {
+        position: static;
+
+        .configurationBreakdown {
+            .configurationBreakdownContent {
+                padding: 0;
+            }
+        }
+
+        .breakdownButton {
+            display: none;
+        }
+    }
+}

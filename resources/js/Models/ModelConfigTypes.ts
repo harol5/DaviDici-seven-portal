@@ -31,6 +31,18 @@ type ItemObj =
 
 type Item = Opera.Item | NewYork.Item;
 
+type ItemFoxPro =
+    | "VANITY"
+    | "SIDE UNIT"
+    | "ACCESSORY"
+    | "DRAWER/VANITY"
+    | "MIRROR"
+    | "TALL UNIT/LINEN CLOSET"
+    | "TOP"
+    | "VESSEL SINK"
+    | "WALL UNIT"
+    | "WASHBASIN/SINK";
+
 type Model =
     | typeof Margi.Name
     | typeof NewYork.Name
@@ -68,7 +80,7 @@ type ModelCurrConfig = {
     isDoubleSink: boolean;
 };
 
-export type { ItemObj, Model, ModelCurrConfig, Item };
+export type { ItemObj, Model, ModelCurrConfig, Item, ItemFoxPro };
 
 export const SkuLengthModels: Record<Model, SkuLengthObj> = {
     MARGI: Margi.SkuLengths,

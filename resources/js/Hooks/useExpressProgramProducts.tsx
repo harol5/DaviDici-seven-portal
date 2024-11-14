@@ -123,7 +123,15 @@ function useExpressProgramProducts(
                     if (sinkConfig) {
                         if (!sinkPosition.has(sinkConfig[0]))
                             sinkPosition.set(sinkConfig[0], []);
+
                         sinkPosition.get(sinkConfig[0]).push(product);
+
+                        if (sinkConfig[0] === "CENTERED") {
+                            if (!sinkPositionsMap.has("CENTERED"))
+                                sinkPositionsMap.set("CENTERED", []);
+
+                            sinkPositionsMap.get("CENTERED").push(product);
+                        }
                     }
                 } else {
                     if (!sinkPositionsMap.has("CENTERED"))
@@ -154,6 +162,10 @@ function useExpressProgramProducts(
 
             if (vanity.finish.includes("/")) {
                 finish = vanity.finish.replace("/", "-");
+            }
+
+            if (finish === "MATT LACQ. WHITE-INDIGO") {
+                finish = "MATT LACQ. INDIGO";
             }
 
             const finishObj = {
@@ -212,6 +224,48 @@ function useExpressProgramProducts(
         return otherProductsObj;
     };
 
+    const generateMirrorsCompositionObj = (
+        compositions: Composition[],
+        otherProducts: Map<string, Map<string, ProductInventory[]>>,
+        sharedItemsMap: Map<string, ProductInventory[]>
+    ) => {
+        const getStartingPrice = () => {
+            const mirrors = sharedItemsMap.get("MIRROR")!;
+            let mirrorStartingPrice = 0;
+
+            if (mirrors) {
+                mirrors.sort(
+                    (a: ProductInventory, b: ProductInventory) =>
+                        a.msrp - b.msrp
+                );
+
+                mirrorStartingPrice = mirrors[0].sprice
+                    ? mirrors[0].sprice
+                    : mirrors[0].msrp;
+            }
+
+            return mirrorStartingPrice;
+        };
+
+        compositions.push({
+            model: "MIRRORS",
+            name: "MIRRORS",
+            compositionImage: `https://${location.hostname}/images/express-program/mirrors/main.webp`,
+            size: "",
+            sinkPosition: "",
+            startingPrice: getStartingPrice(),
+            vanities: [],
+            finishes: [],
+            sideUnits: [],
+            washbasins: [],
+            otherProductsAvailable: generateOtherProductsObj(
+                otherProducts,
+                sharedItemsMap,
+                "MIRRORS"
+            ),
+        });
+    };
+
     const generateCenteredSinkCompositions = (
         listOfVanities: ProductInventory[],
         finishesForFilterMap: Map<string, FinishObj>,
@@ -244,18 +298,30 @@ function useExpressProgramProducts(
                 ? vanities[0].sprice
                 : vanities[0].msrp;
 
-            const washbasinPrice = washbasins[0].sprice
-                ? washbasins[0].sprice
-                : washbasins[0].msrp;
+            let washbasinPrice = 0;
+            if (washbasins.length !== 0) {
+                washbasinPrice = washbasins[0].sprice
+                    ? washbasins[0].sprice
+                    : washbasins[0].msrp;
+            }
 
             return vanityPrice + washbasinPrice;
+        };
+
+        const getName = () => {
+            let base = `${model} ${size}"`;
+            base +=
+                washbasins.length !== 0
+                    ? ` Incl a ${washbasins[0].model} SINK`
+                    : "";
+            return base;
         };
 
         // Add constructed composition to array.
         compositions.push({
             model: model,
-            name: `${model} ${size}" Incl a ${washbasins[0].model} SINK`,
-            compositionImage: `https://portal.davidici.com/images/express-program/${model}/${size}.webp`,
+            name: getName(),
+            compositionImage: `https://${location.hostname}/images/express-program/${model}/${size}.webp`,
             size: size,
             sinkPosition: sinkPositionMeasure,
             startingPrice: getStartingPrice(),
@@ -433,7 +499,7 @@ function useExpressProgramProducts(
         compositions.push({
             model: model,
             name: `${model} ${size}" ${sinkPositionMeasure} Incl a ${washbasins[0].model} ${position} SINK`,
-            compositionImage: `https://portal.davidici.com/images/express-program/${model}/${sinkPositionMeasure} ${position} SINK.webp`,
+            compositionImage: `https://${location.hostname}/images/express-program/${model}/${sinkPositionMeasure} ${position} SINK.webp`,
             size: size,
             sinkPosition: position,
             startingPrice: getStartingPrice(),
@@ -544,6 +610,31 @@ function useExpressProgramProducts(
         const sinkPositionsForFilterMap = new Map<string, SinkPositionObj>();
         const modelsForFilterMap = new Map<string, ModelObj>();
 
+        // ONLY FOR THOSE MODELS THAT HAVE INTEGRATED SINK
+        if (vanitiesAndSideUnitsMap.get("VANITY").has("20")) {
+            initialSizesForFilter.push("20");
+            const modelsMap = vanitiesAndSideUnitsMap.get("VANITY").get("20");
+            for (const [model, products] of modelsMap) {
+                if (model === "MINI" || model === "FLORA 20") continue;
+                modelsForFilterMap.set(model, {
+                    name: model,
+                    url: `https://${location.hostname}/images/express-program/${model}/${model}.webp`,
+                });
+                generateCenteredSinkCompositions(
+                    products,
+                    finishesForFilterMap,
+                    sinkPositionsForFilterMap,
+                    initialCompositions,
+                    model,
+                    "20",
+                    "CENTERED",
+                    [],
+                    otherProductsMap,
+                    sharedItemsMap
+                );
+            }
+        }
+
         // Traverse throght validCompositionSizesMap so we can create all possible compositions.
         // SIZE -> SINK SET UP -> SINK POSITION.
         for (const [size, sinkPositionsMap] of validCompositionSizesMap) {
@@ -566,7 +657,7 @@ function useExpressProgramProducts(
 
                         modelsForFilterMap.set(model, {
                             name: model,
-                            url: `https://portal.davidici.com/images/express-program/${model}/${model}.webp`,
+                            url: `https://${location.hostname}/images/express-program/${model}/${model}.webp`,
                         });
 
                         // MARGI is a special case because it's also classified by door style. this means,
@@ -639,13 +730,6 @@ function useExpressProgramProducts(
                                     validModels.set(model, new Map());
 
                                 validModels.get(model).set("SIDE UNIT", value);
-
-                                // if (
-                                //     model === "NEW YORK" &&
-                                //     sinkPositionMeasure === "(24+12+24)"
-                                // ) {
-                                //     console.log(validModels);
-                                // }
                             }
                         } else {
                             // Once we got the valid model from the side units,
@@ -655,12 +739,6 @@ function useExpressProgramProducts(
 
                             // IMPORTANT!! - "value" could be an array or a map(MARGI <door style, arr>).
                             for (const [model, value] of modelsMap) {
-                                // if (
-                                //     model === "NEW YORK" &&
-                                //     sinkPositionMeasure === "(24+12+24)"
-                                // )
-                                //     continue;
-
                                 //we can get only vanities that can be pair with a side unit.
                                 if (!validModels.has(model)) continue;
                                 validModels.get(model).set("VANITY", value);
@@ -675,7 +753,7 @@ function useExpressProgramProducts(
 
                             modelsForFilterMap.set(model, {
                                 name: model,
-                                url: `https://portal.davidici.com/images/express-program/${model}/${model}.webp`,
+                                url: `https://${location.hostname}/images/express-program/${model}/${model}.webp`,
                             });
 
                             if (model === "MARGI")
@@ -711,6 +789,17 @@ function useExpressProgramProducts(
                 }
             }
         }
+
+        // creates object for mirrors.
+        modelsForFilterMap.set("MIRRORS", {
+            name: "MIRRORS",
+            url: `https://${location.hostname}/images/express-program/mirrors/main.webp`,
+        });
+        generateMirrorsCompositionObj(
+            initialCompositions,
+            otherProductsMap,
+            sharedItemsMap
+        );
 
         // Converts finishesForFilterMap values to and array with such values.
         const initialFinishesForFilter: FinishObj[] = Object.values(
@@ -749,6 +838,8 @@ function useExpressProgramProducts(
     };
 
     return useMemo(() => {
+        if (!rawProducts) return;
+
         return getExpressProgramData(createProductsTree());
     }, [rawProducts]);
 }

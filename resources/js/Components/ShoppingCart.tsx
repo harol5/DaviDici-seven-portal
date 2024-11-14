@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { shoppingCartProduct as shoppingCartProductModel } from "../Models/ExpressProgramModels";
-import User from "../Models/User";
+import { ShoppingCartProduct as shoppingCartProductModel } from "../Models/ExpressProgramModels";
 import axios from "axios";
 import ShoppingCartProductCard from "./ShoppingCartProductCard";
 import classes from "../../css/shoppingCart.module.css";
 import { router } from "@inertiajs/react";
 import USDollar from "../utils/currentFormatter";
+import { ProductInventory } from "../Models/Product";
 
 interface ShoppingCartProps {
     onShoppingSize: (numOfProducts: number) => void;
@@ -19,8 +19,7 @@ function ShoppingCart({
     const [crrShoppingCartProducts, setShoppingCartProducts] = useState<
         shoppingCartProductModel[]
     >([]);
-    console.log("=== Shopping Cart Component ===");
-    console.log(crrShoppingCartProducts);
+
     const handleRemoveProduct = async (
         product: shoppingCartProductModel,
         productIndex: number
@@ -104,15 +103,17 @@ function ShoppingCart({
             const doubleItemFinalQty = `--${productConfig.quantity * 2}`;
             const singleItemFinalQty = `--${productConfig.quantity * 1}`;
 
-            skusArr.push(
-                `${productConfig.vanity.uscode}!!${
-                    productConfig.composition.model
-                }${
-                    productConfig.isDoubleSink
-                        ? doubleItemFinalQty
-                        : singleItemFinalQty
-                }##${productConfig.label}`
-            );
+            if (productConfig.vanity) {
+                skusArr.push(
+                    `${productConfig.vanity.uscode}!!${
+                        productConfig.composition.model
+                    }${
+                        productConfig.isDoubleSink
+                            ? doubleItemFinalQty
+                            : singleItemFinalQty
+                    }##${productConfig.label}`
+                );
+            }
 
             if (productConfig.washbasin) {
                 skusArr.push(
@@ -121,26 +122,27 @@ function ShoppingCart({
             }
 
             if (productConfig.sideUnits.length > 0) {
-                productConfig.sideUnits.forEach((sideunit) => {
-                    skusArr.push(
-                        `${sideunit.uscode}!!${
-                            productConfig.composition.model
-                        }${
-                            productConfig.isDoubleSideunit &&
-                            productConfig.composition.model === "OPERA"
-                                ? doubleItemFinalQty
-                                : singleItemFinalQty
-                        }##${productConfig.label}`
-                    );
-                });
+                productConfig.sideUnits.forEach(
+                    (sideunit: ProductInventory) => {
+                        skusArr.push(
+                            `${sideunit.uscode}!!${
+                                productConfig.composition.model
+                            }${
+                                productConfig.isDoubleSideunit &&
+                                productConfig.composition.model === "OPERA"
+                                    ? doubleItemFinalQty
+                                    : singleItemFinalQty
+                            }##${productConfig.label}`
+                        );
+                    }
+                );
             }
 
             for (const item in productConfig.otherProducts) {
-                const itemProducts =
-                    productConfig.otherProducts[
-                        item as keyof typeof productConfig.otherProducts
-                    ];
-                itemProducts.forEach((product) => {
+                const itemProducts = productConfig.otherProducts[
+                    item as keyof typeof productConfig.otherProducts
+                ] as ProductInventory[];
+                itemProducts.forEach((product: ProductInventory) => {
                     skusArr.push(
                         `${product.uscode}!!${productConfig.composition.model}${singleItemFinalQty}##${productConfig.label}`
                     );
@@ -150,8 +152,6 @@ function ShoppingCart({
             SKU.push(skusArr.join("~"));
         });
 
-        console.log("=== shopping cart place order fun -> skus generated ===");
-        console.log(SKU);
         router.get("/orders/create-so-num", {
             SKU: SKU.join("~"),
             isShoppingCart: true,

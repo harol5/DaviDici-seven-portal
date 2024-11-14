@@ -7,6 +7,7 @@
         align-items: center;
         padding: 1em;
         border-top: 1px solid #d1aa68;
+        border-bottom: 1px solid #d1aa68;
         cursor: pointer;
 
         .headerTitle {
@@ -16,7 +17,7 @@
 
         .triangleDownIcon {
             width: 4%;
-            transition: all 0.3s ease-out;
+            transition: all 0.25s ease-out;
         }
         /*triangleDownIcon*/
         .rotateTriangle {
@@ -26,11 +27,54 @@
 
     .propertiesWrapper {
         max-height: 0;
+        margin: 1em 0;
+        box-shadow: 0px 0px 2px 0px #d1aa68;
         overflow: hidden;
-        transition: max-height 0.4s ease-out;
+        transition: max-height 0.25s ease-out;
     }
     /*propertiesWrapper state*/
     .activeAccordion {
         max-height: 100vh;
+    }
+
+    .accordionButtonsWrapper {
+        display: flex;
+        justify-content: center;
+        margin: 1rem 0;
+
+        .clearButton,
+        .nextButton {
+            padding: 0.3em 0;
+            box-shadow: 0px 0px 2px 2px #0000001f;
+        }
+
+        .clearButton.alone,
+        .nextButton.alone {
+            width: calc(100% - 1.4rem * 2);
+        }
+
+        .clearButton.groupedTwo,
+        .nextButton.groupedTwo {
+            width: calc(100% / 2);
+            margin: 0 1em;
+        }
+
+        .clearButton.groupedThree,
+        .nextButton.groupedThree {
+            width: calc(100% / 3);
+            margin: 0 1em;
+        }
+
+        .clearButton:hover,
+        .nextButton:hover {
+            background-color: #d1ab68d0;
+            color: white;
+        }
+    }
+}
+
+@media print {
+    .itemPropertiesAccordion {
+        display: none;
     }
 }

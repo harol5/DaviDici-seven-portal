@@ -5,37 +5,46 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Inertia\Inertia;
 use App\FoxproApi\FoxproApi;
+use App\Models\ModelCompositionImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 
 
 class ExpressProgramController extends Controller
 {
     public function all(Request $request){
         $message = $request->session()->get('message');
-        
-        // call foxpro program to get items in stock
+        $input = $request->all();
+        $listingType;
+
+        array_key_exists('listing-type',$input) ? $listingType = $input['listing-type'] : $listingType = 'fullInventory';                
+
+        return Inertia::render('ExpressProgram/ProductsAvailable',
+                [                                           
+                    'message' => $message,
+                    'listingType' => $listingType,                 
+                ]
+            );                                        
+    }
+
+    public function getExpressProgramProducts()
+    {
         $response = FoxproApi::call([
             'action' => 'GETINVSTOCK',
             'params' => ['','','','S'],
             'keep_session' => false,
         ]);
-                                                                    
+
         if($response['status'] === 201){
-            return Inertia::render('ExpressProgram/ProductsAvailable',
-                [                       
-                    'rawProducts' => $response['rows'],
-                    'message' => $message                   
-                ]
-            );
+            return response(['rawProducts' => $response['rows'], 'status' => 201])->header('Content-Type', 'application/json');
         }
-        
-        logFoxproError('getStockProducts','all', ['param1'], $response);
-        return back()->with(['message' => 'Something went wrong. please contact support']);
-                
+
+        logFoxproError('GETINVSTOCK','getExpressProgramProducts', [], $response);
+        return response(['rawProducts' => [], 'status' => 500])->header('Content-Type', 'application/json');
     }
 
     public function setProduct(Request $request){
@@ -85,4 +94,72 @@ class ExpressProgramController extends Controller
             
         return response(['message' => 'shopping cart updated', 'status' => 201])->header('Content-Type', 'application/json');
     }
+
+    public function fileForm(){
+        return Inertia::render('Media');
+    }
+
+    public function storeImages(Request $request) {
+        $request->validate([
+            'model' => 'required|string',
+            'images.*' => 'required|image|mimes:webp|max:2048',
+        ]);
+
+        // Handle the uploaded files
+        $uploadedFiles = $request->file('images');
+        $uploadedPaths = [];
+
+        foreach ($uploadedFiles as $file) {                        
+            $name = $file->getClientOriginalName();      
+            $path = $file->store('/images/express_program','public');
+            // $path = $file->store('/images/resource', ['disk' => 'my_files']);
+
+            ModelCompositionImage::create([
+                'composition_name' => $name,
+                'model' => $request->all()['model'],
+                'image_url' => $path,
+            ]);
+            $uploadedPaths[] = $path;
+        }
+
+        // Return a response
+        return response()->json([
+            'message' => 'Files uploaded successfully',
+            'uploadedPaths' => $uploadedPaths,
+        ]);
+    }
+
+    public function getModelCompositionImages(Request $request) {
+        $model = $request->all()['model'];
+        $images = ModelCompositionImage::select('composition_name','image_url')->where('model', $model)->orderBy('composition_name')->get();
+
+        return response()->json([
+            'images' => $images,            
+        ]); 
+    }
+
+    // get all images.
+    public function getAllCompositionImages() {
+        $images = ModelCompositionImage::all();
+
+        return response()->json([
+            'images' => $images,            
+        ]); 
+    }
+
+    // delete image.
+    public function deleteImages(Request $request) {
+        $name = $request->all()['name'];
+        $imageUrl = $request->all()['url'];
+
+        $res = ModelCompositionImage::destroy($name);        
+        Storage::delete('public/' . $imageUrl);
+
+        return response()->json([
+            'deleted' => $res,            
+        ]); 
+    }
+
+
+    // replace image (if image with same name is uploaded);
 }

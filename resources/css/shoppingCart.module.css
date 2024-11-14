@@ -91,3 +91,9 @@
         text-align: center;
     }
 }
+
+@media print {
+    .shoppingCartButton {
+        display: none;
+    }
+}

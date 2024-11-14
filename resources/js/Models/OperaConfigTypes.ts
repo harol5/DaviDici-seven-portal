@@ -1,4 +1,5 @@
 import type { Option } from "./ExpressProgramModels";
+import { ProductInventory } from "./Product";
 
 export const Name = "OPERA";
 
@@ -54,6 +55,7 @@ type CurrentConfiguration = {
     drawerBase: DrawerBase | null;
     drawerBaseSku: string;
     drawerBasePrice: number;
+    currentProducts: ProductInventory[];
 };
 
 type VanityOptions = {

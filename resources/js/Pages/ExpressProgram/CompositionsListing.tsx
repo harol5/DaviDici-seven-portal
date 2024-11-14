@@ -23,9 +23,13 @@ interface StatefulFilterObj {
 
 interface CompositionsListingProps {
     data: ExpressProgramData;
+    onShoppingCartCount: (count: number) => void;
 }
 
-function CompositionsListing({ data }: CompositionsListingProps) {
+function CompositionsListing({
+    data,
+    onShoppingCartCount: handleShoppingCartCount,
+}: CompositionsListingProps) {
     const {
         initialCompositions,
         initialSizesForFilter,
@@ -152,18 +156,28 @@ function CompositionsListing({ data }: CompositionsListingProps) {
         const sizesForFilterSet = new Set<string>();
 
         filteredComposition.forEach((composition) => {
-            sizesForFilterSet.add(composition.size);
-            sinkPositionsForFilterMap.set(composition.sinkPosition, {
-                name: composition.sinkPosition,
-                url: `https://portal.davidici.com/images/express-program/sink-position/${composition.sinkPosition}.webp`,
-            });
-            modelsForFilterMap.set(composition.model, {
-                name: composition.model,
-                url: `https://portal.davidici.com/images/express-program/${composition.model}/${composition.model}.webp`,
-            });
-            composition.finishes.forEach((finishObj) =>
-                finishesForFilterMap.set(finishObj.finish, finishObj)
-            );
+            if (composition.model === "MIRRORS") {
+                modelsForFilterMap.set("MIRRORS", {
+                    name: "MIRRORS",
+                    url: `https://${location.hostname}/images/express-program/mirrors/main.webp`,
+                });
+            } else {
+                sizesForFilterSet.add(composition.size);
+
+                sinkPositionsForFilterMap.set(composition.sinkPosition, {
+                    name: composition.sinkPosition,
+                    url: `https://${location.hostname}/images/express-program/sink-position/${composition.sinkPosition}.webp`,
+                });
+
+                modelsForFilterMap.set(composition.model, {
+                    name: composition.model,
+                    url: `https://${location.hostname}/images/express-program/${composition.model}/${composition.model}.webp`,
+                });
+
+                composition.finishes.forEach((finishObj) =>
+                    finishesForFilterMap.set(finishObj.finish, finishObj)
+                );
+            }
         });
 
         setFinishesForFilter(
@@ -246,6 +260,10 @@ function CompositionsListing({ data }: CompositionsListingProps) {
                         localStorage.setItem(
                             "shoppingCartProduct",
                             JSON.stringify(null)
+                        );
+
+                        handleShoppingCartCount(
+                            shoppingCartProductsServer.length
                         );
                     } catch (err) {}
                 };

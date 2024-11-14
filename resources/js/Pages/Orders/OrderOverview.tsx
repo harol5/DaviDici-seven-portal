@@ -8,7 +8,7 @@ import type { Product as ProductModel } from "../../Models/Product";
 import User from "../../Models/User";
 
 interface OrderOverviewProps {
-    auth?: User;
+    auth: User;
     order: OrderModel;
     products: ProductModel[];
     isPaymentSubmitted: boolean;

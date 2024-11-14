@@ -31,6 +31,7 @@ type MirrorConfig = {
     ledMirrorPrice: number;
     openCompMirror: string;
     openCompMirrorPrice: number;
+    currentProducts: ProductInventory[];
 };
 
 export type {

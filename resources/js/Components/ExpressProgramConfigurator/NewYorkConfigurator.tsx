@@ -11,6 +11,7 @@ import { router } from "@inertiajs/react";
 import {
     isAlphanumericWithSpaces,
     getSkuAndPrice,
+    scrollToView,
 } from "../../utils/helperFunc";
 import { ProductInventory } from "../../Models/Product";
 import {
@@ -27,9 +28,12 @@ import {
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
 import { MirrorCategory } from "../../Models/MirrorConfigTypes";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
-import { Model } from "../../Models/ModelConfigTypes";
+import { ItemFoxPro, Model } from "../../Models/ModelConfigTypes";
 import MirrorConfigurator from "./MirrorConfigurator";
 import useAccordionState from "../../Hooks/useAccordionState";
+import ConfigurationBreakdown from "./ConfigurationBreakdown";
+import useImagesComposition from "../../Hooks/useImagesComposition";
+import ImageSlider from "./ImageSlider";
 
 /**
  * TODO;
@@ -109,16 +113,6 @@ function NewYorkConfigurator({
                 isDisabled: false,
             });
         });
-
-        // adds option to remove washbasin.
-        all.push({
-            code: "",
-            imgUrl: `https://portal.davidici.com/images/express-program/washbasins/no-sink.webp`,
-            title: "NO WASHBASIN",
-            validSkus: [""],
-            isDisabled: false,
-        });
-
         return all;
     }, []);
 
@@ -308,8 +302,10 @@ function NewYorkConfigurator({
     });
 
     // |===== ACCESSORIES =====|
-    const accessoryOptions: Option[] = useMemo(() => {
+    const accessoryOptions: Option[] | null = useMemo(() => {
         const { accessories } = composition.otherProductsAvailable;
+        if (accessories.length === 0) return null;
+
         const options: Option[] = [];
         accessories.forEach((accessory) => {
             options.push({
@@ -344,7 +340,22 @@ function NewYorkConfigurator({
     };
 
     // |===== ACCORDION =====|
-    const { accordionState, handleAccordionState } = useAccordionState();
+    const { accordionState, handleAccordionState, handleOrderedAccordion } =
+        useAccordionState();
+
+    const accordionsOrder = useMemo(() => {
+        let arr: string[] = ["vanity"];
+        sideUnitOptions ? arr.push("sideUnit") : null;
+        arr.push("washbasin");
+        wallUnitOptions ? arr.push("wallUnit") : null;
+        tallUnitOptions ? arr.push("tallUnit") : null;
+        accessoryOptions ? arr.push("accessory") : null;
+        composition.otherProductsAvailable.mirrors.length > 0
+            ? arr.push("mirror")
+            : null;
+
+        return arr;
+    }, []);
 
     // |===== INITIAL CONFIG =====|
     const initialConfiguration: CurrentConfiguration = useMemo(() => {
@@ -364,9 +375,13 @@ function NewYorkConfigurator({
             composition.vanities
         );
 
-        const washbasinPrice = composition.washbasins[0].sprice
-            ? composition.washbasins[0].sprice
-            : composition.washbasins[0].msrp;
+        const washbasinSkuAndPrice = getSkuAndPrice(
+            composition.model as Model,
+            "washbasin",
+            {},
+            composition.washbasins,
+            composition.washbasins[0].uscode
+        );
 
         const sideUnit: SideUnit | null = sideUnitOptions
             ? {
@@ -408,6 +423,15 @@ function NewYorkConfigurator({
               }
             : null;
 
+        const currentProducts: ProductInventory[] = [];
+        vanitySkuAndPrice.product !== null &&
+            currentProducts.push(vanitySkuAndPrice.product);
+        washbasinSkuAndPrice.product !== null &&
+            currentProducts.push(washbasinSkuAndPrice.product);
+        if (sideUnitSkuAndPrice && sideUnitSkuAndPrice.product) {
+            currentProducts.push(sideUnitSkuAndPrice.product);
+        }
+
         return {
             label: "",
             vanity,
@@ -418,8 +442,8 @@ function NewYorkConfigurator({
             sideUnit,
             sideUnitSku: sideUnitSkuAndPrice ? sideUnitSkuAndPrice.sku : "",
             sideUnitPrice: sideUnitSkuAndPrice ? sideUnitSkuAndPrice.price : 0,
-            washbasin: composition.washbasins[0].uscode,
-            washbasinPrice,
+            washbasin: washbasinSkuAndPrice.sku,
+            washbasinPrice: washbasinSkuAndPrice.price,
             wallUnit,
             wallUnitSku: "",
             wallUnitPrice: 0,
@@ -428,12 +452,13 @@ function NewYorkConfigurator({
             tallUnitPrice: 0,
             accessory: "",
             accessoryPrice: 0,
+            currentProducts,
         };
     }, []);
 
     const reducer = (
         state: CurrentConfiguration,
-        action: { type: string; payload: string | number }
+        action: { type: string; payload: string | number | ProductInventory[] }
     ) => {
         switch (action.type) {
             case "set-vanity-handle":
@@ -476,6 +501,13 @@ function NewYorkConfigurator({
                 return {
                     ...state,
                     washbasinPrice: action.payload as number,
+                };
+
+            case "reset-washbasin":
+                return {
+                    ...state,
+                    washbasin: "",
+                    washbasinPrice: 0,
                 };
 
             case "set-sideUnit-handle":
@@ -607,6 +639,12 @@ function NewYorkConfigurator({
                     accessoryPrice: initialConfiguration.accessoryPrice,
                 };
 
+            case "update-current-products":
+                return {
+                    ...state,
+                    currentProducts: action.payload as ProductInventory[],
+                };
+
             case "reset-configurator":
                 return {
                     ...initialConfiguration,
@@ -688,6 +726,47 @@ function NewYorkConfigurator({
     const [isMissingLabel, setIsMissingLabel] = useState(false);
     const [isInvalidLabel, setIsInvalidLabel] = useState(false);
 
+    // |===== HELPER FUNC =====|
+    const updateCurrentProducts = (
+        item: ItemFoxPro,
+        action: "update" | "remove",
+        product?: ProductInventory
+    ) => {
+        const updatedCurrentProducts = structuredClone(
+            currentConfiguration.currentProducts
+        );
+        const index = updatedCurrentProducts.findIndex(
+            (product) => product.item === item
+        );
+
+        if (action === "update" && product) {
+            if (index !== -1) updatedCurrentProducts[index] = product;
+            else updatedCurrentProducts.push(product);
+        }
+
+        if (action === "remove" && index !== -1) {
+            updatedCurrentProducts.splice(index, 1);
+        }
+
+        dispatch({
+            type: `update-current-products`,
+            payload: updatedCurrentProducts,
+        });
+    };
+
+    // |===== COMPOSITION IMAGES =====|
+    const imageUrls = useImagesComposition({
+        model: composition.model as Model,
+        vanitySku: currentConfiguration.vanitySku,
+        isDoubleSink: currentConfiguration.isDoubleSink,
+        sinkPosition: composition.sinkPosition,
+        hasSideUnit: sideUnitOptions ? true : false,
+        sideUnitSku: currentConfiguration.sideUnitSku,
+        isDoubleSideUnit: currentConfiguration.isDoubleSideUnit,
+        currentProducts: currentConfiguration.currentProducts,
+        currentMirrors: currentMirrorsConfiguration.currentProducts,
+    });
+
     // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (
         item: string,
@@ -735,20 +814,24 @@ function NewYorkConfigurator({
                 property as keyof typeof vanityCurrentConfiguration
             ] = option;
 
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 vanityCurrentConfiguration,
                 composition.vanities
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({ type: `set-${item}-sku`, payload: sku });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setVanityOptions(copyOptions);
+
+            if (product) {
+                updateCurrentProducts("VANITY", "update", product);
+            }
         }
 
         if (item === "sideUnit") {
@@ -793,24 +876,28 @@ function NewYorkConfigurator({
                 property as keyof typeof sideUnitCurrentConfiguration
             ] = option;
 
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 sideUnitCurrentConfiguration,
                 composition.sideUnits
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({ type: `set-${item}-sku`, payload: sku });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setSideUnitOptions(copyOptions);
+
+            if (product) {
+                updateCurrentProducts("SIDE UNIT", "update", product);
+            }
         }
 
         if (item === "washbasin") {
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -820,12 +907,17 @@ function NewYorkConfigurator({
 
             dispatch({
                 type: `set-${item}-${property}`,
-                payload: skuAndPrice.sku,
+                payload: sku,
             });
+
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
+
+            if (product) {
+                updateCurrentProducts("WASHBASIN/SINK", "update", product);
+            }
         }
 
         if (item === "wallUnit") {
@@ -870,24 +962,24 @@ function NewYorkConfigurator({
                 property as keyof typeof wallUnitCurrentConfig
             ] = option;
 
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 wallUnitCurrentConfig,
                 composition.otherProductsAvailable.wallUnits
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({ type: `set-${item}-sku`, payload: sku });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setWallUnitOptions(copyOptions);
 
             setWallUnitStatus((prev) => ({
                 ...prev,
-                isWallUnitValid: skuAndPrice.price > 0,
+                isWallUnitValid: price > 0,
             }));
 
             !wallUnitStatus.isWallUnitSelected &&
@@ -895,6 +987,10 @@ function NewYorkConfigurator({
                     ...prev,
                     isWallUnitSelected: true,
                 }));
+
+            if (product) {
+                updateCurrentProducts("WALL UNIT", "update", product);
+            }
         }
 
         if (item === "tallUnit") {
@@ -940,24 +1036,24 @@ function NewYorkConfigurator({
                 property as keyof typeof tallUnitCurrentConfig
             ] = option;
 
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 tallUnitCurrentConfig,
                 composition.otherProductsAvailable.tallUnitsLinenClosets
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: skuAndPrice.sku });
+            dispatch({ type: `set-${item}-sku`, payload: sku });
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
             dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
             setTallUnitOptions(copyOptions);
 
             setTallUnitStatus((prev) => ({
                 ...prev,
-                isTallUnitValid: skuAndPrice.price > 0,
+                isTallUnitValid: price > 0,
             }));
 
             !tallUnitStatus.isTallUnitSelected &&
@@ -965,10 +1061,18 @@ function NewYorkConfigurator({
                     ...prev,
                     isTallUnitSelected: true,
                 }));
+
+            if (product) {
+                updateCurrentProducts(
+                    "TALL UNIT/LINEN CLOSET",
+                    "update",
+                    product
+                );
+            }
         }
 
         if (item === "accessory") {
-            const skuAndPrice = getSkuAndPrice(
+            const { sku, price, product } = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -978,12 +1082,17 @@ function NewYorkConfigurator({
 
             dispatch({
                 type: `set-${item}-${property}`,
-                payload: skuAndPrice.sku,
+                payload: sku,
             });
+
             dispatch({
                 type: `set-${item}-price`,
-                payload: skuAndPrice.price,
+                payload: price,
             });
+
+            if (product) {
+                updateCurrentProducts("ACCESSORY", "update", product);
+            }
         }
 
         // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
@@ -1017,6 +1126,7 @@ function NewYorkConfigurator({
         if (!currentConfiguration.label) {
             alert("Looks like COMPOSITION NAME is missing!!");
             setIsMissingLabel(true);
+            scrollToView("compositionNameWrapper");
             return false;
         }
 
@@ -1027,6 +1137,7 @@ function NewYorkConfigurator({
             alert(
                 "Looks like you forgot to select all available WALL UNIT OPTIONS. Either clear the wall unit section or select the missing option(s). "
             );
+            scrollToView("wallUnit");
             return false;
         }
 
@@ -1037,6 +1148,7 @@ function NewYorkConfigurator({
             alert(
                 "Looks like you forgot to select all available TALL UNIT OPTIONS. Either clear the tal unit section or select the missing option(s). "
             );
+            scrollToView("tallUnit");
             return false;
         }
 
@@ -1044,6 +1156,7 @@ function NewYorkConfigurator({
             alert(
                 "Looks like you forgot to select all available MIRROR CABINET OPTIONS. Either clear the mirror cabinet section or select the missing option(s). "
             );
+            scrollToView("mirror");
             return false;
         }
 
@@ -1139,11 +1252,21 @@ function NewYorkConfigurator({
         });
         resetMirrorConfigurator();
         dispatch({ type: "reset-configurator", payload: "" });
+        dispatch({
+            type: `update-current-products`,
+            payload: initialConfiguration.currentProducts,
+        });
     };
 
     const handleClearItem = (item: string) => {
         switch (item) {
+            case "washbasin":
+                updateCurrentProducts("WASHBASIN/SINK", "remove");
+                dispatch({ type: "reset-washbasin", payload: "" });
+                break;
+
             case "wallUnit":
+                updateCurrentProducts("WALL UNIT", "remove");
                 setWallUnitOptions(initialWallUnitOptions);
                 setWallUnitStatus({
                     isWallUnitSelected: false,
@@ -1153,6 +1276,7 @@ function NewYorkConfigurator({
                 break;
 
             case "tallUnit":
+                updateCurrentProducts("TALL UNIT/LINEN CLOSET", "remove");
                 setTallUnitOptions(initialTallUnitOptions);
                 setTallUnitStatus({
                     isTallUnitSelected: false,
@@ -1162,6 +1286,7 @@ function NewYorkConfigurator({
                 break;
 
             case "accessory":
+                updateCurrentProducts("ACCESSORY", "remove");
                 dispatch({ type: "reset-accessory", payload: "" });
                 break;
 
@@ -1272,20 +1397,31 @@ function NewYorkConfigurator({
                     <h1>{composition.name}</h1>
                     <button
                         className={classes.resetButton}
+                        onClick={() => print()}
+                    >
+                        PRINT
+                    </button>
+                    <button
+                        className={classes.resetButton}
                         onClick={handleResetConfigurator}
                     >
                         RESET
                     </button>
                 </section>
                 <section className={classes.compositionImageWrapper}>
-                    <img
-                        src={composition.compositionImage}
-                        alt="product image"
-                        onError={(e) => {
-                            (e.target as HTMLImageElement).onerror = null;
-                            (e.target as HTMLImageElement).src =
-                                "https://portal.davidici.com/images/express-program/not-image.jpg";
-                        }}
+                    <ImageSlider
+                        imageUrls={imageUrls}
+                        defaultImage={composition.compositionImage}
+                    />
+                    <ConfigurationBreakdown
+                        productsConfigurator={
+                            currentConfiguration.currentProducts
+                        }
+                        mirrorProductsConfigurator={
+                            currentMirrorsConfiguration.currentProducts
+                        }
+                        isDoubleSink={currentConfiguration.isDoubleSink}
+                        isDoubleSideUnit={currentConfiguration.isDoubleSideUnit}
                     />
                 </section>
             </section>
@@ -1302,6 +1438,9 @@ function NewYorkConfigurator({
                     item="vanity"
                     isOpen={accordionState.vanity}
                     onClick={handleAccordionState}
+                    buttons={"next"}
+                    accordionsOrder={accordionsOrder}
+                    onNavigation={handleOrderedAccordion}
                 >
                     <Options
                         item="vanity"
@@ -1327,6 +1466,9 @@ function NewYorkConfigurator({
                         item="sideUnit"
                         isOpen={accordionState.sideUnit}
                         onClick={handleAccordionState}
+                        buttons={"next and previous"}
+                        accordionsOrder={accordionsOrder}
+                        onNavigation={handleOrderedAccordion}
                     >
                         <Options
                             item="sideUnit"
@@ -1357,6 +1499,10 @@ function NewYorkConfigurator({
                     item="washbasin"
                     isOpen={accordionState.washbasin}
                     onClick={handleAccordionState}
+                    buttons={"next, clear and previous"}
+                    accordionsOrder={accordionsOrder}
+                    onNavigation={handleOrderedAccordion}
+                    onClear={handleClearItem}
                 >
                     <Options
                         item="washbasin"
@@ -1374,13 +1520,16 @@ function NewYorkConfigurator({
                         item="wallUnit"
                         isOpen={accordionState.wallUnit}
                         onClick={handleAccordionState}
+                        buttons={"next, clear and previous"}
+                        accordionsOrder={accordionsOrder}
+                        onNavigation={handleOrderedAccordion}
+                        onClear={handleClearItem}
                     >
-                        <button
-                            className={classes.clearButton}
-                            onClick={() => handleClearItem("wallUnit")}
-                        >
-                            CLEAR
-                        </button>
+                        <img
+                            className="w-[40%] mx-auto mt-0"
+                            src={`https://${location.hostname}/images/express-program/NEW YORK/options/wall-unit.webp`}
+                            alt="image of wall unit"
+                        />
                         <Options
                             item="wallUnit"
                             property="handle"
@@ -1410,13 +1559,16 @@ function NewYorkConfigurator({
                         item="tallUnit"
                         isOpen={accordionState.tallUnit}
                         onClick={handleAccordionState}
+                        buttons={"next, clear and previous"}
+                        accordionsOrder={accordionsOrder}
+                        onNavigation={handleOrderedAccordion}
+                        onClear={handleClearItem}
                     >
-                        <button
-                            className={classes.clearButton}
-                            onClick={() => handleClearItem("tallUnit")}
-                        >
-                            CLEAR
-                        </button>
+                        <img
+                            className="w-[25%] mx-auto mt-4"
+                            src={`https://${location.hostname}/images/express-program/NEW YORK/options/tall-unit.webp`}
+                            alt="image of tall unit"
+                        />
                         <Options
                             item="tallUnit"
                             property="handle"
@@ -1440,6 +1592,28 @@ function NewYorkConfigurator({
                     </ItemPropertiesAccordion>
                 )}
 
+                {accessoryOptions && (
+                    <ItemPropertiesAccordion
+                        headerTitle="ACCESSORIES"
+                        item="accessory"
+                        isOpen={accordionState.accessory}
+                        onClick={handleAccordionState}
+                        buttons={"next, clear and previous"}
+                        accordionsOrder={accordionsOrder}
+                        onNavigation={handleOrderedAccordion}
+                        onClear={handleClearItem}
+                    >
+                        <Options
+                            item="accessory"
+                            property="type"
+                            title="SELECT ACCESSORY"
+                            options={accessoryOptions}
+                            crrOptionSelected={currentConfiguration.accessory}
+                            onOptionSelected={handleOptionSelected}
+                        />
+                    </ItemPropertiesAccordion>
+                )}
+
                 {composition.otherProductsAvailable.mirrors.length > 0 && (
                     <MirrorConfigurator
                         mirrorCabinetOptions={mirrorCabinetOptions}
@@ -1450,37 +1624,15 @@ function NewYorkConfigurator({
                             currentMirrorsConfiguration
                         }
                         accordionState={accordionState}
+                        accordionsOrder={accordionsOrder}
                         handleSwitchCrrMirrorCategory={
                             handleSwitchCrrMirrorCategory
                         }
                         clearMirrorCategory={clearMirrorCategory}
                         handleOptionSelected={handleOptionSelected}
                         handleAccordionState={handleAccordionState}
+                        handleOrderedAccordion={handleOrderedAccordion}
                     ></MirrorConfigurator>
-                )}
-
-                {accessoryOptions && (
-                    <ItemPropertiesAccordion
-                        headerTitle="ACCESSORIES"
-                        item="accessory"
-                        isOpen={accordionState.accessory}
-                        onClick={handleAccordionState}
-                    >
-                        <button
-                            className={classes.clearButton}
-                            onClick={() => handleClearItem("accessory")}
-                        >
-                            CLEAR
-                        </button>
-                        <Options
-                            item="accessory"
-                            property="type"
-                            title="SELECT ACCESSORY"
-                            options={accessoryOptions}
-                            crrOptionSelected={currentConfiguration.accessory}
-                            onOptionSelected={handleOptionSelected}
-                        />
-                    </ItemPropertiesAccordion>
                 )}
 
                 <div className={classes.grandTotalAndOrderNowButtonWrapper}>

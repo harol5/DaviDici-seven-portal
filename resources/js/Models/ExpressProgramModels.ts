@@ -38,9 +38,9 @@ export type ShoppingCartProduct = {
     configuration: any;
     description: string;
     label: string;
-    vanity: ProductInventory;
+    vanity: ProductInventory | null;
     sideUnits: ProductInventory[];
-    washbasin: ProductInventory;
+    washbasin: ProductInventory | null;
     otherProducts: OtherItems;
     isDoubleSink: boolean;
     isDoubleSideunit: boolean;
@@ -73,7 +73,7 @@ export type ExpressProgramData = {
     initialModelsForFilter: ModelObj[];
 };
 
-export type ListingType = "regular" | "onSale";
+export type ListingType = "fullInventory" | "onSale";
 
 export const ModelsAvailable = {
     BRERA: 1,

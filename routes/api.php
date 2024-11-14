@@ -2,7 +2,10 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
+Route::get('/hello-world', function (Request $request) {
+    return response(['message' => 'hello world'])->header('Content-Type', 'application/json');
 })->middleware('auth:sanctum');
+
+Route::post('/user/update-pwd', [UserController::class, 'updatePassword'])->middleware('auth:sanctum');

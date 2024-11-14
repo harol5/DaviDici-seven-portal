@@ -1,8 +1,8 @@
 import type { Composition } from "../Models/Composition";
 import classes from "../../css/express-program.module.css";
 import type { FinishObj } from "../Models/ExpressProgramModels";
+
 import { router } from "@inertiajs/react";
-import { useMemo } from "react";
 
 interface ProductExpressProgramCardProps {
     composition: Composition;
@@ -40,7 +40,11 @@ function ProductExpressProgramCard({
                         <div className={classes.nameAndPriceWrapper}>
                             <h1 className={classes.compositionName}>
                                 {splitedCompositionName[0]} <br />
-                                Incl{splitedCompositionName[1]}
+                                {composition.model === "RAFFAELLO" ||
+                                composition.model === "MIRRORS"
+                                    ? ""
+                                    : "Incl"}
+                                {splitedCompositionName[1]}
                             </h1>
                             <p className={classes.startingPriceLabel}>
                                 Starting at ${composition.startingPrice}
@@ -66,14 +70,13 @@ function ProductExpressProgramCard({
 
 export default ProductExpressProgramCard;
 
-function Finish({
-    composition,
-    finishObj,
-}: {
+interface FinishProps {
     composition: Composition;
     finishObj: FinishObj;
-}) {
-    const formatFinishLabel = useMemo(() => {
+}
+
+function Finish({ composition, finishObj }: FinishProps) {
+    const formatFinishLabel = () => {
         if (composition.model === "ELORA" && finishObj.finish.includes("-")) {
             return finishObj.finish.split("-")[0].replace("MATT LACQ. ", "");
         }
@@ -96,11 +99,12 @@ function Finish({
         }
 
         return finishObj.finish;
-    }, []);
+    };
+
     return (
         <div className={classes.finish}>
             <img src={finishObj.url} />
-            <p>{formatFinishLabel}</p>
+            <p>{formatFinishLabel()}</p>
         </div>
     );
 }

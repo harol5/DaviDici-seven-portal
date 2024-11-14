@@ -14,7 +14,10 @@ function ConfigurationName({
     isInvalidLabel,
 }: ConfigurationNameProps) {
     return (
-        <section className={classes.configurationName}>
+        <section
+            className={classes.configurationName}
+            id="compositionNameWrapper"
+        >
             <label htmlFor="compositionName">Name of Composition:</label>
             <input
                 type="text"

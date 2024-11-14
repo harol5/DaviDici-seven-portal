@@ -1,4 +1,4 @@
-import type { shoppingCartProduct } from "../Models/ExpressProgramModels";
+import type { ShoppingCartProduct } from "../Models/ExpressProgramModels";
 import CustomQtyInput from "./CustomQtyInput";
 import classes from "../../css/shoppingCartProductCard.module.css";
 import USDollar from "../utils/currentFormatter";
@@ -6,14 +6,14 @@ import { memo } from "react";
 import { ProductInventory } from "../Models/Product";
 
 interface ShoppingCartProductCardProps {
-    product: shoppingCartProduct;
+    product: ShoppingCartProduct;
     productIndex: number;
     onRemoveProduct: (
-        product: shoppingCartProduct,
+        product: ShoppingCartProduct,
         productIndex: number
     ) => void;
     onQtyUpdated: (
-        product: shoppingCartProduct,
+        product: ShoppingCartProduct,
         productIndex: number,
         qty: number,
         type: "decrement" | "increment" | "changeValue"
@@ -39,9 +39,11 @@ function ShoppingCartProductCard({
             <div className={classes.productContent}>
                 <div className={classes.productDescription}>
                     <h1>{`${product.composition.model} ${
-                        product.composition.size
-                    } ${product.composition.sinkPosition} SINK ${
-                        product.washbasin ? product.washbasin.model : "NOT SINK"
+                        product.composition.size ?? ""
+                    } ${product.composition.sinkPosition ?? ""} ${
+                        product.washbasin
+                            ? "SINK " + product.washbasin.model
+                            : "NOT SINK"
                     }`}</h1>
                 </div>
                 <div className={classes.productDetails}>
@@ -51,7 +53,7 @@ function ShoppingCartProductCard({
                     </span>
                     <span>
                         <h2>VANITY:</h2>
-                        <p>{product.vanity.descw}</p>
+                        <p>{product.vanity?.descw ?? "NONE"}</p>
                     </span>
                     <span>
                         <h2>WASHBASIN:</h2>
@@ -60,9 +62,11 @@ function ShoppingCartProductCard({
                     <span>
                         <h2>SIDE UNITS:</h2>
                         <div className={classes.sideUnitsWrapper}>
-                            {product.sideUnits.map((sideUnit, index) => (
-                                <p key={index}>{sideUnit.descw}</p>
-                            ))}
+                            {product.sideUnits.map(
+                                (sideUnit: ProductInventory, index: number) => (
+                                    <p key={index}>{sideUnit.descw}</p>
+                                )
+                            )}
                             {product.sideUnits.length === 0 && "NONE"}
                         </div>
                     </span>
@@ -108,16 +112,16 @@ export default ShoppingCartProductCard;
 const OtherItems = memo(function ({
     product,
 }: {
-    product: shoppingCartProduct;
+    product: ShoppingCartProduct;
 }) {
     const items = product.otherProducts;
     let validItems: { title: string; products: ProductInventory[] }[] = [];
     for (const item in items) {
         const products = items[item as keyof typeof items];
-        if (products.length !== 0) {
+        if (products!.length !== 0) {
             validItems.push({
                 title: item.toUpperCase(),
-                products,
+                products: products as ProductInventory[],
             });
         }
     }

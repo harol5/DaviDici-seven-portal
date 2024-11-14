@@ -54,8 +54,10 @@
 }
 
 .leftSideConfiguratorWrapper .compositionImageWrapper {
+    position: relative;
     width: 100%;
     margin: 15px auto;
+    border: #d1aa68 1px solid;
 }
 
 .leftSideConfiguratorWrapper .compositionImageWrapper img {
@@ -64,18 +66,14 @@
 
 /*=== OPTIONS STYLING =====*/
 
-.clearButton {
-    width: calc(100% - 1.4rem * 2);
-    margin: 0 1.4rem;
-    padding: 0.3em 0;
-    box-shadow: 0px 0px 2px 2px #0000001f;
+.headerAndOptionsWrapper {
+    /* margin: 1rem 0; */
+    padding: 0.8rem 1rem;
 }
 
-.headerAndOptionsWrapper,
 .configurationName {
-    margin: 1.4rem;
+    margin: 1rem 0;
     padding: 0.8rem 1rem;
-    box-shadow: 0px 2px 2px 1px #0000001f;
 }
 
 .headerAndOptionsWrapper:first-child {
@@ -107,7 +105,7 @@
 }
 
 .title {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     color: #d1aa68;
 }
 
@@ -214,7 +212,7 @@
 }
 
 .optionDisabled .imageAndOverlayWrapper .imageOverlay::before {
-    content: "OUT OF STOCK";
+    content: "NOT AVAILABLE";
     color: #000000;
     font-size: 0.6rem;
     text-align: center;
@@ -235,7 +233,7 @@
 }
 
 .finishOption.optionDisabled .imageAndOverlayWrapper .imageOverlay::before {
-    content: "OUT OF STOCK";
+    content: "NOT AVAILABLE";
     font-size: 0.6rem;
     color: #000000;
     position: absolute;
@@ -300,7 +298,7 @@
 }
 
 @media (max-width: 1600px) {
-    .leftSideConfiguratorWrapper .compositionImageWrapper img {
+    .leftSideConfiguratorWrapper .compositionImageWrapper > img {
         width: 85%;
     }
 }
@@ -349,5 +347,40 @@
 
     .option {
         width: 30%;
+    }
+}
+
+@media print {
+    .configurationName {
+        display: none;
+    }
+
+    .leftSideConfiguratorWrapper .backButtonAndNameWrapper {
+        justify-content: center;
+    }
+
+    .backButtonWrapper img,
+    .backButtonWrapper p {
+        display: none;
+    }
+
+    .resetButton {
+        display: none;
+    }
+
+    .leftSideConfiguratorWrapper .compositionImageWrapper {
+        border: none;
+    }
+
+    .grandTotalAndOrderNowButtonWrapper {
+        position: static;
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .grandTotalAndOrderNowButtonWrapper button,
+    .grandTotalAndOrderNowButtonWrapper .specsLink {
+        display: none;
     }
 }

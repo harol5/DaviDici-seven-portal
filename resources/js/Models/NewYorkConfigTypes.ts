@@ -1,4 +1,5 @@
 import type { Option } from "./ExpressProgramModels";
+import { ProductInventory } from "./Product";
 
 export const Name = "NEW YORK";
 
@@ -81,6 +82,7 @@ type CurrentConfiguration = {
     tallUnitPrice: number;
     accessory: string;
     accessoryPrice: number;
+    currentProducts: ProductInventory[];
 };
 
 export type {
