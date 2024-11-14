@@ -302,26 +302,23 @@ class OrdersController extends Controller
             'action' => 'getpercentdeposit',
             'params' => [$userEmail, $orderNumber],
             'keep_session' => false,
-        ]);        
+        ]);                  
 
-        if ($deliveryInfo['status'] === 201 && $depositInfo['status'] === 201) {
-            return Inertia::render('Orders/OrderPayment', [
-                'order' => $order,
-                'deliveryInfo' => $deliveryInfo['rows'],
-                'depositInfo' => $depositInfo['rows'][0],
-            ]);
+        if ($deliveryInfo['status'] === 500 || $deliveryInfo['status'] !== 201 || !array_key_exists('rows', $deliveryInfo)) {
+            logFoxproError('GetDeliveryInfo', 'orderPayment', [$orderNumber], $deliveryInfo);            
+            return redirect('/orders')->with(['message' => 'Something went wrong. please contact support']);
         }
 
-        if ($deliveryInfo['status'] === 500) {
-            logFoxproError('GetDeliveryInfo', 'orderPayment', [$orderNumber], $deliveryInfo);
-        }
-
-        if ($depositInfo['status'] === 500) {
+        if ($depositInfo['status'] === 500 || $depositInfo['status'] !== 201 || !array_key_exists('rows', $depositInfo)) {
             logFoxproError('getpercentdeposit', 'orderPayment', [$userEmail, $orderNumber], $depositInfo);
+            return redirect('/orders')->with(['message' => 'Something went wrong. please contact support']);
         }
-
-
-        return redirect('/orders')->with(['message' => 'Something went wrong. please contact support']);
+        
+        return Inertia::render('Orders/OrderPayment', [
+            'order' => $order,
+            'deliveryInfo' => $deliveryInfo['rows'],
+            'depositInfo' => $depositInfo['rows'][0], 
+        ]);                                    
     }
 
     // Creates a transaction.
@@ -347,19 +344,14 @@ class OrdersController extends Controller
         ])->withBody($js_data)->post($intuitApiUrl .'/quickbooks/v4/payments/charges');
 
         if ($response->successful()) {            
-            $foxproInfo = $info['foxproInfo'];
-            info("foxproInfo:");
-            info($foxproInfo);            
+            $foxproInfo = $info['foxproInfo'];                      
 
             // "Result" : "Info Updated Successfully" |
             $cashReceiptRes = FoxproApi::call([
                 'action' => 'SaveCR',                
                 'params' => [$orderNumber, 'CC', $foxproInfo['amountPaid'], $foxproInfo['date'], $foxproInfo['nameOnCard'], $foxproInfo['cc'], $foxproInfo['expDate'], $foxproInfo['cvc']],
                 'keep_session' => false,
-            ]);
-
-            info("foxpro cash receipt res:");
-            info($cashReceiptRes);            
+            ]);             
             
             return response(['intuitRes' => $response->json(), 'status' => $response->status(), 'cashRes' => $cashReceiptRes])->header('Content-Type', 'application/json');
 
