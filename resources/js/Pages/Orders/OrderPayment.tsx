@@ -84,7 +84,9 @@ function OrderPayment({
             subTotal = depositInfo?.totcod!;
         }
 
-        const grandTotal = subTotal + extraFee;
+        const grandTotal = Math.round((subTotal + extraFee) * 100) / 100;
+
+        console.log("grand total:", grandTotal);
 
         return {
             fee: depositInfo?.ccchg,
@@ -454,7 +456,7 @@ function OrderPayment({
                                             className={
                                                 crrPaymentMethod ===
                                                 "bank account"
-                                                    ? "border-b border-davidiciGold px-5 py-1 cursor-pointer"
+                                                    ? "border-b border-davidiciGold px-5 py-1 shadow-sm shadow-davidiciGold transition-shadow hover:shadow-none cursor-pointer"
                                                     : "px-5 py-1 cursor-pointer"
                                             }
                                             onClick={() => {
