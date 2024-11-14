@@ -640,4 +640,14 @@ class UserController extends Controller
         logFoxproError('ChangePW', 'handleChangePwd', [$user->username,$user->email], $foxproResponse);
         return back()->with('message', 'Could not change password, Please contact support');        
     }
+  
+    public function EULA()
+    {
+        return Inertia::render('Users/EULA');
+    }
+
+    public function privacyPolicy()
+    {
+        return Inertia::render('Users/PrivacyPolicy');
+    }
 }

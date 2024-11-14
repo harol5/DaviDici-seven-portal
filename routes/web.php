@@ -7,8 +7,17 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\ExpressProgramController;
+use App\Http\Controllers\IntuitController;
+
+// -- PRACTICING MIDDLEWRE AND SERVICE CONTAINER BINDINGS -- MUST DELETE!!!! --
+use App\Services\TestingService;
+use App\Http\Middleware\TestMiddleware;
+// --
+
 
 Route::get('/', [UserController::class, 'login'])->name('login');
+Route::get('/EULA', [UserController::class, 'EULA']);
+Route::get('/privacy-policy', [UserController::class, 'privacyPolicy']);
 
 Route::post('/auth', [UserController::class, 'authenticate']);
 Route::post('/users/forgot-pwd', [UserController::class, 'sendChangePwdEmail']);
@@ -36,6 +45,8 @@ Route::middleware(['auth','auth.session'])->group(function () {
     Route::post('/users/invite', [UserController::class, 'sendInvitation']);    
     Route::get('/users/add-to-portal', [UserController::class, 'showFormAddUserToPortal']);
     Route::post('/users/add-to-portal/add', [UserController::class, 'addUserToPortal']);
+    Route::get('/intuit', [IntuitController::class, 'connectToIntuit']);
+    Route::get('/intuit/redirect', [IntuitController::class, 'handleIntuitRedirect']);
     Route::get('/media', [ExpressProgramController::class, 'fileForm']);
     Route::post('/media/upload-images', [ExpressProgramController::class, 'storeImages']);
     Route::get('/media/images', [ExpressProgramController::class, 'getAllCompositionImages']);
@@ -43,6 +54,8 @@ Route::middleware(['auth','auth.session'])->group(function () {
     Route::get('/tokens/create', [UserController::class, 'generateToken']);
     Route::get('/users/admin/pwd-form', [UserController::class, 'changePwdAdminForm']);
     Route::post('/users/admin/pwd', [UserController::class, 'changePasswordAdmin']);
+    //===========TESTING ROUTE================//
+    Route::get('/testing', [OrdersController::class, 'testApi'])->middleware(TestMiddleware::class);
 
 
     // Owner only endpoints.    
@@ -71,7 +84,8 @@ Route::middleware(['auth','auth.session'])->group(function () {
     Route::post('/orders/{orderNumber}/products/delivery', [OrdersController::class, 'saveDeliveryInfo']);
     Route::post('/orders/{orderNumber}/products/payment', [OrdersController::class, 'createCharge']);
     Route::post('/orders/{orderNumber}/products/payment-bank', [OrdersController::class, 'createBankCharge']);
-    Route::post('/orders/{orderNumber}/products/payment-bank/status', [OrdersController::class, 'getStatusCheck']);    
+    Route::post('/orders/{orderNumber}/products/payment-bank/status', [OrdersController::class, 'getStatusCheck']);   
+    Route::post('/orders/{orderNumber}/products/approve', [OrdersController::class, 'approveOrder']); 
 
     // Inventory routes.
     Route::get('/inventory', function(){        
@@ -82,6 +96,4 @@ Route::middleware(['auth','auth.session'])->group(function () {
     Route::post('/logout', [UserController::class, 'logout']);
 });
 
-//===========TESTING ROUTE================//
-Route::get('/testing', [OrdersController::class, 'testApi']);
 

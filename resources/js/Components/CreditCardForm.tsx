@@ -1,9 +1,10 @@
-import { FormEvent, useReducer } from "react";
+import { FormEvent, useMemo, useReducer } from "react";
 import type { CardInfo as CardInfoModel } from "../Models/CardInfo";
+import { ErrorIntuit } from "../Models/Intuit";
 
 interface CreditCardFormProps {
     handleSubmit: (e: FormEvent, state: CardInfoModel) => void;
-    errors: any;
+    errors: ErrorIntuit[] | null;
 }
 
 type Action = {
@@ -19,7 +20,15 @@ type Action = {
 };
 
 function CreditCardForm({ handleSubmit, errors }: CreditCardFormProps) {
-    console.log(errors);
+    const crrErrors = useMemo(() => {
+        return errors
+            ? errors.reduce<Record<string, ErrorIntuit>>((acc, error) => {
+                  acc[error.detail ?? error.code] = error;
+                  return acc;
+              }, {})
+            : null;
+    }, [errors]);
+
     const card: CardInfoModel = {
         number: "",
         expMonth: "",
@@ -97,6 +106,14 @@ function CreditCardForm({ handleSubmit, errors }: CreditCardFormProps) {
                             });
                         }}
                     />
+                    {crrErrors && crrErrors["card.number"] ? (
+                        <p className="text-red-500">
+                            {crrErrors["card.number"].message ===
+                            "card.number is invalid."
+                                ? "invalid number"
+                                : ""}
+                        </p>
+                    ) : null}
                 </div>
 
                 <div className="flex flex-col items-center">
@@ -139,6 +156,20 @@ function CreditCardForm({ handleSubmit, errors }: CreditCardFormProps) {
                             }}
                         />
                     </div>
+                    {crrErrors && crrErrors["card.expyear"] ? (
+                        <p className="text-red-500">
+                            {crrErrors["card.expyear"].moreInfo}
+                        </p>
+                    ) : null}
+                    {crrErrors && crrErrors["card.expmonth"] ? (
+                        <p className="text-red-500">
+                            {crrErrors["card.expmonth"].moreInfo}
+                        </p>
+                    ) : null}
+                    {crrErrors &&
+                    crrErrors["card.ExpirationMonth/ExpirationYear"] ? (
+                        <p className="text-red-500">{"Invalid information."}</p>
+                    ) : null}
                 </div>
 
                 <div className="flex flex-col items-center">
@@ -161,6 +192,11 @@ function CreditCardForm({ handleSubmit, errors }: CreditCardFormProps) {
                             });
                         }}
                     />
+                    {crrErrors && crrErrors["card.cvc"] ? (
+                        <p className="text-red-500">
+                            {crrErrors["card.cvc"].moreInfo}
+                        </p>
+                    ) : null}
                 </div>
             </div>
 
@@ -173,6 +209,7 @@ function CreditCardForm({ handleSubmit, errors }: CreditCardFormProps) {
                         className="px-[0.2em] border border-black rounded"
                         type="text"
                         name="name"
+                        required
                         value={state.name}
                         id="name"
                         onChange={(e) => {
@@ -206,6 +243,12 @@ function CreditCardForm({ handleSubmit, errors }: CreditCardFormProps) {
                     />
                 </div>
             </div>
+
+            {crrErrors && crrErrors["PMT-6000"] ? (
+                <p className="text-red-500">
+                    Service unavailable at this time, Please try again later.
+                </p>
+            ) : null}
 
             <div className="flex justify-center mt-5">
                 <button

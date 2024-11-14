@@ -18,3 +18,15 @@ if(! function_exists('logFoxproError')) {
         Log::error($response);
     }
 }
+
+if(! function_exists('logErrorDetails')) {
+    function logErrorDetails($funcName, $controller, $description, $details, $user ){
+        Log::error("=VVVVV=== ERROR at FUNCTION: $funcName, controller: $controller ====VVVVV");        
+        Log::error("----- user ----");
+        Log::error($user);
+        Log::error("----- description ----");
+        Log::error($description);
+        Log::error("----- details ----");
+        Log::error($details);
+    }
+}

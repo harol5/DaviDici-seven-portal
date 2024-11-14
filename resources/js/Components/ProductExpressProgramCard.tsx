@@ -1,5 +1,7 @@
 import type { Composition } from "../Models/Composition";
 import classes from "../../css/express-program.module.css";
+import type { FinishObj } from "../Models/ExpressProgramModels";
+
 import { router } from "@inertiajs/react";
 
 interface ProductExpressProgramCardProps {
@@ -70,10 +72,7 @@ export default ProductExpressProgramCard;
 
 interface FinishProps {
     composition: Composition;
-    finishObj: {
-        finish: string;
-        url: string;
-    };
+    finishObj: FinishObj;
 }
 
 function Finish({ composition, finishObj }: FinishProps) {
