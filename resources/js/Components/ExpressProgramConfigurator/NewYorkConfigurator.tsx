@@ -766,6 +766,9 @@ function NewYorkConfigurator({
         currentProducts: currentConfiguration.currentProducts,
         currentMirrors: currentMirrorsConfiguration.currentProducts,
     });
+    console.log("== new york ==");
+    console.log(composition);
+    console.log(currentConfiguration);
     console.log(imageUrls);
     // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (
