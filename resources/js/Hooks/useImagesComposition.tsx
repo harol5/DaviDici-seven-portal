@@ -11,7 +11,7 @@ import { useMemo } from "react";
  * images that have vanity position will be named as follows:
  * 68-VB-024D-P1-left
  * 68-VB-024D-P1-right
- *
+ * 65-024-VBB-CP-doublesideunit
  *
  */
 
@@ -58,6 +58,8 @@ function useImagesComposition({
             ? `${vanitySku}-double`
             : sinkPosition === "LEFT" || sinkPosition === "RIGHT"
             ? `${vanitySku}-${sinkPosition.toLowerCase()}`
+            : isDoubleSideUnit
+            ? `${vanitySku}-doublesideunit`
             : vanitySku;
 
         skus.push(`(?=.*${finalVanitySku})`);
