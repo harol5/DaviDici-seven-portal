@@ -63,6 +63,11 @@ function OrderDelivery({
         });
     };
 
+    console.log("===== OrderDelivery =====");
+    console.log(rawOrder);
+    console.log(rawProducts);
+    console.log("delivery info by product:", deliveryInfoByProd);
+
     return (
         <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <OrderLayout order={order} crrOrderOption="delivery">

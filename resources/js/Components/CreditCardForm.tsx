@@ -84,8 +84,8 @@ function CreditCardForm({ handleSubmit, errors }: CreditCardFormProps) {
 
     return (
         <form id="payment-form" onSubmit={(e) => handleSubmit(e, state)}>
-            <div className="flex gap-3 mb-2">
-                <div className="flex flex-col grow">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-3 mb-2">
+                <div className="flex flex-col grow w-[100%] md:w-auto">
                     <label htmlFor="card-num" className="mb-1">
                         Card number:
                     </label>

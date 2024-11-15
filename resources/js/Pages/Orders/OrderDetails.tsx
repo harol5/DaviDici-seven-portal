@@ -27,9 +27,11 @@ function OrderDetails({
     rawProducts,
     isPaymentSubmitted,
 }: OrderDetailsProps) {
-    console.log("==========");
+    console.log("===== OrderDetails =====");
     console.log(rawOrder);
     console.log(rawProducts);
+    console.log("is payment submitted:", isPaymentSubmitted);
+
     const formatOrder = () => {
         const subtotal = Number.parseFloat(rawOrder.subtotal as string);
         const totcredit = Number.parseFloat(rawOrder.totcredit as string);

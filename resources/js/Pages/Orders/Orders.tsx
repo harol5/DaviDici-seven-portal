@@ -38,6 +38,10 @@ function Orders({ auth, orders, message = "", commissionInfo }: ordersProp) {
         return ampm;
     }, []);
 
+    console.log("==== Orders ====");
+    console.log("Orders:", orders);
+    console.log("commission info:", commissionInfo);
+
     return (
         <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <div className="main-content-wrapper">

@@ -32,18 +32,32 @@ function OrderOverview({
         setOpenModal(false);
     };
 
+    console.log("===== OrderDetails =====");
+    console.log(order);
+    console.log(products);
+    console.log("is payment submitted:", isPaymentSubmitted);
+    console.log("is delivery info saved?:", isDeliveryInfoSave);
+
     return (
         <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <OrderLayout order={order} crrOrderOption="overview">
                 <section className="overview-wrapper mt-6">
                     <section className="actions-pending-wrapper p-3 bg-zinc-50 shadow-inner shadow-gray-300 rounded-md border border-davidiciGold">
                         <h1>Actions Pending</h1>
-                        <ul>
-                            {!isDeliveryInfoSave && <li>fill out delivery</li>}
-                            {!isPaymentSubmitted && (
-                                <li>fill out payment details</li>
-                            )}
-                        </ul>
+                        {isDeliveryInfoSave && isPaymentSubmitted ? (
+                            <p className="px-1 text-center">
+                                No Pending Actions.
+                            </p>
+                        ) : (
+                            <ul>
+                                {!isDeliveryInfoSave && (
+                                    <li>Fill out delivery.</li>
+                                )}
+                                {!isPaymentSubmitted && (
+                                    <li>Fill out payment details.</li>
+                                )}
+                            </ul>
+                        )}
                     </section>
                     <section className="order-details-wrapper py-5 px-4 bg-zinc-50 shadow-inner shadow-gray-300 rounded-md border border-davidiciGold">
                         <span>

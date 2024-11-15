@@ -351,7 +351,11 @@ class OrdersController extends Controller
                 'action' => 'SaveCR',                
                 'params' => [$orderNumber, 'CC', $foxproInfo['amountPaid'], $foxproInfo['date'], $foxproInfo['nameOnCard'], $foxproInfo['cc'], $foxproInfo['expDate'], $foxproInfo['cvc']],
                 'keep_session' => false,
-            ]);             
+            ]);   
+            
+            if (array_key_exists('Result', $cashReceiptRes) || $cashReceiptRes["Result"] !== 'Info Updated Successfully') {
+                logFoxproError('SaveCR', 'OrdersController->createCharge', ['message' => 'params not logged for secury reasons', 'user' => $request->user()->email], $cashReceiptRes);  
+            }
             
             return response(['intuitRes' => $response->json(), 'status' => $response->status(), 'cashRes' => $cashReceiptRes])->header('Content-Type', 'application/json');
 
@@ -395,7 +399,11 @@ class OrdersController extends Controller
                 'action' => 'SaveCR',                
                 'params' => [$orderNumber, 'CH', $foxproInfo['amountPaid'], $foxproInfo['date'], $foxproInfo['name'], $foxproInfo['checkNumber'], $foxproInfo['routingNumber'], $foxproInfo['accountNumber']],
                 'keep_session' => false,
-            ]);            
+            ]);  
+            
+            if (array_key_exists('Result', $cashReceiptRes) || $cashReceiptRes["Result"] !== 'Info Updated Successfully') {
+                logFoxproError('SaveCR', 'OrdersController->createCharge', ['message' => 'params not logged for secury reasons', 'user' => $request->user()->email], $cashReceiptRes);  
+            }
             
             return response(['intuitRes' => $response->json(), 'status' => $response->status(), 'cashRes' => $cashReceiptRes])->header('Content-Type', 'application/json');
         }else {            
@@ -634,15 +642,15 @@ class OrdersController extends Controller
     //=========HELPER FUNCTIONS=============//
     public function isPaymentSubmitted($orderNumber)
     {
-
         // "Result": "There are no payments for this sales order number" |
         $paymentInfo = FoxproApi::call([
             'action' => 'GetCR',
             'params' => [$orderNumber],
             'keep_session' => false,
-        ]);
-
-        return !array_key_exists('rows', $paymentInfo);        
+        ]);          
+        
+        // "rows" key will containes an associative array with each payment submmited for a given order.
+        return array_key_exists('rows', $paymentInfo) && count($paymentInfo['rows']) !== 0;        
     }
 
     public function isDeliveryInfoSave($orderNumber)
@@ -653,39 +661,5 @@ class OrdersController extends Controller
             'keep_session' => false,
         ]);
         return array_key_exists('rows', $deliveryInfo) && $deliveryInfo['rows'][0]['deldate'];        
-    }
-
-    public function getAccessToken()
-    {
-        $clientId = env('INTUIT_CLIENT_ID');
-        $clientSecret = env('INTUIT_CLIENT_SECRECT');
-        $refreshToken = env('INTUIT_REFRESH_TOKEN');
-
-        $auth = 'Basic ' . base64_encode($clientId . ':' . $clientSecret);
-        $data = http_build_query(['grant_type' => 'refresh_token', 'refresh_token' => $refreshToken]);
-
-        $response = Http::withHeaders([
-            'Accept' => 'application/json',
-            'Authorization' => $auth,
-            'Content-Type' => 'application/x-www-form-urlencoded',
-        ])->withBody($data, 'application/x-www-form-urlencoded')->post(env('INTUIT_TOKEN_URL'));
-
-        info('--vvvvv-- response from access token request --vvvvv--');
-        info($auth);
-        info($data);
-        info($response->status());
-        info($response->collect());
-
-        if ($response->status() === 200) {
-            // get access token and refresh token from response.
-            $collection = $response->collect();
-            $tokens = $collection->all();
-            info($tokens['access_token']);
-            info($tokens['expires_in']);
-            info($tokens['refresh_token']);
-            info($tokens['x_refresh_token_expires_in']);
-            info($tokens['token_type']);
-            // set new tokens.
-        }
-    }
+    }    
 }

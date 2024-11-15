@@ -10,16 +10,16 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import BankAccountForm from "../../Components/BankAccountForm";
-import { Product as ProductModel } from "../../Models/Product";
 import { ErrorIntuit, intuitMaskTokenUrl } from "../../Models/Intuit";
 import User from "../../Models/User";
 import { getFormattedDate } from "../../utils/helperFunc";
+import LoadingSpinner from "../../Components/LoadingSpinner";
 
 interface OrderPaymentProps {
     auth: User;
     order: OrderModel;
     deliveryInfo: DeliveryInfoModel[];
-    depositInfo?: {
+    depositInfo: {
         percdep: number; // % deposit
         percos: number; //
         depneeded: number; // deposit needed $
@@ -34,12 +34,6 @@ function OrderPayment({
     deliveryInfo,
     depositInfo,
 }: OrderPaymentProps) {
-    console.log("==== OrderPayment ====");
-    console.log("Order:", order);
-    console.log("Delivery Info:", deliveryInfo);
-    console.log("Deposit Info:", depositInfo);
-    console.log("token url:", intuitMaskTokenUrl);
-
     const [crrPaymentMethod, setCrrPaymentMethod] = useState<
         "credit card" | "bank account"
     >("credit card");
@@ -54,13 +48,8 @@ function OrderPayment({
 
     const [isLoading, setIsLoading] = useState(false);
 
-    const deliveryFee = useMemo(() => {
-        const crrDeliveryType = deliveryInfo[0].dtype;
-        return crrDeliveryType === "TO DEALER"
-            ? 50
-            : crrDeliveryType === "DAVIDICI FINAL MILE"
-            ? 75
-            : 0;
+    const isDeliveryInfo = useMemo(() => {
+        return Boolean(deliveryInfo[0].dtype);
     }, []);
 
     const finalTotal = useMemo(() => {
@@ -68,31 +57,42 @@ function OrderPayment({
         //     depositInfo?.percdep === 0 &&
         //     Number.parseInt(order.totcredit as string) === 0;
 
-        const isExemptOfDeposit =
-            depositInfo?.percdep === 0 && !order.submitted;
+        const crrDeliveryType = deliveryInfo[0].dtype;
+        const deliveryFee =
+            crrDeliveryType === "TO DEALER"
+                ? 50
+                : crrDeliveryType === "DAVIDICI FINAL MILE"
+                ? 75
+                : 0;
 
-        let subTotal = depositInfo?.depneeded!;
+        const totalCredit = Number.parseInt(order.totcredit as string);
+
+        const isExemptOfDeposit = depositInfo.percdep === 0 && !order.submitted;
+
+        const isDepositPaid = depositInfo.percdep > 0 && totalCredit > 0;
+
+        let subTotal = depositInfo.depneeded;
 
         const extraFee =
             crrPaymentMethod === "credit card" ? depositInfo?.ccchg! : 0;
 
         // if totcredit !== 0 and order.submitted !== null, means the deposit has been paid.
         if (
-            depositInfo?.depneeded! === 0 ||
-            (Number.parseInt(order.totcredit as string) > 0 && order.submitted)
+            depositInfo.depneeded === 0 ||
+            (totalCredit > 0 && order.submitted)
         ) {
-            subTotal = depositInfo?.totcod!;
+            subTotal = depositInfo.totcod;
         }
 
         const grandTotal = Math.round((subTotal + extraFee) * 100) / 100;
 
-        console.log("grand total:", grandTotal);
-
         return {
-            fee: depositInfo?.ccchg,
+            fee: depositInfo.ccchg,
             grandTotal,
             subTotal,
             isExemptOfDeposit,
+            isDepositPaid,
+            deliveryFee,
         };
     }, [crrPaymentMethod]);
 
@@ -308,183 +308,251 @@ function OrderPayment({
         }
     };
 
+    console.log("==== OrderPayment ====");
+    console.log("Order:", order);
+    console.log("Delivery Info:", deliveryInfo);
+    console.log("Deposit Info:", depositInfo);
+    console.log("token url:", intuitMaskTokenUrl);
+    console.log("is delivery info?:", isDeliveryInfo);
+
     return (
         <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <OrderLayout order={order} crrOrderOption="payment">
-                {isTransactionApproved && !finalTotal.isExemptOfDeposit ? (
-                    <div className="absolute bg-gray-200/50 backdrop-blur-sm mt-6 p-5">
-                        <h1 className="">Payment submitted</h1>
+                {!isDeliveryInfo ? (
+                    <div className="bg-gray-200/50 backdrop-blur-sm mt-6 p-5 w-[100%] h-[250px]">
+                        <h1 className="text-red-500 font-semibold text-center">
+                            Please go to "Delivery Options" and fill out the
+                            delivery form before submitting payment. Thank you.
+                        </h1>
                     </div>
-                ) : null}
-
-                {isTransactionApproved && finalTotal.isExemptOfDeposit ? (
-                    <div className="absolute bg-gray-200/50 backdrop-blur-sm mt-6 p-5">
-                        <h1 className="">Order Approved</h1>
-                    </div>
-                ) : null}
-
-                {!isTransactionApproved && (
-                    <section className="flex mt-6 p-5 bg-zinc-50 shadow-inner shadow-gray-200 rounded-md relative">
-                        {/*place transaction approved here*/}
-                        {isLoading && (
-                            <div className="absolute bg-gray-200/50 backdrop-blur-sm w-[100%] h-[100%]">
-                                <p>loading...</p>
+                ) : (
+                    <>
+                        {isTransactionApproved &&
+                        !finalTotal.isExemptOfDeposit ? (
+                            <div className="bg-gray-200/50 backdrop-blur-sm mt-6 p-5 w-[100%] h-[250px]">
+                                <h1 className="">Payment submitted</h1>
                             </div>
-                        )}
+                        ) : null}
 
-                        {finalTotal.isExemptOfDeposit ? (
-                            <section className="grow flex justify-center items-center flex-col text-center">
-                                <p>
-                                    Since you are no required to pay a deposit,
-                                    You are allowed to approve the order at this
-                                    time.
-                                </p>
-                                <button
-                                    onClick={handleApproveOrder}
-                                    className="w-[30%] mt-4 rounded border shadow-sm shadow-gray-950 px-5 py-2 text-sm transition-shadow hover:shadow-none hover:bg-green-400/95 hover:text-white hover:border-green-700"
-                                >
-                                    Approve Order Now!!
-                                </button>
-                            </section>
-                        ) : (
-                            <>
-                                <section className="w-[18em] p-8 shadow-sm shadow-gray-900 rounded mr-2">
-                                    <h1 className="text-center font-medium text-lg text-davidiciGold">
-                                        Charges Breakdown
-                                    </h1>
-                                    <section className="flex flex-col gap-4 mt-4">
-                                        <div className="flex justify-between">
-                                            <span className="">
-                                                <h2>products:</h2>
-                                            </span>
-                                            <span className="">
-                                                <p>
-                                                    $
-                                                    {(order.subtotal as number) -
-                                                        deliveryFee}
-                                                </p>
-                                            </span>
-                                        </div>
+                        {isTransactionApproved &&
+                        finalTotal.isExemptOfDeposit ? (
+                            <div className="bg-gray-200/50 backdrop-blur-sm mt-6 p-5 w-[100%] h-[250px]">
+                                <h1 className="">Order Approved</h1>
+                            </div>
+                        ) : null}
 
-                                        <div className="flex justify-between border-b pb-2 border-b-black">
-                                            <span className="">
-                                                <h2>delivery fee:</h2>
-                                            </span>
-                                            <span className="">
-                                                <p>+${deliveryFee}</p>
-                                            </span>
-                                        </div>
-
-                                        <div className="flex justify-between ">
-                                            <span className="">
-                                                <h2>sub-total:</h2>
-                                            </span>
-                                            <span className="">
-                                                <p>${order.subtotal}</p>
-                                            </span>
-                                        </div>
-
-                                        <div className="flex justify-between">
-                                            <span className="">
-                                                <h2>credit:</h2>
-                                            </span>
-                                            <span className="">
-                                                <p>-${order.totcredit}</p>
-                                            </span>
-                                        </div>
-
-                                        <div
-                                            className={
-                                                crrPaymentMethod ===
-                                                "bank account"
-                                                    ? "border-b pb-1 border-b-black flex justify-between"
-                                                    : "flex justify-between"
-                                            }
-                                        >
-                                            <span className="">
-                                                <h2>deposit:</h2>
-                                            </span>
-                                            <span className="">
-                                                <p>${depositInfo?.depneeded}</p>
-                                            </span>
-                                        </div>
-
-                                        {crrPaymentMethod === "credit card" && (
-                                            <div className="border-b pb-2 border-b-black flex justify-between">
-                                                <span className="">
-                                                    <h2>3% credit card fee:</h2>
-                                                </span>
-                                                <span className="">
-                                                    <p>
-                                                        +$
-                                                        {finalTotal.fee}
-                                                    </p>
-                                                </span>
-                                            </div>
-                                        )}
-
-                                        <div className="flex justify-between">
-                                            <span className="">
-                                                <h2>Due Today:</h2>
-                                            </span>
-                                            <span className="">
-                                                <p>${finalTotal.grandTotal}</p>
-                                            </span>
-                                        </div>
+                        {!isTransactionApproved && (
+                            <section className="flex flex-col md:flex-row mt-6 p-5 bg-zinc-50 shadow-inner shadow-gray-200 rounded-md relative">
+                                {isLoading && (
+                                    <section className="bg-gray-200/50 backdrop-blur-md absolute top-0 left-0 w-[100%] h-[100%] ">
+                                        <LoadingSpinner message="processing transaction..." />
                                     </section>
-                                </section>
+                                )}
 
-                                <section className="grow p-8">
-                                    <div className="flex gap-4  pb-2 mb-2">
-                                        <p
-                                            className={
-                                                crrPaymentMethod ===
-                                                "credit card"
-                                                    ? "border-b border-davidiciGold px-5 py-1 shadow-sm shadow-davidiciGold transition-shadow hover:shadow-none cursor-pointer"
-                                                    : "px-5 py-1 cursor-pointer"
-                                            }
-                                            onClick={() => {
-                                                setCrrPaymentMethod(
-                                                    "credit card"
-                                                );
-                                                setBankErrors(null);
-                                            }}
-                                        >
-                                            Credit
+                                {finalTotal.isExemptOfDeposit ? (
+                                    <section className="grow flex justify-center items-center flex-col text-center">
+                                        <p>
+                                            Since you are no required to pay a
+                                            deposit, You are allowed to approve
+                                            the order at this time.
                                         </p>
-                                        <p
-                                            className={
-                                                crrPaymentMethod ===
-                                                "bank account"
-                                                    ? "border-b border-davidiciGold px-5 py-1 shadow-sm shadow-davidiciGold transition-shadow hover:shadow-none cursor-pointer"
-                                                    : "px-5 py-1 cursor-pointer"
-                                            }
-                                            onClick={() => {
-                                                setCrrPaymentMethod(
-                                                    "bank account"
-                                                );
-                                                setCardErrors(null);
-                                            }}
+                                        <button
+                                            onClick={handleApproveOrder}
+                                            className="w-[30%] mt-4 rounded border shadow-sm shadow-gray-950 px-5 py-2 text-sm transition-shadow hover:shadow-none hover:bg-green-400/95 hover:text-white hover:border-green-700"
                                         >
-                                            Bank account
-                                        </p>
-                                    </div>
-                                    {crrPaymentMethod === "credit card" && (
-                                        <CreditCardForm
-                                            handleSubmit={handleCardSubmit}
-                                            errors={cardValidationErrors}
-                                        />
-                                    )}
-                                    {crrPaymentMethod === "bank account" && (
-                                        <BankAccountForm
-                                            handleSubmit={handleBankSubmit}
-                                            errors={bankValidationErrors}
-                                        />
-                                    )}
-                                </section>
-                            </>
+                                            Approve Order Now!!
+                                        </button>
+                                    </section>
+                                ) : (
+                                    <>
+                                        <section className="w-[100%] md:w-[18em] p-6 shadow-sm shadow-gray-900 rounded mr-2">
+                                            <h1 className="text-center font-medium text-lg text-davidiciGold">
+                                                Charges Breakdown
+                                            </h1>
+                                            <section className="flex flex-col gap-3 mt-4">
+                                                <div className="flex justify-between">
+                                                    <span className="">
+                                                        <h2>Products:</h2>
+                                                    </span>
+                                                    <span className="">
+                                                        <p>
+                                                            $
+                                                            {(order.subtotal as number) -
+                                                                finalTotal.deliveryFee}
+                                                        </p>
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex justify-between border-b border-dotted pb-2 border-b-black">
+                                                    <span className="">
+                                                        <h2>Delivery Fee:</h2>
+                                                    </span>
+                                                    <span className="">
+                                                        <p>
+                                                            +$
+                                                            {
+                                                                finalTotal.deliveryFee
+                                                            }
+                                                        </p>
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex justify-between ">
+                                                    <span className="">
+                                                        <h2>Sub-Total:</h2>
+                                                    </span>
+                                                    <span className="">
+                                                        <p>${order.subtotal}</p>
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex justify-between border-b border-dotted pb-2 border-b-black">
+                                                    <span className="">
+                                                        <h2>Credit:</h2>
+                                                    </span>
+                                                    <span className="">
+                                                        <p>
+                                                            -${order.totcredit}
+                                                        </p>
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex justify-between pb-4 border-b-4 border-double border-b-davidiciGold">
+                                                    <span className="">
+                                                        <h2>
+                                                            Current Sub-Total:
+                                                        </h2>
+                                                    </span>
+                                                    <span className="">
+                                                        <p>
+                                                            $
+                                                            {
+                                                                depositInfo?.totcod
+                                                            }
+                                                        </p>
+                                                    </span>
+                                                </div>
+
+                                                {!finalTotal.isDepositPaid && (
+                                                    <div
+                                                        className={
+                                                            crrPaymentMethod ===
+                                                            "bank account"
+                                                                ? "border-b pb-2 border-b-black border-dotted flex justify-between"
+                                                                : "flex justify-between"
+                                                        }
+                                                    >
+                                                        <span className="">
+                                                            <h2>Deposit:</h2>
+                                                        </span>
+                                                        <span className="">
+                                                            <p>
+                                                                $
+                                                                {
+                                                                    depositInfo?.depneeded
+                                                                }
+                                                            </p>
+                                                        </span>
+                                                    </div>
+                                                )}
+
+                                                {crrPaymentMethod ===
+                                                    "credit card" && (
+                                                    <div className="border-b pb-2 border-b-black border-dotted flex justify-between">
+                                                        <span className="">
+                                                            <h2>
+                                                                3% credit card
+                                                                fee:
+                                                            </h2>
+                                                        </span>
+                                                        <span className="">
+                                                            <p>
+                                                                +$
+                                                                {finalTotal.fee}
+                                                            </p>
+                                                        </span>
+                                                    </div>
+                                                )}
+
+                                                <div className="flex justify-between">
+                                                    <span className="">
+                                                        <h2>Due Today:</h2>
+                                                    </span>
+                                                    <span>
+                                                        <p className="text-davidiciGold font-semibold">
+                                                            $
+                                                            {
+                                                                finalTotal.grandTotal
+                                                            }
+                                                        </p>
+                                                    </span>
+                                                </div>
+                                            </section>
+                                        </section>
+
+                                        <section className="grow py-6 md:px-8 md:py-4">
+                                            <div className="flex gap-6 pb-2 mb-2">
+                                                <p
+                                                    className={
+                                                        crrPaymentMethod ===
+                                                        "credit card"
+                                                            ? "px-5 py-1 text-davidiciGold font-semibold border-b border-davidiciGold"
+                                                            : "px-5 py-1 shadow-sm shadow-davidiciGold/60 transition-shadow hover:shadow-none cursor-pointer"
+                                                    }
+                                                    onClick={() => {
+                                                        setCrrPaymentMethod(
+                                                            "credit card"
+                                                        );
+                                                        setBankErrors(null);
+                                                    }}
+                                                >
+                                                    Credit
+                                                </p>
+                                                <p
+                                                    className={
+                                                        crrPaymentMethod ===
+                                                        "bank account"
+                                                            ? "px-5 py-1 text-davidiciGold font-semibold border-b border-davidiciGold"
+                                                            : "px-5 py-1 shadow-sm shadow-davidiciGold/60 transition-shadow hover:shadow-none cursor-pointer"
+                                                    }
+                                                    onClick={() => {
+                                                        setCrrPaymentMethod(
+                                                            "bank account"
+                                                        );
+                                                        setCardErrors(null);
+                                                    }}
+                                                >
+                                                    Bank account
+                                                </p>
+                                            </div>
+                                            {crrPaymentMethod ===
+                                                "credit card" && (
+                                                <CreditCardForm
+                                                    handleSubmit={
+                                                        handleCardSubmit
+                                                    }
+                                                    errors={
+                                                        cardValidationErrors
+                                                    }
+                                                />
+                                            )}
+                                            {crrPaymentMethod ===
+                                                "bank account" && (
+                                                <BankAccountForm
+                                                    handleSubmit={
+                                                        handleBankSubmit
+                                                    }
+                                                    errors={
+                                                        bankValidationErrors
+                                                    }
+                                                />
+                                            )}
+                                        </section>
+                                    </>
+                                )}
+                            </section>
                         )}
-                    </section>
+                    </>
                 )}
             </OrderLayout>
             <ToastContainer />

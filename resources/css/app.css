@@ -291,6 +291,7 @@ main {
 .order-options-menu-wrapper {
     margin-right: 2em;
     flex-basis: 15%;
+    z-index: 1;
 }
 .order-options-menu-wrapper ul {
     padding: 0;

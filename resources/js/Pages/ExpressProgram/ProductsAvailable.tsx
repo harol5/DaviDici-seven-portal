@@ -1,7 +1,6 @@
 import UserAuthenticatedLayout from "../../Layouts/UserAuthenticatedLayout";
 import User from "../../Models/User";
 import useExpressProgramProducts from "../../Hooks/useExpressProgramProducts";
-import type { ProductInventory } from "../../Models/Product";
 import type {
     FinishObj,
     ListingType,
@@ -10,6 +9,7 @@ import type {
 } from "../../Models/ExpressProgramModels";
 import CompositionsListing from "./CompositionsListing";
 import classes from "../../../css/express-program.module.css";
+import LoadingSpinner from "../../Components/LoadingSpinner";
 import { router } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -134,16 +134,7 @@ function ProductsAvailable({ auth, listingType }: ProductsAvailableProps) {
                     <></>
                 )}
 
-                {isLoading && (
-                    <p className="absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] p-7 bg-white text-center">
-                        <img
-                            className={classes.logoLoadSpinner}
-                            src={`https://${location.hostname}/images/davidici-logo-no-letters.svg`}
-                            alt="home icon"
-                        />
-                        fetching products...
-                    </p>
-                )}
+                {isLoading && <LoadingSpinner message="fetching products..." />}
 
                 {!isLoading && (
                     <>

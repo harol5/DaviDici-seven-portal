@@ -171,8 +171,15 @@ function OrderLayout({ children, order, crrOrderOption }: OrderLayoutProps) {
                         </div>
                     </section>
                     <div className="order-buttons-wrapper">
-                        <button className="common-button">print order</button>
-                        <button className="common-button">approve order</button>
+                        <button className="common-button">Print Order</button>
+                        <button className="common-button">
+                            <Link
+                                href={`/orders/${order.ordernum}/payment`}
+                                data={orderFormatted}
+                            >
+                                Approve Order
+                            </Link>
+                        </button>
                     </div>
                 </div>
                 <div className="order-body-wrapper">{children}</div>

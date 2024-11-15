@@ -35,16 +35,22 @@ function ProductDetailsCard({
         () => collections.includes(product.model),
         [product.model]
     );
+
     const isPaymentORSubmittedDate = isPaymentSubmitted || isSubmitedDate;
+
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+
     const [crrModalContent, setCrrModalContent] = useState<
         "removeModal" | "addNote"
     >();
+
     const [openModal, setOpenModal] = useState(false);
+
     const handleOpenModal = (contentModal: "removeModal" | "addNote") => {
         setOpenModal(true);
         setCrrModalContent(contentModal);
     };
+
     const handleCloseModal = () => {
         setOpenModal(false);
     };

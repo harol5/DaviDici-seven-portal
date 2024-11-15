@@ -223,9 +223,9 @@ function BankAccountForm({ handleSubmit, errors }: BankAccountFormProps) {
                 </div>
             </div>
 
-            <div className="">
+            <div className="flex justify-center mt-5">
                 <button
-                    className="border border-black rounded px-3"
+                    className="rounded border shadow-sm shadow-gray-950 px-5 py-2 text-sm transition-shadow hover:shadow-none hover:bg-green-400/95 hover:text-white hover:border-green-700"
                     type="submit"
                 >
                     submit
