@@ -14,6 +14,7 @@ import OtherModelsConfigurator from "../../Components/ExpressProgramConfigurator
 import { ShoppingCartProduct as shoppingCartProductModel } from "../../Models/ExpressProgramModels";
 import axios from "axios";
 import { router } from "@inertiajs/react";
+import { ToastContainer, toast } from "react-toastify";
 
 interface ProductConfiguratorProps {
     auth: User;
@@ -52,9 +53,11 @@ function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
                     shoppingCartProductsServer
                 );
 
+                toast.success("Added to the cart!!");
                 setShoppingCartSize(shoppingCartProductsServer.length);
             } catch (err) {
                 console.log(err);
+                toast.error("Something went wrong");
             }
         }
     };
@@ -124,6 +127,7 @@ function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
                     />
                 )}
             </div>
+            <ToastContainer />
         </UserAuthenticatedLayout>
     );
 }

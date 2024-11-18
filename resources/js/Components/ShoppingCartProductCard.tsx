@@ -54,17 +54,43 @@ function ShoppingCartProductCard({
                     <span>
                         <h2>VANITY:</h2>
                         <p>{product.vanity?.descw ?? "NONE"}</p>
+                        <p>
+                            $
+                            {product.vanity?.sprice
+                                ? product.vanity?.sprice
+                                : product.vanity?.msrp
+                                ? product.vanity?.msrp
+                                : "NONE"}
+                        </p>
                     </span>
                     <span>
                         <h2>WASHBASIN:</h2>
                         <p>{product.washbasin?.descw ?? "NONE"}</p>
+                        <p>
+                            $
+                            {product.washbasin?.sprice
+                                ? product.washbasin?.sprice
+                                : product.washbasin?.msrp
+                                ? product.washbasin?.msrp
+                                : "NONE"}
+                        </p>
                     </span>
                     <span>
                         <h2>SIDE UNITS:</h2>
                         <div className={classes.sideUnitsWrapper}>
                             {product.sideUnits.map(
                                 (sideUnit: ProductInventory, index: number) => (
-                                    <p key={index}>{sideUnit.descw}</p>
+                                    <div key={index}>
+                                        <p>{sideUnit.descw}</p>
+                                        <p>
+                                            $
+                                            {sideUnit.sprice
+                                                ? sideUnit.sprice
+                                                : sideUnit.msrp
+                                                ? sideUnit.msrp
+                                                : ""}
+                                        </p>
+                                    </div>
                                 )
                             )}
                             {product.sideUnits.length === 0 && "NONE"}
@@ -133,7 +159,17 @@ const OtherItems = memo(function ({
                     <h2>{item?.title}</h2>
                     <div className={classes.sideUnitsWrapper}>
                         {item?.products.map((product, index) => (
-                            <p key={index}>{product.descw}</p>
+                            <div key={index}>
+                                <p>{product.descw}</p>
+                                <p>
+                                    $
+                                    {product.sprice
+                                        ? product.sprice
+                                        : product.msrp
+                                        ? product.msrp
+                                        : ""}
+                                </p>
+                            </div>
                         ))}
                     </div>
                 </span>

@@ -34,7 +34,7 @@
     }
     /*propertiesWrapper state*/
     .activeAccordion {
-        max-height: 100vh;
+        max-height: 150vh;
     }
 
     .accordionButtonsWrapper {

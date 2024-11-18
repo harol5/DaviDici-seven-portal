@@ -45,6 +45,11 @@
     color: #d1aa68;
 }
 
+.leftSideConfiguratorWrapper .backButtonAndNameWrapper .buttonsWrapper {
+    display: flex;
+    gap: 1em;
+}
+
 .leftSideConfiguratorWrapper .backButtonAndNameWrapper .resetButton {
     font-size: 0.7rem;
     background-color: #d1aa68;
@@ -329,7 +334,7 @@
     .compositionConfiguratorWrapper {
         flex-direction: column;
         padding-top: 0;
-        padding-bottom: 13rem;
+        padding-bottom: 12rem;
     }
 
     .leftSideConfiguratorWrapper {
@@ -345,8 +350,17 @@
         font-size: medium;
     }
 
+    .leftSideConfiguratorWrapper .backButtonAndNameWrapper .buttonsWrapper {
+        flex-direction: column;
+    }
+
     .option {
         width: 30%;
+    }
+
+    .grandTotalAndOrderNowButtonWrapper button,
+    .grandTotalAndOrderNowButtonWrapper .specsLink {
+        font-size: 0.75rem;
     }
 }
 

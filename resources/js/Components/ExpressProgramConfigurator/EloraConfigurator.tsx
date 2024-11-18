@@ -1229,18 +1229,20 @@ function EloraConfigurator({
                         <p>BACK</p>
                     </span>
                     <h1>{composition.name}</h1>
-                    <button
-                        className={classes.resetButton}
-                        onClick={() => print()}
-                    >
-                        PRINT
-                    </button>
-                    <button
-                        className={classes.resetButton}
-                        onClick={handleResetConfigurator}
-                    >
-                        RESET
-                    </button>
+                    <div className={classes.buttonsWrapper}>
+                        <button
+                            className={classes.resetButton}
+                            onClick={() => print()}
+                        >
+                            PRINT
+                        </button>
+                        <button
+                            className={classes.resetButton}
+                            onClick={handleResetConfigurator}
+                        >
+                            RESET
+                        </button>
+                    </div>
                 </section>
                 <section className={classes.compositionImageWrapper}>
                     <ImageSlider
