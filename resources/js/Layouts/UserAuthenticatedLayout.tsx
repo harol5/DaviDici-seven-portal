@@ -132,6 +132,9 @@ function UserAuthenticatedLayout({
                             </>
                         ) : (
                             <>
+                                <li className="link-button">
+                                    <Link href="/">Login</Link>
+                                </li>
                                 <li
                                     className={
                                         crrPage === "express program"

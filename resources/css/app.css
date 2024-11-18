@@ -142,6 +142,7 @@ nav {
     padding: 0;
     flex-grow: 1;
     justify-content: center;
+    gap: 1.5rem;
 }
 
 /*-dropdown setting menu-*/

@@ -1,4 +1,4 @@
-import { useForm } from "@inertiajs/react";
+import { useForm, Link } from "@inertiajs/react";
 import FlashMessage from "../../Components/FlashMessage";
 import { FormEvent, useState } from "react";
 import Modal from "../../Components/Modal";
@@ -92,6 +92,14 @@ function Login({ message = "" }) {
                     {crrForm === "forgot pwd" && (
                         <ForgotPwdForm handleCrrForm={handleCrrForm} />
                     )}
+                </div>
+                <div className="flex justify-center py-10">
+                    <Link
+                        href="/express-program"
+                        className="bg-davidiciGold py-2 px-6 rounded"
+                    >
+                        Express Program
+                    </Link>
                 </div>
             </div>
             <FlashMessage message={message} time={6000} />

@@ -635,7 +635,13 @@ class OrdersController extends Controller
         // return Inertia::render('Test',['response' => $response]);
         // return response(['response' => $response])->header('Content-Type', 'application/json');
 
-        return response(['response' => $testingService->getUniqueInstanceId()])->header('Content-Type', 'application/json');
+        $foxproRes = FoxproApi::call([
+            'action' => 'PrintSo',
+            'params' => ['HAR000001'],
+            'keep_session' => false,
+        ]);          
+
+        return response(['response' => $testingService->getUniqueInstanceId(), 'foxproRes' => $foxproRes])->header('Content-Type', 'application/json');
     }
 
 
@@ -647,7 +653,10 @@ class OrdersController extends Controller
             'action' => 'GetCR',
             'params' => [$orderNumber],
             'keep_session' => false,
-        ]);          
+        ]);   
+        
+        info('==== isPaymentSubmitted ====');
+        info($paymentInfo);
         
         // "rows" key will containes an associative array with each payment submmited for a given order.
         return array_key_exists('rows', $paymentInfo) && count($paymentInfo['rows']) !== 0;        
