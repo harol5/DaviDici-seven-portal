@@ -48,6 +48,8 @@ function OrderPayment({
 
     const [isLoading, setIsLoading] = useState(false);
 
+    const [isInternalError, setIsInternalError] = useState(false);
+
     const isDeliveryInfo = useMemo(() => {
         return Boolean(deliveryInfo[0].dtype);
     }, []);
@@ -223,7 +225,6 @@ function OrderPayment({
             if (data.status === 400) {
                 setIsLoading(false);
                 const errors = data.intuitRes.errors;
-                console.log("echeck error:", errors);
                 setBankErrors(errors);
                 return;
             }
@@ -231,6 +232,7 @@ function OrderPayment({
             if (data.status === 401 || data.status === 501) {
                 setIsLoading(false);
                 setBankErrors(null);
+                setIsInternalError(true);
                 toast.error("Something went wrong, please contact support.");
                 return;
             }
@@ -276,6 +278,7 @@ function OrderPayment({
         } catch (err) {
             toast.error("Something went wrong, please contact support.");
             setIsLoading(false);
+            setIsInternalError(true);
         }
     };
 
@@ -323,6 +326,15 @@ function OrderPayment({
                         <h1 className="text-red-500 font-semibold text-center">
                             Please go to "Delivery Options" and fill out the
                             delivery form before submitting payment. Thank you.
+                        </h1>
+                    </div>
+                ) : isInternalError ? (
+                    <div className="bg-gray-200/50 backdrop-blur-sm mt-6 p-5 w-[100%] h-[250px]">
+                        <h1 className="text-red-500 font-semibold text-center text-lg">
+                            An Internal error has occurred. We apologize for the
+                            inconvenience. Please <strong>DO NOT TRY</strong> to
+                            submit a payment again, notify us and we will fix
+                            this issue as soon as possible. Thank you.
                         </h1>
                     </div>
                 ) : (

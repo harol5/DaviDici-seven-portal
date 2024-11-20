@@ -353,7 +353,7 @@ class OrdersController extends Controller
                 'keep_session' => false,
             ]);   
             
-            if (array_key_exists('Result', $cashReceiptRes) || $cashReceiptRes["Result"] !== 'Info Updated Successfully') {
+            if (!array_key_exists('Result', $cashReceiptRes) || $cashReceiptRes["Result"] !== 'Info Updated Successfully') {
                 logFoxproError('SaveCR', 'OrdersController->createCharge', ['message' => 'params not logged for secury reasons', 'user' => $request->user()->email], $cashReceiptRes);  
             }
             
@@ -401,8 +401,8 @@ class OrdersController extends Controller
                 'keep_session' => false,
             ]);  
             
-            if (array_key_exists('Result', $cashReceiptRes) || $cashReceiptRes["Result"] !== 'Info Updated Successfully') {
-                logFoxproError('SaveCR', 'OrdersController->createCharge', ['message' => 'params not logged for secury reasons', 'user' => $request->user()->email], $cashReceiptRes);  
+            if (!array_key_exists('Result', $cashReceiptRes) || $cashReceiptRes["Result"] !== 'Info Updated Successfully') {
+                logFoxproError('SaveCR', 'OrdersController->createBankCharge', ['message' => 'params not logged for secury reasons', 'user' => $request->user()->email], $cashReceiptRes);  
             }
             
             return response(['intuitRes' => $response->json(), 'status' => $response->status(), 'cashRes' => $cashReceiptRes])->header('Content-Type', 'application/json');
@@ -454,10 +454,13 @@ class OrdersController extends Controller
     public function createOrderNumber(Request $request)
     {
         $username = auth()->user()->username;
+        $userRole = auth()->user()->role;
         $products = $request->all();
         if (!array_key_exists('isShoppingCart', $products)) $products['isShoppingCart'] = 'false';
 
-        // Get all orders
+        // Get all orders.
+        // TODO: should be a specific program that returns order from all sales rep.
+        // so we can see all order nums taken.        
         $orders = FoxproApi::call([
             'action' => 'getordersbyuser',
             'params' => [$username],
@@ -472,6 +475,34 @@ class OrdersController extends Controller
 
         // get how many orders the client has.
         $numOfOrders = count($orders['rows']);
+        
+        // Get list of sales rep if owner acc created the order.
+        // TODO: we need to include the username on each sale rep info.
+        $salesPersonsList = [];
+        $companyCode = '';        
+        $userInfoRes = [];
+        $salesPersonsRes = [];
+
+        if ($userRole === 1919 || $userRole === 3478) {
+            $userInfoRes = FoxproApi::call([
+                'action' => 'GETUSERINFO',
+                'params' => [$username],
+                'keep_session' => false,
+            ]);
+    
+            if ($userInfoRes['status'] === 201 || (array_key_exists('rows', $userInfoRes) && count($userInfoRes['rows']) > 0)) {
+                $companyCode = $userInfoRes['rows'][0]['wholesaler'];    
+                $salesPersonsRes = FoxproApi::call([
+                    'action' => 'GETSLMNINFO',
+                    'params' => ['',$companyCode],
+                    'keep_session' => false,
+                ]);    
+                
+                if ($salesPersonsRes['status'] === 201 || (array_key_exists('rows', $salesPersonsRes) && count($salesPersonsRes['rows']) > 0)) {
+                    $salesPersonsList = $salesPersonsRes['rows'];
+                }
+            }            
+        }        
 
         // if there are orders.
         if ($numOfOrders > 0) {
@@ -487,23 +518,37 @@ class OrdersController extends Controller
 
             $newOrderNumber = $charsFromOrderNum . $nextOrderNumber;
 
-            return Inertia::render('Orders/OrderNumber', ['nextOrderNumber' => $newOrderNumber, 'products' => $products, 'orders' => $orders['rows'], 'message' => '']);
-        } else {
-
-            // Gets user info.
-            $response = FoxproApi::call([
-                'action' => 'GETUSERINFO',
-                'params' => [$username],
-                'keep_session' => false,
-            ]);
-
-            if ($response['status'] === 500 || (array_key_exists('Result', $response) && $response['Result'] === 'no such user name found')) {
-                Log::error("=VVVVV===ERROR REQUESTING DATA FROM FOXPRO. function: GETUSERINFO ====VVVVV");
-                Log::error($response);
-                return Inertia::render('Orders/OrderNumber', ['nextOrderNumber' => 'none', 'products' => 'none', 'orders' => 'none', 'message' => 'error']);
+            return Inertia::render(
+                'Orders/OrderNumber', 
+                [
+                    'nextOrderNumber' => $newOrderNumber, 
+                    'products' => $products, 
+                    'orders' => $orders['rows'], 
+                    'message' => '',
+                    'salesRepsList' => $salesPersonsList
+                ]
+            );
+        } else {    
+            if (!$companyCode) {
+                logFoxproError(
+                    'GETSLMNINFO or GETUSERINFO', 
+                    'OrdersController->createOrderNumber', 
+                    ['message' => 'params not logged for secury reasons', 'user' => $request->user()->email], 
+                    ['userInfoRes' => $userInfoRes, 'salesPersonsRes' => $salesPersonsRes]
+                );
+                
+                return Inertia::render(
+                    'Orders/OrderNumber', 
+                    [
+                        'nextOrderNumber' => 'none',
+                        'products' => 'none', 
+                        'orders' => 'none', 
+                        'message' => 'error',
+                        'salesRepsList' => $salesPersonsList
+                    ]
+                );        
             }
-
-            $companyCode = $response['rows'][0]['wholesaler'];
+                        
             return Inertia::render('Orders/OrderNumber', ['nextOrderNumber' => $companyCode . '000001', 'products' => $products, 'orders' => $orders['rows'], 'message' => '']);
         }
     }
@@ -635,9 +680,27 @@ class OrdersController extends Controller
         // return Inertia::render('Test',['response' => $response]);
         // return response(['response' => $response])->header('Content-Type', 'application/json');
 
+        // $foxproRes = FoxproApi::call([
+        //     'action' => 'PrintSo',
+        //     'params' => ['HAR000001'],
+        //     'keep_session' => false,
+        // ]); 
+        
+
+        //---- Get company code.
+        $adminUsername = auth()->user()->username;
+        $getCompanyInforesponse = FoxproApi::call([
+            'action' => 'GETUSERINFO',
+            'params' => [$adminUsername],
+            'keep_session' => false,
+        ]);        
+
+        $companyCode = $getCompanyInforesponse['rows'][0]['wholesaler'];
+
+        // 'params' => ['TWO-LETTER SALESMAN CODE','THREE-LETTER COMPANY CODE'],        
         $foxproRes = FoxproApi::call([
-            'action' => 'PrintSo',
-            'params' => ['HAR000001'],
+            'action' => 'GETSLMNINFO',
+            'params' => ['',$companyCode],
             'keep_session' => false,
         ]);          
 
@@ -653,10 +716,7 @@ class OrdersController extends Controller
             'action' => 'GetCR',
             'params' => [$orderNumber],
             'keep_session' => false,
-        ]);   
-        
-        info('==== isPaymentSubmitted ====');
-        info($paymentInfo);
+        ]);           
         
         // "rows" key will containes an associative array with each payment submmited for a given order.
         return array_key_exists('rows', $paymentInfo) && count($paymentInfo['rows']) !== 0;        

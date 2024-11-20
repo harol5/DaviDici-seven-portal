@@ -41,22 +41,26 @@
 }
 
 #login-page {
-    width: 550px;
+    transform: translate(-50%, -50%);
+    width: 30%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+}
+
+.logoAndFormWrapper {
     background-color: rgba(255, 255, 255, 0.25);
     backdrop-filter: blur(3px);
     border-radius: 10px;
     box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
-    margin: auto;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 430px;
+}
+
+#form-wrapper {
+    padding-bottom: 1.7em;
 }
 
 #LogoDiv {
-    padding: 2.2em 0;
+    padding: 1.7em 0;
 }
 
 #Logo {
@@ -718,7 +722,7 @@ main {
 
 @media (max-width: 1600px) {
     * {
-        font-size: 0.87rem;
+        font-size: 0.84rem;
     }
     /*======= DETAIL PAGE =======*/
     .product-wrapper {

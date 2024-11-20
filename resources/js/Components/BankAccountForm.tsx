@@ -119,21 +119,26 @@ function BankAccountForm({ handleSubmit, errors }: BankAccountFormProps) {
                 </div>
 
                 <div className="flex flex-col">
-                    <label htmlFor="account-number" className="mb-1">
-                        Account number:
+                    <label htmlFor="routing-number" className="mb-1">
+                        Routing number:
                     </label>
+                    {crrErrors && crrErrors["bankAccount.routingNumber"] ? (
+                        <p className="text-red-500">
+                            {crrErrors["bankAccount.routingNumber"].moreInfo}
+                        </p>
+                    ) : null}
                     <input
                         className="px-[0.2em] border border-black rounded"
                         type="tel"
-                        name="accountNumber"
-                        value={state.bankAccount.accountNumber}
-                        id="account-number"
+                        name="routingNumber"
+                        value={state.bankAccount.routingNumber}
+                        id="routing-number"
                         required
-                        minLength={4}
-                        maxLength={17}
+                        minLength={9}
+                        maxLength={9}
                         onChange={(e) => {
                             dispatch({
-                                type: "set-accountNumber",
+                                type: "set-routingNumber",
                                 payload: e.currentTarget.value,
                             });
                         }}
@@ -173,26 +178,21 @@ function BankAccountForm({ handleSubmit, errors }: BankAccountFormProps) {
                 </div>
 
                 <div className="flex flex-col">
-                    <label htmlFor="routing-number" className="mb-1">
-                        Routing number:
+                    <label htmlFor="account-number" className="mb-1">
+                        Account number:
                     </label>
-                    {crrErrors && crrErrors["bankAccount.routingNumber"] ? (
-                        <p className="text-red-500">
-                            {crrErrors["bankAccount.routingNumber"].moreInfo}
-                        </p>
-                    ) : null}
                     <input
                         className="px-[0.2em] border border-black rounded"
                         type="tel"
-                        name="routingNumber"
-                        value={state.bankAccount.routingNumber}
-                        id="routing-number"
+                        name="accountNumber"
+                        value={state.bankAccount.accountNumber}
+                        id="account-number"
                         required
-                        minLength={9}
-                        maxLength={9}
+                        minLength={4}
+                        maxLength={17}
                         onChange={(e) => {
                             dispatch({
-                                type: "set-routingNumber",
+                                type: "set-accountNumber",
                                 payload: e.currentTarget.value,
                             });
                         }}

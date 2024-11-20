@@ -12,6 +12,7 @@ interface OrderNumberProps {
     products: { SKU: string; isShoppingCart: string };
     orders: OrderModel[];
     message: string;
+    salesRepsList: any;
 }
 
 function OrderNumber({
@@ -20,6 +21,7 @@ function OrderNumber({
     products,
     orders,
     message,
+    salesRepsList,
 }: OrderNumberProps) {
     const [orderNum, setOrderNum] = useState(() => nextOrderNumber.slice(3));
     const [error, setError] = useState<string>();
@@ -58,6 +60,7 @@ function OrderNumber({
             {
                 newOrderNum,
                 skus: products.SKU.replaceAll("--", "**"),
+                username: "",
             },
             {
                 onStart: () => setIsLoading(true),
