@@ -235,24 +235,30 @@ class OrdersController extends Controller
     // Save delivery info into foxpro.
     public function saveDeliveryInfo(Request $request)
     {
-        $formFields = $request->validate([
-            'date' => 'required',
-            'address' => 'required',
-            'cellphoneNumber' => 'required',
-            'city' => 'required',
-            'contactName' => 'required',
-            'customerEmail' => ['required', 'email'],
-            'customerName' => 'required',
-            'deliveryType' => 'required',
-            'state' => 'required',
-            'telephoneNumber' => 'required',
-            'wholesalerEmail' => 'required',
-            'zipCode' => 'required'
-        ]);
-
-        $orderNumber = getOrderNumberFromPath($request->path());
         $deliveryInfo = $request->all();
 
+        if ($deliveryInfo['deliveryType'] !== 'PICK UP') {
+            $request->validate([
+                'date' => 'required',
+                'address' => 'required',
+                'cellphoneNumber' => 'required',
+                'city' => 'required',
+                'contactName' => 'required',
+                'customerEmail' => ['required', 'email'],
+                'customerName' => 'required',
+                'deliveryType' => 'required',
+                'state' => 'required',
+                'telephoneNumber' => 'required',
+                'wholesalerEmail' => 'required',
+                'zipCode' => 'required'
+            ]);
+        }else {
+            foreach($deliveryInfo as $key => $value){
+                if (!$value) $deliveryInfo[$key] = '';
+            }
+        }        
+
+        $orderNumber = getOrderNumberFromPath($request->path());            
         $res = FoxproApi::call([
             'action' => 'SaveDeliveryInfo',
             'params' => [
@@ -280,6 +286,30 @@ class OrdersController extends Controller
             return response(['foxproRes' => $res, 'message' => 'delivery information saved!!', 'information' => $deliveryInfo])->header('Content-Type', 'application/json');
         }
 
+        logFoxproError(
+            'SaveDeliveryInfo', 
+            'OrdersController->saveDeliveryInfo', 
+            [
+                $orderNumber,
+                $deliveryInfo['date'],
+                $deliveryInfo['customerName'],
+                $deliveryInfo['contactName'],
+                $deliveryInfo['telephoneNumber'],
+                $deliveryInfo['cellphoneNumber'],
+                $deliveryInfo['wholesalerEmail'],
+                $deliveryInfo['customerEmail'],
+                $deliveryInfo['address'],
+                $deliveryInfo['city'],
+                $deliveryInfo['state'],
+                $deliveryInfo['zipCode'],
+                $deliveryInfo['deliveryType'],
+                $deliveryInfo['deliveryInstruction'],
+                'ALL',
+                '0'
+            ], 
+            $res
+        );
+          
         return response(['foxproRes' => $res, 'message' => 'internal issue', 'information' => $deliveryInfo])->header('Content-Type', 'application/json');
     }
 
@@ -349,15 +379,38 @@ class OrdersController extends Controller
             // "Result" : "Info Updated Successfully" |
             $cashReceiptRes = FoxproApi::call([
                 'action' => 'SaveCR',                
-                'params' => [$orderNumber, 'CC', $foxproInfo['amountPaid'], $foxproInfo['date'], $foxproInfo['nameOnCard'], $foxproInfo['cc'], $foxproInfo['expDate'], $foxproInfo['cvc']],
+                'params' => [
+                    $orderNumber, 
+                    'CC', 
+                    $foxproInfo['amountPaid'], 
+                    $foxproInfo['date'], 
+                    $foxproInfo['nameOnCard'], 
+                    $foxproInfo['cc'], 
+                    $foxproInfo['expDate'], 
+                    $foxproInfo['cvc']
+                ],
                 'keep_session' => false,
-            ]);   
+            ]);
             
             if (!array_key_exists('Result', $cashReceiptRes) || $cashReceiptRes["Result"] !== 'Info Updated Successfully') {
                 logFoxproError('SaveCR', 'OrdersController->createCharge', ['message' => 'params not logged for secury reasons', 'user' => $request->user()->email], $cashReceiptRes);  
-            }
+            }            
+
+            // $clientTransID = $response->collect()->all()['context']['clientTransID'];
+            // $uuidTransaction2 = (string) Str::uuid();
+            // $intuirReceipt = Http::withHeaders([
+            //     'Authorization' => 'Bearer ' . $accessToken,
+            //     'Accept' => 'application/pdf',
+            //     'Content-Type' => 'application/json',
+            //     'Request-Id' => $uuidTransaction2,
+            // ])->get($intuitApiUrl .'/quickbooks/v4/payments/receipt/test123abc?clientTransID=test123abc');
+
+            // info('=== receipt response ===');
+            // info($intuirReceipt->headers());
+            // info($intuirReceipt->body());
             
             return response(['intuitRes' => $response->json(), 'status' => $response->status(), 'cashRes' => $cashReceiptRes])->header('Content-Type', 'application/json');
+            // return response(['intuitRes' => $response->json(), 'status' => $response->status(), 'cashRes' => 'testing'])->header('Content-Type', 'application/json');
 
         } else {
             // 401 -> access token expired!!
@@ -676,35 +729,38 @@ class OrdersController extends Controller
     }
 
     public function testApi(TestingService $testingService)
-    {                            
-        // return Inertia::render('Test',['response' => $response]);
-        // return response(['response' => $response])->header('Content-Type', 'application/json');
+    {   
+        if (Gate::allows('admin-only')) {
+            // return Inertia::render('Test',['response' => $response]);
+            // return response(['response' => $response])->header('Content-Type', 'application/json');
 
-        // $foxproRes = FoxproApi::call([
-        //     'action' => 'PrintSo',
-        //     'params' => ['HAR000001'],
-        //     'keep_session' => false,
-        // ]); 
-        
+            $foxproRes = FoxproApi::call([
+                'action' => 'PrintSo',
+                'params' => ['HAR000001'],
+                'keep_session' => false,
+            ]); 
+            
 
-        //---- Get company code.
-        $adminUsername = auth()->user()->username;
-        $getCompanyInforesponse = FoxproApi::call([
-            'action' => 'GETUSERINFO',
-            'params' => [$adminUsername],
-            'keep_session' => false,
-        ]);        
+            //---- Get company code.
+            // $adminUsername = auth()->user()->username;
+            // $getCompanyInforesponse = FoxproApi::call([
+            //     'action' => 'GETUSERINFO',
+            //     'params' => [$adminUsername],
+            //     'keep_session' => false,
+            // ]);        
 
-        $companyCode = $getCompanyInforesponse['rows'][0]['wholesaler'];
+            // $companyCode = $getCompanyInforesponse['rows'][0]['wholesaler'];
 
-        // 'params' => ['TWO-LETTER SALESMAN CODE','THREE-LETTER COMPANY CODE'],        
-        $foxproRes = FoxproApi::call([
-            'action' => 'GETSLMNINFO',
-            'params' => ['',$companyCode],
-            'keep_session' => false,
-        ]);          
+            // 'params' => ['TWO-LETTER SALESMAN CODE','THREE-LETTER COMPANY CODE'],        
+            // $foxproRes = FoxproApi::call([
+            //     'action' => 'GETSLMNINFO',
+            //     'params' => ['',$companyCode],
+            //     'keep_session' => false,
+            // ]);          
 
-        return response(['response' => $testingService->getUniqueInstanceId(), 'foxproRes' => $foxproRes])->header('Content-Type', 'application/json');
+            return response(['response' => $testingService->getUniqueInstanceId(), 'foxproRes' => $foxproRes])->header('Content-Type', 'application/json');
+        } 
+        abort(403);                                 
     }
 
 

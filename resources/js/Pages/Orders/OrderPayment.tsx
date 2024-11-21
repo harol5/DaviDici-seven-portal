@@ -154,6 +154,7 @@ function OrderPayment({
 
             if (response.data.status === 401) {
                 setIsLoading(false);
+                setIsInternalError(true);
                 return;
             }
 
@@ -166,7 +167,8 @@ function OrderPayment({
 
             if (response.data.status === 501) {
                 setIsLoading(false);
-                toast.error("SOmething went wrong. please contact support");
+                setIsInternalError(true);
+                toast.error("Something went wrong. please contact support");
                 return;
             }
 
@@ -182,13 +184,11 @@ function OrderPayment({
             setIsLoading(false);
             setCardErrors(null);
         } catch (error) {
-            if (axios.isAxiosError(error)) {
-                if (error.response?.data.errors) {
-                    const errors: ErrorIntuit[] = error.response.data.errors;
-                    setCardErrors(errors);
-                }
+            if (axios.isAxiosError(error) && error.response?.data.errors) {
+                const errors: ErrorIntuit[] = error.response.data.errors;
+                setCardErrors(errors);
             } else {
-                console.error(error);
+                setIsInternalError(true);
             }
             setIsLoading(false);
         }

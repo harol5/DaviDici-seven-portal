@@ -9,7 +9,7 @@ function Media({ auth }: { auth: User }) {
     const [files, setFiles] = useState<FileList | null>(null);
     const [response, setResponse] = useState("");
 
-    const { isPending, error, data } = useQuery({
+    const { isPending, data } = useQuery({
         queryKey: ["allImages"],
         queryFn: () => axios.get(`/media/images`).then((res) => res.data),
     });

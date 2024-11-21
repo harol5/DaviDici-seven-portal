@@ -1,12 +1,12 @@
-import type { shoppingCartProduct } from "../Models/ExpressProgramModels";
+import type { ShoppingCartProduct } from "../Models/ExpressProgramModels";
 import classes from "../../css/CustomQtyInput.module.css";
 import { useEffect, useState } from "react";
 
 interface CustomQtyInputProps {
-    product: shoppingCartProduct;
+    product: ShoppingCartProduct;
     productIndex: number;
     onQtyUpdated: (
-        product: shoppingCartProduct,
+        product: ShoppingCartProduct,
         productIndex: number,
         qty: number,
         type: "decrement" | "increment" | "changeValue"

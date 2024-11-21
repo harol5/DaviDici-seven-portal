@@ -90,10 +90,6 @@ function BankAccountForm({ handleSubmit, errors }: BankAccountFormProps) {
 
     const [state, dispatch] = useReducer(reducer, eCheck);
 
-    console.log("=== BankAccountForm ===");
-    console.log("Errors:", errors);
-    console.log("current Errors:", crrErrors);
-
     return (
         <form id="payment-form" onSubmit={(e) => handleSubmit(e, state)}>
             <div className="flex gap-3 flex-col mb-2">

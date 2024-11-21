@@ -48,6 +48,13 @@ function ShoppingCart({
         }
     };
 
+    /**
+     * TODO:
+     *
+     * 1. must pass the exact item (vanity,washbasin,tall unit, etc...) inside the "product" object needs to be updated.
+     * 2. i might need to chage the shopping cart product object so it can reflect the qty and total for each item.
+     *
+     */
     const handleQtyUpdated = async (
         product: shoppingCartProductModel,
         productIndex: number,
@@ -180,6 +187,9 @@ function ShoppingCart({
         };
         getShoppingCartProducts();
     }, []);
+
+    console.log("==== ShoppingCart ====");
+    console.log("shopping cart products:", crrShoppingCartProducts);
 
     return (
         <section className={classes.shoppingCart}>
