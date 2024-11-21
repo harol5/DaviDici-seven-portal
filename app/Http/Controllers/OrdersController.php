@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use App\Services\OAuthTokenService;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Gate;
 
 use App\Services\TestingService;
 
@@ -309,7 +310,7 @@ class OrdersController extends Controller
             ], 
             $res
         );
-          
+
         return response(['foxproRes' => $res, 'message' => 'internal issue', 'information' => $deliveryInfo])->header('Content-Type', 'application/json');
     }
 
@@ -515,11 +516,12 @@ class OrdersController extends Controller
         // TODO: should be a specific program that returns order from all sales rep.
         // so we can see all order nums taken.        
         $orders = FoxproApi::call([
-            'action' => 'getordersbyuser',
+            'action' => 'getordersbycompany',
             'params' => [$username],
             'keep_session' => false,
         ]);
 
+        //this means there are no orders for this customer.
         if ($orders['status'] === 500) {
             // TODO: log error.
             // assings an empty array so template can display proper message.
@@ -734,33 +736,44 @@ class OrdersController extends Controller
             // return Inertia::render('Test',['response' => $response]);
             // return response(['response' => $response])->header('Content-Type', 'application/json');
 
-            $foxproRes = FoxproApi::call([
-                'action' => 'PrintSo',
-                'params' => ['HAR000001'],
-                'keep_session' => false,
-            ]); 
-            
+            // $foxproRes = FoxproApi::call([
+            //     'action' => 'PrintSo',
+            //     'params' => ['HAR000001'],
+            //     'keep_session' => false,
+            // ]);                        
 
             //---- Get company code.
-            // $adminUsername = auth()->user()->username;
-            // $getCompanyInforesponse = FoxproApi::call([
-            //     'action' => 'GETUSERINFO',
-            //     'params' => [$adminUsername],
-            //     'keep_session' => false,
-            // ]);        
+            $adminUsername = auth()->user()->username;
+            $getCompanyInforesponse = FoxproApi::call([
+                'action' => 'GETUSERINFO',
+                'params' => [$adminUsername],
+                'keep_session' => false,
+            ]);    
+            
+            $foxproRes = FoxproApi::call([
+                'action' => 'getordersbycompany',
+                'params' => [$adminUsername],
+                'keep_session' => false,
+            ]);
+            
+            $orders = FoxproApi::call([
+                'action' => 'getordersbyuser',
+                'params' => [$adminUsername],
+                'keep_session' => false,
+            ]);
 
-            // $companyCode = $getCompanyInforesponse['rows'][0]['wholesaler'];
+            $companyCode = $getCompanyInforesponse['rows'][0]['wholesaler'];
 
             // 'params' => ['TWO-LETTER SALESMAN CODE','THREE-LETTER COMPANY CODE'],        
-            // $foxproRes = FoxproApi::call([
-            //     'action' => 'GETSLMNINFO',
-            //     'params' => ['',$companyCode],
-            //     'keep_session' => false,
-            // ]);          
+            $salesrepInfo = FoxproApi::call([
+                'action' => 'GETSLMNINFO',
+                'params' => ['',''],
+                'keep_session' => false,
+            ]);          
 
-            return response(['response' => $testingService->getUniqueInstanceId(), 'foxproRes' => $foxproRes])->header('Content-Type', 'application/json');
-        } 
-        abort(403);                                 
+            return response(['response' => $testingService->getUniqueInstanceId(), 'ordersByCompany' => $foxproRes, 'ordersByUser' => $orders, 'salesReps' => $salesrepInfo ])->header('Content-Type', 'application/json');
+        }
+        abort(403);                        
     }
 
 
