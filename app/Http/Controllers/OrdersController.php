@@ -28,7 +28,7 @@ class OrdersController extends Controller
             'params' => [$username],
             'keep_session' => false,
         ]);
-
+        info($orders);
         $commissionInfo = FoxproApi::call([
             'action' => 'GETCOMMINFO',
             'params' => [$username],
@@ -37,8 +37,16 @@ class OrdersController extends Controller
 
         // assings an empty array so template can display proper message.
         if ($orders['status'] === 500) $orders['rows'] = [];
+        info($orders);
+        info($commissionInfo);
 
-        if (array_key_exists('Result', $commissionInfo) && $commissionInfo['Result'] === 'there are no sales orders for this wholesaler') {
+        if ($commissionInfo['status'] === 500 || array_key_exists('Result', $commissionInfo) && $commissionInfo['Result'] === 'there are no sales orders for this wholesaler') {
+            logFoxproError(
+                'GETCOMMINFO', 
+                'OrdersController->all', 
+                [$username], 
+                $commissionInfo
+            );
             $commissionInfo['rows'] = [];
         }
 
@@ -736,42 +744,61 @@ class OrdersController extends Controller
             // return Inertia::render('Test',['response' => $response]);
             // return response(['response' => $response])->header('Content-Type', 'application/json');
 
+            // is returning the pdf order? PENDING
             // $foxproRes = FoxproApi::call([
             //     'action' => 'PrintSo',
             //     'params' => ['HAR000001'],
             //     'keep_session' => false,
             // ]);                        
-
-            //---- Get company code.
+            
             $adminUsername = auth()->user()->username;
             $getCompanyInforesponse = FoxproApi::call([
                 'action' => 'GETUSERINFO',
-                'params' => [$adminUsername],
+                'params' => [env('TEST_USERNAME')],
                 'keep_session' => false,
-            ]);    
+            ]);  
             
+            // is it returning the proper figures for each sales rep? TESTING
+            $commissionInfo = FoxproApi::call([
+                'action' => 'GETCOMMINFO',
+                'params' => [env('TEST_USERNAME')],
+                'keep_session' => false,
+            ]);
+            
+            // is it returning all the orders of the company? YES!!
             $foxproRes = FoxproApi::call([
                 'action' => 'getordersbycompany',
-                'params' => [$adminUsername],
+                'params' => [env('TEST_USERNAME')],
                 'keep_session' => false,
             ]);
             
+            // is it returning ONLY USER created orders? YES!!
             $orders = FoxproApi::call([
                 'action' => 'getordersbyuser',
-                'params' => [$adminUsername],
+                'params' => [env('TEST_USERNAME')],
                 'keep_session' => false,
-            ]);
-
-            $companyCode = $getCompanyInforesponse['rows'][0]['wholesaler'];
-
+            ]);            
+            
+            // is it retuning all the sales rep for that company? TESTING
+            // is it returning the username along with other information for each sales rep? YES!!            
             // 'params' => ['TWO-LETTER SALESMAN CODE','THREE-LETTER COMPANY CODE'],        
+            $companyCode = $getCompanyInforesponse['rows'][0]['wholesaler'];
             $salesrepInfo = FoxproApi::call([
                 'action' => 'GETSLMNINFO',
-                'params' => ['',''],
+                'params' => ['',$companyCode],
                 'keep_session' => false,
             ]);          
 
-            return response(['response' => $testingService->getUniqueInstanceId(), 'ordersByCompany' => $foxproRes, 'ordersByUser' => $orders, 'salesReps' => $salesrepInfo ])->header('Content-Type', 'application/json');
+            return response(
+                [
+                    'response' => $testingService->getUniqueInstanceId(), 
+                    'userInfo' => $getCompanyInforesponse,
+                    'userCommisionInfo' => $commissionInfo,
+                    'ordersByUser' => $orders, 
+                    'ordersByCompany' => $foxproRes, 
+                    'companySalesReps' => $salesrepInfo 
+                ]
+            )->header('Content-Type', 'application/json');
         }
         abort(403);                        
     }
