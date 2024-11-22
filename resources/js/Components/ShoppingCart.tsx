@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+
+// THIS WILL CHANGE TO "ShoppingCartComposition"
 import { ShoppingCartProduct as shoppingCartProductModel } from "../Models/ExpressProgramModels";
+
 import axios from "axios";
 import ShoppingCartProductCard from "./ShoppingCartProductCard";
 import classes from "../../css/shoppingCart.module.css";
@@ -16,7 +19,9 @@ function ShoppingCart({
     onShoppingSize: handleShoppingCartSize,
     onClose: handleCloseShoppingCartModal,
 }: ShoppingCartProps) {
+    // THIS WILL CHANGE TO "crrShoppingCartCompositions: ShoppingCartComposition"
     const [crrShoppingCartProducts, setShoppingCartProducts] = useState<
+        // THIS WILL CHANGE TO "ShoppingCartComposition[]"
         shoppingCartProductModel[]
     >([]);
 
@@ -56,21 +61,46 @@ function ShoppingCart({
      *
      */
     const handleQtyUpdated = async (
-        product: shoppingCartProductModel,
-        productIndex: number,
+        product: shoppingCartProductModel, // THIS WILL CHANGE TO "composition: ShoppingCartComposition"
+        productIndex: number, // THIS WILL CHANGE TO "compositionIndex: number"
+        //"product: string" -> EXTRA PARAM FOR THE ACTUAL PRODUCT INSIDE THE COMPOSTION
+        //"otherProductIndex: number | null" -> EXTRA PARAM TO LOOK FOR PRODUCT INSIDE THE 'otherProducts' OBJ.
+        //"sideUnitIndex: number | null" -> EXTRA PARAM TO LOOK FOR SIDE UNIT INSIDE ARRAY.
         qty: number | typeof NaN,
         type: "decrement" | "increment" | "changeValue"
     ) => {
+        // THIS WILL CHANGE TO "updatedShoppingCartCompositions"  and  "crrShoppingCartCompositions"
         const updatedProducts = structuredClone(crrShoppingCartProducts);
 
+        // THIS WILL CHANGE TO "updatedShoppingCartCompositions"
         for (let i = 0; i < updatedProducts.length; i++) {
+            // THIS WILL CHANGE TO "crrComposition" and "updatedShoppingCartCompositions"
             const crrProduct = updatedProducts[i];
 
+            // THIS MAKES SURE TO SEARCH FOR THE CORRECT COMPOSITION INSIDE THE SHOPPING CART.
             if (
                 crrProduct.description !== product.description ||
                 productIndex !== i
             )
                 continue;
+
+            // THIS LOGIC MUST BE CHANGE, BECAUSE NOW WE NEED TO UPDATE THE QTY FOR THE CORRESPONDING
+            // PRODUCT INSIDE THE COMPOSITION.
+
+            // THIS BECOMES MORE COMPLEX WHEN PRODUCTS INSIDE THE "otherProducts" OBJECT OR SIDE UNIT
+            // ARRAY ARE UPDATED.
+
+            // I WILL USE THE EXTRA PARAMS MENTIONS ABOVE TO WRITE CONDITIONS THAT WILL CHECK:
+            /**
+             * if (otherProductIndex) -> crrComposition.otherProducts[product][otherProductIndex].quantity = qty;
+             *                           crrComposition.otherProducts[product][otherProductIndex].total = ?
+             *
+             * else if (sideUnitIndex) -> crrComposition[product][sideUnitIndex].quantity = qty;
+             *                            crrComposition[product][sideUnitIndex].total = ?;
+             *
+             * else crrComposition[product].quantity = qty;
+             *      crrComposition[product].total = ?;
+             */
 
             switch (type) {
                 case "changeValue":

@@ -25,28 +25,69 @@ export type ModelObj = {
     url: string;
 };
 
-export type OtherItems = {
-    wallUnit: ProductInventory[];
-    tallUnit: ProductInventory[];
-    accessory: ProductInventory[];
-    mirror: ProductInventory[];
-    drawerBase?: ProductInventory[];
-};
+// export type OtherItems = {
+//     wallUnit: ProductInventory[];
+//     tallUnit: ProductInventory[];
+//     accessory: ProductInventory[];
+//     mirror: ProductInventory[];
+//     drawerBase?: ProductInventory[];
+// };
 
 export type ShoppingCartProduct = {
     composition: Composition;
     configuration: any;
     description: string;
     label: string;
-    vanity: ProductInventory | null;
-    sideUnits: ProductInventory[];
-    washbasin: ProductInventory | null;
-    otherProducts: OtherItems;
+    vanity: ProductInventory | null; // CHANGED
+    sideUnits: ProductInventory[]; // CHANGED
+    washbasin: ProductInventory | null; // CHANGED
+    otherProducts: OtherItems; // CHANGED
     isDoubleSink: boolean;
     isDoubleSideunit: boolean;
-    quantity: number;
+    quantity: number; // REMOVED
     grandTotal: number;
 };
+
+//===============================================
+
+export type ShoppingCartCompositionProduct = {
+    type: string;
+    productObj: ProductInventory | null;
+    quantity: number;
+    unitPrice: number;
+    total: number;
+};
+export type OtherItems = {
+    wallUnit: ShoppingCartCompositionProduct[];
+    tallUnit: ShoppingCartCompositionProduct[];
+    accessory: ShoppingCartCompositionProduct[];
+    mirror: ShoppingCartCompositionProduct[];
+    drawerBase?: ShoppingCartCompositionProduct[];
+};
+export const OtherItemsLoopUp = {
+    "WALL UNIT": "wallUnit",
+    "TALL UNIT/LINEN CLOSET": "tallUnit",
+    ACCESSORY: "accessory",
+    MIRROR: "mirror",
+    "DRAWER/VANITY": "drawerBase",
+    TOP: "top",
+    "VESSEL SINK": "vesselSink",
+};
+export type ShoppingCartComposition = {
+    composition: Composition;
+    configuration: any;
+    description: string;
+    label: string;
+    vanity?: ShoppingCartCompositionProduct | undefined | null;
+    sideUnits: ShoppingCartCompositionProduct[];
+    washbasin?: ShoppingCartCompositionProduct | undefined | null;
+    otherProducts: OtherItems;
+    isDoubleSink: boolean;
+    isDoubleSideUnit: boolean;
+    grandTotal: number;
+};
+
+//===============================================
 
 export type OtherProductsAvailable = {
     accessories: ProductInventory[];

@@ -11,7 +11,10 @@ import KoraConfigurator from "../../Components/ExpressProgramConfigurator/KoraCo
 import KoraXlConfigurator from "../../Components/ExpressProgramConfigurator/KoraXlConfigurator";
 import MirrorsOnlyConfigurator from "../../Components/ExpressProgramConfigurator/MirrorsOnlyConfigurator";
 import OtherModelsConfigurator from "../../Components/ExpressProgramConfigurator/OtherModelsConfigurator";
-import { ShoppingCartProduct as shoppingCartProductModel } from "../../Models/ExpressProgramModels";
+import {
+    ShoppingCartProduct as shoppingCartProductModel,
+    ShoppingCartComposition,
+} from "../../Models/ExpressProgramModels";
 import axios from "axios";
 import { router } from "@inertiajs/react";
 import { ToastContainer, toast } from "react-toastify";
@@ -25,13 +28,13 @@ function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
     const [shoppingCartSize, setShoppingCartSize] = useState(0);
 
     const handleShoppingCartProduct = async (
-        shoppingCartProduct: shoppingCartProductModel
+        shoppingCartComposition: ShoppingCartComposition
     ) => {
         if (!auth.user) {
             // saved intended products on local storage.
             localStorage.setItem(
                 "shoppingCartProduct",
-                JSON.stringify(shoppingCartProduct)
+                JSON.stringify(shoppingCartComposition)
             );
 
             // redirect user to login page.
@@ -43,10 +46,10 @@ function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
                     "/express-program/shopping-cart/products"
                 );
 
-                const shoppingCartProductsServer: shoppingCartProductModel[] =
+                const shoppingCartProductsServer: ShoppingCartComposition[] =
                     response.data.shoppingCartProducts;
 
-                shoppingCartProductsServer.push(shoppingCartProduct);
+                shoppingCartProductsServer.push(shoppingCartComposition);
 
                 await axios.post(
                     "/express-program/shopping-cart/update",

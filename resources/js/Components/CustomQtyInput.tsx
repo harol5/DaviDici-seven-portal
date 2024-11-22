@@ -3,7 +3,7 @@ import classes from "../../css/CustomQtyInput.module.css";
 import { useEffect, useState } from "react";
 
 interface CustomQtyInputProps {
-    product: ShoppingCartProduct;
+    product: ShoppingCartProduct; // I MIGHT NEED TO CHAGE THIS OBJECT FOR ProductShoppingCart
     productIndex: number;
     onQtyUpdated: (
         product: ShoppingCartProduct,

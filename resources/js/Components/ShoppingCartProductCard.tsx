@@ -42,7 +42,7 @@ function ShoppingCartProductCard({
                         product.composition.size ?? ""
                     } ${product.composition.sinkPosition ?? ""} ${
                         product.washbasin
-                            ? "SINK " + product.washbasin.model
+                            ? "SINK " + product.washbasin.model // CHANGE
                             : "NOT SINK"
                     }`}</h1>
                 </div>
@@ -53,7 +53,8 @@ function ShoppingCartProductCard({
                     </span>
                     <span>
                         <h2>VANITY:</h2>
-                        <p>{product.vanity?.descw ?? "NONE"}</p>
+                        <p>{product.vanity?.descw ?? "NONE"}</p> // CHANGE
+                        VANITY
                         <p>
                             $
                             {product.vanity?.sprice
@@ -65,7 +66,8 @@ function ShoppingCartProductCard({
                     </span>
                     <span>
                         <h2>WASHBASIN:</h2>
-                        <p>{product.washbasin?.descw ?? "NONE"}</p>
+                        <p>{product.washbasin?.descw ?? "NONE"}</p> // CHANGE
+                        WASHBASIN
                         <p>
                             $
                             {product.washbasin?.sprice
@@ -79,6 +81,7 @@ function ShoppingCartProductCard({
                         <h2>SIDE UNITS:</h2>
                         <div className={classes.sideUnitsWrapper}>
                             {product.sideUnits.map(
+                                // CHANGE SIDE UNIT
                                 (sideUnit: ProductInventory, index: number) => (
                                     <div key={index}>
                                         <p>{sideUnit.descw}</p>
@@ -96,7 +99,7 @@ function ShoppingCartProductCard({
                             {product.sideUnits.length === 0 && "NONE"}
                         </div>
                     </span>
-                    <OtherItems product={product} />
+                    <OtherItems product={product} /> // CHANGE
                     <span>
                         <h2>TOTAL:</h2>
                         <p>{getGrandTotal()}</p>
