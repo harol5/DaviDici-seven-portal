@@ -19,6 +19,8 @@ class ExpressProgramController extends Controller
     public function all(Request $request){
         $message = $request->session()->get('message');
         $input = $request->all();
+
+        /** @var mixed $listingType */
         $listingType;
 
         array_key_exists('listing-type',$input) ? $listingType = $input['listing-type'] : $listingType = 'fullInventory';                
@@ -68,31 +70,50 @@ class ExpressProgramController extends Controller
     }
 
     public function getShoppingCart(Request $request) {
+        
+        /** @var mixed $shoppingCartProducts */
         $shoppingCartProducts;
+
+        /** @var int $statusCode */
+        $statusCode;
+
         if($request->user()) {            
+            // can this trow an error?
             $shoppingCart = DB::table('shopping_cart')->where('user_id', $request->user()->id)->first();
-            $shoppingCartProducts = $shoppingCart ? json_decode($shoppingCart->products) : [];            
+
+            $shoppingCartProducts = $shoppingCart ? json_decode($shoppingCart->products) : [];
+            $statusCode = 201;    
         }else {
-            $shoppingCartProducts = [];
-            // return redirect("/")->with('location','express-program');
+            $shoppingCartProducts = "missing user";            
+            $statusCode = 401;
         }        
         
-        return response(['shoppingCartProducts' => $shoppingCartProducts, 'status' => 201])->header('Content-Type', 'application/json');
+        return response(['shoppingCartProducts' => $shoppingCartProducts], $statusCode)
+        ->header('Content-Type', 'application/json');
     }
 
-    public function updateShoppingCart(Request $request) {
+    public function updateShoppingCart(Request $request) {        
+        /** @var string $message*/
+        $message;
 
-        if(!$request->user()) {
-            return response(['message' => 'no user', 'status' => 500])->header('Content-Type', 'application/json');
-        }
+        /** @var int $statusCode*/
+        $statusCode;
 
-        DB::table('shopping_cart')
+        if($request->user()) {            
+            DB::table('shopping_cart')
             ->updateOrInsert(
                 ['user_id' => $request->user()->id],
                 ['products' => $request->getContent()]
-            );
-            
-        return response(['message' => 'shopping cart updated', 'status' => 201])->header('Content-Type', 'application/json');
+            );                                                           
+            $message = 'shopping cart updated';
+            $statusCode = 201;                        
+        }else {
+            $message = 'missing user';
+            $statusCode = 401;                 
+        }            
+
+        return response(['message' => $message, 'status' => $statusCode], $statusCode)
+        ->header('Content-Type', 'application/json');                                                
     }
 
     public function fileForm(){

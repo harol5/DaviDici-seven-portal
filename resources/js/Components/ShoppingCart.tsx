@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 
 // THIS WILL CHANGE TO "ShoppingCartComposition"
-import { ShoppingCartProduct as shoppingCartProductModel } from "../Models/ExpressProgramModels";
+import { ShoppingCartComposition, ShoppingCartCompositionProduct } from "../Models/ExpressProgramModels";
 
 import axios from "axios";
-import ShoppingCartProductCard from "./ShoppingCartProductCard";
+import ShoppingCartCompositionCard from "./ShoppingCartCompositionCard";
 import classes from "../../css/shoppingCart.module.css";
 import { router } from "@inertiajs/react";
 import USDollar from "../utils/currentFormatter";
 import { ProductInventory } from "../Models/Product";
+import { getShoppingCartCompositions } from "../utils/shoppingCartUtils";
 
 interface ShoppingCartProps {
     onShoppingSize: (numOfProducts: number) => void;
@@ -18,18 +19,16 @@ interface ShoppingCartProps {
 function ShoppingCart({
     onShoppingSize: handleShoppingCartSize,
     onClose: handleCloseShoppingCartModal,
-}: ShoppingCartProps) {
-    // THIS WILL CHANGE TO "crrShoppingCartCompositions: ShoppingCartComposition"
-    const [crrShoppingCartProducts, setShoppingCartProducts] = useState<
-        // THIS WILL CHANGE TO "ShoppingCartComposition[]"
-        shoppingCartProductModel[]
+}: ShoppingCartProps) {    
+    const [crrShoppingCartCompositions, setShoppingCartCompositions] = useState<        
+        ShoppingCartComposition[]
     >([]);
 
     const handleRemoveProduct = async (
-        product: shoppingCartProductModel,
+        product: ShoppingCartComposition,
         productIndex: number
     ) => {
-        const filteredProducts = crrShoppingCartProducts.filter(
+        const filteredProducts = crrShoppingCartCompositions.filter(
             (crrProduct, index) => {
                 return (
                     crrProduct.description !== product.description ||
@@ -46,7 +45,7 @@ function ShoppingCart({
 
             if (response.data.message === "shopping cart updated") {
                 handleShoppingCartSize(filteredProducts.length);
-                setShoppingCartProducts(filteredProducts);
+                setShoppingCartCompositions(filteredProducts);
             }
         } catch (err) {
             console.log(err);
@@ -54,35 +53,41 @@ function ShoppingCart({
     };
 
     /**
-     * TODO:
+     * TODO: DONE!!
      *
      * 1. must pass the exact item (vanity,washbasin,tall unit, etc...) inside the "product" object needs to be updated.
      * 2. i might need to chage the shopping cart product object so it can reflect the qty and total for each item.
      *
      */
     const handleQtyUpdated = async (
-        product: shoppingCartProductModel, // THIS WILL CHANGE TO "composition: ShoppingCartComposition"
-        productIndex: number, // THIS WILL CHANGE TO "compositionIndex: number"
-        //"product: string" -> EXTRA PARAM FOR THE ACTUAL PRODUCT INSIDE THE COMPOSTION
-        //"otherProductIndex: number | null" -> EXTRA PARAM TO LOOK FOR PRODUCT INSIDE THE 'otherProducts' OBJ.
-        //"sideUnitIndex: number | null" -> EXTRA PARAM TO LOOK FOR SIDE UNIT INSIDE ARRAY.
+        composition: ShoppingCartComposition, // THIS WILL CHANGE TO "composition: ShoppingCartComposition"
+        compositionIndex: number, // THIS WILL CHANGE TO "compositionIndex: number"
+        product: ShoppingCartCompositionProduct,//"product: string" -> EXTRA PARAM FOR THE ACTUAL PRODUCT INSIDE THE COMPOSTION
+        otherProductIndex: number | null, //"otherProductIndex: number | null" -> EXTRA PARAM TO LOOK FOR PRODUCT INSIDE THE 'otherProducts' OBJ.
+        sideUnitIndex: number | null,//"sideUnitIndex: number | null" -> EXTRA PARAM TO LOOK FOR SIDE UNIT INSIDE ARRAY.
         qty: number | typeof NaN,
         type: "decrement" | "increment" | "changeValue"
-    ) => {
-        // THIS WILL CHANGE TO "updatedShoppingCartCompositions"  and  "crrShoppingCartCompositions"
-        const updatedProducts = structuredClone(crrShoppingCartProducts);
-
-        // THIS WILL CHANGE TO "updatedShoppingCartCompositions"
-        for (let i = 0; i < updatedProducts.length; i++) {
-            // THIS WILL CHANGE TO "crrComposition" and "updatedShoppingCartCompositions"
-            const crrProduct = updatedProducts[i];
+    ) => {                
+        const updatedShoppingCartCompositions = structuredClone(crrShoppingCartCompositions);
+        
+        for (let i = 0; i < updatedShoppingCartCompositions.length; i++) {            
+            const crrComposition = updatedShoppingCartCompositions[i];
 
             // THIS MAKES SURE TO SEARCH FOR THE CORRECT COMPOSITION INSIDE THE SHOPPING CART.
             if (
-                crrProduct.description !== product.description ||
-                productIndex !== i
+                crrComposition.description !== composition.description ||
+                compositionIndex !== i
             )
                 continue;
+
+            console.log("========= handleQtyUpdated ===========");
+            console.log("composition to be update:",crrComposition);
+            console.log("compositionIndex:",compositionIndex)
+            console.log("product:",product)
+            console.log("otherProductIndex:",otherProductIndex)
+            console.log("sideUnitIndex:",sideUnitIndex)
+            console.log("qty:",qty)
+            console.log("type:",type)
 
             // THIS LOGIC MUST BE CHANGE, BECAUSE NOW WE NEED TO UPDATE THE QTY FOR THE CORRESPONDING
             // PRODUCT INSIDE THE COMPOSITION.
@@ -102,32 +107,52 @@ function ShoppingCart({
              *      crrComposition[product].total = ?;
              */
 
+            let crrProduct: ShoppingCartCompositionProduct;
+
+            if (otherProductIndex !== null) {
+                // crrProduct = crrComposition.otherProducts[product.type as keyof typeof crrComposition.otherProducts][otherProductIndex];
+                crrProduct = crrComposition.otherProducts[product.type as keyof typeof crrComposition.otherProducts]![otherProductIndex];
+            }else if (sideUnitIndex !== null){
+                crrProduct = crrComposition[product.type as keyof typeof crrComposition][sideUnitIndex]
+            }else {
+                crrProduct = crrComposition[product.type as keyof typeof crrComposition]
+            }
+
+            console.log("product to be updated:",crrProduct);
+
+
+
             switch (type) {
                 case "changeValue":
                     crrProduct.quantity = qty;
+                    crrProduct.total = qty * crrProduct.unitPrice;
                     break;
                 case "decrement":
                     crrProduct.quantity = qty === 1 ? qty : --qty;
+                    crrProduct.total = qty * crrProduct.unitPrice;
                     break;
                 case "increment":
                     crrProduct.quantity = ++qty;
+                    crrProduct.total = qty * crrProduct.unitPrice;
                     break;
                 default:
                     throw new Error("invalid type");
             }
-        }
 
-        setShoppingCartProducts(updatedProducts);
+            console.log("composition updated:",crrComposition);
+            console.log("updatedShoppingCartCompositions:",updatedShoppingCartCompositions);
+            console.log("updated qty global:",qty)
+
+        }        
+
+        setShoppingCartCompositions(updatedShoppingCartCompositions);
         if (qty <= 0 || isNaN(qty)) return;
 
         try {
-            const response = await axios.post(
+            await axios.post(
                 "/express-program/shopping-cart/update",
-                updatedProducts
-            );
-
-            if (response.status !== 200)
-                console.log("could not updated server state");
+                updatedShoppingCartCompositions
+            );            
         } catch (err) {
             console.log(err);
         }
@@ -135,59 +160,60 @@ function ShoppingCart({
 
     const handlePlaceOrder = () => {
         let SKU: string[] = [];
-        crrShoppingCartProducts.forEach((productConfig) => {
-            const skusArr: string[] = [];
-            const doubleItemFinalQty = `--${productConfig.quantity * 2}`;
-            const singleItemFinalQty = `--${productConfig.quantity * 1}`;
 
-            if (productConfig.vanity) {
-                skusArr.push(
-                    `${productConfig.vanity.uscode}!!${
-                        productConfig.composition.model
-                    }${
-                        productConfig.isDoubleSink
-                            ? doubleItemFinalQty
-                            : singleItemFinalQty
-                    }##${productConfig.label}`
-                );
-            }
+        // crrShoppingCartCompositions.forEach((productConfig) => {
+        //     const skusArr: string[] = [];
+        //     const doubleItemFinalQty = `--${productConfig.quantity * 2}`;
+        //     const singleItemFinalQty = `--${productConfig.quantity * 1}`;
 
-            if (productConfig.washbasin) {
-                skusArr.push(
-                    `${productConfig.washbasin.uscode}!!${productConfig.composition.model}${singleItemFinalQty}##${productConfig.label}`
-                );
-            }
+        //     if (productConfig.vanity) {
+        //         skusArr.push(
+        //             `${productConfig.vanity.uscode}!!${
+        //                 productConfig.composition.model
+        //             }${
+        //                 productConfig.isDoubleSink
+        //                     ? doubleItemFinalQty
+        //                     : singleItemFinalQty
+        //             }##${productConfig.label}`
+        //         );
+        //     }
 
-            if (productConfig.sideUnits.length > 0) {
-                productConfig.sideUnits.forEach(
-                    (sideunit: ProductInventory) => {
-                        skusArr.push(
-                            `${sideunit.uscode}!!${
-                                productConfig.composition.model
-                            }${
-                                productConfig.isDoubleSideunit &&
-                                productConfig.composition.model === "OPERA"
-                                    ? doubleItemFinalQty
-                                    : singleItemFinalQty
-                            }##${productConfig.label}`
-                        );
-                    }
-                );
-            }
+        //     if (productConfig.washbasin) {
+        //         skusArr.push(
+        //             `${productConfig.washbasin.uscode}!!${productConfig.composition.model}${singleItemFinalQty}##${productConfig.label}`
+        //         );
+        //     }
 
-            for (const item in productConfig.otherProducts) {
-                const itemProducts = productConfig.otherProducts[
-                    item as keyof typeof productConfig.otherProducts
-                ] as ProductInventory[];
-                itemProducts.forEach((product: ProductInventory) => {
-                    skusArr.push(
-                        `${product.uscode}!!${productConfig.composition.model}${singleItemFinalQty}##${productConfig.label}`
-                    );
-                });
-            }
+        //     if (productConfig.sideUnits.length > 0) {
+        //         productConfig.sideUnits.forEach(
+        //             (sideunit: ProductInventory) => {
+        //                 skusArr.push(
+        //                     `${sideunit.uscode}!!${
+        //                         productConfig.composition.model
+        //                     }${
+        //                         productConfig.isDoubleSideunit &&
+        //                         productConfig.composition.model === "OPERA"
+        //                             ? doubleItemFinalQty
+        //                             : singleItemFinalQty
+        //                     }##${productConfig.label}`
+        //                 );
+        //             }
+        //         );
+        //     }
 
-            SKU.push(skusArr.join("~"));
-        });
+        //     for (const item in productConfig.otherProducts) {
+        //         const itemProducts = productConfig.otherProducts[
+        //             item as keyof typeof productConfig.otherProducts
+        //         ] as ProductInventory[];
+        //         itemProducts.forEach((product: ProductInventory) => {
+        //             skusArr.push(
+        //                 `${product.uscode}!!${productConfig.composition.model}${singleItemFinalQty}##${productConfig.label}`
+        //             );
+        //         });
+        //     }
+
+        //     SKU.push(skusArr.join("~"));
+        // });
 
         router.get("/orders/create-so-num", {
             SKU: SKU.join("~"),
@@ -195,31 +221,30 @@ function ShoppingCart({
         });
     };
 
+    // NEXT!!
     const calGrandTotal = (): number => {
-        return crrShoppingCartProducts.reduce((prev, crr) => {
-            return prev + crr.grandTotal * crr.quantity;
-        }, 0);
+        // return crrShoppingCartCompositions.reduce((prev, crr) => {
+        //     return prev + crr.grandTotal * crr.quantity;
+        // }, 0);
+
+        return 0
     };
 
-    useEffect(() => {
+    // DONE!!
+    useEffect(() => {        
         const getShoppingCartProducts = async () => {
-            try {
-                // GET SHOPPING CART PRODUTS FROM SERVER.
-                const response = await axios.get(
-                    "/express-program/shopping-cart/products"
-                );
-
-                const shoppingCartProductsServer =
-                    response.data.shoppingCartProducts;
-
-                setShoppingCartProducts(shoppingCartProductsServer);
-            } catch (err) {}
+            try {                
+                const {compositions} = await getShoppingCartCompositions();                                                
+                setShoppingCartCompositions(compositions);                               
+            } catch (err) {                
+                console.error(err);
+            }
         };
-        getShoppingCartProducts();
+        getShoppingCartProducts();   
     }, []);
 
     console.log("==== ShoppingCart ====");
-    console.log("shopping cart products:", crrShoppingCartProducts);
+    console.log("shopping cart products:", crrShoppingCartCompositions);
 
     return (
         <section className={classes.shoppingCart}>
@@ -232,7 +257,7 @@ function ShoppingCart({
                     <button
                         className={classes.placeOrderButton}
                         onClick={handlePlaceOrder}
-                        disabled={crrShoppingCartProducts.length === 0}
+                        disabled={crrShoppingCartCompositions.length === 0}
                     >
                         PLACE ORDER
                     </button>
@@ -245,17 +270,17 @@ function ShoppingCart({
                 </button>
             </section>
             <section className={classes.shoppingCartContent}>
-                {crrShoppingCartProducts.map((product, index) => (
-                    <ShoppingCartProductCard
+                {crrShoppingCartCompositions.map((composition, index) => (
+                    <ShoppingCartCompositionCard
                         key={index}
-                        product={product}
-                        productIndex={index}
+                        composition={composition}
+                        compositionIndex={index}
                         onRemoveProduct={handleRemoveProduct}
                         onQtyUpdated={handleQtyUpdated}
                     />
                 ))}
             </section>
-            {crrShoppingCartProducts.length === 0 && (
+            {crrShoppingCartCompositions.length === 0 && (
                 <p>YOUR SHOPPING CART IS EMPTY.</p>
             )}
         </section>

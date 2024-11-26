@@ -1320,7 +1320,7 @@ function NewYorkConfigurator({
         const secondSideUnitSku = isDoubleSideUnit ? getSecondSideUnit() : "";
 
         const shoppingCartObj: ShoppingCartComposition = {
-            composition,
+            info: composition,
             description: composition.name,
             configuration: currentConfiguration,
             label,
@@ -1344,6 +1344,9 @@ function NewYorkConfigurator({
         for (const model in allConfigs) {
             const crrConfig = allConfigs[model as keyof typeof allConfigs];
             for (const product of crrConfig.currentProducts) {
+
+                const finalPrice = product.sprice ? product.sprice : product.msrp;
+
                 const otherProductsItemAsKey = OtherItemsLoopUp[
                     product.item as keyof typeof OtherItemsLoopUp
                 ] as keyof typeof shoppingCartObj.otherProducts;
@@ -1354,8 +1357,8 @@ function NewYorkConfigurator({
                             type: otherProductsItemAsKey,
                             productObj: product,
                             quantity: 1,
-                            unitPrice: product.msrp,
-                            total: product.msrp,
+                            unitPrice: finalPrice,
+                            total: finalPrice,
                         }
                     );
                 }
@@ -1374,12 +1377,13 @@ function NewYorkConfigurator({
                     );
 
                     sideUnitsArr.forEach((sideUnit) => {
+                        const finalPrice = sideUnit.sprice ? sideUnit.sprice : sideUnit.msrp;
                         shoppingCartObj.sideUnits.push({
                             type: "sideUnits",
                             productObj: sideUnit,
                             quantity: 1,
-                            unitPrice: sideUnit.msrp,
-                            total: sideUnit.msrp,
+                            unitPrice: finalPrice,
+                            total: finalPrice,
                         });
                     });
                 }
@@ -1392,10 +1396,10 @@ function NewYorkConfigurator({
                         type: "sideUnits",
                         productObj: product,
                         quantity: isDoubleSideUnit ? 2 : 1,
-                        unitPrice: product.msrp,
+                        unitPrice: finalPrice,
                         total: isDoubleSideUnit
-                            ? product.msrp * 2
-                            : product.msrp,
+                            ? finalPrice * 2
+                            : finalPrice,
                     });
                 }
 
@@ -1404,8 +1408,8 @@ function NewYorkConfigurator({
                         type: "washbasin",
                         productObj: product,
                         quantity: 1,
-                        unitPrice: product.msrp,
-                        total: product.msrp,
+                        unitPrice: finalPrice,
+                        total: finalPrice,
                     };
                 }
 
@@ -1414,8 +1418,8 @@ function NewYorkConfigurator({
                         type: "vanity",
                         productObj: product,
                         quantity: isDoubleSink ? 2 : 1,
-                        unitPrice: product.msrp,
-                        total: isDoubleSink ? product.msrp * 2 : product.msrp,
+                        unitPrice: finalPrice,
+                        total: isDoubleSink ? finalPrice * 2 : finalPrice,
                     };
                 }
             }

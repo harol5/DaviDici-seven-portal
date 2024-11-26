@@ -39,12 +39,7 @@ function ProductsAvailable({ auth, listingType }: ProductsAvailableProps) {
                 .then((res) => res.data.rawProducts),
     });
 
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        if (!rawProducts) return;
-        setIsLoading(false);
-    }, [rawProducts]);
+    const [isLoading, setIsLoading] = useState(true);    
 
     const regularCompositionsListingData =
         useExpressProgramProducts(rawProducts);
@@ -102,16 +97,15 @@ function ProductsAvailable({ auth, listingType }: ProductsAvailableProps) {
         return baseClass;
     };
 
-    const [shoppingCartCount, setShoppingCartCount] = useState(0);
-    const handleShoppingCartCount = (count: number) => {
-        setShoppingCartCount(count);
-    };
+    useEffect(() => {
+        if (!rawProducts) return;
+        setIsLoading(false);
+    }, [rawProducts]);    
 
     return (
         <UserAuthenticatedLayout
             auth={auth}
-            crrPage="express program"
-            shoppingCartSize={shoppingCartCount}
+            crrPage="express program"            
         >
             <div className="main-content-wrapper">
                 {onSaleCompositionsListingData &&
@@ -142,8 +136,7 @@ function ProductsAvailable({ auth, listingType }: ProductsAvailableProps) {
                             <CompositionsListing
                                 data={
                                     regularCompositionsListingData as ExpressProgramData
-                                }
-                                onShoppingCartCount={handleShoppingCartCount}
+                                }                                
                             />
                         )}
 
@@ -151,8 +144,7 @@ function ProductsAvailable({ auth, listingType }: ProductsAvailableProps) {
                             <CompositionsListing
                                 data={
                                     onSaleCompositionsListingData as ExpressProgramData
-                                }
-                                onShoppingCartCount={handleShoppingCartCount}
+                                }                                
                             />
                         )}
                     </>

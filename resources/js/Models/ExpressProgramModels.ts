@@ -52,7 +52,7 @@ export type ShoppingCartProduct = {
 
 export type ShoppingCartCompositionProduct = {
     type: string;
-    productObj: ProductInventory | null;
+    productObj: ProductInventory;
     quantity: number;
     unitPrice: number;
     total: number;
@@ -74,7 +74,7 @@ export const OtherItemsLoopUp = {
     "VESSEL SINK": "vesselSink",
 };
 export type ShoppingCartComposition = {
-    composition: Composition;
+    info: Composition;
     configuration: any;
     description: string;
     label: string;
@@ -86,6 +86,15 @@ export type ShoppingCartComposition = {
     isDoubleSideUnit: boolean;
     grandTotal: number;
 };
+
+
+export class ShoppingCartCustomError extends Error {
+    details;
+    constructor(message:string,field:{}){
+        super(message);
+        this.details = field;
+    }
+}
 
 //===============================================
 

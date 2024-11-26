@@ -5,12 +5,10 @@ import ProductExpressProgramCard from "../../Components/ProductExpressProgramCar
 import Modal from "../../Components/Modal";
 import type { Composition } from "../../Models/Composition";
 import classes from "../../../css/express-program.module.css";
-import axios from "axios";
 import type {
     FinishObj,
     SinkPositionObj,
-    ModelObj,
-    ShoppingCartProduct,
+    ModelObj,    
     ExpressProgramData,
 } from "../../Models/ExpressProgramModels";
 
@@ -22,13 +20,11 @@ interface StatefulFilterObj {
 }
 
 interface CompositionsListingProps {
-    data: ExpressProgramData;
-    onShoppingCartCount: (count: number) => void;
+    data: ExpressProgramData;    
 }
 
 function CompositionsListing({
-    data,
-    onShoppingCartCount: handleShoppingCartCount,
+    data,    
 }: CompositionsListingProps) {
     const {
         initialCompositions,
@@ -218,11 +214,7 @@ function CompositionsListing({
     };
 
     useEffect(() => {
-        const statefulFiltersJSON = localStorage.getItem("statefulFilters");
-        const shoppingCartProductJSON = localStorage.getItem(
-            "shoppingCartProduct"
-        );
-
+        const statefulFiltersJSON = localStorage.getItem("statefulFilters");        
         if (statefulFiltersJSON) {
             const statefulFilters: StatefulFilterObj =
                 JSON.parse(statefulFiltersJSON);
@@ -234,42 +226,7 @@ function CompositionsListing({
                 statefulFilters.crrFilteredModel
             )
                 handleFilter("stateful filters", statefulFilters);
-        }
-
-        if (shoppingCartProductJSON) {
-            const shoppingCartProduct = JSON.parse(shoppingCartProductJSON);
-
-            if (shoppingCartProduct) {
-                const getShoppingCartProducts = async () => {
-                    try {
-                        // GET SHOPPING CART PRODUTS FROM SERVER.
-                        const response = await axios.get(
-                            "/express-program/shopping-cart/products"
-                        );
-
-                        const shoppingCartProductsServer: ShoppingCartProduct[] =
-                            response.data.shoppingCartProducts;
-
-                        shoppingCartProductsServer.push(shoppingCartProduct);
-
-                        await axios.post(
-                            "/express-program/shopping-cart/update",
-                            shoppingCartProductsServer
-                        );
-
-                        localStorage.setItem(
-                            "shoppingCartProduct",
-                            JSON.stringify(null)
-                        );
-
-                        handleShoppingCartCount(
-                            shoppingCartProductsServer.length
-                        );
-                    } catch (err) {}
-                };
-                getShoppingCartProducts();
-            }
-        }
+        }        
     }, []);
 
     return (

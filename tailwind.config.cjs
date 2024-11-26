@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 
 const colors = require("tailwindcss/colors");
+// import colors from 'tatailwindcss/colors';
 export default {
     content: [
         "./resources/**/*.blade.php",

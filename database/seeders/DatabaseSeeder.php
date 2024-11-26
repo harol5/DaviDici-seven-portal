@@ -31,5 +31,15 @@ class DatabaseSeeder extends Seeder
             'role' => 3478,
             'password' => Hash::make(env('FOXPRO_PWD')),
         ]);
+
+        DB::table('users')->insert([
+            'first_name' => 'john',
+            'last_name' => 'doe',
+            'phone' => 1234567890,
+            'email' => 'hrcode95@gmail.com',
+            'username' => 'hrcode95%40gmail.com',
+            'role' => 1950,
+            'password' => Hash::make(env('FOXPRO_PWD')),
+        ]);
     }
 }
