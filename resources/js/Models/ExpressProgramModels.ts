@@ -25,30 +25,6 @@ export type ModelObj = {
     url: string;
 };
 
-// export type OtherItems = {
-//     wallUnit: ProductInventory[];
-//     tallUnit: ProductInventory[];
-//     accessory: ProductInventory[];
-//     mirror: ProductInventory[];
-//     drawerBase?: ProductInventory[];
-// };
-
-export type ShoppingCartProduct = {
-    composition: Composition;
-    configuration: any;
-    description: string;
-    label: string;
-    vanity: ProductInventory | null; // CHANGED
-    sideUnits: ProductInventory[]; // CHANGED
-    washbasin: ProductInventory | null; // CHANGED
-    otherProducts: OtherItems; // CHANGED
-    isDoubleSink: boolean;
-    isDoubleSideunit: boolean;
-    quantity: number; // REMOVED
-    grandTotal: number;
-};
-
-//===============================================
 
 export type ShoppingCartCompositionProduct = {
     type: string;
@@ -77,6 +53,7 @@ export type ShoppingCartComposition = {
     info: Composition;
     configuration: any;
     description: string;
+    images: string[] | null;
     label: string;
     vanity?: ShoppingCartCompositionProduct | undefined | null;
     sideUnits: ShoppingCartCompositionProduct[];
@@ -96,7 +73,6 @@ export class ShoppingCartCustomError extends Error {
     }
 }
 
-//===============================================
 
 export type OtherProductsAvailable = {
     accessories: ProductInventory[];

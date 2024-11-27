@@ -1,10 +1,10 @@
 import classes from "../../css/express-program.module.css";
-import type { sinkPosition, model } from "../Models/ExpressProgramModels";
+import type { SinkPositionObj, ModelObj } from "../Models/ExpressProgramModels";
 
 interface FilterProps {
     filterTitle: string;
     contentType: "sizes" | "sink position" | "models";
-    values: string[] | sinkPosition[];
+    values: string[] | SinkPositionObj[];
     crrValueSelected: string;
     onFilter: (filter: string, value: string) => void;
 }
@@ -22,7 +22,7 @@ function Filter({
                 <h1>{filterTitle}</h1>
                 {crrValueSelected && (
                     <button onClick={() => handleFilter(contentType, "")}>
-                        reset
+                        Reset
                     </button>
                 )}
             </div>
@@ -51,7 +51,7 @@ function Filter({
             {contentType === "sink position" && (
                 <div className={classes.filterWrapper}>
                     {values.map((value, index) => {
-                        const sinkPosition = value as sinkPosition;
+                        const sinkPosition = value as SinkPositionObj;
                         return (
                             <div
                                 key={index}
@@ -83,7 +83,7 @@ function Filter({
             {contentType === "models" && (
                 <div className={classes.filterWrapper}>
                     {values.map((value, index) => {
-                        const model = value as model;
+                        const model = value as ModelObj;
                         return (
                             <div
                                 key={index}

@@ -59,10 +59,7 @@ function UserAuthenticatedLayout({
     const handleShoppingCartSize = (numOfProducts: number) => {
         setCounter(numOfProducts);
     };
-    useEffect(() => {
-        console.log("=== auth useEffect ran ====");
-        console.log("counter:",counter);        
-
+    useEffect(() => {        
         const shoppingCartCompositionJSON = localStorage.getItem(
             "shoppingCartComposition"
         );
@@ -86,8 +83,7 @@ function UserAuthenticatedLayout({
             };         
             updateShoppingCart();
         }else {
-            // else -> update counter.
-            console.log("shopping cart composition counter");
+            // else -> update counter.            
             const getShoppingCartInfo = async () => {
                 try {                
                     const {compositions} = await getShoppingCartCompositions();                                

@@ -28,10 +28,7 @@ function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
 
     const handleShoppingCartProduct = async (
         shoppingCartComposition: ShoppingCartComposition
-    ) => {
-
-        console.log("=== handleShoppingCartProduct ===");
-
+    ) => {        
         try {
             const {compositions} = await updateShoppingCartCompositions(shoppingCartComposition);
             toast.success("Added to the cart!!");

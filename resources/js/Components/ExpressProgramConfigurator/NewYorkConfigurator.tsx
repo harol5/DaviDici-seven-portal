@@ -2,11 +2,9 @@ import { Composition } from "../../Models/Composition";
 import classes from "../../../css/product-configurator.module.css";
 import { useMemo, useReducer, useState } from "react";
 import {
-    type Option,
-    type ShoppingCartProduct as shoppingCartProductModel,
+    type Option,    
     type ShoppingCartComposition,
-    type ShoppingCartCompositionProduct,
-    OtherItemsLoopUp,
+    type ShoppingCartCompositionProduct,    
     OtherItems,
 } from "../../Models/ExpressProgramModels";
 import Options from "./Options";
@@ -38,6 +36,7 @@ import useAccordionState from "../../Hooks/useAccordionState";
 import ConfigurationBreakdown from "./ConfigurationBreakdown";
 import useImagesComposition from "../../Hooks/useImagesComposition";
 import ImageSlider from "./ImageSlider";
+import { generateShoppingCartCompositionProductObjs } from "../../utils/shoppingCartUtils";
 
 /**
  * TODO;
@@ -1317,13 +1316,19 @@ function NewYorkConfigurator({
             return `${Object.values(rightSideUnitCodes!).join("-")}`;
         };
 
-        const secondSideUnitSku = isDoubleSideUnit ? getSecondSideUnit() : "";
+        const secondSideUnitSku = isDoubleSideUnit ? getSecondSideUnit() : "";        
+        const sideUnitsArr = composition.sideUnits.filter(
+            (sideUnit) =>
+                sideUnit.uscode === sideUnitSku ||
+                sideUnit.uscode === secondSideUnitSku
+        );
 
         const shoppingCartObj: ShoppingCartComposition = {
             info: composition,
             description: composition.name,
             configuration: currentConfiguration,
             label,
+            images: imageUrls,
             sideUnits: [] as ShoppingCartCompositionProduct[],
             otherProducts: {
                 wallUnit: [] as ShoppingCartCompositionProduct[],
@@ -1341,186 +1346,15 @@ function NewYorkConfigurator({
             mirrorConfig: currentMirrorsConfiguration,
         };
 
-        for (const model in allConfigs) {
-            const crrConfig = allConfigs[model as keyof typeof allConfigs];
-            for (const product of crrConfig.currentProducts) {
-
-                const finalPrice = product.sprice ? product.sprice : product.msrp;
-
-                const otherProductsItemAsKey = OtherItemsLoopUp[
-                    product.item as keyof typeof OtherItemsLoopUp
-                ] as keyof typeof shoppingCartObj.otherProducts;
-
-                if (otherProductsItemAsKey) {
-                    shoppingCartObj.otherProducts[otherProductsItemAsKey]?.push(
-                        {
-                            type: otherProductsItemAsKey,
-                            productObj: product,
-                            quantity: 1,
-                            unitPrice: finalPrice,
-                            total: finalPrice,
-                        }
-                    );
-                }
-
-                if (
-                    product.item === "SIDE UNIT" &&
-                    product.model === "NEW YORK"
-                ) {
-                    console.log(sideUnitSku);
-                    console.log(secondSideUnitSku);
-
-                    const sideUnitsArr = composition.sideUnits.filter(
-                        (sideUnit) =>
-                            sideUnit.uscode === sideUnitSku ||
-                            sideUnit.uscode === secondSideUnitSku
-                    );
-
-                    sideUnitsArr.forEach((sideUnit) => {
-                        const finalPrice = sideUnit.sprice ? sideUnit.sprice : sideUnit.msrp;
-                        shoppingCartObj.sideUnits.push({
-                            type: "sideUnits",
-                            productObj: sideUnit,
-                            quantity: 1,
-                            unitPrice: finalPrice,
-                            total: finalPrice,
-                        });
-                    });
-                }
-
-                if (
-                    product.item === "SIDE UNIT" &&
-                    product.model !== "NEW YORK"
-                ) {
-                    shoppingCartObj.sideUnits.push({
-                        type: "sideUnits",
-                        productObj: product,
-                        quantity: isDoubleSideUnit ? 2 : 1,
-                        unitPrice: finalPrice,
-                        total: isDoubleSideUnit
-                            ? finalPrice * 2
-                            : finalPrice,
-                    });
-                }
-
-                if (product.item === "WASHBASIN/SINK") {
-                    shoppingCartObj["washbasin"] = {
-                        type: "washbasin",
-                        productObj: product,
-                        quantity: 1,
-                        unitPrice: finalPrice,
-                        total: finalPrice,
-                    };
-                }
-
-                if (product.item === "VANITY") {
-                    shoppingCartObj["vanity"] = {
-                        type: "vanity",
-                        productObj: product,
-                        quantity: isDoubleSink ? 2 : 1,
-                        unitPrice: finalPrice,
-                        total: isDoubleSink ? finalPrice * 2 : finalPrice,
-                    };
-                }
-            }
-        }
-
+        generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,sideUnitsArr,isDoubleSideUnit,isDoubleSink);
+            
         console.log("==== handleAddToCart ====");
         console.log("currentConfiguration:", currentConfiguration);
         console.log(
             "currentMirrorsConfiguration:",
             currentMirrorsConfiguration
         );
-        console.log("shoppingCartObj:", shoppingCartObj);
-
-        // const otherProducts = {
-        //     wallUnit: [] as ProductInventory[],
-        //     tallUnit: [] as ProductInventory[],
-        //     accessory: [] as ProductInventory[],
-        //     mirror: [] as ProductInventory[],
-        // };
-
-        // // -- VANITY
-        // const vanityObj = composition.vanities.find(
-        //     (vanity) => vanity.uscode === vanitySku
-        // );
-        // const vanity: ShoppingCartCompositionProduct | null = vanityObj
-        //     ? {
-        //           type: "vanity",
-        //           productObj: vanityObj,
-        //           quantity: isDoubleSink ? 2 : 1,
-        //           unitPrice: vanityObj.msrp,
-        //           total: isDoubleSink ? vanityObj.msrp * 2 : vanityObj.msrp,
-        //       }
-        //     : null;
-
-        // // -- SIDE UNITS
-        // const sideUnitsArr = composition.sideUnits.filter(
-        //     (sideUnit) =>
-        //         sideUnit.uscode === sideUnitSku ||
-        //         sideUnit.uscode === secondSideUnitSku
-        // );
-        // const sideUnits: ShoppingCartCompositionProduct[] = [];
-        // sideUnitsArr.forEach((sideUnit) => {
-        //     sideUnits.push({
-        //         type: "vanity",
-        //         productObj: sideUnit,
-        //         quantity: 1,
-        //         unitPrice: sideUnit.msrp,
-        //         total: sideUnit.msrp,
-        //     });
-        // });
-
-        // // -- WASHBASIN
-        // const washbasinObj = composition.washbasins.find(
-        //     (washbasin) => washbasin.uscode === washbasinSku
-        // );
-        // const washbasin = washbasinObj
-        //     ? {
-        //           type: "vanity",
-        //           productObj: washbasinObj,
-        //           quantity: 1,
-        //           unitPrice: washbasinObj.msrp,
-        //           total: washbasinObj.msrp,
-        //       }
-        //     : null;
-
-        // // -- WALL UNIT
-        // const wallUnitObj = composition.otherProductsAvailable.wallUnits.find(
-        //     (wallUnit) => wallUnit.uscode === wallUnitSku
-        // );
-        // wallUnitObj && otherProducts.wallUnit.push(wallUnitObj);
-
-        // const tallUnitObj =
-        //     composition.otherProductsAvailable.tallUnitsLinenClosets.find(
-        //         (tallUnit) => tallUnit.uscode === tallUnitSku
-        //     );
-        // tallUnitObj && otherProducts.tallUnit.push(tallUnitObj);
-
-        // const accessoryObj =
-        //     composition.otherProductsAvailable.accessories.find(
-        //         (accessory) => accessory.uscode === accessorySku
-        //     );
-        // accessoryObj && otherProducts.accessory.push(accessoryObj);
-
-        // getMirrorProductObj(
-        //     composition.otherProductsAvailable.mirrors,
-        //     otherProducts
-        // );
-
-        // const shoppingCartObj: ShoppingCartComposition = {
-        //     composition: composition,
-        //     description: composition.name,
-        //     configuration: currentConfiguration,
-        //     label,
-        //     vanity,
-        //     sideUnits,
-        //     washbasin,
-        //     otherProducts,
-        //     isDoubleSink,
-        //     isDoubleSideunit: isDoubleSideUnit,
-        //     grandTotal: grandTotal,
-        // };
+        console.log("shoppingCartObj:", shoppingCartObj);        
 
         onAddToCart(shoppingCartObj);
     };

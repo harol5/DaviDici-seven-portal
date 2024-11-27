@@ -3,7 +3,9 @@ import classes from "../../../css/product-configurator.module.css";
 import { useMemo, useReducer, useState } from "react";
 import type {
     Option,
-    ShoppingCartProduct as shoppingCartProductModel,
+    OtherItems,
+    ShoppingCartComposition,
+    ShoppingCartCompositionProduct,    
 } from "../../Models/ExpressProgramModels";
 import Options from "./Options";
 import ConfigurationName from "./ConfigurationName";
@@ -32,10 +34,11 @@ import { ItemFoxPro, Model } from "../../Models/ModelConfigTypes";
 import MirrorConfigurator from "./MirrorConfigurator";
 import useAccordionState from "../../Hooks/useAccordionState";
 import ConfigurationBreakdown from "./ConfigurationBreakdown";
+import { generateShoppingCartCompositionProductObjs } from "../../utils/shoppingCartUtils";
 
 interface MargiConfiguratorProps {
     composition: Composition;
-    onAddToCart: (shoppingCartProduct: shoppingCartProductModel) => void;
+    onAddToCart: (shoppingCartComposition: ShoppingCartComposition) => void;
 }
 
 function MargiConfigurator({
@@ -1257,57 +1260,35 @@ function MargiConfigurator({
     const handleAddToCart = () => {
         if (!isValidConfiguration()) return;
 
-        const {
-            vanitySku,
-            sideUnitSku,
-            washbasin: washbasinSku,
-            wallUnitSku,
+        const {            
+            label,
+            isDoubleSink,            
         } = currentConfiguration;
 
-        const otherProducts = {
-            wallUnit: [] as ProductInventory[],
-            tallUnit: [] as ProductInventory[],
-            accessory: [] as ProductInventory[],
-            mirror: [] as ProductInventory[],
-        };
-
-        const vanityObj = composition.vanities.find(
-            (vanity) => vanity.uscode === vanitySku
-        );
-
-        const sideUnitsObj = composition.sideUnits.find(
-            (sideUnit) => sideUnit.uscode === sideUnitSku
-        );
-
-        const washbasinObj = composition.washbasins.find(
-            (washbasin) => washbasin.uscode === washbasinSku
-        );
-
-        const wallUnitObj = composition.otherProductsAvailable.wallUnits.find(
-            (wallUnit) => wallUnit.uscode === wallUnitSku
-        );
-        wallUnitObj && otherProducts.wallUnit.push(wallUnitObj);
-
-        getMirrorProductObj(
-            composition.otherProductsAvailable.mirrors,
-            otherProducts
-        );
-
-        const shoppingCartObj: shoppingCartProductModel = {
-            composition: composition,
-            configuration: currentConfiguration,
+        const shoppingCartObj: ShoppingCartComposition = {
+            info: composition,
             description: composition.name,
-            label: currentConfiguration.label,
-            vanity: vanityObj!,
-            sideUnits: sideUnitsObj ? [sideUnitsObj] : [],
-            washbasin: washbasinObj!,
-            otherProducts,
-            isDoubleSink: currentConfiguration.isDoubleSink,
-            isDoubleSideunit: false,
-            quantity: 1,
-            grandTotal: grandTotal,
+            configuration: currentConfiguration,
+            label,
+            images: null,
+            sideUnits: [] as ShoppingCartCompositionProduct[],
+            otherProducts: {
+                wallUnit: [] as ShoppingCartCompositionProduct[],
+                tallUnit: [] as ShoppingCartCompositionProduct[],
+                accessory: [] as ShoppingCartCompositionProduct[],
+                mirror: [] as ShoppingCartCompositionProduct[],
+            } as OtherItems,
+            isDoubleSink,
+            isDoubleSideUnit: false,
+            grandTotal,
         };
 
+        const allConfigs = {
+            modelConfig: currentConfiguration,
+            mirrorConfig: currentMirrorsConfiguration,
+        };
+
+        generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,null,false,isDoubleSink);                   
         onAddToCart(shoppingCartObj);
     };
 
