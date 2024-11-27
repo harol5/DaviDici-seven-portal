@@ -1,3 +1,40 @@
+.inputAndRemoveButtonWrapper {
+    display: flex;    
+    justify-content:space-evenly;
+}
+
+.errorMsgAndQtyInputWrapper {
+
+}
+
+.removeButton {    
+    box-shadow: 0px 0px 1px 1px rgba(0, 0, 0, 0.214);
+    padding: 0.25rem 1.5rem;
+    border-radius: 2px;
+    font-size: 0.8rem;    
+    color: #000000c2;
+
+}
+
+.removeButton:hover {
+    box-shadow: 0px 0px 3px 0px #d1ab68a0;    
+}
+
+.allFiltersWrapper .resetFiltersAndCloseFilterButtonsWrapper button {
+    background-color: #d1aa68;
+    color: white;
+    padding: 0.5em 4em;
+    margin: 1em;
+    border-radius: 5px;
+}
+
+.allFiltersWrapper .resetFiltersAndCloseFilterButtonsWrapper button:hover {
+    background-color: white;
+    color: #d1aa68;   
+    font-weight: 600;     
+}
+
+
 .customQtyInput {
     display: flex;
     justify-content: center;
@@ -21,6 +58,11 @@
     text-align: center;
     width: 2.1em;
     border: 1px solid #d1aa68;
+    cursor: auto;
+}
+
+.inputQty:focus-visible {    
+    outline-width: 0;
 }
 
 .errorMessage {
@@ -29,14 +71,28 @@
     text-align: center;
 }
 
-.inputQty:focus {
-    border-color: #d1aa68;
-}
-
 .increment,
 .decrement {
     padding: 0.05em 0.85em;
     color: #d1aa68;
     border-radius: 2px;
-    box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.299);
+    box-shadow: 0px 0px 1px 1px rgba(0, 0, 0, 0.214);
 }
+
+.increment:hover,
+.decrement:hover {
+    box-shadow: 0px 0px 3px 0px #d1ab68a0;   
+}
+
+/* .removeButton {    
+    box-shadow: 0px 0px 1px 1px rgba(0, 0, 0, 0.214);
+    padding: 0.25rem 1.5rem;
+    border-radius: 2px;
+    font-size: 0.8rem;    
+    color: #000000c2;
+
+}
+
+.removeButton:hover {
+    box-shadow: 0px 0px 3px 0px #d1ab68a0;    
+} */

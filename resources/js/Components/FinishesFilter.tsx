@@ -1,11 +1,11 @@
 import { useMemo } from "react";
 import classes from "../../css/express-program.module.css";
-import type { finish } from "../Models/ExpressProgramModels";
+import type { FinishObj } from "../Models/ExpressProgramModels";
 
 interface FinishesFilterProps {
     filterTitle: string;
     contentType: "finishes" | "sizes";
-    values: finish[];
+    values: FinishObj[];
     crrValueSelected: string;
     onFilter: (filter: string, value: string) => void;
 }
@@ -19,9 +19,9 @@ function FinishesFilter({
 }: FinishesFilterProps) {
     const finishTypes = useMemo(() => {
         const obj = {
-            lacquered: [] as finish[],
-            glass: [] as finish[],
-            melamine: [] as finish[],
+            lacquered: [] as FinishObj[],
+            glass: [] as FinishObj[],
+            melamine: [] as FinishObj[],
         };
 
         values.forEach((value) => {
@@ -45,7 +45,7 @@ function FinishesFilter({
                 <h1>{filterTitle}</h1>
                 {crrValueSelected && (
                     <button onClick={() => handleFilter(contentType, "")}>
-                        reset
+                        Reset
                     </button>
                 )}
             </div>
@@ -55,7 +55,7 @@ function FinishesFilter({
                         <h1 className={classes.finishTypeLabel}>MELAMINE</h1>
                         <div className={classes.finishFilterWrapper}>
                             {finishTypes.melamine.map((value, index) => {
-                                const finishObj = value as finish;
+                                const finishObj = value as FinishObj;
                                 return (
                                     <div
                                         key={index}
@@ -106,7 +106,7 @@ function FinishesFilter({
                         <h1 className={classes.finishTypeLabel}>LACQUERED</h1>
                         <div className={classes.finishFilterWrapper}>
                             {finishTypes.lacquered.map((value, index) => {
-                                const finishObj = value as finish;
+                                const finishObj = value as FinishObj;
                                 return (
                                     <div
                                         key={index}
@@ -157,7 +157,7 @@ function FinishesFilter({
                         <h1 className={classes.finishTypeLabel}>GLASS</h1>
                         <div className={classes.finishFilterWrapper}>
                             {finishTypes.glass.map((value, index) => {
-                                const finishObj = value as finish;
+                                const finishObj = value as FinishObj;
                                 return (
                                     <div
                                         key={index}

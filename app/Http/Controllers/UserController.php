@@ -20,15 +20,17 @@ class UserController extends Controller
 {
     // Show login form ----------
     public function login(Request $request)
-    {
-        $message = $request->session()->get('message');        
-        $location = $request->query('location', '');
-        if ($location) $request->session()->flash('location', $location);
-
-        $username = auth()->user();
-        if ($username) {
+    {        
+        if (auth()->user()) {
             return redirect('/orders');
         }
+
+        $message = $request->session()->get('message');   
+        
+        //set location where user will be redirected after auth if any.
+        $location = $request->query('location', '');
+        if ($location) session()->flash('location', $location);        
+        
 
         return Inertia::render('Users/Login', ['message' => $message]);
     }

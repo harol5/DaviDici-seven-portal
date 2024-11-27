@@ -25,28 +25,54 @@ export type ModelObj = {
     url: string;
 };
 
-export type OtherItems = {
-    wallUnit: ProductInventory[];
-    tallUnit: ProductInventory[];
-    accessory: ProductInventory[];
-    mirror: ProductInventory[];
-    drawerBase?: ProductInventory[];
-};
 
-export type ShoppingCartProduct = {
-    composition: Composition;
+export type ShoppingCartCompositionProduct = {
+    type: string;
+    productObj: ProductInventory;
+    quantity: number;
+    unitPrice: number;
+    total: number;
+};
+export type OtherItems = {
+    wallUnit: ShoppingCartCompositionProduct[];
+    tallUnit: ShoppingCartCompositionProduct[];
+    accessory: ShoppingCartCompositionProduct[];
+    mirror: ShoppingCartCompositionProduct[];
+    drawerBase?: ShoppingCartCompositionProduct[];
+};
+export const OtherItemsLoopUp = {
+    "WALL UNIT": "wallUnit",
+    "TALL UNIT/LINEN CLOSET": "tallUnit",
+    ACCESSORY: "accessory",
+    MIRROR: "mirror",
+    "DRAWER/VANITY": "drawerBase",
+    TOP: "top",
+    "VESSEL SINK": "vesselSink",
+};
+export type ShoppingCartComposition = {
+    info: Composition;
     configuration: any;
     description: string;
+    images: string[] | null;
     label: string;
-    vanity: ProductInventory | null;
-    sideUnits: ProductInventory[];
-    washbasin: ProductInventory | null;
+    vanity?: ShoppingCartCompositionProduct | undefined | null;
+    sideUnits: ShoppingCartCompositionProduct[];
+    washbasin?: ShoppingCartCompositionProduct | undefined | null;
     otherProducts: OtherItems;
     isDoubleSink: boolean;
-    isDoubleSideunit: boolean;
-    quantity: number;
+    isDoubleSideUnit: boolean;
     grandTotal: number;
 };
+
+
+export class ShoppingCartCustomError extends Error {
+    details;
+    constructor(message:string,field:{}){
+        super(message);
+        this.details = field;
+    }
+}
+
 
 export type OtherProductsAvailable = {
     accessories: ProductInventory[];

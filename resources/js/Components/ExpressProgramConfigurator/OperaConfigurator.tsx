@@ -3,7 +3,9 @@ import classes from "../../../css/product-configurator.module.css";
 import { useMemo, useReducer, useState } from "react";
 import type {
     Option,
-    ShoppingCartProduct as shoppingCartProductModel,
+    OtherItems,
+    ShoppingCartComposition,
+    ShoppingCartCompositionProduct,    
 } from "../../Models/ExpressProgramModels";
 import Options from "./Options";
 import ConfigurationName from "./ConfigurationName";
@@ -34,10 +36,11 @@ import useAccordionState from "../../Hooks/useAccordionState";
 import ConfigurationBreakdown from "./ConfigurationBreakdown";
 import useImagesComposition from "../../Hooks/useImagesComposition";
 import ImageSlider from "./ImageSlider";
+import { generateShoppingCartCompositionProductObjs } from "../../utils/shoppingCartUtils";
 
 interface OperaConfiguratorProps {
     composition: Composition;
-    onAddToCart: (shoppingCartProduct: shoppingCartProductModel) => void;
+    onAddToCart: (shoppingCartComposition: ShoppingCartComposition) => void;
 }
 
 function OperaConfigurator({
@@ -1294,77 +1297,37 @@ function OperaConfigurator({
     const handleAddToCart = () => {
         if (!isValidConfiguration()) return;
 
-        const {
-            vanitySku,
-            sideUnitSku,
-            washbasin: washbasinSku,
-            tallUnit: tallUnitSku,
+        const {            
             label,
             isDoubleSink,
-            isDoubleSideUnit,
-            drawerBaseSku,
-            wallUnitSku,
+            isDoubleSideUnit,                    
         } = currentConfiguration;
 
-        const otherProducts = {
-            wallUnit: [] as ProductInventory[],
-            tallUnit: [] as ProductInventory[],
-            accessory: [] as ProductInventory[],
-            drawerBase: [] as ProductInventory[],
-            mirror: [] as ProductInventory[],
-        };
-
-        const vanityObj = composition.vanities.find(
-            (vanity) => vanity.uscode === vanitySku
-        );
-
-        const sideUnitsObj = composition.sideUnits.filter(
-            (sideUnit) => sideUnit.uscode === sideUnitSku
-        );
-
-        const washbasinObj = composition.washbasins.find(
-            (washbasin) => washbasin.uscode === washbasinSku
-        );
-
-        const drawerBaseObj =
-            composition.otherProductsAvailable.drawersVanities.find(
-                (drawerBase) => {
-                    drawerBase.uscode === drawerBaseSku;
-                }
-            );
-        drawerBaseObj && otherProducts.drawerBase.push(drawerBaseObj);
-
-        const wallUnitObj = composition.otherProductsAvailable.wallUnits.find(
-            (wallUnit) => wallUnit.uscode === wallUnitSku
-        );
-        wallUnitObj && otherProducts.wallUnit.push(wallUnitObj);
-
-        const tallUnitObj =
-            composition.otherProductsAvailable.tallUnitsLinenClosets.find(
-                (tallUnit) => tallUnit.uscode === tallUnitSku
-            );
-        tallUnitObj && otherProducts.tallUnit.push(tallUnitObj);
-
-        getMirrorProductObj(
-            composition.otherProductsAvailable.mirrors,
-            otherProducts
-        );
-
-        const shoppingCartObj: shoppingCartProductModel = {
-            composition: composition,
+        const shoppingCartObj: ShoppingCartComposition = {
+            info: composition,
             description: composition.name,
             configuration: currentConfiguration,
-            label: label,
-            vanity: vanityObj!,
-            sideUnits: sideUnitsObj,
-            washbasin: washbasinObj!,
-            otherProducts,
-            isDoubleSink: isDoubleSink,
-            isDoubleSideunit: isDoubleSideUnit,
-            quantity: 1,
-            grandTotal: grandTotal,
+            label,
+            images: imageUrls,
+            sideUnits: [] as ShoppingCartCompositionProduct[],
+            otherProducts: {
+                wallUnit: [] as ShoppingCartCompositionProduct[],
+                tallUnit: [] as ShoppingCartCompositionProduct[],
+                accessory: [] as ShoppingCartCompositionProduct[],
+                drawerBase: [] as ShoppingCartCompositionProduct[],
+                mirror: [] as ShoppingCartCompositionProduct[],
+            } as OtherItems,
+            isDoubleSink,
+            isDoubleSideUnit,
+            grandTotal,
         };
 
+        const allConfigs = {
+            modelConfig: currentConfiguration,
+            mirrorConfig: currentMirrorsConfiguration,
+        };
+        
+        generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,null,isDoubleSideUnit,isDoubleSink);                        
         onAddToCart(shoppingCartObj);
     };
 

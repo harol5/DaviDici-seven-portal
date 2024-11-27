@@ -11,10 +11,12 @@ import KoraConfigurator from "../../Components/ExpressProgramConfigurator/KoraCo
 import KoraXlConfigurator from "../../Components/ExpressProgramConfigurator/KoraXlConfigurator";
 import MirrorsOnlyConfigurator from "../../Components/ExpressProgramConfigurator/MirrorsOnlyConfigurator";
 import OtherModelsConfigurator from "../../Components/ExpressProgramConfigurator/OtherModelsConfigurator";
-import { ShoppingCartProduct as shoppingCartProductModel } from "../../Models/ExpressProgramModels";
-import axios from "axios";
+import {
+    ShoppingCartComposition,
+} from "../../Models/ExpressProgramModels";
 import { router } from "@inertiajs/react";
 import { ToastContainer, toast } from "react-toastify";
+import { updateShoppingCartCompositions } from "../../utils/shoppingCartUtils";
 
 interface ProductConfiguratorProps {
     auth: User;
@@ -25,41 +27,26 @@ function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
     const [shoppingCartSize, setShoppingCartSize] = useState(0);
 
     const handleShoppingCartProduct = async (
-        shoppingCartProduct: shoppingCartProductModel
-    ) => {
-        if (!auth.user) {
-            // saved intended products on local storage.
-            localStorage.setItem(
-                "shoppingCartProduct",
-                JSON.stringify(shoppingCartProduct)
-            );
-
-            // redirect user to login page.
-            router.get("/", { location: "express-program" });
-        } else {
-            try {
-                // GET SHOPPING CART PRODUTS FROM SERVER.
-                const response = await axios.get(
-                    "/express-program/shopping-cart/products"
+        shoppingCartComposition: ShoppingCartComposition
+    ) => {        
+        try {
+            const {compositions} = await updateShoppingCartCompositions(shoppingCartComposition);
+            toast.success("Added to the cart!!");
+            setShoppingCartSize(compositions.length);            
+        }catch(err: any) {            
+            if (err.message === "user no available") {
+                // saved intended products on local storage.
+                localStorage.setItem(
+                    "shoppingCartComposition",
+                    JSON.stringify(shoppingCartComposition)
                 );
-
-                const shoppingCartProductsServer: shoppingCartProductModel[] =
-                    response.data.shoppingCartProducts;
-
-                shoppingCartProductsServer.push(shoppingCartProduct);
-
-                await axios.post(
-                    "/express-program/shopping-cart/update",
-                    shoppingCartProductsServer
-                );
-
-                toast.success("Added to the cart!!");
-                setShoppingCartSize(shoppingCartProductsServer.length);
-            } catch (err) {
-                console.log(err);
-                toast.error("Something went wrong");
-            }
-        }
+                // TODO: add a meesage that let user know they will be redirected.
+                // redirect user to login page.
+                router.get("/", { location: "express-program" });
+            } else {
+                toast.error("Internal error!!. Please comtact support");
+            }                        
+        }                   
     };
 
     useEffect(() => {

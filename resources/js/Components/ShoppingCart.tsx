@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
-import { ShoppingCartProduct as shoppingCartProductModel } from "../Models/ExpressProgramModels";
+import {
+    ShoppingCartComposition,
+    ShoppingCartCompositionProduct,
+} from "../Models/ExpressProgramModels";
 import axios from "axios";
-import ShoppingCartProductCard from "./ShoppingCartProductCard";
+import ShoppingCartCompositionCard from "./ShoppingCartCompositionCard";
 import classes from "../../css/shoppingCart.module.css";
 import { router } from "@inertiajs/react";
 import USDollar from "../utils/currentFormatter";
-import { ProductInventory } from "../Models/Product";
+import { getShoppingCartCompositions } from "../utils/shoppingCartUtils";
+
 
 interface ShoppingCartProps {
     onShoppingSize: (numOfProducts: number) => void;
@@ -16,88 +20,159 @@ function ShoppingCart({
     onShoppingSize: handleShoppingCartSize,
     onClose: handleCloseShoppingCartModal,
 }: ShoppingCartProps) {
-    const [crrShoppingCartProducts, setShoppingCartProducts] = useState<
-        shoppingCartProductModel[]
+    const [crrShoppingCartCompositions, setShoppingCartCompositions] = useState<
+        ShoppingCartComposition[]
     >([]);
 
-    const handleRemoveProduct = async (
-        product: shoppingCartProductModel,
-        productIndex: number
+    const getCompositionAndProduct = (
+        composition: ShoppingCartComposition,
+        compositionIndex: number,
+        product: ShoppingCartCompositionProduct | null,
+        otherProductIndex: number | null,
+        sideUnitIndex: number | null
     ) => {
-        const filteredProducts = crrShoppingCartProducts.filter(
-            (crrProduct, index) => {
-                return (
-                    crrProduct.description !== product.description ||
-                    productIndex !== index
-                );
-            }
+        const updatedShoppingCartCompositions = structuredClone(
+            crrShoppingCartCompositions
         );
+        let crrComposition: ShoppingCartComposition | null = null;
+        let crrProduct: ShoppingCartCompositionProduct | null = null;
+
+        for (let i = 0; i < updatedShoppingCartCompositions.length; i++) {
+            if (
+                updatedShoppingCartCompositions[i].description ===
+                    composition.description &&
+                compositionIndex === i
+            ) {
+                crrComposition = updatedShoppingCartCompositions[i];
+            }
+        }
+
+        if (product && crrComposition) {
+            if (otherProductIndex !== null) {
+                crrProduct =
+                    crrComposition!.otherProducts[
+                        product.type as keyof typeof crrComposition.otherProducts
+                    ]![otherProductIndex];
+            } else if (sideUnitIndex !== null) {
+                crrProduct =
+                    crrComposition![
+                        product.type as keyof typeof crrComposition
+                    ][sideUnitIndex];
+            } else {
+                crrProduct =
+                    crrComposition![
+                        product.type as keyof typeof crrComposition
+                    ];
+            }
+        }
+
+        return {
+            shoppingCartCompositionsCopy: updatedShoppingCartCompositions,
+            crrComposition,
+            crrProduct,
+        };
+    };
+
+    // DONE!!
+    const handleRemoveProduct = async (
+        composition: ShoppingCartComposition,
+        compositionIndex: number,
+        product: ShoppingCartCompositionProduct | null,
+        otherProductIndex: number | null,
+        sideUnitIndex: number | null,
+        removeAction: "composition" | "composition product",
+    ) => {                
+        const { shoppingCartCompositionsCopy, crrComposition, crrProduct } =
+            getCompositionAndProduct(
+                composition,
+                compositionIndex,
+                product,
+                otherProductIndex,
+                sideUnitIndex
+            );
+
+        if (removeAction === "composition") {            
+            shoppingCartCompositionsCopy.splice(compositionIndex,1);
+        }
+
+
+        if (removeAction === "composition product" && crrComposition && crrProduct) {            
+            crrComposition.grandTotal -= crrProduct.total;
+
+            if (otherProductIndex !== null) {                
+                crrComposition.otherProducts[crrProduct.type as keyof typeof crrComposition.otherProducts]!.splice(otherProductIndex,1);
+            }else if (sideUnitIndex !== null){
+                crrComposition[crrProduct.type as keyof typeof crrComposition].splice(sideUnitIndex,1);
+            }else if (crrProduct.type === "washbasin") {
+                crrComposition.washbasin = null;
+            }else {
+                crrComposition.vanity = null;
+            }
+        }                        
 
         try {
             const response = await axios.post(
                 "/express-program/shopping-cart/update",
-                filteredProducts
+                shoppingCartCompositionsCopy
             );
 
             if (response.data.message === "shopping cart updated") {
-                handleShoppingCartSize(filteredProducts.length);
-                setShoppingCartProducts(filteredProducts);
+                handleShoppingCartSize(shoppingCartCompositionsCopy.length);
+                setShoppingCartCompositions(shoppingCartCompositionsCopy);
             }
         } catch (err) {
             console.log(err);
         }
     };
 
-    /**
-     * TODO:
-     *
-     * 1. must pass the exact item (vanity,washbasin,tall unit, etc...) inside the "product" object needs to be updated.
-     * 2. i might need to chage the shopping cart product object so it can reflect the qty and total for each item.
-     *
-     */
+    
     const handleQtyUpdated = async (
-        product: shoppingCartProductModel,
-        productIndex: number,
+        composition: ShoppingCartComposition,
+        compositionIndex: number, 
+        product: ShoppingCartCompositionProduct,
+        otherProductIndex: number | null, 
+        sideUnitIndex: number | null,
         qty: number | typeof NaN,
         type: "decrement" | "increment" | "changeValue"
     ) => {
-        const updatedProducts = structuredClone(crrShoppingCartProducts);
+        const { shoppingCartCompositionsCopy, crrComposition, crrProduct } =
+            getCompositionAndProduct(
+                composition,
+                compositionIndex,
+                product,
+                otherProductIndex,
+                sideUnitIndex
+            );
 
-        for (let i = 0; i < updatedProducts.length; i++) {
-            const crrProduct = updatedProducts[i];
-
-            if (
-                crrProduct.description !== product.description ||
-                productIndex !== i
-            )
-                continue;
-
+        if (crrComposition && crrProduct) {
+            crrComposition.grandTotal -= crrProduct.total;
             switch (type) {
                 case "changeValue":
                     crrProduct.quantity = qty;
+                    crrProduct.total = qty * crrProduct.unitPrice;
                     break;
                 case "decrement":
                     crrProduct.quantity = qty === 1 ? qty : --qty;
+                    crrProduct.total = qty * crrProduct.unitPrice;
                     break;
                 case "increment":
                     crrProduct.quantity = ++qty;
+                    crrProduct.total = qty * crrProduct.unitPrice;
                     break;
                 default:
                     throw new Error("invalid type");
             }
+            crrComposition.grandTotal += crrProduct.total;
         }
 
-        setShoppingCartProducts(updatedProducts);
+        setShoppingCartCompositions(shoppingCartCompositionsCopy);
         if (qty <= 0 || isNaN(qty)) return;
 
         try {
-            const response = await axios.post(
+            await axios.post(
                 "/express-program/shopping-cart/update",
-                updatedProducts
+                shoppingCartCompositionsCopy
             );
-
-            if (response.status !== 200)
-                console.log("could not updated server state");
         } catch (err) {
             console.log(err);
         }
@@ -105,91 +180,77 @@ function ShoppingCart({
 
     const handlePlaceOrder = () => {
         let SKU: string[] = [];
-        crrShoppingCartProducts.forEach((productConfig) => {
-            const skusArr: string[] = [];
-            const doubleItemFinalQty = `--${productConfig.quantity * 2}`;
-            const singleItemFinalQty = `--${productConfig.quantity * 1}`;
 
-            if (productConfig.vanity) {
+        crrShoppingCartCompositions.forEach((composition) => {
+            const skusArr: string[] = [];            
+            
+            if (composition.vanity) {                
                 skusArr.push(
-                    `${productConfig.vanity.uscode}!!${
-                        productConfig.composition.model
-                    }${
-                        productConfig.isDoubleSink
-                            ? doubleItemFinalQty
-                            : singleItemFinalQty
-                    }##${productConfig.label}`
+                    `${composition.vanity.productObj.uscode}!!${
+                        composition.info.model
+                    }--${
+                        composition.vanity.quantity
+                    }##${composition.label}`
                 );
             }
 
-            if (productConfig.washbasin) {
+            if (composition.washbasin) {                
                 skusArr.push(
-                    `${productConfig.washbasin.uscode}!!${productConfig.composition.model}${singleItemFinalQty}##${productConfig.label}`
+                    `${composition.washbasin.productObj.uscode}!!${composition.info.model}--${composition.washbasin.quantity}##${composition.label}`
                 );
             }
 
-            if (productConfig.sideUnits.length > 0) {
-                productConfig.sideUnits.forEach(
-                    (sideunit: ProductInventory) => {
+            if (composition.sideUnits.length > 0) {
+                composition.sideUnits.forEach(
+                    (sideunit: ShoppingCartCompositionProduct) => {
                         skusArr.push(
-                            `${sideunit.uscode}!!${
-                                productConfig.composition.model
-                            }${
-                                productConfig.isDoubleSideunit &&
-                                productConfig.composition.model === "OPERA"
-                                    ? doubleItemFinalQty
-                                    : singleItemFinalQty
-                            }##${productConfig.label}`
+                            `${sideunit.productObj.uscode}!!${
+                                composition.info.model
+                            }--${
+                                sideunit.quantity
+                            }##${composition.label}`
                         );
                     }
                 );
             }
 
-            for (const item in productConfig.otherProducts) {
-                const itemProducts = productConfig.otherProducts[
-                    item as keyof typeof productConfig.otherProducts
-                ] as ProductInventory[];
-                itemProducts.forEach((product: ProductInventory) => {
+            for (const item in composition.otherProducts) {
+                const itemProducts = composition.otherProducts[
+                    item as keyof typeof composition.otherProducts
+                ] as ShoppingCartCompositionProduct[];
+                itemProducts.forEach((product: ShoppingCartCompositionProduct) => {
                     skusArr.push(
-                        `${product.uscode}!!${productConfig.composition.model}${singleItemFinalQty}##${productConfig.label}`
+                        `${product.productObj.uscode}!!${composition.info.model}--${product.quantity}##${composition.label}`
                     );
                 });
             }
 
             SKU.push(skusArr.join("~"));
-        });
+        });        
 
         router.get("/orders/create-so-num", {
             SKU: SKU.join("~"),
             isShoppingCart: true,
         });
     };
-
+    
     const calGrandTotal = (): number => {
-        return crrShoppingCartProducts.reduce((prev, crr) => {
-            return prev + crr.grandTotal * crr.quantity;
+        return crrShoppingCartCompositions.reduce((prev, crr) => {
+            return prev + crr.grandTotal;
         }, 0);
     };
-
+    
     useEffect(() => {
         const getShoppingCartProducts = async () => {
             try {
-                // GET SHOPPING CART PRODUTS FROM SERVER.
-                const response = await axios.get(
-                    "/express-program/shopping-cart/products"
-                );
-
-                const shoppingCartProductsServer =
-                    response.data.shoppingCartProducts;
-
-                setShoppingCartProducts(shoppingCartProductsServer);
-            } catch (err) {}
+                const { compositions } = await getShoppingCartCompositions();
+                setShoppingCartCompositions(compositions);
+            } catch (err) {
+                console.error(err);
+            }
         };
         getShoppingCartProducts();
-    }, []);
-
-    console.log("==== ShoppingCart ====");
-    console.log("shopping cart products:", crrShoppingCartProducts);
+    }, []);    
 
     return (
         <section className={classes.shoppingCart}>
@@ -202,7 +263,7 @@ function ShoppingCart({
                     <button
                         className={classes.placeOrderButton}
                         onClick={handlePlaceOrder}
-                        disabled={crrShoppingCartProducts.length === 0}
+                        disabled={crrShoppingCartCompositions.length === 0}
                     >
                         PLACE ORDER
                     </button>
@@ -215,17 +276,17 @@ function ShoppingCart({
                 </button>
             </section>
             <section className={classes.shoppingCartContent}>
-                {crrShoppingCartProducts.map((product, index) => (
-                    <ShoppingCartProductCard
+                {crrShoppingCartCompositions.map((composition, index) => (
+                    <ShoppingCartCompositionCard
                         key={index}
-                        product={product}
-                        productIndex={index}
+                        composition={composition}
+                        compositionIndex={index}
                         onRemoveProduct={handleRemoveProduct}
                         onQtyUpdated={handleQtyUpdated}
                     />
                 ))}
             </section>
-            {crrShoppingCartProducts.length === 0 && (
+            {crrShoppingCartCompositions.length === 0 && (
                 <p>YOUR SHOPPING CART IS EMPTY.</p>
             )}
         </section>

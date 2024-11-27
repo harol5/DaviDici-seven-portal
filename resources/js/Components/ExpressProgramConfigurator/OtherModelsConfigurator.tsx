@@ -3,7 +3,9 @@ import classes from "../../../css/product-configurator.module.css";
 import { useMemo, useReducer, useState } from "react";
 import type {
     Option,
-    ShoppingCartProduct as shoppingCartProductModel,
+    OtherItems,
+    ShoppingCartComposition,
+    ShoppingCartCompositionProduct,    
 } from "../../Models/ExpressProgramModels";
 import Options from "./Options";
 import ConfigurationName from "./ConfigurationName";
@@ -19,6 +21,7 @@ import ImageSlider from "./ImageSlider";
 import ConfigurationBreakdown from "./ConfigurationBreakdown";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import useAccordionState from "../../Hooks/useAccordionState";
+import { generateShoppingCartCompositionProductObjs } from "../../utils/shoppingCartUtils";
 
 /**
  * TODO;
@@ -27,7 +30,7 @@ import useAccordionState from "../../Hooks/useAccordionState";
 
 interface OtherModelsConfiguratorProps {
     composition: Composition;
-    onAddToCart: (shoppingCartProduct: shoppingCartProductModel) => void;
+    onAddToCart: (shoppingCartComposition: ShoppingCartComposition) => void;
 }
 
 interface CurrentConfiguration {
@@ -256,28 +259,29 @@ function OtherModelsConfigurator({
             mirror: [] as ProductInventory[],
         };
 
-        const vanityObj = composition.vanities.find(
-            (vanity) => vanity.uscode === vanitySku
-        );
-
-        const shoppingCartObj: shoppingCartProductModel = {
-            composition: composition,
+        const shoppingCartObj: ShoppingCartComposition = {
+            info: composition,
             description: composition.name,
             configuration: currentConfiguration,
             label,
-            vanity: vanityObj!,
-            sideUnits: [],
-            washbasin: null,
-            otherProducts,
+            images: imageUrls,
+            sideUnits: [] as ShoppingCartCompositionProduct[],
+            otherProducts: {
+                wallUnit: [] as ShoppingCartCompositionProduct[],
+                tallUnit: [] as ShoppingCartCompositionProduct[],
+                accessory: [] as ShoppingCartCompositionProduct[],
+                mirror: [] as ShoppingCartCompositionProduct[],
+            } as OtherItems,
             isDoubleSink: false,
-            isDoubleSideunit: false,
-            quantity: 1,
-            grandTotal: grandTotal,
+            isDoubleSideUnit: false,
+            grandTotal,
         };
 
-        console.log("=== handleAddToCart ===");
-        console.log(shoppingCartObj);
+        const allConfigs = {
+            modelConfig: currentConfiguration,            
+        };
 
+        generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,null,false,false);        
         onAddToCart(shoppingCartObj);
     };
 

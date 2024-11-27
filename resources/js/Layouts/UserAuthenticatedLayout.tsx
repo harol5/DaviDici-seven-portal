@@ -6,7 +6,7 @@ import Modal from "../Components/Modal";
 import ShoppingCart from "../Components/ShoppingCart";
 import shoppingCartClasses from "../../css/shoppingCart.module.css";
 import authClasses from "../../css/user-authenticated-layout.module.css";
-import axios from "axios";
+import { getShoppingCartCompositions, updateShoppingCartCompositions } from "../utils/shoppingCartUtils";
 
 interface UserAuthenticatedLayoutProps {
     auth: User;
@@ -45,32 +45,55 @@ function UserAuthenticatedLayout({
 
     // --- Manage Modal shopping cart.
     const [openShoppingCartModal, setOpenShoppingCartModal] = useState(false);
-    const [counter, setCounter] = useState(shoppingCartSize);
-
-    const handleShoppingCartSize = (numOfProducts: number) => {
-        setCounter(numOfProducts);
-    };
-
     const handleCloseShoppingCartModal = () => {
         setOpenShoppingCartModal(false);
     };
 
-    useEffect(() => {
-        const getShoppingCartProducts = async () => {
-            try {
-                // GET SHOPPING CART PRODUTS FROM SERVER.
-                const response = await axios.get(
-                    "/express-program/shopping-cart/products"
-                );
 
-                const shoppingCartProductsServer =
-                    response.data.shoppingCartProducts;
+    /**
+     * the counter can be updated from several places, for example:
+     * - when a composition is added from the configurator (props -> useEffect to update state).
+     * - when navigating to a different page. (component is re-render completely, losing its state).
+     */
+    const [counter, setCounter] = useState(shoppingCartSize);
+    const handleShoppingCartSize = (numOfProducts: number) => {
+        setCounter(numOfProducts);
+    };
+    useEffect(() => {        
+        const shoppingCartCompositionJSON = localStorage.getItem(
+            "shoppingCartComposition"
+        );
 
-                if (shoppingCartProductsServer)
-                    setCounter(shoppingCartProductsServer.length);
-            } catch (err) {}
-        };
-        getShoppingCartProducts();
+
+        // if there is a composition on local storage -> update shoping cart and counter.
+        if (shoppingCartCompositionJSON && JSON.parse(shoppingCartCompositionJSON)) {
+            console.log("stateful Shopping cart");
+            const shoppingCartComposition = JSON.parse(shoppingCartCompositionJSON);            
+            const updateShoppingCart = async () => {                
+                try {
+                    const {compositions} = await updateShoppingCartCompositions(shoppingCartComposition);
+                    localStorage.setItem(
+                        "shoppingCartComposition",
+                        JSON.stringify(null)
+                    );                    
+                    setCounter(compositions.length);                                      
+                } catch (err) {                    
+                    console.error(err);
+                }
+            };         
+            updateShoppingCart();
+        }else {
+            // else -> update counter.            
+            const getShoppingCartInfo = async () => {
+                try {                
+                    const {compositions} = await getShoppingCartCompositions();                                
+                    setCounter(compositions.length);                                    
+                } catch (err) {                
+                    console.error(err);
+                }
+            };
+            getShoppingCartInfo();   
+        }        
     }, [shoppingCartSize]);
 
     return (

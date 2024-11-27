@@ -1,7 +1,7 @@
 import { Composition } from "../../Models/Composition";
 import classes from "../../../css/product-configurator.module.css";
 import { useMemo, useReducer, useState } from "react";
-import type { ShoppingCartProduct as shoppingCartProductModel } from "../../Models/ExpressProgramModels";
+import type { OtherItems, ShoppingCartComposition, ShoppingCartCompositionProduct } from "../../Models/ExpressProgramModels";
 import ConfigurationName from "./ConfigurationName";
 import { isAlphanumericWithSpaces, scrollToView } from "../../utils/helperFunc";
 import { ProductInventory } from "../../Models/Product";
@@ -14,6 +14,7 @@ import ConfigurationBreakdown from "./ConfigurationBreakdown";
 import useImagesComposition from "../../Hooks/useImagesComposition";
 import ImageSlider from "./ImageSlider";
 import { router } from "@inertiajs/react";
+import { generateShoppingCartCompositionProductObjs } from "../../utils/shoppingCartUtils";
 
 type CurrentConfiguration = {
     label: string;
@@ -23,7 +24,7 @@ type CurrentConfiguration = {
 
 interface MirrorsOnlyConfiguratorProps {
     composition: Composition;
-    onAddToCart: (shoppingCartProduct: shoppingCartProductModel) => void;
+    onAddToCart: (shoppingCartComposition: ShoppingCartComposition) => void;
 }
 
 function MirrorsOnlyConfigurator({
@@ -209,35 +210,32 @@ function MirrorsOnlyConfigurator({
     const handleAddToCart = () => {
         if (!isValidConfiguration()) return;
 
-        const { label, isDoubleSink } = currentConfiguration;
+        const { label, isDoubleSink } = currentConfiguration;        
 
-        const otherProducts = {
-            wallUnit: [] as ProductInventory[],
-            tallUnit: [] as ProductInventory[],
-            accessory: [] as ProductInventory[],
-            mirror: [] as ProductInventory[],
-        };
-
-        getMirrorProductObj(
-            composition.otherProductsAvailable.mirrors,
-            otherProducts
-        );
-
-        const shoppingCartObj: shoppingCartProductModel = {
-            composition: composition,
+        const shoppingCartObj: ShoppingCartComposition = {
+            info: composition,
             description: composition.name,
             configuration: currentConfiguration,
             label,
-            vanity: null,
-            sideUnits: [],
-            washbasin: null,
-            otherProducts,
+            images: imageUrls,
+            sideUnits: [] as ShoppingCartCompositionProduct[],
+            otherProducts: {
+                wallUnit: [] as ShoppingCartCompositionProduct[],
+                tallUnit: [] as ShoppingCartCompositionProduct[],
+                accessory: [] as ShoppingCartCompositionProduct[],
+                mirror: [] as ShoppingCartCompositionProduct[],
+            } as OtherItems,
             isDoubleSink,
-            isDoubleSideunit: false,
-            quantity: 1,
-            grandTotal: grandTotal,
+            isDoubleSideUnit: false,
+            grandTotal,
         };
 
+        const allConfigs = {
+            modelConfig: currentConfiguration,
+            mirrorConfig: currentMirrorsConfiguration,
+        };
+
+        generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,null,false,isDoubleSink);        
         onAddToCart(shoppingCartObj);
     };
 

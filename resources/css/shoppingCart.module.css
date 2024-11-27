@@ -33,6 +33,7 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    flex-direction: column;
 }
 
 .grandTotalAndPlaceOrderButtonWrapper {
@@ -58,8 +59,14 @@
 .grandTotalAndPlaceOrderButtonWrapper .placeOrderButton {
     background-color: #d1aa68;
     color: white;
-    padding: 0.5rem 4rem;
-    border-radius: 4px;
+    padding: 0.5em 4em;
+    margin: 1em;
+    border-radius: 5px;
+}
+
+.grandTotalAndPlaceOrderButtonWrapper .placeOrderButton:hover {
+    background-color: white;
+    color: #d1aa68;       
 }
 
 @media (max-width: 950px) {

@@ -115,23 +115,30 @@
     margin-bottom: 1em;
 }
 
-.allFiltersWrapper
-    .resetFiltersAndCloseFilterButtonsWrapper
-    .resetFiltersButton {
+.allFiltersWrapper .resetFiltersAndCloseFilterButtonsWrapper button {
     background-color: #d1aa68;
     color: white;
     padding: 0.5em 4em;
+    margin: 1em;
     border-radius: 5px;
+}
+
+.allFiltersWrapper .resetFiltersAndCloseFilterButtonsWrapper button:hover {
+    background-color: white;
+    color: #d1aa68;   
+    font-weight: 600;     
+}
+
+/* .allFiltersWrapper
+    .resetFiltersAndCloseFilterButtonsWrapper
+    .resetFiltersButton {
+    
 }
 
 .allFiltersWrapper
     .resetFiltersAndCloseFilterButtonsWrapper
-    .closeFilterModalButton {
-    background-color: #d1aa68;
-    color: white;
-    padding: 0.5em 4em;
-    border-radius: 5px;
-}
+    .closeFilterModalButton {    
+} */
 
 .allFiltersWrapper .titleAndFilterWrapper {
     padding: 1em 0;
@@ -142,16 +149,27 @@
 .titleWrapper {
     display: flex;
     justify-content: center;
-    gap: 1rem;
+    gap: 1.4rem;
     align-items: center;
     margin-bottom: 14px;
 }
 
+.titleWrapper h1 {
+    font-weight: 700;
+    color: #d1ab68d4;
+    font-size: 1rem;    
+}
+
 .titleWrapper button {
-    box-shadow: 0px 0px 1px 2px rgba(0, 0, 0, 0.214);
-    padding: 0.15rem 0.4rem;
+    box-shadow: 0px 0px 1px 1px rgba(0, 0, 0, 0.214);
+    padding: 0.25rem 1.5rem;
     border-radius: 2px;
-    font-size: 0.9rem;
+    font-size: 0.9rem;    
+    color: #000000c2;
+}
+
+.titleWrapper button:hover {
+    box-shadow: 0px 0px 3px 0px #d1ab68a0;    
 }
 
 .filterWrapper {
