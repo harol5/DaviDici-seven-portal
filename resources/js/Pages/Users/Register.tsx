@@ -17,7 +17,7 @@ import SignaturePage from "../../Components/SignaturePage";
  */
 
 function Register({ message }: { message: string }) {
-    const { data, setData, post, errors, reset } = useForm({
+    const { data, setData, post, errors } = useForm({
         firstName: "",
         lastName: "",
         companyName: "",

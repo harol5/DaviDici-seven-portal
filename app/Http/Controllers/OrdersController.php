@@ -17,7 +17,7 @@ use App\Services\TestingService;
 
 class OrdersController extends Controller
 {
-    // Show all orders.    
+    // Show all orders.
     public function all(Request $request)
     {
         $username = auth()->user()->username;
@@ -28,7 +28,7 @@ class OrdersController extends Controller
             'params' => [$username],
             'keep_session' => false,
         ]);
-        info($orders);
+
         $commissionInfo = FoxproApi::call([
             'action' => 'GETCOMMINFO',
             'params' => [$username],
@@ -37,14 +37,12 @@ class OrdersController extends Controller
 
         // assings an empty array so template can display proper message.
         if ($orders['status'] === 500) $orders['rows'] = [];
-        info($orders);
-        info($commissionInfo);
 
         if ($commissionInfo['status'] === 500 || array_key_exists('Result', $commissionInfo) && $commissionInfo['Result'] === 'there are no sales orders for this wholesaler') {
             logFoxproError(
-                'GETCOMMINFO', 
-                'OrdersController->all', 
-                [$username], 
+                'GETCOMMINFO',
+                'OrdersController->all',
+                [$username],
                 $commissionInfo
             );
             $commissionInfo['rows'] = [];
@@ -126,7 +124,7 @@ class OrdersController extends Controller
         $product = $request->all();
         $orderNumber = getOrderNumberFromPath($request->path());
 
-        //"Result": "Can not update -- this Sales Order is in use" | 
+        //"Result": "Can not update -- this Sales Order is in use" |
         $res = FoxproApi::call([
             'action' => 'ChangeOrderQty',
             'params' => [$orderNumber, $product['uscode'], $product['linenum'], $product['qty']],
@@ -218,7 +216,7 @@ class OrdersController extends Controller
         return response(['status' => 500])->header('Content-Type', 'application/json');
     }
 
-    // Show single order delivery form. 
+    // Show single order delivery form.
     public function orderDelivery(Request $request)
     {
         // throw 404 if order number does not exist
@@ -265,9 +263,9 @@ class OrdersController extends Controller
             foreach($deliveryInfo as $key => $value){
                 if (!$value) $deliveryInfo[$key] = '';
             }
-        }        
+        }
 
-        $orderNumber = getOrderNumberFromPath($request->path());            
+        $orderNumber = getOrderNumberFromPath($request->path());
         $res = FoxproApi::call([
             'action' => 'SaveDeliveryInfo',
             'params' => [
@@ -296,8 +294,8 @@ class OrdersController extends Controller
         }
 
         logFoxproError(
-            'SaveDeliveryInfo', 
-            'OrdersController->saveDeliveryInfo', 
+            'SaveDeliveryInfo',
+            'OrdersController->saveDeliveryInfo',
             [
                 $orderNumber,
                 $deliveryInfo['date'],
@@ -315,7 +313,7 @@ class OrdersController extends Controller
                 $deliveryInfo['deliveryInstruction'],
                 'ALL',
                 '0'
-            ], 
+            ],
             $res
         );
 
@@ -328,7 +326,7 @@ class OrdersController extends Controller
         // throw 404 if order number does not exist
         $order = $request->all();
         $orderNumber = getOrderNumberFromPath($request->path());
-        $userEmail = auth()->user()->attributesToArray()['email'];                
+        $userEmail = auth()->user()->attributesToArray()['email'];
 
         $deliveryInfo = FoxproApi::call([
             'action' => 'GetDeliveryInfo',
@@ -341,10 +339,10 @@ class OrdersController extends Controller
             'action' => 'getpercentdeposit',
             'params' => [$userEmail, $orderNumber],
             'keep_session' => false,
-        ]);                  
+        ]);
 
         if ($deliveryInfo['status'] === 500 || $deliveryInfo['status'] !== 201 || !array_key_exists('rows', $deliveryInfo)) {
-            logFoxproError('GetDeliveryInfo', 'orderPayment', [$orderNumber], $deliveryInfo);            
+            logFoxproError('GetDeliveryInfo', 'orderPayment', [$orderNumber], $deliveryInfo);
             return redirect('/orders')->with(['message' => 'Something went wrong. please contact support']);
         }
 
@@ -352,28 +350,28 @@ class OrdersController extends Controller
             logFoxproError('getpercentdeposit', 'orderPayment', [$userEmail, $orderNumber], $depositInfo);
             return redirect('/orders')->with(['message' => 'Something went wrong. please contact support']);
         }
-        
+
         return Inertia::render('Orders/OrderPayment', [
             'order' => $order,
             'deliveryInfo' => $deliveryInfo['rows'],
-            'depositInfo' => $depositInfo['rows'][0], 
-        ]);                                    
+            'depositInfo' => $depositInfo['rows'][0],
+        ]);
     }
 
     // Creates a transaction.
     public function createCharge(Request $request)
-    {        
+    {
         $info = $request->all();
         $js_data = json_encode($info['info']);
         $uuidTransaction = (string) Str::uuid();
         $orderNumber = getOrderNumberFromPath($request->path());
 
-        $accessToken = OAuthTokenService::getAccessToken();    
+        $accessToken = OAuthTokenService::getAccessToken();
         if (!$accessToken) {
             logErrorDetails('createCharge','OrdersController','empty access token','none', $request->user()->email);
             return response(['intuitRes' => 'empty access token. refresh failed.', 'status' => 501])->header('Content-Type', 'application/json');
-        }         
-        
+        }
+
         $intuitApiUrl = App::environment('production') ? env('INTUIT_API_URL') : env('INTUIT_SANDBOX_API_URL');
 
         $response = Http::withHeaders([
@@ -382,28 +380,28 @@ class OrdersController extends Controller
             'Request-Id' => $uuidTransaction,
         ])->withBody($js_data)->post($intuitApiUrl .'/quickbooks/v4/payments/charges');
 
-        if ($response->successful()) {            
-            $foxproInfo = $info['foxproInfo'];                      
+        if ($response->successful()) {
+            $foxproInfo = $info['foxproInfo'];
 
             // "Result" : "Info Updated Successfully" |
             $cashReceiptRes = FoxproApi::call([
-                'action' => 'SaveCR',                
+                'action' => 'SaveCR',
                 'params' => [
-                    $orderNumber, 
-                    'CC', 
-                    $foxproInfo['amountPaid'], 
-                    $foxproInfo['date'], 
-                    $foxproInfo['nameOnCard'], 
-                    $foxproInfo['cc'], 
-                    $foxproInfo['expDate'], 
+                    $orderNumber,
+                    'CC',
+                    $foxproInfo['amountPaid'],
+                    $foxproInfo['date'],
+                    $foxproInfo['nameOnCard'],
+                    $foxproInfo['cc'],
+                    $foxproInfo['expDate'],
                     $foxproInfo['cvc']
                 ],
                 'keep_session' => false,
             ]);
-            
+
             if (!array_key_exists('Result', $cashReceiptRes) || $cashReceiptRes["Result"] !== 'Info Updated Successfully') {
-                logFoxproError('SaveCR', 'OrdersController->createCharge', ['message' => 'params not logged for secury reasons', 'user' => $request->user()->email], $cashReceiptRes);  
-            }            
+                logFoxproError('SaveCR', 'OrdersController->createCharge', ['message' => 'params not logged for secury reasons', 'user' => $request->user()->email], $cashReceiptRes);
+            }
 
             // $clientTransID = $response->collect()->all()['context']['clientTransID'];
             // $uuidTransaction2 = (string) Str::uuid();
@@ -414,10 +412,6 @@ class OrdersController extends Controller
             //     'Request-Id' => $uuidTransaction2,
             // ])->get($intuitApiUrl .'/quickbooks/v4/payments/receipt/test123abc?clientTransID=test123abc');
 
-            // info('=== receipt response ===');
-            // info($intuirReceipt->headers());
-            // info($intuirReceipt->body());
-            
             return response(['intuitRes' => $response->json(), 'status' => $response->status(), 'cashRes' => $cashReceiptRes])->header('Content-Type', 'application/json');
             // return response(['intuitRes' => $response->json(), 'status' => $response->status(), 'cashRes' => 'testing'])->header('Content-Type', 'application/json');
 
@@ -426,8 +420,8 @@ class OrdersController extends Controller
             if ($response->status() === 401) {
                 logErrorDetails('createCharge','OrdersController','intuit access token expired',$response->body(), $request->user()->email);
                 return response(['intuitRes' => "the access token provided to charge endpoint is expired!! status: 401" , 'status' => $response->status()])->header('Content-Type', 'application/json');
-            }            
-            
+            }
+
             logErrorDetails('createCharge','OrdersController','intuit charge request not successful',$response->body(), $request->user()->email);
             return response(['intuitRes' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');
         }
@@ -445,7 +439,7 @@ class OrdersController extends Controller
         if (!$accessToken) {
             logErrorDetails('createBankCharge','OrdersController','empty access token','none', $request->user()->email);
             return response(['intuitRes' => 'empty access token. refresh failed.', 'status' => 501])->header('Content-Type', 'application/json');
-        }        
+        }
 
         $intuitApiUrl = App::environment('production') ? env('INTUIT_API_URL') : env('INTUIT_SANDBOX_API_URL');
 
@@ -456,24 +450,24 @@ class OrdersController extends Controller
         ])->withBody($intuitInfo)->post($intuitApiUrl .'/quickbooks/v4/payments/echecks');
 
         if ($response->successful()) {
-            $foxproInfo = $info['foxproInfo'];                      
+            $foxproInfo = $info['foxproInfo'];
             $cashReceiptRes = FoxproApi::call([
-                'action' => 'SaveCR',                
+                'action' => 'SaveCR',
                 'params' => [$orderNumber, 'CH', $foxproInfo['amountPaid'], $foxproInfo['date'], $foxproInfo['name'], $foxproInfo['checkNumber'], $foxproInfo['routingNumber'], $foxproInfo['accountNumber']],
                 'keep_session' => false,
-            ]);  
-            
+            ]);
+
             if (!array_key_exists('Result', $cashReceiptRes) || $cashReceiptRes["Result"] !== 'Info Updated Successfully') {
-                logFoxproError('SaveCR', 'OrdersController->createBankCharge', ['message' => 'params not logged for secury reasons', 'user' => $request->user()->email], $cashReceiptRes);  
+                logFoxproError('SaveCR', 'OrdersController->createBankCharge', ['message' => 'params not logged for secury reasons', 'user' => $request->user()->email], $cashReceiptRes);
             }
-            
+
             return response(['intuitRes' => $response->json(), 'status' => $response->status(), 'cashRes' => $cashReceiptRes])->header('Content-Type', 'application/json');
-        }else {            
+        }else {
             if ($response->status() === 401) {
                 logErrorDetails('createBankCharge','OrdersController','intuit access token expired',$response->body(), $request->user()->email);
                 return response(['intuitRes' => "the access token provided to charge endpoint is expired!! status: 401" , 'status' => $response->status()])->header('Content-Type', 'application/json');
-            }            
-            
+            }
+
             logErrorDetails('createBankCharge','OrdersController','intuit echeck request not successful',$response->body(), $request->user()->email);
             return response(['intuitRes' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');
         }
@@ -483,13 +477,13 @@ class OrdersController extends Controller
     public function getStatusCheck(Request $request)
     {
         $info = $request->all();
-        $uuidTransaction = (string) Str::uuid();        
+        $uuidTransaction = (string) Str::uuid();
         $accessToken = OAuthTokenService::getAccessToken();
 
         if (!$accessToken) {
             logErrorDetails('getStatusCheck','OrdersController','empty access token','none', $request->user()->email);
             return response(['intuitRes' => 'empty access token. refresh failed.', 'status' => 501])->header('Content-Type', 'application/json');
-        }        
+        }
 
         $intuitApiUrl = App::environment('production') ? env('INTUIT_API_URL') : env('INTUIT_SANDBOX_API_URL');
 
@@ -497,16 +491,16 @@ class OrdersController extends Controller
             'Authorization' => 'Bearer ' . $accessToken,
             'Request-Id' => $uuidTransaction,
         ])->get($intuitApiUrl . '/quickbooks/v4/payments/echecks/' . $info['id']);
-        
+
 
         if ($response->successful()) {
             return response(['intuitRes' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');
-        } else {            
+        } else {
             if ($response->status() === 401) {
                 logErrorDetails('getStatusCheck','OrdersController','intuit access token expired',$response->body(), $request->user()->email);
                 return response(['intuitRes' => "the access token provided to charge endpoint is expired!! status: 401" , 'status' => $response->status()])->header('Content-Type', 'application/json');
-            }            
-            
+            }
+
             logErrorDetails('getStatusCheck','OrdersController','intuit echeck status request not successful',$response->body(), $request->user()->email);
             return response(['intuitRes' => $response->json(), 'status' => $response->status()])->header('Content-Type', 'application/json');
         }
@@ -520,9 +514,6 @@ class OrdersController extends Controller
         $products = $request->all();
         if (!array_key_exists('isShoppingCart', $products)) $products['isShoppingCart'] = 'false';
 
-        // Get all orders.
-        // TODO: should be a specific program that returns order from all sales rep.
-        // so we can see all order nums taken.        
         $orders = FoxproApi::call([
             'action' => 'getordersbycompany',
             'params' => [$username],
@@ -530,19 +521,24 @@ class OrdersController extends Controller
         ]);
 
         //this means there are no orders for this customer.
-        if ($orders['status'] === 500) {
-            // TODO: log error.
-            // assings an empty array so template can display proper message.
+        if ($orders['status'] === 500 || $orders['status'] !== 201 || !array_key_exists('rows', $orders)) {
+            logFoxproError(
+                'getordersbycompany',
+                'OrdersController->createOrderNumber',
+                [$username],
+                $orders
+            );
+
+            // assigns an empty array so template can display proper message.
             $orders['rows'] = [];
         }
 
         // get how many orders the client has.
         $numOfOrders = count($orders['rows']);
-        
+
         // Get list of sales rep if owner acc created the order.
-        // TODO: we need to include the username on each sale rep info.
         $salesPersonsList = [];
-        $companyCode = '';        
+        $companyCode = '';
         $userInfoRes = [];
         $salesPersonsRes = [];
 
@@ -552,20 +548,20 @@ class OrdersController extends Controller
                 'params' => [$username],
                 'keep_session' => false,
             ]);
-    
+
             if ($userInfoRes['status'] === 201 || (array_key_exists('rows', $userInfoRes) && count($userInfoRes['rows']) > 0)) {
-                $companyCode = $userInfoRes['rows'][0]['wholesaler'];    
+                $companyCode = $userInfoRes['rows'][0]['wholesaler'];
                 $salesPersonsRes = FoxproApi::call([
                     'action' => 'GETSLMNINFO',
                     'params' => ['',$companyCode],
                     'keep_session' => false,
-                ]);    
-                
+                ]);
+
                 if ($salesPersonsRes['status'] === 201 || (array_key_exists('rows', $salesPersonsRes) && count($salesPersonsRes['rows']) > 0)) {
                     $salesPersonsList = $salesPersonsRes['rows'];
                 }
-            }            
-        }        
+            }
+        }
 
         // if there are orders.
         if ($numOfOrders > 0) {
@@ -582,36 +578,36 @@ class OrdersController extends Controller
             $newOrderNumber = $charsFromOrderNum . $nextOrderNumber;
 
             return Inertia::render(
-                'Orders/OrderNumber', 
+                'Orders/OrderNumber',
                 [
-                    'nextOrderNumber' => $newOrderNumber, 
-                    'products' => $products, 
-                    'orders' => $orders['rows'], 
+                    'nextOrderNumber' => $newOrderNumber,
+                    'products' => $products,
+                    'orders' => $orders['rows'],
                     'message' => '',
                     'salesRepsList' => $salesPersonsList
                 ]
             );
-        } else {    
+        } else {
             if (!$companyCode) {
                 logFoxproError(
-                    'GETSLMNINFO or GETUSERINFO', 
-                    'OrdersController->createOrderNumber', 
-                    ['message' => 'params not logged for secury reasons', 'user' => $request->user()->email], 
+                    'GETSLMNINFO or GETUSERINFO',
+                    'OrdersController->createOrderNumber',
+                    ['message' => 'params not logged for secury reasons', 'user' => $request->user()->email],
                     ['userInfoRes' => $userInfoRes, 'salesPersonsRes' => $salesPersonsRes]
                 );
-                
+
                 return Inertia::render(
-                    'Orders/OrderNumber', 
+                    'Orders/OrderNumber',
                     [
                         'nextOrderNumber' => 'none',
-                        'products' => 'none', 
-                        'orders' => 'none', 
+                        'products' => 'none',
+                        'orders' => 'none',
                         'message' => 'error',
                         'salesRepsList' => $salesPersonsList
                     ]
-                );        
+                );
             }
-                        
+
             return Inertia::render('Orders/OrderNumber', ['nextOrderNumber' => $companyCode . '000001', 'products' => $products, 'orders' => $orders['rows'], 'message' => '']);
         }
     }
@@ -627,14 +623,18 @@ class OrdersController extends Controller
         $username = auth()->user()->username;
         $data = $request->all();
 
-        if (strlen($data['skus']) <= 200) {            
+        if ($data["salesRepUsername"]) {
+            $username = $data["salesRepUsername"];
+        }
+
+        if (strlen($data['skus']) <= 200) {
             // Result: "This sales order already exists" | "All items entered"
             $response = FoxproApi::call([
                 'action' => 'OrderEnter',
                 'params' => [$username, $data['newOrderNum'], $data['skus']],
                 'keep_session' => false,
             ]);
-            
+
             if ($response['status'] === 201 && $response['Result'] === 'All items entered') {
                 DB::table('shopping_cart')
                     ->updateOrInsert(
@@ -653,7 +653,7 @@ class OrdersController extends Controller
             }
 
             return redirect('/orders')->with('message', "something went wrong. Please contact support.");
-        } else {                        
+        } else {
             // get the number of calls we will have to make to the "addtoorder", depending on the size of the sku string;
             $numberOfCalls = floor(strlen($data['skus']) / 200);
             $skusArr = explode('~', $data['skus']);
@@ -719,88 +719,89 @@ class OrdersController extends Controller
     // only use when user does not require a deposit.
     public function approveOrder(Request $request)
     {
-        $info = $request->all();                
+        $info = $request->all();
         $orderNumber = getOrderNumberFromPath($request->path());
-        $user = $request->user()->first_name;        
+        $user = $request->user()->first_name;
 
         // 'Result' => 'you did not specify the amount' | 'Info Updated Successfully'
         $cashReceiptRes = FoxproApi::call([
-            'action' => 'SaveCR',            
+            'action' => 'SaveCR',
             'params' => [$orderNumber, 'CC', $info['amountPaid'], $info['date'], $user, '0000000000000', '00/00', '000'],
             'keep_session' => false,
-        ]);        
+        ]);
 
         if (array_key_exists('Result', $cashReceiptRes) && $cashReceiptRes['Result'] === "Info Updated Successfully") {
             return response(['cashRes' => 'order approved', 'status' => 201])->header('Content-Type', 'application/json');
         }
 
         logFoxproError('foxprop:SaveCR controllerFunc:approveOrder','OrderController',[$orderNumber, 'CC', $info['amountPaid'], $info['date'], $user, '0000000000000', '00/00', '000'],$cashReceiptRes);
-        return response(['cashRes' => 'could not approve order.', 'status' => 500])->header('Content-Type', 'application/json');        
+        return response(['cashRes' => 'could not approve order.', 'status' => 500])->header('Content-Type', 'application/json');
     }
 
     public function testApi(TestingService $testingService)
-    {   
+    {
         if (Gate::allows('admin-only')) {
             // return Inertia::render('Test',['response' => $response]);
             // return response(['response' => $response])->header('Content-Type', 'application/json');
 
             // is returning the pdf order? PENDING
-            // $foxproRes = FoxproApi::call([
-            //     'action' => 'PrintSo',
-            //     'params' => ['HAR000001'],
-            //     'keep_session' => false,
-            // ]);                        
-            
+            $printSo = FoxproApi::call([
+                 'action' => 'PrintSo',
+                 'params' => ['HAR000030'],
+                 'keep_session' => false,
+            ]);
+
             $adminUsername = auth()->user()->username;
             $getCompanyInforesponse = FoxproApi::call([
                 'action' => 'GETUSERINFO',
                 'params' => [env('TEST_USERNAME')],
                 'keep_session' => false,
-            ]);  
-            
+            ]);
+
             // is it returning the proper figures for each sales rep? TESTING
             $commissionInfo = FoxproApi::call([
                 'action' => 'GETCOMMINFO',
                 'params' => [env('TEST_USERNAME')],
                 'keep_session' => false,
             ]);
-            
+
             // is it returning all the orders of the company? YES!!
             $foxproRes = FoxproApi::call([
                 'action' => 'getordersbycompany',
                 'params' => [env('TEST_USERNAME')],
                 'keep_session' => false,
             ]);
-            
+
             // is it returning ONLY USER created orders? YES!!
             $orders = FoxproApi::call([
                 'action' => 'getordersbyuser',
                 'params' => [env('TEST_USERNAME')],
                 'keep_session' => false,
-            ]);            
-            
+            ]);
+
             // is it retuning all the sales rep for that company? TESTING
-            // is it returning the username along with other information for each sales rep? YES!!            
-            // 'params' => ['TWO-LETTER SALESMAN CODE','THREE-LETTER COMPANY CODE'],        
+            // is it returning the username along with other information for each sales rep? YES!!
+            // 'params' => ['TWO-LETTER SALESMAN CODE','THREE-LETTER COMPANY CODE'],
             $companyCode = $getCompanyInforesponse['rows'][0]['wholesaler'];
             $salesrepInfo = FoxproApi::call([
                 'action' => 'GETSLMNINFO',
                 'params' => ['',$companyCode],
                 'keep_session' => false,
-            ]);          
+            ]);
 
             return response(
                 [
-                    'response' => $testingService->getUniqueInstanceId(), 
+                    'response' => $testingService->getUniqueInstanceId(),
                     'userInfo' => $getCompanyInforesponse,
                     'userCommisionInfo' => $commissionInfo,
-                    'ordersByUser' => $orders, 
-                    'ordersByCompany' => $foxproRes, 
-                    'companySalesReps' => $salesrepInfo 
+                    'ordersByUser' => $orders,
+                    'ordersByCompany' => $foxproRes,
+                    'companySalesReps' => $salesrepInfo,
+                    'printSo' => $printSo,
                 ]
             )->header('Content-Type', 'application/json');
         }
-        abort(403);                        
+        abort(403);
     }
 
 
@@ -812,10 +813,10 @@ class OrdersController extends Controller
             'action' => 'GetCR',
             'params' => [$orderNumber],
             'keep_session' => false,
-        ]);           
-        
+        ]);
+
         // "rows" key will containes an associative array with each payment submmited for a given order.
-        return array_key_exists('rows', $paymentInfo) && count($paymentInfo['rows']) !== 0;        
+        return array_key_exists('rows', $paymentInfo) && count($paymentInfo['rows']) !== 0;
     }
 
     public function isDeliveryInfoSave($orderNumber)
@@ -825,6 +826,6 @@ class OrdersController extends Controller
             'params' => [$orderNumber],
             'keep_session' => false,
         ]);
-        return array_key_exists('rows', $deliveryInfo) && $deliveryInfo['rows'][0]['deldate'];        
-    }    
+        return array_key_exists('rows', $deliveryInfo) && $deliveryInfo['rows'][0]['deldate'];
+    }
 }
