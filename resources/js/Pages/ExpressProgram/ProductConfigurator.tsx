@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import UserAuthenticatedLayout from "../../Layouts/UserAuthenticatedLayout";
 import User from "../../Models/User";
 import { Composition } from "../../Models/Composition";
@@ -28,37 +28,27 @@ function ProductConfigurator({ auth, composition }: ProductConfiguratorProps) {
 
     const handleShoppingCartProduct = async (
         shoppingCartComposition: ShoppingCartComposition
-    ) => {        
+    ) => {
         try {
             const {compositions} = await updateShoppingCartCompositions(shoppingCartComposition);
             toast.success("Added to the cart!!");
-            setShoppingCartSize(compositions.length);            
-        }catch(err: any) {            
+            setShoppingCartSize(compositions.length);
+        }catch(err: any) {
             if (err.message === "user no available") {
                 // saved intended products on local storage.
                 localStorage.setItem(
                     "shoppingCartComposition",
                     JSON.stringify(shoppingCartComposition)
                 );
-                // TODO: add a meesage that let user know they will be redirected.
+                // TODO: add a message that let user know they will be redirected.
                 // redirect user to login page.
                 router.get("/", { location: "express-program" });
             } else {
-                toast.error("Internal error!!. Please comtact support");
-            }                        
-        }                   
+                toast.error("Internal error!!. Please contact support");
+            }
+        }
     };
 
-    useEffect(() => {
-        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-            // event.preventDefault();
-            // event.returnValue = true;
-        };
-        window.addEventListener("beforeunload", handleBeforeUnload);
-
-        return () =>
-            window.removeEventListener("beforeunload", handleBeforeUnload);
-    }, []);
 
     return (
         <UserAuthenticatedLayout

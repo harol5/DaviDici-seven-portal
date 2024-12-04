@@ -5,7 +5,7 @@ import type {
     Option,
     OtherItems,
     ShoppingCartComposition,
-    ShoppingCartCompositionProduct,    
+    ShoppingCartCompositionProduct,
 } from "../../Models/ExpressProgramModels";
 import Options from "./Options";
 import ConfigurationName from "./ConfigurationName";
@@ -377,7 +377,6 @@ function MargiConfigurator({
         handleResetMirrorConfigurator: resetMirrorConfigurator,
         handleClearMirrorCategory: clearMirrorCategory,
         getFormattedMirrorSkus,
-        getMirrorProductObj,
         isMirrorCabinetConfigValid,
     } = useMirrorOptions(composition.otherProductsAvailable.mirrors);
 
@@ -1260,9 +1259,9 @@ function MargiConfigurator({
     const handleAddToCart = () => {
         if (!isValidConfiguration()) return;
 
-        const {            
+        const {
             label,
-            isDoubleSink,            
+            isDoubleSink,
         } = currentConfiguration;
 
         const shoppingCartObj: ShoppingCartComposition = {
@@ -1288,7 +1287,7 @@ function MargiConfigurator({
             mirrorConfig: currentMirrorsConfiguration,
         };
 
-        generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,null,false,isDoubleSink);                   
+        generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,null,false,isDoubleSink);
         onAddToCart(shoppingCartObj);
     };
 
@@ -1587,3 +1586,14 @@ function SizeUnit({
         );
     }
 }
+
+
+/**
+ * when the program was design, a composition was the main focus, meaning that there are some rules and characteristics
+ * the configurator must follow. seems customers want to be able to break some of these rules (# of products per item), we will
+ * include such new features as an extension rather than modifying the existing model (crrConfig).
+ *
+ *
+ * seems like we must modify the currentConfiguration object so it can represent the state for multiple products of the same item.
+ * the modification of such object will probably break multiple parts of the code (handlers and Components that read from that object).
+ */
