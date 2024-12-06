@@ -1,10 +1,10 @@
-import { useMemo, useReducer, useState } from "react";
-import type { Composition } from "../../Models/Composition";
+import {useMemo, useReducer, useState} from "react";
+import type {Composition} from "../../Models/Composition";
 import type {
     Option,
     OtherItems,
     ShoppingCartComposition,
-    ShoppingCartCompositionProduct,    
+    ShoppingCartCompositionProduct,
 } from "../../Models/ExpressProgramModels";
 import type {
     Vanity,
@@ -16,21 +16,21 @@ import {
     isAlphanumericWithSpaces,
     scrollToView,
 } from "../../utils/helperFunc";
-import { router } from "@inertiajs/react";
-import { ProductInventory } from "../../Models/Product";
+import {router} from "@inertiajs/react";
+import {ProductInventory} from "../../Models/Product";
 import classes from "../../../css/product-configurator.module.css";
 import ConfigurationName from "./ConfigurationName";
 import Options from "./Options";
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
-import { MirrorCategory } from "../../Models/MirrorConfigTypes";
-import { ItemFoxPro, Model } from "../../Models/ModelConfigTypes";
+import {MirrorCategory} from "../../Models/MirrorConfigTypes";
+import {ItemFoxPro, Model} from "../../Models/ModelConfigTypes";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import MirrorConfigurator from "./MirrorConfigurator";
 import useAccordionState from "../../Hooks/useAccordionState";
 import ConfigurationBreakdown from "./ConfigurationBreakdown";
 import useImagesComposition from "../../Hooks/useImagesComposition";
 import ImageSlider from "./ImageSlider";
-import { generateShoppingCartCompositionProductObjs } from "../../utils/shoppingCartUtils";
+import {generateShoppingCartCompositionProductObjs} from "../../utils/shoppingCartUtils";
 
 interface KoraXlConfiguratorProps {
     composition: Composition;
@@ -101,7 +101,7 @@ function KoraXlConfigurator({
     // |===== TALL UNIT =====|
     const tallUnitOptions: Option[] | null = useMemo(() => {
         const all: Option[] = [];
-        const { tallUnitsLinenClosets } = composition.otherProductsAvailable;
+        const {tallUnitsLinenClosets} = composition.otherProductsAvailable;
         if (tallUnitsLinenClosets.length === 0) return null;
 
         tallUnitsLinenClosets.forEach((tallUnit) => {
@@ -134,7 +134,6 @@ function KoraXlConfigurator({
         handleResetMirrorConfigurator: resetMirrorConfigurator,
         handleClearMirrorCategory: clearMirrorCategory,
         getFormattedMirrorSkus,
-        getMirrorProductObj,
         isMirrorCabinetConfigValid,
     } = useMirrorOptions(composition.otherProductsAvailable.mirrors);
 
@@ -143,7 +142,7 @@ function KoraXlConfigurator({
     };
 
     // |===== ACCORDION =====|
-    const { accordionState, handleAccordionState, handleOrderedAccordion } =
+    const {accordionState, handleAccordionState, handleOrderedAccordion} =
         useAccordionState();
 
     const accordionsOrder = useMemo(() => {
@@ -180,9 +179,9 @@ function KoraXlConfigurator({
 
         const currentProducts: ProductInventory[] = [];
         vanitySkuAndPrice.product !== null &&
-            currentProducts.push(vanitySkuAndPrice.product);
+        currentProducts.push(vanitySkuAndPrice.product);
         washbasinSkuAndPrice.product !== null &&
-            currentProducts.push(washbasinSkuAndPrice.product);
+        currentProducts.push(washbasinSkuAndPrice.product);
 
         return {
             label: "",
@@ -291,10 +290,10 @@ function KoraXlConfigurator({
 
     // |===== GRAND TOTAL =====|
     const grandTotal = useMemo(() => {
-        const { vanityPrice, washbasinPrice, isDoubleSink, tallUnitPrice } =
+        const {vanityPrice, washbasinPrice, isDoubleSink, tallUnitPrice} =
             currentConfiguration;
 
-        const { mirrorCabinetPrice, ledMirrorPrice, openCompMirrorPrice } =
+        const {mirrorCabinetPrice, ledMirrorPrice, openCompMirrorPrice} =
             currentMirrorsConfiguration;
 
         /**
@@ -403,21 +402,21 @@ function KoraXlConfigurator({
 
             vanityCurrentConfiguration[
                 property as keyof typeof vanityCurrentConfiguration
-            ] = option;
+                ] = option;
 
-            const { sku, price, product } = getSkuAndPrice(
+            const {sku, price, product} = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 vanityCurrentConfiguration,
                 composition.vanities
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: sku });
+            dispatch({type: `set-${item}-sku`, payload: sku});
             dispatch({
                 type: `set-${item}-price`,
                 payload: price,
             });
-            dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
+            dispatch({type: `set-${item}-${property}`, payload: `${option}`});
             setVanityOptions(copyOptions);
 
             if (product) {
@@ -426,7 +425,7 @@ function KoraXlConfigurator({
         }
 
         if (item === "washbasin") {
-            const { sku, price, product } = getSkuAndPrice(
+            const {sku, price, product} = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -449,7 +448,7 @@ function KoraXlConfigurator({
         }
 
         if (item === "tallUnit") {
-            const { sku, price, product } = getSkuAndPrice(
+            const {sku, price, product} = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -506,7 +505,7 @@ function KoraXlConfigurator({
             setIsInvalidLabel(false);
         }
 
-        dispatch({ type: "set-label", payload: name });
+        dispatch({type: "set-label", payload: name});
     };
 
     const isValidConfiguration = () => {
@@ -586,7 +585,7 @@ function KoraXlConfigurator({
             isTallUnitValid: false,
         });
         resetMirrorConfigurator();
-        dispatch({ type: "reset-configurator", payload: "" });
+        dispatch({type: "reset-configurator", payload: ""});
         dispatch({
             type: `update-current-products`,
             payload: initialConfiguration.currentProducts,
@@ -597,7 +596,7 @@ function KoraXlConfigurator({
         switch (item) {
             case "washbasin":
                 updateCurrentProducts("WASHBASIN/SINK", "remove");
-                dispatch({ type: "reset-washbasin", payload: "" });
+                dispatch({type: "reset-washbasin", payload: ""});
                 break;
 
             case "tallUnit":
@@ -606,7 +605,7 @@ function KoraXlConfigurator({
                     isTallUnitSelected: false,
                     isTallUnitValid: false,
                 });
-                dispatch({ type: "reset-tallUnit", payload: "" });
+                dispatch({type: "reset-tallUnit", payload: ""});
                 break;
 
             default:
@@ -619,10 +618,7 @@ function KoraXlConfigurator({
 
         const {
             label,
-            vanitySku,
-            washbasin: washbasinSku,
             isDoubleSink,
-            tallUnit: tallUnitSku,
         } = currentConfiguration;
 
         const shoppingCartObj: ShoppingCartComposition = {
@@ -648,7 +644,7 @@ function KoraXlConfigurator({
             mirrorConfig: currentMirrorsConfiguration,
         };
 
-        generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,null,false,isDoubleSink);                
+        generateShoppingCartCompositionProductObjs(allConfigs, shoppingCartObj, null, false, isDoubleSink);
         onAddToCart(shoppingCartObj);
     };
 

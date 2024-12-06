@@ -5,7 +5,7 @@ import type {
     Option,
     OtherItems,
     ShoppingCartComposition,
-    ShoppingCartCompositionProduct    
+    ShoppingCartCompositionProduct
 } from "../../Models/ExpressProgramModels";
 import Options from "./Options";
 import ConfigurationName from "./ConfigurationName";
@@ -320,7 +320,6 @@ function NewBaliConfigurator({
         handleResetMirrorConfigurator: resetMirrorConfigurator,
         handleClearMirrorCategory: clearMirrorCategory,
         getFormattedMirrorSkus,
-        getMirrorProductObj,
         isMirrorCabinetConfigValid,
     } = useMirrorOptions(composition.otherProductsAvailable.mirrors);
 
@@ -729,7 +728,7 @@ function NewBaliConfigurator({
         vanitySku: currentConfiguration.vanitySku,
         isDoubleSink: currentConfiguration.isDoubleSink,
         sinkPosition: composition.sinkPosition,
-        hasSideUnit: sideUnitOptions ? true : false,
+        hasSideUnit: !!sideUnitOptions,
         sideUnitSku: currentConfiguration.sideUnitSku,
         isDoubleSideUnit: false,
         currentProducts: currentConfiguration.currentProducts,
@@ -1195,9 +1194,9 @@ function NewBaliConfigurator({
     const handleAddToCart = () => {
         if (!isValidConfiguration()) return;
 
-        const {            
+        const {
             label,
-            isDoubleSink,            
+            isDoubleSink,
         } = currentConfiguration;
 
         const shoppingCartObj: ShoppingCartComposition = {
@@ -1224,7 +1223,7 @@ function NewBaliConfigurator({
             mirrorConfig: currentMirrorsConfiguration,
         };
 
-        generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,null,false,isDoubleSink);            
+        generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,null,false,isDoubleSink);
         onAddToCart(shoppingCartObj);
     };
 
@@ -1467,13 +1466,13 @@ function NewBaliConfigurator({
                         SPECS
                     </a>
                     <button
-                        disabled={!grandTotal ? true : false}
+                        disabled={!grandTotal}
                         onClick={handleOrderNow}
                     >
                         ORDER NOW
                     </button>
                     <button
-                        disabled={!grandTotal ? true : false}
+                        disabled={!grandTotal}
                         onClick={handleAddToCart}
                     >
                         ADD TO CART
