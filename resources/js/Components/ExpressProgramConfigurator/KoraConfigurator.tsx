@@ -4,7 +4,7 @@ import type {
     Option,
     OtherItems,
     ShoppingCartComposition,
-    ShoppingCartCompositionProduct,    
+    ShoppingCartCompositionProduct,
 } from "../../Models/ExpressProgramModels";
 import type {
     Vanity,
@@ -125,7 +125,6 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
         handleResetMirrorConfigurator: resetMirrorConfigurator,
         handleClearMirrorCategory: clearMirrorCategory,
         getFormattedMirrorSkus,
-        getMirrorProductObj,
         isMirrorCabinetConfigValid,
     } = useMirrorOptions(composition.otherProductsAvailable.mirrors);
 
@@ -580,10 +579,10 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
         if (!isValidConfiguration()) return;
 
         const {
-            label,            
-            isDoubleSink,            
+            label,
+            isDoubleSink,
         } = currentConfiguration;
-        
+
 
         const shoppingCartObj: ShoppingCartComposition = {
             info: composition,
@@ -608,7 +607,7 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
             mirrorConfig: currentMirrorsConfiguration,
         };
 
-        generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,null,false,isDoubleSink);        
+        generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,null,false,isDoubleSink);
         onAddToCart(shoppingCartObj);
     };
 
