@@ -4,7 +4,7 @@ import type {
     MainConfig,
 } from "../Models/ExtraItemsHookModels.ts";
 import type {Model} from "../Models/ModelConfigTypes.ts";
-import {useState} from "react";
+import {useMemo, useState} from "react";
 import {Option} from "../Models/ExpressProgramModels.ts";
 import * as Margi from "../Models/MargiConfigTypes.ts";
 import * as NewYork from "../Models/NewYorkConfigTypes";
@@ -21,16 +21,18 @@ function useExtraProductsExpressProgram(model: Model, initialMainConfig: MainCon
     console.log("initialMainConfig: ", initialMainConfig);
     console.log("mainItemsOptions: ", mainItemsCurrentState);
 
-    const [extraItems, setExtraItems] = useState<ExtraItems>({
-        accessory: {configurations: [], currentlyDisplay: -1, currentOptions: mainItemsCurrentState.accessory?.options, currentConfig: mainItemsCurrentState.accessory?.config},
-        drawerBase: {configurations: [], currentlyDisplay: -1, currentOptions: mainItemsCurrentState.drawerBase?.options, currentConfig: mainItemsCurrentState.drawerBase?.config},
-        sideUnit: {configurations: [], currentlyDisplay: -1, currentOptions: mainItemsCurrentState.sideUnit?.options, currentConfig: mainItemsCurrentState.sideUnit?.config},
-        tallUnit: {configurations: [], currentlyDisplay: -1, currentOptions: mainItemsCurrentState.tallUnit?.options, currentConfig: mainItemsCurrentState.tallUnit?.config},
-        vanity: {configurations: [], currentlyDisplay: -1, currentOptions: mainItemsCurrentState.vanity?.options, currentConfig: mainItemsCurrentState.vanity?.config},
-        wallUnit: {configurations: [], currentlyDisplay: -1, currentOptions: mainItemsCurrentState.wallUnit?.options, currentConfig: mainItemsCurrentState.wallUnit?.config},
-        washbasin: {configurations: [], currentlyDisplay: -1, currentOptions: mainItemsCurrentState.washbasin?.options, currentConfig: mainItemsCurrentState.washbasin?.config},
-    });
-
+    const initialExtraItems = useMemo(() => {
+        return {
+            accessory: {configurations: [], currentlyDisplay: -1, currentOptions: mainItemsCurrentState.accessory?.options, currentConfig: mainItemsCurrentState.accessory?.config},
+            drawerBase: {configurations: [], currentlyDisplay: -1, currentOptions: mainItemsCurrentState.drawerBase?.options, currentConfig: mainItemsCurrentState.drawerBase?.config},
+            sideUnit: {configurations: [], currentlyDisplay: -1, currentOptions: mainItemsCurrentState.sideUnit?.options, currentConfig: mainItemsCurrentState.sideUnit?.config},
+            tallUnit: {configurations: [], currentlyDisplay: -1, currentOptions: mainItemsCurrentState.tallUnit?.options, currentConfig: mainItemsCurrentState.tallUnit?.config},
+            vanity: {configurations: [], currentlyDisplay: -1, currentOptions: mainItemsCurrentState.vanity?.options, currentConfig: mainItemsCurrentState.vanity?.config},
+            wallUnit: {configurations: [], currentlyDisplay: -1, currentOptions: mainItemsCurrentState.wallUnit?.options, currentConfig: mainItemsCurrentState.wallUnit?.config},
+            washbasin: {configurations: [], currentlyDisplay: -1, currentOptions: mainItemsCurrentState.washbasin?.options, currentConfig: mainItemsCurrentState.washbasin?.config},
+        }
+    },[]);
+    const [extraItems, setExtraItems] = useState<ExtraItems>(initialExtraItems);
     const [extraItemsCurrentProducts, setExtraItemsCurrentProducts] = useState({
         accessory: [] as ProductInventory[],
         drawerBase: [] as ProductInventory[],
@@ -783,7 +785,14 @@ function useExtraProductsExpressProgram(model: Model, initialMainConfig: MainCon
         setExtraItems(updatedExtraItems);
     }
 
-    const setCurrentOptionsAndConfiguration = (item: keyof typeof extraItems, index: number, updatedExtraItems:ExtraItems) => {
+    /*
+    * Helper function:*
+    * */
+    const setCurrentOptionsAndConfiguration = (
+        item: keyof typeof extraItems,
+        index: number,
+        updatedExtraItems:ExtraItems
+    ) => {
         if (index !== -1) {
             updatedExtraItems[item].currentOptions = updatedExtraItems[item].configurations[index].options;
             updatedExtraItems[item].currentConfig = updatedExtraItems[item].configurations[index].config;
@@ -793,14 +802,73 @@ function useExtraProductsExpressProgram(model: Model, initialMainConfig: MainCon
         }
     }
 
-    const updateOnMainConfigChanges = (item: keyof typeof extraItems, options:any, config: any) => {
+    const getExtraItemsProductsGrandTotal = () => {
+        return Object
+            .values(extraItemsCurrentProducts)
+            .flat()
+            .reduce((previousValue, currentProduct) => {
+                const actualPrice = currentProduct.sprice ? currentProduct.sprice : currentProduct.msrp;
+                return previousValue + actualPrice
+            },0);
+    }
+
+    const updateOnMainConfigChanges = (
+        item: keyof typeof extraItems,
+        options:any,
+        config: any
+    ) => {
         const updatedExtraItems = structuredClone(extraItems);
         updatedExtraItems[item].currentConfig = config;
         updatedExtraItems[item].currentOptions = options;
         setExtraItems(updatedExtraItems);
     }
 
-    return {extraItems,extraItemsCurrentProducts,handleAddExtraProduct,setCurrentDisplayItem,removeConfiguration,handleOptionSelected, updateOnMainConfigChanges,clearExtraProduct};
+    const resetExtraItems = () => {
+        setExtraItems(initialExtraItems);
+        setExtraItemsCurrentProducts({
+            accessory: [] as ProductInventory[],
+            drawerBase: [] as ProductInventory[],
+            sideUnit: [] as ProductInventory[],
+            tallUnit: [] as ProductInventory[],
+            vanity: [] as ProductInventory[],
+            wallUnit: [] as ProductInventory[],
+            washbasin: [] as ProductInventory[],
+        });
+    }
+
+    const validateExtraItemsConfig = () => {
+        let isExtraItemsConfigValid = true;
+        const messages: string[] = [];
+
+        for (const [item, state] of Object.entries(extraItems)) {
+            if (state.configurations.length === 0) continue;
+
+            state.configurations.forEach((config,index) => {
+                if (config.isSelected && !config.isValid) {
+                    isExtraItemsConfigValid = false;
+                    messages.push(
+                        `${item.toUpperCase()} ${index + 2} configuration is invalid. Please complete your configuration or remove it.`
+                    );
+                }
+            })
+        }
+
+        return {isExtraItemsConfigValid,messages};
+    }
+
+    return {
+        extraItems,
+        extraItemsCurrentProducts,
+        handleAddExtraProduct,
+        setCurrentDisplayItem,
+        removeConfiguration,
+        handleOptionSelected,
+        updateOnMainConfigChanges,
+        clearExtraProduct,
+        getExtraItemsProductsGrandTotal,
+        resetExtraItems,
+        validateExtraItemsConfig
+    };
 }
 
 export default useExtraProductsExpressProgram;

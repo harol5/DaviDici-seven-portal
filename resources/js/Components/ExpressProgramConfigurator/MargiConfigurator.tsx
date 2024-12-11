@@ -10,22 +10,18 @@ import type {
 import Options from "./Options";
 import ConfigurationName from "./ConfigurationName";
 import {router} from "@inertiajs/react";
-import {
-    isAlphanumericWithSpaces,
-    getSkuAndPrice,
-    scrollToView,
-} from "../../utils/helperFunc";
+import {getSkuAndPrice, isAlphanumericWithSpaces, scrollToView,} from "../../utils/helperFunc";
 import {ProductInventory} from "../../Models/Product";
 import {
-    VanityOptions,
-    WallUnitOptions,
-    OpenUnitOptions,
-    SideCabinetOptions,
-    OpenUnit,
-    SideCabinet,
-    WallUnit,
-    Vanity,
     CurrentConfiguration,
+    OpenUnit,
+    OpenUnitOptions,
+    SideCabinet,
+    SideCabinetOptions,
+    Vanity,
+    VanityOptions,
+    WallUnit,
+    WallUnitOptions,
 } from "../../Models/MargiConfigTypes";
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
@@ -731,7 +727,10 @@ function MargiConfigurator({
         removeConfiguration,
         handleOptionSelected: handleExtraItemOptionSelected,
         updateOnMainConfigChanges,
-        clearExtraProduct
+        clearExtraProduct,
+        getExtraItemsProductsGrandTotal,
+        resetExtraItems,
+        validateExtraItemsConfig
     } = useExtraProductsExpressProgram(
         "MARGI",
         initialConfiguration,
@@ -786,14 +785,6 @@ function MargiConfigurator({
         const {mirrorCabinetPrice, ledMirrorPrice, openCompMirrorPrice} =
             currentMirrorsConfiguration;
 
-        const extraItemsProductsTotalSum = Object
-            .values(extraItemsCurrentProducts)
-            .flat()
-            .reduce((previousValue, currentProduct) => {
-                const actualPrice = currentProduct.sprice ? currentProduct.sprice : currentProduct.msrp;
-                return previousValue + actualPrice
-            },0);
-
         /**
          * in order to allow the user to order or add product to
          * the shopping cart, they must select the mandatory options.
@@ -814,18 +805,16 @@ function MargiConfigurator({
                 ? vanityPrice * 2
                 : vanityPrice;
 
-            const grandTotal =
-                finalVanityPrice +
+            return finalVanityPrice +
                 washbasinPrice +
                 sideUnitPrice +
                 wallUnitPrice +
                 mirrorCabinetPrice +
                 ledMirrorPrice +
-                openCompMirrorPrice;
-
-            return grandTotal;
+                openCompMirrorPrice +
+                getExtraItemsProductsGrandTotal();
         }
-    }, [currentConfiguration, currentMirrorsConfiguration]);
+    }, [currentConfiguration, currentMirrorsConfiguration,extraItemsCurrentProducts]);
 
     // |===== COMPOSITION NAME =====| (repeated logic)
     const [isMissingLabel, setIsMissingLabel] = useState(false);
@@ -1262,6 +1251,12 @@ function MargiConfigurator({
             return false;
         }
 
+        const {isExtraItemsConfigValid,messages} = validateExtraItemsConfig()
+        if (!isExtraItemsConfigValid){
+            alert(messages.join("\n"));
+            return false;
+        }
+
         return true;
     };
 
@@ -1323,6 +1318,7 @@ function MargiConfigurator({
             type: `update-current-products`,
             payload: initialConfiguration.currentProducts,
         });
+        resetExtraItems();
     };
 
     const handleClearItem = (item: string) => {
