@@ -1,47 +1,42 @@
-import { Composition } from "../../Models/Composition";
+import {Composition} from "../../Models/Composition";
 import classes from "../../../css/product-configurator.module.css";
-import { useMemo, useReducer, useState } from "react";
+import {useMemo, useReducer, useState} from "react";
 import {
-    type Option,    
-    type ShoppingCartComposition,
-    type ShoppingCartCompositionProduct,    
+    type Option,
     OtherItems,
+    type ShoppingCartComposition,
+    type ShoppingCartCompositionProduct,
 } from "../../Models/ExpressProgramModels";
 import Options from "./Options";
 import ConfigurationName from "./ConfigurationName";
-import { router } from "@inertiajs/react";
-import {
-    isAlphanumericWithSpaces,
-    getSkuAndPrice,
-    scrollToView,
-} from "../../utils/helperFunc";
-import { ProductInventory } from "../../Models/Product";
+import {router} from "@inertiajs/react";
+import {getSkuAndPrice, isAlphanumericWithSpaces, scrollToView,} from "../../utils/helperFunc";
+import {ProductInventory} from "../../Models/Product";
 import {
     CurrentConfiguration,
-    Vanity,
     SideUnit,
-    VanityOptions,
     SideUnitOptions,
-    WallUnitOptions,
-    TallUnitOptions,
-    WallUnit,
     TallUnit,
+    TallUnitOptions,
+    Vanity,
+    VanityOptions,
+    WallUnit,
+    WallUnitOptions,
 } from "../../Models/NewYorkConfigTypes";
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
-import { MirrorCategory } from "../../Models/MirrorConfigTypes";
+import {MirrorCategory} from "../../Models/MirrorConfigTypes";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
-import { ItemFoxPro, Model } from "../../Models/ModelConfigTypes";
+import {ItemFoxPro, Model} from "../../Models/ModelConfigTypes";
 import MirrorConfigurator from "./MirrorConfigurator";
 import useAccordionState from "../../Hooks/useAccordionState";
 import ConfigurationBreakdown from "./ConfigurationBreakdown";
 import useImagesComposition from "../../Hooks/useImagesComposition";
 import ImageSlider from "./ImageSlider";
-import { generateShoppingCartCompositionProductObjs } from "../../utils/shoppingCartUtils";
+import {generateShoppingCartCompositionProductObjs} from "../../utils/shoppingCartUtils";
+import useExtraProductsExpressProgram from "../../Hooks/useExtraProductsExpressProgram.tsx";
+import MultiItemSelector from "./MultiItemSelector.tsx";
+import {ExtraItems} from "../../Models/ExtraItemsHookModels.ts";
 
-/**
- * TODO;
- * 2. add other products options.
- */
 
 interface NewYorkConfiguratorProps {
     composition: Composition;
@@ -334,7 +329,6 @@ function NewYorkConfigurator({
         handleResetMirrorConfigurator: resetMirrorConfigurator,
         handleClearMirrorCategory: clearMirrorCategory,
         getFormattedMirrorSkus,
-        getMirrorProductObj,
         isMirrorCabinetConfigValid,
     } = useMirrorOptions(composition.otherProductsAvailable.mirrors);
 
@@ -669,6 +663,74 @@ function NewYorkConfigurator({
         initialConfiguration
     );
 
+    // |===== EXTRA PRODUCTS =====|
+    const {
+        extraItems,
+        extraItemsCurrentProducts,
+        handleAddExtraProduct,
+        setCurrentDisplayItem,
+        removeConfiguration,
+        handleOptionSelected: handleExtraItemOptionSelected,
+        updateExtraItemsStateOnMainConfigChanges,
+        clearExtraProduct,
+        getExtraItemsProductsGrandTotal,
+        resetExtraItems,
+        validateExtraItemsConfig,
+        getFormattedExtraItemsSkus,
+        getExtraItemsCurrentProductsAsArray
+    } = useExtraProductsExpressProgram(
+        "NEW YORK",
+        initialConfiguration,
+        {
+            vanity: {
+                options: vanityOptions,
+                config: {
+                    vanityObj: currentConfiguration.vanity,
+                    vanitySku: currentConfiguration.vanitySku,
+                    vanityPrice: currentConfiguration.vanityPrice
+                },
+            },
+            washbasin: {
+                options: washbasinOptions,
+                config: {
+                    washbasinSku: currentConfiguration.washbasin,
+                    washbasinPrice: currentConfiguration.washbasinPrice,
+                }
+            },
+            sideUnit: {
+                options: sideUnitOptions,
+                config: {
+                    sideUnitObj: currentConfiguration.sideUnit,
+                    sideUnitSku: currentConfiguration.sideUnitSku,
+                    sideUnitPrice: currentConfiguration.sideUnitPrice
+                }
+            },
+            wallUnit: {
+                options: wallUnitOptions,
+                config: {
+                    wallUnitObj: currentConfiguration.wallUnit,
+                    wallUnitSku: currentConfiguration.wallUnitSku,
+                    wallUnitPrice: currentConfiguration.wallUnitPrice,
+                }
+            },
+            tallUnit: {
+                options: tallUnitOptions,
+                config: {
+                    tallUnitObj: currentConfiguration.tallUnit,
+                    tallUnitSku: currentConfiguration.tallUnitSku,
+                    tallUnitPrice: currentConfiguration.tallUnitPrice
+                }
+            },
+            accessory: {
+                options: accessoryOptions,
+                config: {
+                    accessorySku: currentConfiguration.accessory,
+                    accessoryPrice: currentConfiguration.accessoryPrice
+                }
+            }
+        }
+    );
+
     // |===== GRAND TOTAL =====|
     const grandTotal = useMemo(() => {
         const {
@@ -710,8 +772,7 @@ function NewYorkConfigurator({
                 ? sideUnitPrice * 2
                 : sideUnitPrice;
 
-            const grandTotal =
-                finalVanityPrice +
+            return finalVanityPrice +
                 washbasinPrice +
                 finalSideUnitPrice +
                 wallUnitPrice +
@@ -719,11 +780,10 @@ function NewYorkConfigurator({
                 mirrorCabinetPrice +
                 ledMirrorPrice +
                 openCompMirrorPrice +
-                accessoryPrice;
-
-            return grandTotal;
+                accessoryPrice +
+                getExtraItemsProductsGrandTotal();
         }
-    }, [currentConfiguration, currentMirrorsConfiguration]);
+    }, [currentConfiguration, currentMirrorsConfiguration,extraItemsCurrentProducts]);
 
     // |===== COMPOSITION NAME =====| (repeated logic)
     const [isMissingLabel, setIsMissingLabel] = useState(false);
@@ -763,7 +823,7 @@ function NewYorkConfigurator({
         vanitySku: currentConfiguration.vanitySku,
         isDoubleSink: currentConfiguration.isDoubleSink,
         sinkPosition: composition.sinkPosition,
-        hasSideUnit: sideUnitOptions ? true : false,
+        hasSideUnit: !!sideUnitOptions,
         sideUnitSku: currentConfiguration.sideUnitSku,
         isDoubleSideUnit: currentConfiguration.isDoubleSideUnit,
         currentProducts: currentConfiguration.currentProducts,
@@ -924,9 +984,10 @@ function NewYorkConfigurator({
         }
 
         if (item === "wallUnit") {
-            const copyOptions = structuredClone(
-                wallUnitOptions
-            ) as WallUnitOptions;
+            const crrWallUnitOptions = extraItems.wallUnit.currentlyDisplay !== -1 ?
+                extraItems.wallUnit.configurations[extraItems.wallUnit.currentlyDisplay].options as WallUnitOptions
+                : wallUnitOptions as WallUnitOptions;
+            const copyOptions = structuredClone(crrWallUnitOptions);
 
             // Checks if any handle option should be disabled.
             for (const handleOption of copyOptions.handleOptions) {
@@ -958,9 +1019,11 @@ function NewYorkConfigurator({
                 }
             }
 
-            const wallUnitCurrentConfig = structuredClone(
-                currentConfiguration.wallUnit
-            ) as WallUnit;
+            const crrWallUnitConfig = extraItems.wallUnit.currentlyDisplay !== -1 ?
+                extraItems.wallUnit.currentConfig.wallUnitObj
+                : currentConfiguration.wallUnit;
+            const wallUnitCurrentConfig = structuredClone(crrWallUnitConfig);
+
             wallUnitCurrentConfig[
                 property as keyof typeof wallUnitCurrentConfig
             ] = option;
@@ -972,34 +1035,54 @@ function NewYorkConfigurator({
                 composition.otherProductsAvailable.wallUnits
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: sku });
-            dispatch({
-                type: `set-${item}-price`,
-                payload: price,
-            });
-            dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
-            setWallUnitOptions(copyOptions);
+            const extraItemUpdatedConfigObj = {
+                wallUnitObj: wallUnitCurrentConfig,
+                wallUnitSku: sku,
+                wallUnitPrice: price
+            }
 
-            setWallUnitStatus((prev) => ({
-                ...prev,
-                isWallUnitValid: price > 0,
-            }));
+            if (extraItems.wallUnit.currentlyDisplay !== -1) {
+                handleExtraItemOptionSelected(
+                    item,
+                    extraItems.wallUnit.currentlyDisplay,
+                    extraItemUpdatedConfigObj,
+                    copyOptions,
+                    price > 0,
+                    product
+                );
+            }else {
+                dispatch({ type: `set-${item}-sku`, payload: sku });
+                dispatch({
+                    type: `set-${item}-price`,
+                    payload: price,
+                });
+                dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
+                setWallUnitOptions(copyOptions);
 
-            !wallUnitStatus.isWallUnitSelected &&
+                setWallUnitStatus((prev) => ({
+                    ...prev,
+                    isWallUnitValid: price > 0,
+                }));
+
+                !wallUnitStatus.isWallUnitSelected &&
                 setWallUnitStatus((prev) => ({
                     ...prev,
                     isWallUnitSelected: true,
                 }));
 
-            if (product) {
-                updateCurrentProducts("WALL UNIT", "update", product);
+                if (product) {
+                    updateCurrentProducts("WALL UNIT", "update", product);
+                }
+
+                updateExtraItemsStateOnMainConfigChanges(item,copyOptions,extraItemUpdatedConfigObj);
             }
         }
 
         if (item === "tallUnit") {
-            const copyOptions = structuredClone(
-                tallUnitOptions
-            ) as TallUnitOptions;
+            const crrTallUnitOptions = extraItems.tallUnit.currentlyDisplay !== -1 ?
+                extraItems.tallUnit.configurations[extraItems.tallUnit.currentlyDisplay].options as TallUnitOptions
+                : tallUnitOptions as TallUnitOptions;
+            const copyOptions = structuredClone(crrTallUnitOptions);
 
             // Checks if any handle option should be disabled.
             for (const handleOption of copyOptions.handleOptions) {
@@ -1031,9 +1114,10 @@ function NewYorkConfigurator({
                 }
             }
 
-            const tallUnitCurrentConfig = structuredClone(
-                currentConfiguration.tallUnit
-            ) as TallUnit;
+            const crrTallUnitConfig = extraItems.tallUnit.currentlyDisplay !== -1 ?
+                extraItems.tallUnit.currentConfig.tallUnitObj
+                : currentConfiguration.tallUnit;
+            const tallUnitCurrentConfig = structuredClone(crrTallUnitConfig);
 
             tallUnitCurrentConfig[
                 property as keyof typeof tallUnitCurrentConfig
@@ -1046,31 +1130,50 @@ function NewYorkConfigurator({
                 composition.otherProductsAvailable.tallUnitsLinenClosets
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: sku });
-            dispatch({
-                type: `set-${item}-price`,
-                payload: price,
-            });
-            dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
-            setTallUnitOptions(copyOptions);
+            const extraItemUpdatedConfigObj = {
+                tallUnitObj: tallUnitCurrentConfig,
+                tallUnitSku: sku,
+                tallUnitPrice: price
+            }
 
-            setTallUnitStatus((prev) => ({
-                ...prev,
-                isTallUnitValid: price > 0,
-            }));
+            if (extraItems.tallUnit.currentlyDisplay !== -1) {
+                handleExtraItemOptionSelected(
+                    item,
+                    extraItems.tallUnit.currentlyDisplay,
+                    extraItemUpdatedConfigObj,
+                    copyOptions,
+                    price > 0,
+                    product
+                );
+            }else {
+                dispatch({ type: `set-${item}-sku`, payload: sku });
+                dispatch({
+                    type: `set-${item}-price`,
+                    payload: price,
+                });
+                dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
+                setTallUnitOptions(copyOptions);
 
-            !tallUnitStatus.isTallUnitSelected &&
+                setTallUnitStatus((prev) => ({
+                    ...prev,
+                    isTallUnitValid: price > 0,
+                }));
+
+                !tallUnitStatus.isTallUnitSelected &&
                 setTallUnitStatus((prev) => ({
                     ...prev,
                     isTallUnitSelected: true,
                 }));
 
-            if (product) {
-                updateCurrentProducts(
-                    "TALL UNIT/LINEN CLOSET",
-                    "update",
-                    product
-                );
+                if (product) {
+                    updateCurrentProducts(
+                        "TALL UNIT/LINEN CLOSET",
+                        "update",
+                        product
+                    );
+                }
+
+                updateExtraItemsStateOnMainConfigChanges(item,copyOptions,extraItemUpdatedConfigObj);
             }
         }
 
@@ -1083,18 +1186,36 @@ function NewYorkConfigurator({
                 option
             );
 
-            dispatch({
-                type: `set-${item}-${property}`,
-                payload: sku,
-            });
+            const extraItemUpdatedConfigObj = {
+                accessorySku: sku,
+                accessoryPrice: price
+            }
 
-            dispatch({
-                type: `set-${item}-price`,
-                payload: price,
-            });
+            if (extraItems.accessory.currentlyDisplay !== -1) {
+                handleExtraItemOptionSelected(
+                    item,
+                    extraItems.accessory.currentlyDisplay,
+                    extraItemUpdatedConfigObj,
+                    accessoryOptions,
+                    price > 0,
+                    product
+                );
+            }else {
+                dispatch({
+                    type: `set-${item}-${property}`,
+                    payload: sku,
+                });
 
-            if (product) {
-                updateCurrentProducts("ACCESSORY", "update", product);
+                dispatch({
+                    type: `set-${item}-price`,
+                    payload: price,
+                });
+
+                if (product) {
+                    updateCurrentProducts("ACCESSORY", "update", product);
+                }
+
+                updateExtraItemsStateOnMainConfigChanges(item,accessoryOptions,extraItemUpdatedConfigObj);
             }
         }
 
@@ -1163,6 +1284,12 @@ function NewYorkConfigurator({
             return false;
         }
 
+        const {isExtraItemsConfigValid,messages} = validateExtraItemsConfig();
+        if (!isExtraItemsConfigValid){
+            alert(messages.join("\n"));
+            return false;
+        }
+
         return true;
     };
 
@@ -1170,16 +1297,11 @@ function NewYorkConfigurator({
         if (!isValidConfiguration()) return;
 
         const {
-            vanitySku,
             sideUnit,
-            sideUnitSku,
-            washbasin: washbasinSku,
-            wallUnitSku,
-            tallUnitSku,
-            accessory: accessorySku,
             label,
             isDoubleSink,
             isDoubleSideUnit,
+            currentProducts
         } = currentConfiguration;
 
         const getSecondSideUnit = () => {
@@ -1192,49 +1314,20 @@ function NewYorkConfigurator({
 
         const allFormattedSkus: string[] = [];
 
-        const vanityFormattedSku = `${vanitySku}!!${composition.model}${
-            isDoubleSink ? "--2" : "--1"
-        }##${label}`;
-        allFormattedSkus.push(vanityFormattedSku);
+        for (const product of currentProducts) {
+            if (product.item === "VANITY") {
+                allFormattedSkus.push(
+                    `${product.uscode}!!${composition.model}${isDoubleSink ? "--2" : "--1"
+                    }##${label}`
+                );
+            } else {
+                allFormattedSkus.push(`${product.uscode}!!${composition.model}--1##${label}`);
+                if (product.item === "SIDE UNIT" && isDoubleSideUnit) allFormattedSkus.push(getSecondSideUnit());
+            }
+        }
 
-        const sideUnitFormattedSku = sideUnitSku
-            ? `${sideUnitSku}!!${composition.model}--1##${label}`
-            : "";
-        sideUnitFormattedSku && allFormattedSkus.push(sideUnitFormattedSku);
-
-        const secondSideUnitFormattedSku = isDoubleSideUnit
-            ? getSecondSideUnit()
-            : "";
-        secondSideUnitFormattedSku &&
-            allFormattedSkus.push(secondSideUnitFormattedSku);
-
-        const washbasinFormattedSku = washbasinSku
-            ? `${washbasinSku}!!${composition.model}--1##${label}`
-            : "";
-        washbasinFormattedSku && allFormattedSkus.push(washbasinFormattedSku);
-
-        const wallUnitFormattedSku = wallUnitSku
-            ? `${wallUnitSku}!!${composition.model}--1##${label}`
-            : "";
-        wallUnitFormattedSku && allFormattedSkus.push(wallUnitFormattedSku);
-
-        const tallUnitFormattedSku = tallUnitSku
-            ? `${tallUnitSku}!!${composition.model}--1##${label}`
-            : "";
-        tallUnitFormattedSku && allFormattedSkus.push(tallUnitFormattedSku);
-
-        const accessoryFormattedSku = accessorySku
-            ? `${accessorySku}!!${composition.model}--1##${label}`
-            : "";
-        accessoryFormattedSku && allFormattedSkus.push(accessoryFormattedSku);
-
-        // ========= VVVV MIRROR (REPEATED LOGIC) ==========VVVVV
-        getFormattedMirrorSkus(
-            composition.model,
-            currentConfiguration.label,
-            allFormattedSkus
-        );
-
+        getFormattedMirrorSkus(composition.model, label, allFormattedSkus);
+        getFormattedExtraItemsSkus(allFormattedSkus,composition.model,label);
         router.get("/orders/create-so-num", {
             SKU: allFormattedSkus.join("~"),
         });
@@ -1259,9 +1352,15 @@ function NewYorkConfigurator({
             type: `update-current-products`,
             payload: initialConfiguration.currentProducts,
         });
+        resetExtraItems();
     };
 
     const handleClearItem = (item: string) => {
+        if (extraItems[item as keyof typeof extraItems].currentlyDisplay !== -1){
+            clearExtraProduct(item as keyof ExtraItems,extraItems[item as keyof typeof extraItems].currentlyDisplay);
+            return;
+        }
+
         switch (item) {
             case "washbasin":
                 updateCurrentProducts("WASHBASIN/SINK", "remove");
@@ -1276,6 +1375,7 @@ function NewYorkConfigurator({
                     isWallUnitValid: false,
                 });
                 dispatch({ type: "reset-wallUnit", payload: "" });
+                updateExtraItemsStateOnMainConfigChanges(item);
                 break;
 
             case "tallUnit":
@@ -1286,11 +1386,13 @@ function NewYorkConfigurator({
                     isTallUnitValid: false,
                 });
                 dispatch({ type: "reset-tallUnit", payload: "" });
+                updateExtraItemsStateOnMainConfigChanges(item);
                 break;
 
             case "accessory":
                 updateCurrentProducts("ACCESSORY", "remove");
                 dispatch({ type: "reset-accessory", payload: "" });
+                updateExtraItemsStateOnMainConfigChanges(item);
                 break;
 
             default:
@@ -1298,12 +1400,6 @@ function NewYorkConfigurator({
         }
     };
 
-    /**
-     * Refactoring;
-     *
-     * function that creates ShoppingCartCompositionProduct objects.
-     *
-     */
     const handleAddToCart = () => {
         if (!isValidConfiguration()) return;
 
@@ -1316,7 +1412,7 @@ function NewYorkConfigurator({
             return `${Object.values(rightSideUnitCodes!).join("-")}`;
         };
 
-        const secondSideUnitSku = isDoubleSideUnit ? getSecondSideUnit() : "";        
+        const secondSideUnitSku = isDoubleSideUnit ? getSecondSideUnit() : "";
         const sideUnitsArr = composition.sideUnits.filter(
             (sideUnit) =>
                 sideUnit.uscode === sideUnitSku ||
@@ -1335,6 +1431,9 @@ function NewYorkConfigurator({
                 tallUnit: [] as ShoppingCartCompositionProduct[],
                 accessory: [] as ShoppingCartCompositionProduct[],
                 mirror: [] as ShoppingCartCompositionProduct[],
+                vanity: [] as ShoppingCartCompositionProduct[],
+                washbasin: [] as ShoppingCartCompositionProduct[],
+                sideUnit: [] as ShoppingCartCompositionProduct[],
             } as OtherItems,
             isDoubleSink,
             isDoubleSideUnit,
@@ -1344,18 +1443,12 @@ function NewYorkConfigurator({
         const allConfigs = {
             modelConfig: currentConfiguration,
             mirrorConfig: currentMirrorsConfiguration,
+            extraItemsConfig: {
+                currentProducts: getExtraItemsCurrentProductsAsArray(),
+            }
         };
 
         generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,sideUnitsArr,isDoubleSideUnit,isDoubleSink);
-            
-        console.log("==== handleAddToCart ====");
-        console.log("currentConfiguration:", currentConfiguration);
-        console.log(
-            "currentMirrorsConfiguration:",
-            currentMirrorsConfiguration
-        );
-        console.log("shoppingCartObj:", shoppingCartObj);        
-
         onAddToCart(shoppingCartObj);
     };
 
@@ -1401,6 +1494,7 @@ function NewYorkConfigurator({
                         mirrorProductsConfigurator={
                             currentMirrorsConfiguration.currentProducts
                         }
+                        extraItemsProducts={getExtraItemsCurrentProductsAsArray()}
                         isDoubleSink={currentConfiguration.isDoubleSink}
                         isDoubleSideUnit={currentConfiguration.isDoubleSideUnit}
                     />
@@ -1511,13 +1605,21 @@ function NewYorkConfigurator({
                             src={`https://${location.hostname}/images/express-program/NEW YORK/options/wall-unit.webp`}
                             alt="image of wall unit"
                         />
+                        <MultiItemSelector
+                            item={"wallUnit"}
+                            initialOptions={initialWallUnitOptions as WallUnitOptions}
+                            extraItems={extraItems}
+                            handleAddExtraProduct={handleAddExtraProduct}
+                            setCurrentDisplayItem={setCurrentDisplayItem}
+                            removeConfiguration={removeConfiguration}
+                        />
                         <Options
                             item="wallUnit"
                             property="handle"
                             title="SELECT HANDLE"
-                            options={wallUnitOptions?.handleOptions}
+                            options={extraItems.wallUnit.currentOptions.handleOptions}
                             crrOptionSelected={
-                                currentConfiguration.wallUnit?.handle!
+                                extraItems.wallUnit.currentConfig.wallUnitObj.handle
                             }
                             onOptionSelected={handleOptionSelected}
                         />
@@ -1525,9 +1627,9 @@ function NewYorkConfigurator({
                             item="wallUnit"
                             property="finish"
                             title="SELECT FINISH"
-                            options={wallUnitOptions?.finishOptions}
+                            options={extraItems.wallUnit.currentOptions.finishOptions}
                             crrOptionSelected={
-                                currentConfiguration.wallUnit?.finish!
+                                extraItems.wallUnit.currentConfig.wallUnitObj.finish
                             }
                             onOptionSelected={handleOptionSelected}
                         />
@@ -1550,13 +1652,21 @@ function NewYorkConfigurator({
                             src={`https://${location.hostname}/images/express-program/NEW YORK/options/tall-unit.webp`}
                             alt="image of tall unit"
                         />
+                        <MultiItemSelector
+                            item={"tallUnit"}
+                            initialOptions={initialTallUnitOptions as TallUnitOptions}
+                            extraItems={extraItems}
+                            handleAddExtraProduct={handleAddExtraProduct}
+                            setCurrentDisplayItem={setCurrentDisplayItem}
+                            removeConfiguration={removeConfiguration}
+                        />
                         <Options
                             item="tallUnit"
                             property="handle"
                             title="SELECT HANDLE"
-                            options={tallUnitOptions?.handleOptions}
+                            options={extraItems.tallUnit.currentOptions.handleOptions}
                             crrOptionSelected={
-                                currentConfiguration.tallUnit?.handle!
+                                extraItems.tallUnit.currentConfig.tallUnitObj.handle
                             }
                             onOptionSelected={handleOptionSelected}
                         />
@@ -1564,9 +1674,9 @@ function NewYorkConfigurator({
                             item="tallUnit"
                             property="finish"
                             title="SELECT FINISH"
-                            options={tallUnitOptions?.finishOptions}
+                            options={extraItems.tallUnit.currentOptions.finishOptions}
                             crrOptionSelected={
-                                currentConfiguration.tallUnit?.finish!
+                                extraItems.tallUnit.currentConfig.tallUnitObj.finish
                             }
                             onOptionSelected={handleOptionSelected}
                         />
@@ -1584,12 +1694,20 @@ function NewYorkConfigurator({
                         onNavigation={handleOrderedAccordion}
                         onClear={handleClearItem}
                     >
+                        <MultiItemSelector
+                            item={"accessory"}
+                            initialOptions={accessoryOptions as Option[]}
+                            extraItems={extraItems}
+                            handleAddExtraProduct={handleAddExtraProduct}
+                            setCurrentDisplayItem={setCurrentDisplayItem}
+                            removeConfiguration={removeConfiguration}
+                        />
                         <Options
                             item="accessory"
                             property="type"
                             title="SELECT ACCESSORY"
-                            options={accessoryOptions}
-                            crrOptionSelected={currentConfiguration.accessory}
+                            options={extraItems.accessory.currentOptions}
+                            crrOptionSelected={extraItems.accessory.currentConfig.accessorySku}
                             onOptionSelected={handleOptionSelected}
                         />
                     </ItemPropertiesAccordion>
@@ -1631,13 +1749,13 @@ function NewYorkConfigurator({
                         SPECS
                     </a>
                     <button
-                        disabled={grandTotal === 0}
+                        disabled={!grandTotal}
                         onClick={handleOrderNow}
                     >
                         ORDER NOW
                     </button>
                     <button
-                        disabled={grandTotal === 0}
+                        disabled={!grandTotal}
                         onClick={handleAddToCart}
                     >
                         ADD TO CART

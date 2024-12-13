@@ -1,27 +1,24 @@
-import { Composition } from "../../Models/Composition";
+import {Composition} from "../../Models/Composition";
 import classes from "../../../css/product-configurator.module.css";
-import { useMemo, useReducer, useState } from "react";
+import {useMemo, useReducer, useState} from "react";
 import type {
     Option,
     OtherItems,
     ShoppingCartComposition,
-    ShoppingCartCompositionProduct,    
+    ShoppingCartCompositionProduct,
 } from "../../Models/ExpressProgramModels";
 import Options from "./Options";
 import ConfigurationName from "./ConfigurationName";
-import { router } from "@inertiajs/react";
-import {
-    getSkuAndPrice,
-    isAlphanumericWithSpaces,
-} from "../../utils/helperFunc";
-import { ProductInventory } from "../../Models/Product";
-import { Model } from "../../Models/ModelConfigTypes";
+import {router} from "@inertiajs/react";
+import {getSkuAndPrice, isAlphanumericWithSpaces,} from "../../utils/helperFunc";
+import {ProductInventory} from "../../Models/Product";
+import {Model} from "../../Models/ModelConfigTypes";
 import useImagesComposition from "../../Hooks/useImagesComposition";
 import ImageSlider from "./ImageSlider";
 import ConfigurationBreakdown from "./ConfigurationBreakdown";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import useAccordionState from "../../Hooks/useAccordionState";
-import { generateShoppingCartCompositionProductObjs } from "../../utils/shoppingCartUtils";
+import {generateShoppingCartCompositionProductObjs} from "../../utils/shoppingCartUtils";
 
 /**
  * TODO;
@@ -138,14 +135,13 @@ function OtherModelsConfigurator({
         useAccordionState();
 
     const accordionsOrder = useMemo(() => {
-        let arr: string[] = ["vanity"];
-        return arr;
+        return ["vanity"];
     }, []);
 
     // |====== Events ======|
     const handleOptionSelected = (
         item: string,
-        property: string,
+        _property: string,
         option: string
     ) => {
         if (item === "vanity") {
@@ -209,9 +205,7 @@ function OtherModelsConfigurator({
 
         if (vanityPrice === 0) return 0;
         else {
-            const grandTotal = vanityPrice;
-
-            return grandTotal;
+            return vanityPrice;
         }
     }, [currentConfiguration]);
 
@@ -250,14 +244,7 @@ function OtherModelsConfigurator({
     const handleAddToCart = () => {
         if (!isValidConfiguration()) return;
 
-        const { vanity: vanitySku, label } = currentConfiguration;
-
-        const otherProducts = {
-            wallUnit: [] as ProductInventory[],
-            tallUnit: [] as ProductInventory[],
-            accessory: [] as ProductInventory[],
-            mirror: [] as ProductInventory[],
-        };
+        const { label } = currentConfiguration;
 
         const shoppingCartObj: ShoppingCartComposition = {
             info: composition,
@@ -278,10 +265,10 @@ function OtherModelsConfigurator({
         };
 
         const allConfigs = {
-            modelConfig: currentConfiguration,            
+            modelConfig: currentConfiguration,
         };
 
-        generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,null,false,false);        
+        generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,null,false,false);
         onAddToCart(shoppingCartObj);
     };
 
@@ -325,6 +312,7 @@ function OtherModelsConfigurator({
                             currentConfiguration.currentProducts
                         }
                         mirrorProductsConfigurator={[]}
+                        extraItemsProducts={[]}
                         isDoubleSink={false}
                         isDoubleSideUnit={false}
                     />
@@ -371,13 +359,13 @@ function OtherModelsConfigurator({
                         SPECS
                     </a>
                     <button
-                        disabled={grandTotal === 0}
+                        disabled={!grandTotal}
                         onClick={handleOrderNow}
                     >
                         ORDER NOW
                     </button>
                     <button
-                        disabled={grandTotal === 0}
+                        disabled={!grandTotal}
                         onClick={handleAddToCart}
                     >
                         ADD TO CART

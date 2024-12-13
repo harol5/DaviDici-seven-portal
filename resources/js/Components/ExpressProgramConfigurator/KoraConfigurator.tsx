@@ -1,36 +1,31 @@
-import { useMemo, useReducer, useState } from "react";
-import type { Composition } from "../../Models/Composition";
+import {useMemo, useReducer, useState} from "react";
+import type {Composition} from "../../Models/Composition";
 import type {
     Option,
     OtherItems,
     ShoppingCartComposition,
     ShoppingCartCompositionProduct,
 } from "../../Models/ExpressProgramModels";
-import type {
-    Vanity,
-    VanityOptions,
-    CurrentConfiguration,
-} from "../../Models/KoraConfigTypes";
-import {
-    getSkuAndPrice,
-    isAlphanumericWithSpaces,
-    scrollToView,
-} from "../../utils/helperFunc";
-import { router } from "@inertiajs/react";
-import { ProductInventory } from "../../Models/Product";
+import type {CurrentConfiguration, Vanity, VanityOptions,} from "../../Models/KoraConfigTypes";
+import {getSkuAndPrice, isAlphanumericWithSpaces, scrollToView,} from "../../utils/helperFunc";
+import {router} from "@inertiajs/react";
+import {ProductInventory} from "../../Models/Product";
 import classes from "../../../css/product-configurator.module.css";
 import ConfigurationName from "./ConfigurationName";
 import Options from "./Options";
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
-import { MirrorCategory } from "../../Models/MirrorConfigTypes";
-import { ItemFoxPro, Model } from "../../Models/ModelConfigTypes";
+import {MirrorCategory} from "../../Models/MirrorConfigTypes";
+import {ItemFoxPro, Model} from "../../Models/ModelConfigTypes";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import MirrorConfigurator from "./MirrorConfigurator";
 import useAccordionState from "../../Hooks/useAccordionState";
 import ConfigurationBreakdown from "./ConfigurationBreakdown";
 import useImagesComposition from "../../Hooks/useImagesComposition";
 import ImageSlider from "./ImageSlider";
-import { generateShoppingCartCompositionProductObjs } from "../../utils/shoppingCartUtils";
+import {generateShoppingCartCompositionProductObjs} from "../../utils/shoppingCartUtils";
+import useExtraProductsExpressProgram from "../../Hooks/useExtraProductsExpressProgram.tsx";
+import MultiItemSelector from "./MultiItemSelector.tsx";
+import {ExtraItems} from "../../Models/ExtraItemsHookModels.ts";
 
 interface KoraConfiguratorProps {
     composition: Composition;
@@ -265,6 +260,50 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
         initialConfiguration
     );
 
+    // |===== EXTRA PRODUCTS =====|
+    const {
+        extraItems,
+        extraItemsCurrentProducts,
+        handleAddExtraProduct,
+        setCurrentDisplayItem,
+        removeConfiguration,
+        handleOptionSelected: handleExtraItemOptionSelected,
+        updateExtraItemsStateOnMainConfigChanges,
+        clearExtraProduct,
+        getExtraItemsProductsGrandTotal,
+        resetExtraItems,
+        validateExtraItemsConfig,
+        getFormattedExtraItemsSkus,
+        getExtraItemsCurrentProductsAsArray
+    } = useExtraProductsExpressProgram(
+        "KORA",
+        initialConfiguration,
+        {
+            vanity: {
+                options: vanityOptions,
+                config: {
+                    vanityObj: currentConfiguration.vanity,
+                    vanitySku: currentConfiguration.vanitySku,
+                    vanityPrice: currentConfiguration.vanityPrice
+                },
+            },
+            washbasin: {
+                options: washbasinOptions,
+                config: {
+                    washbasinSku: currentConfiguration.washbasin,
+                    washbasinPrice: currentConfiguration.washbasinPrice,
+                }
+            },
+            accessory: {
+                options: accessoryOptions,
+                config: {
+                    accessorySku: currentConfiguration.accessory,
+                    accessoryPrice: currentConfiguration.accessoryPrice
+                }
+            }
+        }
+    );
+
     // |===== ACCORDION =====|
     const { accordionState, handleAccordionState, handleOrderedAccordion } =
         useAccordionState();
@@ -307,17 +346,15 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
                 ? vanityPrice * 2
                 : vanityPrice;
 
-            const grandTotal =
-                finalVanityPrice +
+            return finalVanityPrice +
                 washbasinPrice +
                 mirrorCabinetPrice +
                 ledMirrorPrice +
                 openCompMirrorPrice +
-                accessoryPrice;
-
-            return grandTotal;
+                accessoryPrice +
+                getExtraItemsProductsGrandTotal();
         }
-    }, [currentConfiguration, currentMirrorsConfiguration]);
+    }, [currentConfiguration, currentMirrorsConfiguration, extraItemsCurrentProducts]);
 
     // |===== COMPOSITION NAME =====| (repeated logic)
     const [isMissingLabel, setIsMissingLabel] = useState(false);
@@ -448,17 +485,35 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
                 option
             );
 
-            dispatch({
-                type: `set-${item}-${property}`,
-                payload: sku,
-            });
-            dispatch({
-                type: `set-${item}-price`,
-                payload: price,
-            });
+            const extraItemUpdatedConfigObj = {
+                accessorySku: sku,
+                accessoryPrice: price
+            }
 
-            if (product) {
-                updateCurrentProducts("ACCESSORY", "update", product);
+            if (extraItems.accessory.currentlyDisplay !== -1) {
+                handleExtraItemOptionSelected(
+                    item,
+                    extraItems.accessory.currentlyDisplay,
+                    extraItemUpdatedConfigObj,
+                    accessoryOptions,
+                    price > 0,
+                    product
+                );
+            }else {
+                dispatch({
+                    type: `set-${item}-${property}`,
+                    payload: sku,
+                });
+                dispatch({
+                    type: `set-${item}-price`,
+                    payload: price,
+                });
+
+                if (product) {
+                    updateCurrentProducts("ACCESSORY", "update", product);
+                }
+
+                updateExtraItemsStateOnMainConfigChanges(item,accessoryOptions,extraItemUpdatedConfigObj);
             }
         }
 
@@ -505,6 +560,12 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
             return false;
         }
 
+        const {isExtraItemsConfigValid,messages} = validateExtraItemsConfig()
+        if (!isExtraItemsConfigValid){
+            alert(messages.join("\n"));
+            return false;
+        }
+
         return true;
     };
 
@@ -513,36 +574,41 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
 
         const {
             label,
-            vanitySku,
-            washbasin: washbasinSku,
             isDoubleSink,
-            accessory: accessorySku,
+            currentProducts
         } = currentConfiguration;
 
         const allFormattedSkus: string[] = [];
 
-        const vanityFormattedSku = `${vanitySku}!!${composition.model}--${
-            isDoubleSink ? "2" : "1"
-        }##${label}`;
-        allFormattedSkus.push(vanityFormattedSku);
+        for (const product of currentProducts) {
+            if (product.item === "VANITY") {
+                allFormattedSkus.push(
+                    `${product.uscode}!!${composition.model}${isDoubleSink ? "--2" : "--1"
+                    }##${label}`
+                );
+            }else {
+                allFormattedSkus.push(`${product.uscode}!!${composition.model}--1##${label}`)
+            }
+        }
 
-        const washbasinFormattedSku = washbasinSku
-            ? `${washbasinSku}!!${composition.model}--1##${label}`
-            : "";
-        washbasinFormattedSku && allFormattedSkus.push(washbasinFormattedSku);
-
-        const accessoryFormattedSku = accessorySku
-            ? `${accessorySku}!!${composition.model}--1##${label}`
-            : "";
-        accessoryFormattedSku && allFormattedSkus.push(accessoryFormattedSku);
+        // const vanityFormattedSku = `${vanitySku}!!${composition.model}--${
+        //     isDoubleSink ? "2" : "1"
+        // }##${label}`;
+        // allFormattedSkus.push(vanityFormattedSku);
+        //
+        // const washbasinFormattedSku = washbasinSku
+        //     ? `${washbasinSku}!!${composition.model}--1##${label}`
+        //     : "";
+        // washbasinFormattedSku && allFormattedSkus.push(washbasinFormattedSku);
+        //
+        // const accessoryFormattedSku = accessorySku
+        //     ? `${accessorySku}!!${composition.model}--1##${label}`
+        //     : "";
+        // accessoryFormattedSku && allFormattedSkus.push(accessoryFormattedSku);
 
         // ========= VVVV MIRROR (REPEATED LOGIC) ==========VVVVV
-        getFormattedMirrorSkus(
-            composition.model,
-            currentConfiguration.label,
-            allFormattedSkus
-        );
-
+        getFormattedMirrorSkus(composition.model, label, allFormattedSkus);
+        getFormattedExtraItemsSkus(allFormattedSkus,composition.model,label);
         router.get("/orders/create-so-num", {
             SKU: allFormattedSkus.join("~"),
         });
@@ -556,9 +622,15 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
             type: `update-current-products`,
             payload: initialConfiguration.currentProducts,
         });
+        resetExtraItems();
     };
 
     const handleClearItem = (item: string) => {
+        if (extraItems[item as keyof typeof extraItems].currentlyDisplay !== -1){
+            clearExtraProduct(item as keyof ExtraItems,extraItems[item as keyof typeof extraItems].currentlyDisplay);
+            return;
+        }
+
         switch (item) {
             case "washbasin":
                 updateCurrentProducts("WASHBASIN/SINK", "remove");
@@ -568,6 +640,7 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
             case "accessory":
                 updateCurrentProducts("ACCESSORY", "remove");
                 dispatch({ type: "reset-accessory", payload: "" });
+                updateExtraItemsStateOnMainConfigChanges(item);
                 break;
 
             default:
@@ -596,6 +669,9 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
                 tallUnit: [] as ShoppingCartCompositionProduct[],
                 accessory: [] as ShoppingCartCompositionProduct[],
                 mirror: [] as ShoppingCartCompositionProduct[],
+                vanity: [] as ShoppingCartCompositionProduct[],
+                washbasin: [] as ShoppingCartCompositionProduct[],
+                sideUnit: [] as ShoppingCartCompositionProduct[],
             } as OtherItems,
             isDoubleSink,
             isDoubleSideUnit: false,
@@ -605,6 +681,9 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
         const allConfigs = {
             modelConfig: currentConfiguration,
             mirrorConfig: currentMirrorsConfiguration,
+            extraItemsConfig: {
+                currentProducts: getExtraItemsCurrentProductsAsArray(),
+            }
         };
 
         generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,null,false,isDoubleSink);
@@ -653,6 +732,7 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
                         mirrorProductsConfigurator={
                             currentMirrorsConfiguration.currentProducts
                         }
+                        extraItemsProducts={getExtraItemsCurrentProductsAsArray()}
                         isDoubleSink={currentConfiguration.isDoubleSink}
                         isDoubleSideUnit={false}
                     />
@@ -715,12 +795,20 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
                         onNavigation={handleOrderedAccordion}
                         onClear={handleClearItem}
                     >
+                        <MultiItemSelector
+                            item={"accessory"}
+                            initialOptions={accessoryOptions as Option[]}
+                            extraItems={extraItems}
+                            handleAddExtraProduct={handleAddExtraProduct}
+                            setCurrentDisplayItem={setCurrentDisplayItem}
+                            removeConfiguration={removeConfiguration}
+                        />
                         <Options
                             item="accessory"
                             property="type"
                             title="SELECT ACCESSORY"
-                            options={accessoryOptions}
-                            crrOptionSelected={currentConfiguration.accessory}
+                            options={extraItems.accessory.currentOptions}
+                            crrOptionSelected={extraItems.accessory.currentConfig.accessorySku}
                             onOptionSelected={handleOptionSelected}
                         />
                     </ItemPropertiesAccordion>
@@ -762,13 +850,13 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
                         SPECS
                     </a>
                     <button
-                        disabled={!grandTotal ? true : false}
+                        disabled={!grandTotal}
                         onClick={handleOrderNow}
                     >
                         ORDER NOW
                     </button>
                     <button
-                        disabled={!grandTotal ? true : false}
+                        disabled={!grandTotal}
                         onClick={handleAddToCart}
                     >
                         ADD TO CART

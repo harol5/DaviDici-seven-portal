@@ -22,14 +22,14 @@ function MultiItemSelector({
 }: MultiItemOptionsProps) {
     return (
         <>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
                 <button
                     className={
                         extraItems[item].currentlyDisplay === -1 ? "border rounded bg-davidiciGold text-white py-1 px-2" : "border rounded border-davidiciGold py-1 px-2"
                     }
                     onClick={() => setCurrentDisplayItem(item, -1)}
                 >
-                    main
+                    {`${item} 1`}
                 </button>
                 {extraItems[item].configurations.map((_configuration, index) => (
                     <span
@@ -40,7 +40,7 @@ function MultiItemSelector({
                             className={extraItems[item].currentlyDisplay === index ? "text-white py-1 px-2 cursor-pointer" : "py-1 px-2 cursor-pointer"}
                             onClick={() => setCurrentDisplayItem(item, index)}
                         >
-                            {`${item} ${index + 1}`}
+                            {`${item} ${index + 2}`}
                         </span>
                         <button
                             className="px-2 mr-1 rounded h-[80%] self-center hover:bg-red-500 hover:text-white"

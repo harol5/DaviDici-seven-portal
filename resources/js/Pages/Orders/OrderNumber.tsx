@@ -14,6 +14,9 @@ interface OrderNumberProps {
     salesRepsList: SalesRep[];
 }
 
+/*
+* TODO: the 'salesRepsList' prop is returning null value.
+ */
 function OrderNumber({
                          auth,
                          nextOrderNumber,
@@ -75,7 +78,7 @@ function OrderNumber({
     };
 
     const salesRepsListSanitized: SalesRep[] = useMemo(() => {
-        if (salesRepsList.length !== 0) return salesRepsList.filter(rep => Boolean(rep.username));
+        if (salesRepsList && salesRepsList.length !== 0) return salesRepsList.filter(rep => Boolean(rep.username));
         return []
     }, []);
 

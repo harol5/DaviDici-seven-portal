@@ -39,6 +39,9 @@ export type OtherItems = {
     accessory: ShoppingCartCompositionProduct[];
     mirror: ShoppingCartCompositionProduct[];
     drawerBase?: ShoppingCartCompositionProduct[];
+    washbasin?: ShoppingCartCompositionProduct[];
+    sideUnit?: ShoppingCartCompositionProduct[];
+    vanity?: ShoppingCartCompositionProduct[];
 };
 export const OtherItemsLoopUp = {
     "WALL UNIT": "wallUnit",
@@ -48,6 +51,9 @@ export const OtherItemsLoopUp = {
     "DRAWER/VANITY": "drawerBase",
     TOP: "top",
     "VESSEL SINK": "vesselSink",
+    "WASHBASIN/SINK": "washbasin",
+    "SIDE UNIT": "sideUnit",
+    "VANITY": "vanity",
 };
 export type ShoppingCartComposition = {
     info: Composition;

@@ -6,16 +6,8 @@ import type {
     ShoppingCartComposition,
     ShoppingCartCompositionProduct,
 } from "../../Models/ExpressProgramModels";
-import type {
-    Vanity,
-    VanityOptions,
-    CurrentConfiguration,
-} from "../../Models/KoraXlConfigTypes";
-import {
-    getSkuAndPrice,
-    isAlphanumericWithSpaces,
-    scrollToView,
-} from "../../utils/helperFunc";
+import type {CurrentConfiguration, Vanity, VanityOptions,} from "../../Models/KoraXlConfigTypes";
+import {getSkuAndPrice, isAlphanumericWithSpaces, scrollToView,} from "../../utils/helperFunc";
 import {router} from "@inertiajs/react";
 import {ProductInventory} from "../../Models/Product";
 import classes from "../../../css/product-configurator.module.css";
@@ -31,6 +23,9 @@ import ConfigurationBreakdown from "./ConfigurationBreakdown";
 import useImagesComposition from "../../Hooks/useImagesComposition";
 import ImageSlider from "./ImageSlider";
 import {generateShoppingCartCompositionProductObjs} from "../../utils/shoppingCartUtils";
+import useExtraProductsExpressProgram from "../../Hooks/useExtraProductsExpressProgram.tsx";
+import MultiItemSelector from "./MultiItemSelector.tsx";
+import {ExtraItems} from "../../Models/ExtraItemsHookModels.ts";
 
 interface KoraXlConfiguratorProps {
     composition: Composition;
@@ -288,6 +283,52 @@ function KoraXlConfigurator({
         initialConfiguration
     );
 
+    // |===== EXTRA PRODUCTS =====|
+    const {
+        extraItems,
+        extraItemsCurrentProducts,
+        handleAddExtraProduct,
+        setCurrentDisplayItem,
+        removeConfiguration,
+        handleOptionSelected: handleExtraItemOptionSelected,
+        updateExtraItemsStateOnMainConfigChanges,
+        clearExtraProduct,
+        getExtraItemsProductsGrandTotal,
+        resetExtraItems,
+        validateExtraItemsConfig,
+        getFormattedExtraItemsSkus,
+        getExtraItemsCurrentProductsAsArray
+    } = useExtraProductsExpressProgram(
+        "KORA XL",
+        initialConfiguration,
+        {
+            vanity: {
+                options: vanityOptions,
+                config: {
+                    vanityObj: currentConfiguration.vanity,
+                    vanitySku: currentConfiguration.vanitySku,
+                    vanityPrice: currentConfiguration.vanityPrice
+                },
+            },
+            washbasin: {
+                options: washbasinOptions,
+                config: {
+                    washbasinSku: currentConfiguration.washbasin,
+                    washbasinPrice: currentConfiguration.washbasinPrice,
+                }
+            },
+            tallUnit: {
+                options: tallUnitOptions,
+                config: {
+                    tallUnitObj: null,
+                    tallUnitSku: currentConfiguration.tallUnit,
+                    tallUnitPrice: currentConfiguration.tallUnitPrice
+                }
+            },
+        }
+    );
+
+
     // |===== GRAND TOTAL =====|
     const grandTotal = useMemo(() => {
         const {vanityPrice, washbasinPrice, isDoubleSink, tallUnitPrice} =
@@ -316,17 +357,15 @@ function KoraXlConfigurator({
                 ? vanityPrice * 2
                 : vanityPrice;
 
-            const grandTotal =
-                finalVanityPrice +
+            return finalVanityPrice +
                 washbasinPrice +
                 tallUnitPrice +
                 mirrorCabinetPrice +
                 ledMirrorPrice +
-                openCompMirrorPrice;
-
-            return grandTotal;
+                openCompMirrorPrice +
+                getExtraItemsProductsGrandTotal();
         }
-    }, [currentConfiguration, currentMirrorsConfiguration]);
+    }, [currentConfiguration, currentMirrorsConfiguration, extraItemsCurrentProducts]);
 
     // |===== COMPOSITION NAME =====| (repeated logic)
     const [isMissingLabel, setIsMissingLabel] = useState(false);
@@ -456,32 +495,50 @@ function KoraXlConfigurator({
                 option
             );
 
-            dispatch({
-                type: `set-${item}-${property}`,
-                payload: sku,
-            });
+            const extraItemUpdatedConfigObj = {
+                tallUnitObj: null,
+                tallUnitSku: sku,
+                tallUnitPrice: price,
+            }
 
-            dispatch({
-                type: `set-${item}-price`,
-                payload: price,
-            });
-
-            setTallUnitStatus((prev) => ({
-                ...prev,
-                isTallUnitValid: price > 0,
-                isTallUnitSelected: true,
-            }));
-
-            if (product) {
-                updateCurrentProducts(
-                    "TALL UNIT/LINEN CLOSET",
-                    "update",
+            if (extraItems.tallUnit.currentlyDisplay !== -1) {
+                handleExtraItemOptionSelected(
+                    item,
+                    extraItems.tallUnit.currentlyDisplay,
+                    extraItemUpdatedConfigObj,
+                    tallUnitOptions,
+                    price > 0,
                     product
                 );
+            }else {
+                dispatch({
+                    type: `set-${item}-${property}`,
+                    payload: sku,
+                });
+
+                dispatch({
+                    type: `set-${item}-price`,
+                    payload: price,
+                });
+
+                setTallUnitStatus((prev) => ({
+                    ...prev,
+                    isTallUnitValid: price > 0,
+                    isTallUnitSelected: true,
+                }));
+
+                if (product) {
+                    updateCurrentProducts(
+                        "TALL UNIT/LINEN CLOSET",
+                        "update",
+                        product
+                    );
+                }
+
+                updateExtraItemsStateOnMainConfigChanges(item,tallUnitOptions,extraItemUpdatedConfigObj);
             }
         }
 
-        // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
         updateMirrorOptions(
             item,
             property,
@@ -535,6 +592,12 @@ function KoraXlConfigurator({
             return false;
         }
 
+        const {isExtraItemsConfigValid,messages} = validateExtraItemsConfig();
+        if (!isExtraItemsConfigValid){
+            alert(messages.join("\n"));
+            return false;
+        }
+
         return true;
     };
 
@@ -543,36 +606,25 @@ function KoraXlConfigurator({
 
         const {
             label,
-            vanitySku,
-            washbasin: washbasinSku,
             isDoubleSink,
-            tallUnit: tallUnitSku,
+            currentProducts
         } = currentConfiguration;
 
         const allFormattedSkus: string[] = [];
 
-        const vanityFormattedSku = `${vanitySku}!!${composition.model}--${
-            isDoubleSink ? "2" : "1"
-        }##${label}`;
-        allFormattedSkus.push(vanityFormattedSku);
+        for (const product of currentProducts) {
+            if (product.item === "VANITY") {
+                allFormattedSkus.push(
+                    `${product.uscode}!!${composition.model}${isDoubleSink ? "--2" : "--1"
+                    }##${label}`
+                );
+            } else {
+                allFormattedSkus.push(`${product.uscode}!!${composition.model}--1##${label}`)
+            }
+        }
 
-        const washbasinFormattedSku = washbasinSku
-            ? `${washbasinSku}!!${composition.model}--1##${label}`
-            : "";
-        washbasinFormattedSku && allFormattedSkus.push(washbasinFormattedSku);
-
-        const tallUnitFormattedSku = tallUnitSku
-            ? `${tallUnitSku}!!${composition.model}--1##${label}`
-            : "";
-        tallUnitFormattedSku && allFormattedSkus.push(tallUnitFormattedSku);
-
-        // ========= VVVV MIRROR (REPEATED LOGIC) ==========VVVVV
-        getFormattedMirrorSkus(
-            composition.model,
-            currentConfiguration.label,
-            allFormattedSkus
-        );
-
+        getFormattedMirrorSkus(composition.model, label, allFormattedSkus);
+        getFormattedExtraItemsSkus(allFormattedSkus,composition.model,label);
         router.get("/orders/create-so-num", {
             SKU: allFormattedSkus.join("~"),
         });
@@ -590,9 +642,15 @@ function KoraXlConfigurator({
             type: `update-current-products`,
             payload: initialConfiguration.currentProducts,
         });
+        resetExtraItems();
     };
 
     const handleClearItem = (item: string) => {
+        if (extraItems[item as keyof typeof extraItems].currentlyDisplay !== -1){
+            clearExtraProduct(item as keyof ExtraItems,extraItems[item as keyof typeof extraItems].currentlyDisplay);
+            return;
+        }
+
         switch (item) {
             case "washbasin":
                 updateCurrentProducts("WASHBASIN/SINK", "remove");
@@ -606,6 +664,7 @@ function KoraXlConfigurator({
                     isTallUnitValid: false,
                 });
                 dispatch({type: "reset-tallUnit", payload: ""});
+                updateExtraItemsStateOnMainConfigChanges(item);
                 break;
 
             default:
@@ -633,6 +692,9 @@ function KoraXlConfigurator({
                 tallUnit: [] as ShoppingCartCompositionProduct[],
                 accessory: [] as ShoppingCartCompositionProduct[],
                 mirror: [] as ShoppingCartCompositionProduct[],
+                vanity: [] as ShoppingCartCompositionProduct[],
+                washbasin: [] as ShoppingCartCompositionProduct[],
+                sideUnit: [] as ShoppingCartCompositionProduct[],
             } as OtherItems,
             isDoubleSink,
             isDoubleSideUnit: false,
@@ -642,6 +704,9 @@ function KoraXlConfigurator({
         const allConfigs = {
             modelConfig: currentConfiguration,
             mirrorConfig: currentMirrorsConfiguration,
+            extraItemsConfig: {
+                currentProducts: getExtraItemsCurrentProductsAsArray(),
+            }
         };
 
         generateShoppingCartCompositionProductObjs(allConfigs, shoppingCartObj, null, false, isDoubleSink);
@@ -690,6 +755,7 @@ function KoraXlConfigurator({
                         mirrorProductsConfigurator={
                             currentMirrorsConfiguration.currentProducts
                         }
+                        extraItemsProducts={getExtraItemsCurrentProductsAsArray()}
                         isDoubleSink={currentConfiguration.isDoubleSink}
                         isDoubleSideUnit={false}
                     />
@@ -753,12 +819,20 @@ function KoraXlConfigurator({
                         onNavigation={handleOrderedAccordion}
                         onClear={handleClearItem}
                     >
+                        <MultiItemSelector
+                            item={"tallUnit"}
+                            initialOptions={tallUnitOptions as Option[]}
+                            extraItems={extraItems}
+                            handleAddExtraProduct={handleAddExtraProduct}
+                            setCurrentDisplayItem={setCurrentDisplayItem}
+                            removeConfiguration={removeConfiguration}
+                        />
                         <Options
                             item="tallUnit"
                             property="type"
                             title="SELECT TALL UNIT"
-                            options={tallUnitOptions}
-                            crrOptionSelected={currentConfiguration.tallUnit}
+                            options={extraItems.tallUnit.currentOptions}
+                            crrOptionSelected={extraItems.tallUnit.currentConfig.tallUnitSku}
                             onOptionSelected={handleOptionSelected}
                         />
                     </ItemPropertiesAccordion>
@@ -800,13 +874,13 @@ function KoraXlConfigurator({
                         SPECS
                     </a>
                     <button
-                        disabled={!grandTotal ? true : false}
+                        disabled={!grandTotal}
                         onClick={handleOrderNow}
                     >
                         ORDER NOW
                     </button>
                     <button
-                        disabled={!grandTotal ? true : false}
+                        disabled={!grandTotal}
                         onClick={handleAddToCart}
                     >
                         ADD TO CART

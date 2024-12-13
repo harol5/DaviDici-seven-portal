@@ -19,17 +19,52 @@ function useExtraProductsExpressProgram(model: Model, initialMainConfig: MainCon
     console.log("=== useExtraProductsExpressProgram ===");
     console.log("model: ", model);
     console.log("initialMainConfig: ", initialMainConfig);
-    console.log("mainItemsOptions: ", mainItemsCurrentState);
+    console.log("mainItemsCurrentState: ", mainItemsCurrentState);
 
     const initialExtraItems = useMemo(() => {
         return {
-            accessory: {configurations: [], currentlyDisplay: -1, currentOptions: mainItemsCurrentState.accessory?.options, currentConfig: mainItemsCurrentState.accessory?.config},
-            drawerBase: {configurations: [], currentlyDisplay: -1, currentOptions: mainItemsCurrentState.drawerBase?.options, currentConfig: mainItemsCurrentState.drawerBase?.config},
-            sideUnit: {configurations: [], currentlyDisplay: -1, currentOptions: mainItemsCurrentState.sideUnit?.options, currentConfig: mainItemsCurrentState.sideUnit?.config},
-            tallUnit: {configurations: [], currentlyDisplay: -1, currentOptions: mainItemsCurrentState.tallUnit?.options, currentConfig: mainItemsCurrentState.tallUnit?.config},
-            vanity: {configurations: [], currentlyDisplay: -1, currentOptions: mainItemsCurrentState.vanity?.options, currentConfig: mainItemsCurrentState.vanity?.config},
-            wallUnit: {configurations: [], currentlyDisplay: -1, currentOptions: mainItemsCurrentState.wallUnit?.options, currentConfig: mainItemsCurrentState.wallUnit?.config},
-            washbasin: {configurations: [], currentlyDisplay: -1, currentOptions: mainItemsCurrentState.washbasin?.options, currentConfig: mainItemsCurrentState.washbasin?.config},
+            accessory: {
+                configurations: [],
+                currentlyDisplay: -1,
+                currentOptions: mainItemsCurrentState.accessory?.options,
+                currentConfig: mainItemsCurrentState.accessory?.config
+            },
+            drawerBase: {
+                configurations: [],
+                currentlyDisplay: -1,
+                currentOptions: mainItemsCurrentState.drawerBase?.options,
+                currentConfig: mainItemsCurrentState.drawerBase?.config
+            },
+            sideUnit: {
+                configurations: [],
+                currentlyDisplay: -1,
+                currentOptions: mainItemsCurrentState.sideUnit?.options,
+                currentConfig: mainItemsCurrentState.sideUnit?.config
+            },
+            tallUnit: {
+                configurations: [],
+                currentlyDisplay: -1,
+                currentOptions: mainItemsCurrentState.tallUnit?.options,
+                currentConfig: mainItemsCurrentState.tallUnit?.config
+            },
+            vanity: {
+                configurations: [],
+                currentlyDisplay: -1,
+                currentOptions: mainItemsCurrentState.vanity?.options,
+                currentConfig: mainItemsCurrentState.vanity?.config
+            },
+            wallUnit: {
+                configurations: [],
+                currentlyDisplay: -1,
+                currentOptions: mainItemsCurrentState.wallUnit?.options,
+                currentConfig: mainItemsCurrentState.wallUnit?.config
+            },
+            washbasin: {
+                configurations: [],
+                currentlyDisplay: -1,
+                currentOptions: mainItemsCurrentState.washbasin?.options,
+                currentConfig: mainItemsCurrentState.washbasin?.config
+            },
         }
     },[]);
     const [extraItems, setExtraItems] = useState<ExtraItems>(initialExtraItems);
@@ -802,24 +837,19 @@ function useExtraProductsExpressProgram(model: Model, initialMainConfig: MainCon
         }
     }
 
-    const getExtraItemsProductsGrandTotal = () => {
-        return Object
-            .values(extraItemsCurrentProducts)
-            .flat()
-            .reduce((previousValue, currentProduct) => {
-                const actualPrice = currentProduct.sprice ? currentProduct.sprice : currentProduct.msrp;
-                return previousValue + actualPrice
-            },0);
-    }
-
-    const updateOnMainConfigChanges = (
+    const updateExtraItemsStateOnMainConfigChanges = (
         item: keyof typeof extraItems,
-        options:any,
-        config: any
+        options?:any,
+        config?: any
     ) => {
         const updatedExtraItems = structuredClone(extraItems);
-        updatedExtraItems[item].currentConfig = config;
-        updatedExtraItems[item].currentOptions = options;
+        if (options && config) {
+            updatedExtraItems[item].currentOptions = options;
+            updatedExtraItems[item].currentConfig = config;
+        }else {
+            updatedExtraItems[item].currentOptions = initialExtraItems[item].currentOptions;
+            updatedExtraItems[item].currentConfig = initialExtraItems[item].currentConfig;
+        }
         setExtraItems(updatedExtraItems);
     }
 
@@ -856,6 +886,25 @@ function useExtraProductsExpressProgram(model: Model, initialMainConfig: MainCon
         return {isExtraItemsConfigValid,messages};
     }
 
+    const getExtraItemsCurrentProductsAsArray = () => {
+        return Object.values(extraItemsCurrentProducts).flat();
+    }
+
+    const getExtraItemsProductsGrandTotal = () => {
+        return getExtraItemsCurrentProductsAsArray()
+            .reduce((previousValue, currentProduct) => {
+                const actualPrice = currentProduct.sprice ? currentProduct.sprice : currentProduct.msrp;
+                return previousValue + actualPrice
+            },0);
+    }
+
+    const getFormattedExtraItemsSkus = (allFormattedSkus:string[],model: string, label:string) => {
+        getExtraItemsCurrentProductsAsArray()
+            .forEach(product => {
+                allFormattedSkus.push(`${product.uscode}!!${model}--1##${label}`);
+            });
+    }
+
     return {
         extraItems,
         extraItemsCurrentProducts,
@@ -863,11 +912,13 @@ function useExtraProductsExpressProgram(model: Model, initialMainConfig: MainCon
         setCurrentDisplayItem,
         removeConfiguration,
         handleOptionSelected,
-        updateOnMainConfigChanges,
+        updateExtraItemsStateOnMainConfigChanges,
         clearExtraProduct,
         getExtraItemsProductsGrandTotal,
         resetExtraItems,
-        validateExtraItemsConfig
+        validateExtraItemsConfig,
+        getFormattedExtraItemsSkus,
+        getExtraItemsCurrentProductsAsArray,
     };
 }
 

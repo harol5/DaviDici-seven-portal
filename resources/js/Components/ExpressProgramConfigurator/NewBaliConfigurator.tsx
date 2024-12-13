@@ -1,6 +1,6 @@
-import { Composition } from "../../Models/Composition";
+import {Composition} from "../../Models/Composition";
 import classes from "../../../css/product-configurator.module.css";
-import { useMemo, useReducer, useState } from "react";
+import {useMemo, useReducer, useState} from "react";
 import type {
     Option,
     OtherItems,
@@ -9,34 +9,33 @@ import type {
 } from "../../Models/ExpressProgramModels";
 import Options from "./Options";
 import ConfigurationName from "./ConfigurationName";
-import {
-    getSkuAndPrice,
-    isAlphanumericWithSpaces,
-    scrollToView,
-} from "../../utils/helperFunc";
-import { ProductInventory } from "../../Models/Product";
+import {getSkuAndPrice, isAlphanumericWithSpaces, scrollToView,} from "../../utils/helperFunc";
+import {ProductInventory} from "../../Models/Product";
 import type {
     CurrentConfiguration,
-    Vanity,
-    VanityOptions,
-    SideUnit,
-    SideUnitOptions,
     DrawerBase,
     DrawerBaseOptions,
+    SideUnit,
+    SideUnitOptions,
+    Vanity,
+    VanityOptions,
     WallUnit,
     WallUnitOptions,
 } from "../../Models/NewBaliConfigTypes";
-import { ItemFoxPro, Model } from "../../Models/ModelConfigTypes";
+import {ItemFoxPro, Model} from "../../Models/ModelConfigTypes";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
-import { MirrorCategory } from "../../Models/MirrorConfigTypes";
+import {MirrorCategory} from "../../Models/MirrorConfigTypes";
 import MirrorConfigurator from "./MirrorConfigurator";
-import { router } from "@inertiajs/react";
+import {router} from "@inertiajs/react";
 import useAccordionState from "../../Hooks/useAccordionState";
 import ConfigurationBreakdown from "./ConfigurationBreakdown";
 import useImagesComposition from "../../Hooks/useImagesComposition";
 import ImageSlider from "./ImageSlider";
-import { generateShoppingCartCompositionProductObjs } from "../../utils/shoppingCartUtils";
+import {generateShoppingCartCompositionProductObjs} from "../../utils/shoppingCartUtils";
+import useExtraProductsExpressProgram from "../../Hooks/useExtraProductsExpressProgram.tsx";
+import MultiItemSelector from "./MultiItemSelector.tsx";
+import {ExtraItems} from "../../Models/ExtraItemsHookModels.ts";
 
 interface NewBaliConfiguratorProps {
     composition: Composition;
@@ -641,6 +640,67 @@ function NewBaliConfigurator({
         initialConfiguration
     );
 
+    // |===== EXTRA PRODUCTS =====|
+    const {
+        extraItems,
+        extraItemsCurrentProducts,
+        handleAddExtraProduct,
+        setCurrentDisplayItem,
+        removeConfiguration,
+        handleOptionSelected: handleExtraItemOptionSelected,
+        updateExtraItemsStateOnMainConfigChanges,
+        clearExtraProduct,
+        getExtraItemsProductsGrandTotal,
+        resetExtraItems,
+        validateExtraItemsConfig,
+        getFormattedExtraItemsSkus,
+        getExtraItemsCurrentProductsAsArray
+    } = useExtraProductsExpressProgram(
+        "NEW BALI",
+        initialConfiguration,
+        {
+            vanity: {
+                options: vanityOptions,
+                config: {
+                    vanityObj: currentConfiguration.vanity,
+                    vanitySku: currentConfiguration.vanitySku,
+                    vanityPrice: currentConfiguration.vanityPrice
+                },
+            },
+            washbasin: {
+                options: washbasinOptions,
+                config: {
+                    washbasinSku: currentConfiguration.washbasin,
+                    washbasinPrice: currentConfiguration.washbasinPrice,
+                }
+            },
+            sideUnit: {
+                options: sideUnitOptions,
+                config: {
+                    sideUnitObj: currentConfiguration.sideUnit,
+                    sideUnitSku: currentConfiguration.sideUnitSku,
+                    sideUnitPrice: currentConfiguration.sideUnitPrice
+                }
+            },
+            wallUnit: {
+                options: wallUnitOptions,
+                config: {
+                    wallUnitObj: currentConfiguration.wallUnit,
+                    wallUnitSku: currentConfiguration.wallUnitSku,
+                    wallUnitPrice: currentConfiguration.wallUnitPrice,
+                }
+            },
+            drawerBase: {
+                options: drawerBaseOptions,
+                config: {
+                    drawerBaseObj: currentConfiguration.drawerBase,
+                    drawerBaseSku: currentConfiguration.drawerBaseSku,
+                    drawerBasePrice: currentConfiguration.drawerBasePrice
+                }
+            }
+        }
+    );
+
     // |===== GRAND TOTAL =====|
     const grandTotal = useMemo(() => {
         const {
@@ -676,19 +736,17 @@ function NewBaliConfigurator({
                 ? vanityPrice * 2
                 : vanityPrice;
 
-            const grandTotal =
-                finalVanityPrice +
+            return finalVanityPrice +
                 washbasinPrice +
                 sideUnitPrice +
                 drawerBasePrice +
                 wallUnitPrice +
                 mirrorCabinetPrice +
                 ledMirrorPrice +
-                openCompMirrorPrice;
-
-            return grandTotal;
+                openCompMirrorPrice +
+                getExtraItemsProductsGrandTotal();
         }
-    }, [currentConfiguration, currentMirrorsConfiguration]);
+    }, [currentConfiguration, currentMirrorsConfiguration,extraItemsCurrentProducts]);
 
     // |===== COMPOSITION NAME =====| (repeated logic)
     const [isMissingLabel, setIsMissingLabel] = useState(false);
@@ -867,9 +925,10 @@ function NewBaliConfigurator({
         }
 
         if (item === "drawerBase") {
-            const copyOptions = structuredClone(
-                drawerBaseOptions
-            ) as DrawerBaseOptions;
+            const crrDrawerBaseOptions = extraItems.drawerBase.currentlyDisplay !== -1 ?
+                extraItems.drawerBase.configurations[extraItems.drawerBase.currentlyDisplay].options as DrawerBaseOptions
+                : drawerBaseOptions as DrawerBaseOptions;
+            const copyOptions = structuredClone(crrDrawerBaseOptions);
 
             for (const drawersOption of copyOptions.drawerOptions) {
                 if (property === "drawer") break;
@@ -899,9 +958,10 @@ function NewBaliConfigurator({
                 }
             }
 
-            const drawerBaseCurrentConfiguration = structuredClone(
-                currentConfiguration.drawerBase
-            ) as DrawerBase;
+            const crrDrawerBaseConfig = extraItems.drawerBase.currentlyDisplay !== -1 ?
+                extraItems.drawerBase.currentConfig.drawerBaseObj
+                : currentConfiguration.drawerBase;
+            const drawerBaseCurrentConfiguration = structuredClone(crrDrawerBaseConfig);
 
             drawerBaseCurrentConfiguration[
                 property as keyof typeof drawerBaseCurrentConfiguration
@@ -914,34 +974,54 @@ function NewBaliConfigurator({
                 composition.otherProductsAvailable.drawersVanities
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: sku });
-            dispatch({
-                type: `set-${item}-price`,
-                payload: price,
-            });
-            dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
-            setDrawerBaseOptions(copyOptions);
+            const extraItemUpdatedConfigObj = {
+                drawerBaseObj: drawerBaseCurrentConfiguration,
+                drawerBaseSku: sku,
+                drawerBasePrice: price
+            }
 
-            setDrawerBaseStatus((prev) => ({
-                ...prev,
-                isDrawerBaseValid: price > 0,
-            }));
+            if (extraItems.drawerBase.currentlyDisplay !== -1) {
+                handleExtraItemOptionSelected(
+                    item,
+                    extraItems.drawerBase.currentlyDisplay,
+                    extraItemUpdatedConfigObj,
+                    copyOptions,
+                    price > 0,
+                    product
+                );
+            }else {
+                dispatch({ type: `set-${item}-sku`, payload: sku });
+                dispatch({
+                    type: `set-${item}-price`,
+                    payload: price,
+                });
+                dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
+                setDrawerBaseOptions(copyOptions);
 
-            !drawerBaseStatus.isDrawerBaseSelected &&
+                setDrawerBaseStatus((prev) => ({
+                    ...prev,
+                    isDrawerBaseValid: price > 0,
+                }));
+
+                !drawerBaseStatus.isDrawerBaseSelected &&
                 setDrawerBaseStatus((prev) => ({
                     ...prev,
                     isDrawerBaseSelected: true,
                 }));
 
-            if (product) {
-                updateCurrentProducts("DRAWER/VANITY", "update", product);
+                if (product) {
+                    updateCurrentProducts("DRAWER/VANITY", "update", product);
+                }
+
+                updateExtraItemsStateOnMainConfigChanges(item,copyOptions,extraItemUpdatedConfigObj);
             }
         }
 
         if (item === "wallUnit") {
-            const copyOptions = structuredClone(
-                wallUnitOptions
-            ) as WallUnitOptions;
+            const crrWallUnitOptions = extraItems.wallUnit.currentlyDisplay !== -1 ?
+                extraItems.wallUnit.configurations[extraItems.wallUnit.currentlyDisplay].options as WallUnitOptions
+                : wallUnitOptions as WallUnitOptions;
+            const copyOptions = structuredClone(crrWallUnitOptions);
 
             for (const sizeOption of copyOptions.sizeOptions) {
                 if (property === "size") break;
@@ -985,9 +1065,11 @@ function NewBaliConfigurator({
                 }
             }
 
-            const wallUnitCurrentConfig = structuredClone(
-                currentConfiguration.wallUnit
-            ) as WallUnit;
+            const crrWallUnitConfig = extraItems.wallUnit.currentlyDisplay !== -1 ?
+                extraItems.wallUnit.currentConfig.wallUnitObj
+                : currentConfiguration.wallUnit;
+            const wallUnitCurrentConfig = structuredClone(crrWallUnitConfig);
+
             wallUnitCurrentConfig[
                 property as keyof typeof wallUnitCurrentConfig
             ] = option;
@@ -999,27 +1081,46 @@ function NewBaliConfigurator({
                 composition.otherProductsAvailable.wallUnits
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: sku });
-            dispatch({
-                type: `set-${item}-price`,
-                payload: price,
-            });
-            dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
-            setWallUnitOptions(copyOptions);
+            const extraItemUpdatedConfigObj = {
+                wallUnitObj: wallUnitCurrentConfig,
+                wallUnitSku: sku,
+                wallUnitPrice: price
+            }
 
-            setWallUnitStatus((prev) => ({
-                ...prev,
-                isWallUnitValid: price > 0,
-            }));
+            if (extraItems.wallUnit.currentlyDisplay !== -1) {
+                handleExtraItemOptionSelected(
+                    item,
+                    extraItems.wallUnit.currentlyDisplay,
+                    extraItemUpdatedConfigObj,
+                    copyOptions,
+                    price > 0,
+                    product
+                );
+            } else {
+                dispatch({ type: `set-${item}-sku`, payload: sku });
+                dispatch({
+                    type: `set-${item}-price`,
+                    payload: price,
+                });
+                dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
+                setWallUnitOptions(copyOptions);
 
-            !wallUnitStatus.isWallUnitSelected &&
+                setWallUnitStatus((prev) => ({
+                    ...prev,
+                    isWallUnitValid: price > 0,
+                }));
+
+                !wallUnitStatus.isWallUnitSelected &&
                 setWallUnitStatus((prev) => ({
                     ...prev,
                     isWallUnitSelected: true,
                 }));
 
-            if (product) {
-                updateCurrentProducts("WALL UNIT", "update", product);
+                if (product) {
+                    updateCurrentProducts("WALL UNIT", "update", product);
+                }
+
+                updateExtraItemsStateOnMainConfigChanges(item,copyOptions,extraItemUpdatedConfigObj);
             }
         }
 
@@ -1088,6 +1189,12 @@ function NewBaliConfigurator({
             return false;
         }
 
+        const {isExtraItemsConfigValid,messages} = validateExtraItemsConfig();
+        if (!isExtraItemsConfigValid){
+            alert(messages.join("\n"));
+            return false;
+        }
+
         return true;
     };
 
@@ -1095,45 +1202,52 @@ function NewBaliConfigurator({
         if (!isValidConfiguration()) return;
 
         const {
-            vanitySku,
-            sideUnitSku,
-            washbasin: washbasinSku,
             label,
             isDoubleSink,
-            drawerBaseSku,
-            wallUnitSku,
+            currentProducts
         } = currentConfiguration;
 
         const allFormattedSkus: string[] = [];
 
-        const vanityFormattedSku = `${vanitySku}!!${composition.model}${
-            isDoubleSink ? "--2" : "--1"
-        }##${label}`;
-        allFormattedSkus.push(vanityFormattedSku);
+        for (const product of currentProducts) {
+            if (product.item === "VANITY") {
+                allFormattedSkus.push(
+                    `${product.uscode}!!${composition.model}${isDoubleSink ? "--2" : "--1"
+                    }##${label}`
+                );
+            } else {
+                allFormattedSkus.push(`${product.uscode}!!${composition.model}--1##${label}`)
+            }
+        }
 
-        const sideUnitFormattedSku = sideUnitSku
-            ? `${sideUnitSku}!!${composition.model}--1##${label}`
-            : "";
-        sideUnitFormattedSku && allFormattedSkus.push(sideUnitFormattedSku);
-
-        const washbasinFormattedSku = washbasinSku
-            ? `${washbasinSku}!!${composition.model}--1##${label}`
-            : "";
-        washbasinFormattedSku && allFormattedSkus.push(washbasinFormattedSku);
-
-        const wallUnitFormattedSku = wallUnitSku
-            ? `${wallUnitSku}!!${composition.model}--1##${label}`
-            : "";
-        wallUnitFormattedSku && allFormattedSkus.push(wallUnitFormattedSku);
-
-        const drawerBaseFormattedSku = drawerBaseSku
-            ? `${drawerBaseSku}!!${composition.model}--1##${label}`
-            : "";
-        drawerBaseFormattedSku && allFormattedSkus.push(drawerBaseFormattedSku);
+        // const vanityFormattedSku = `${vanitySku}!!${composition.model}${
+        //     isDoubleSink ? "--2" : "--1"
+        // }##${label}`;
+        // allFormattedSkus.push(vanityFormattedSku);
+        //
+        // const sideUnitFormattedSku = sideUnitSku
+        //     ? `${sideUnitSku}!!${composition.model}--1##${label}`
+        //     : "";
+        // sideUnitFormattedSku && allFormattedSkus.push(sideUnitFormattedSku);
+        //
+        // const washbasinFormattedSku = washbasinSku
+        //     ? `${washbasinSku}!!${composition.model}--1##${label}`
+        //     : "";
+        // washbasinFormattedSku && allFormattedSkus.push(washbasinFormattedSku);
+        //
+        // const wallUnitFormattedSku = wallUnitSku
+        //     ? `${wallUnitSku}!!${composition.model}--1##${label}`
+        //     : "";
+        // wallUnitFormattedSku && allFormattedSkus.push(wallUnitFormattedSku);
+        //
+        // const drawerBaseFormattedSku = drawerBaseSku
+        //     ? `${drawerBaseSku}!!${composition.model}--1##${label}`
+        //     : "";
+        // drawerBaseFormattedSku && allFormattedSkus.push(drawerBaseFormattedSku);
 
         // ========= VVVV MIRROR (REPEATED LOGIC) ==========VVVVV
         getFormattedMirrorSkus(composition.model, label, allFormattedSkus);
-
+        getFormattedExtraItemsSkus(allFormattedSkus,composition.model,label);
         router.get("/orders/create-so-num", {
             SKU: allFormattedSkus.join("~"),
         });
@@ -1157,9 +1271,15 @@ function NewBaliConfigurator({
             type: `update-current-products`,
             payload: initialConfiguration.currentProducts,
         });
+        resetExtraItems();
     };
 
     const handleClearItem = (item: string) => {
+        if (extraItems[item as keyof typeof extraItems].currentlyDisplay !== -1){
+            clearExtraProduct(item as keyof ExtraItems,extraItems[item as keyof typeof extraItems].currentlyDisplay);
+            return;
+        }
+
         switch (item) {
             case "washbasin":
                 updateCurrentProducts("WASHBASIN/SINK", "remove");
@@ -1174,6 +1294,7 @@ function NewBaliConfigurator({
                     isWallUnitValid: false,
                 });
                 dispatch({ type: "reset-wallUnit", payload: "" });
+                updateExtraItemsStateOnMainConfigChanges(item);
                 break;
 
             case "drawerBase":
@@ -1184,6 +1305,7 @@ function NewBaliConfigurator({
                     isDrawerBaseValid: false,
                 });
                 dispatch({ type: "reset-drawerBase", payload: "" });
+                updateExtraItemsStateOnMainConfigChanges(item);
                 break;
 
             default:
@@ -1212,6 +1334,9 @@ function NewBaliConfigurator({
                 drawerBase: [] as ShoppingCartCompositionProduct[],
                 accessory: [] as ShoppingCartCompositionProduct[],
                 mirror: [] as ShoppingCartCompositionProduct[],
+                vanity: [] as ShoppingCartCompositionProduct[],
+                washbasin: [] as ShoppingCartCompositionProduct[],
+                sideUnit: [] as ShoppingCartCompositionProduct[],
             } as OtherItems,
             isDoubleSink,
             isDoubleSideUnit: false,
@@ -1221,6 +1346,9 @@ function NewBaliConfigurator({
         const allConfigs = {
             modelConfig: currentConfiguration,
             mirrorConfig: currentMirrorsConfiguration,
+            extraItemsConfig: {
+                currentProducts: getExtraItemsCurrentProductsAsArray(),
+            }
         };
 
         generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,null,false,isDoubleSink);
@@ -1269,6 +1397,7 @@ function NewBaliConfigurator({
                         mirrorProductsConfigurator={
                             currentMirrorsConfiguration.currentProducts
                         }
+                        extraItemsProducts={getExtraItemsCurrentProductsAsArray()}
                         isDoubleSink={currentConfiguration.isDoubleSink}
                         isDoubleSideUnit={false}
                     />
@@ -1363,13 +1492,21 @@ function NewBaliConfigurator({
                         onNavigation={handleOrderedAccordion}
                         onClear={handleClearItem}
                     >
+                        <MultiItemSelector
+                            item={"drawerBase"}
+                            initialOptions={initialDrawerBaseOptions as DrawerBaseOptions}
+                            extraItems={extraItems}
+                            handleAddExtraProduct={handleAddExtraProduct}
+                            setCurrentDisplayItem={setCurrentDisplayItem}
+                            removeConfiguration={removeConfiguration}
+                        />
                         <Options
                             item="drawerBase"
                             property="drawer"
                             title="SELECT SIZE/# DRAWERS"
-                            options={drawerBaseOptions.drawerOptions}
+                            options={extraItems.drawerBase.currentOptions.drawerOptions}
                             crrOptionSelected={
-                                currentConfiguration.drawerBase?.drawer!
+                                extraItems.drawerBase.currentConfig.drawerBaseObj.drawer
                             }
                             onOptionSelected={handleOptionSelected}
                         />
@@ -1377,9 +1514,9 @@ function NewBaliConfigurator({
                             item="drawerBase"
                             property="finish"
                             title="SELECT FINISH"
-                            options={drawerBaseOptions.finishOptions}
+                            options={extraItems.drawerBase.currentOptions.finishOptions}
                             crrOptionSelected={
-                                currentConfiguration.drawerBase?.finish!
+                                extraItems.drawerBase.currentConfig.drawerBaseObj.finish
                             }
                             onOptionSelected={handleOptionSelected}
                         />
@@ -1397,13 +1534,21 @@ function NewBaliConfigurator({
                         onNavigation={handleOrderedAccordion}
                         onClear={handleClearItem}
                     >
+                        <MultiItemSelector
+                            item={"wallUnit"}
+                            initialOptions={initialWallUnitOptions as WallUnitOptions}
+                            extraItems={extraItems}
+                            handleAddExtraProduct={handleAddExtraProduct}
+                            setCurrentDisplayItem={setCurrentDisplayItem}
+                            removeConfiguration={removeConfiguration}
+                        />
                         <Options
                             item="wallUnit"
                             property="size"
                             title="SELECT SIZE"
-                            options={wallUnitOptions?.sizeOptions}
+                            options={extraItems.wallUnit.currentOptions.sizeOptions}
                             crrOptionSelected={
-                                currentConfiguration.wallUnit?.size!
+                                extraItems.wallUnit.currentConfig.wallUnitObj.size
                             }
                             onOptionSelected={handleOptionSelected}
                         />
@@ -1411,9 +1556,9 @@ function NewBaliConfigurator({
                             item="wallUnit"
                             property="type"
                             title="SELECT TYPE"
-                            options={wallUnitOptions?.typeOptions}
+                            options={extraItems.wallUnit.currentOptions.typeOptions}
                             crrOptionSelected={
-                                currentConfiguration.wallUnit?.type!
+                                extraItems.wallUnit.currentConfig.wallUnitObj.type
                             }
                             onOptionSelected={handleOptionSelected}
                         />
@@ -1421,9 +1566,9 @@ function NewBaliConfigurator({
                             item="wallUnit"
                             property="finish"
                             title="SELECT FINISH"
-                            options={wallUnitOptions?.finishOptions}
+                            options={extraItems.wallUnit.currentOptions.finishOptions}
                             crrOptionSelected={
-                                currentConfiguration.wallUnit?.finish!
+                                extraItems.wallUnit.currentConfig.wallUnitObj.finish
                             }
                             onOptionSelected={handleOptionSelected}
                         />
