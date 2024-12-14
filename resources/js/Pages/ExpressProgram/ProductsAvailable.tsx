@@ -10,11 +10,11 @@ import type {
 import CompositionsListing from "./CompositionsListing";
 import classes from "../../../css/express-program.module.css";
 import LoadingSpinner from "../../Components/LoadingSpinner";
-import { router } from "@inertiajs/react";
-import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import {router} from "@inertiajs/react";
+import {useEffect, useState} from "react";
+import {useQuery} from "@tanstack/react-query";
 import axios from "axios";
-import { Composition } from "../../Models/Composition";
+import {Composition} from "../../Models/Composition";
 
 interface ProductsAvailableProps {
     auth: User;
@@ -30,8 +30,8 @@ interface ExpressProgramData {
     initialModelsForFilter: ModelObj[];
 }
 
-function ProductsAvailable({ auth, listingType }: ProductsAvailableProps) {
-    const { data: rawProducts } = useQuery({
+function ProductsAvailable({auth, listingType}: ProductsAvailableProps) {
+    const {data: rawProducts} = useQuery({
         queryKey: ["expressProgramRawProductsData"],
         queryFn: () =>
             axios
@@ -39,7 +39,8 @@ function ProductsAvailable({ auth, listingType }: ProductsAvailableProps) {
                 .then((res) => res.data.rawProducts),
     });
 
-    const [isLoading, setIsLoading] = useState(true);    
+    const [isLoading, setIsLoading] = useState(true);
+    const [isInvEmpty, setIsInvEmpty] = useState(false);
 
     const regularCompositionsListingData =
         useExpressProgramProducts(rawProducts);
@@ -99,13 +100,14 @@ function ProductsAvailable({ auth, listingType }: ProductsAvailableProps) {
 
     useEffect(() => {
         if (!rawProducts) return;
+        if (rawProducts.length === 0) setIsInvEmpty(true);
         setIsLoading(false);
-    }, [rawProducts]);    
+    }, [rawProducts]);
 
     return (
         <UserAuthenticatedLayout
             auth={auth}
-            crrPage="express program"            
+            crrPage="express program"
         >
             <div className="main-content-wrapper">
                 {onSaleCompositionsListingData &&
@@ -128,25 +130,30 @@ function ProductsAvailable({ auth, listingType }: ProductsAvailableProps) {
                     <></>
                 )}
 
-                {isLoading && <LoadingSpinner message="fetching products..." />}
+                {isLoading && <LoadingSpinner message="fetching products..."/>}
 
                 {!isLoading && (
                     <>
-                        {listingType === "fullInventory" && (
-                            <CompositionsListing
-                                data={
-                                    regularCompositionsListingData as ExpressProgramData
-                                }                                
-                            />
-                        )}
+                        {isInvEmpty ? <p>
+                            An errors has occurred, we apologize for the inconvenient, please try again in a few
+                            minutes.
+                        </p> : <>
+                            {listingType === "fullInventory" && (
+                                <CompositionsListing
+                                    data={
+                                        regularCompositionsListingData as ExpressProgramData
+                                    }
+                                />
+                            )}
 
-                        {listingType === "onSale" && (
-                            <CompositionsListing
-                                data={
-                                    onSaleCompositionsListingData as ExpressProgramData
-                                }                                
-                            />
-                        )}
+                            {listingType === "onSale" && (
+                                <CompositionsListing
+                                    data={
+                                        onSaleCompositionsListingData as ExpressProgramData
+                                    }
+                                />
+                            )}
+                        </>}
                     </>
                 )}
             </div>

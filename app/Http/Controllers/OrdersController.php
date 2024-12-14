@@ -789,6 +789,12 @@ class OrdersController extends Controller
                 'keep_session' => false,
             ]);
 
+            $getInvStockRes = FoxproApi::call([
+                'action' => 'GETINVSTOCK',
+                'params' => ['','','','S'],
+                'keep_session' => false,
+            ]);
+
             return response(
                 [
                     'response' => $testingService->getUniqueInstanceId(),
@@ -798,6 +804,7 @@ class OrdersController extends Controller
                     'ordersByCompany' => $foxproRes,
                     'companySalesReps' => $salesrepInfo,
                     'printSo' => $printSo,
+                    '$getInvStockRes' => $getInvStockRes
                 ]
             )->header('Content-Type', 'application/json');
         }

@@ -838,7 +838,7 @@ function useExpressProgramProducts(
     };
 
     return useMemo(() => {
-        if (!rawProducts) return;
+        if (!rawProducts || rawProducts.length === 0) return;
 
         return getExpressProgramData(createProductsTree());
     }, [rawProducts]);
