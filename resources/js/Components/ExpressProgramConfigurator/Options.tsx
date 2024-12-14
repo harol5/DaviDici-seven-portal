@@ -5,8 +5,8 @@ interface OptionsProps {
     item: string;
     property: string;
     title: string;
-    options: Option[];
-    crrOptionSelected: string;
+    options?: Option[];
+    crrOptionSelected?: string;
     onOptionSelected: (item: string, property: string, option: string) => void;
 }
 
@@ -41,7 +41,7 @@ function Options({
         <section className={classes.headerAndOptionsWrapper}>
             <h1 className={classes.title}>{title}</h1>
             <div className={classes.OptionsWrapper}>
-                {options.map((option, index) => {
+                {options!.map((option, index) => {
                     return (
                         <div
                             key={index}

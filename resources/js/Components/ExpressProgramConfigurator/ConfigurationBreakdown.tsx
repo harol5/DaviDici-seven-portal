@@ -5,6 +5,7 @@ import { useState } from "react";
 interface ConfigurationBreakdownProps {
     productsConfigurator: ProductInventory[];
     mirrorProductsConfigurator: ProductInventory[];
+    extraItemsProducts: ProductInventory[];
     isDoubleSink: boolean;
     isDoubleSideUnit: boolean;
 }
@@ -12,6 +13,7 @@ interface ConfigurationBreakdownProps {
 function ConfigurationBreakdown({
     productsConfigurator,
     mirrorProductsConfigurator,
+    extraItemsProducts,
     isDoubleSink,
     isDoubleSideUnit,
 }: ConfigurationBreakdownProps) {
@@ -54,6 +56,14 @@ function ConfigurationBreakdown({
                             product={product}
                             isDoubleSink={isDoubleSink}
                             isDoubleSideUnit={isDoubleSideUnit}
+                        />
+                    ))}
+                    {extraItemsProducts.map((product, index) => (
+                        <BreakdownCard
+                            key={index}
+                            product={product}
+                            isDoubleSink={false}
+                            isDoubleSideUnit={false}
                         />
                     ))}
                 </div>

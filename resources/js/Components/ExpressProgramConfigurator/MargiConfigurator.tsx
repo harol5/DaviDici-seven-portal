@@ -1,40 +1,40 @@
-import { Composition } from "../../Models/Composition";
+import {Composition} from "../../Models/Composition";
 import classes from "../../../css/product-configurator.module.css";
-import { useMemo, useReducer, useState } from "react";
+import {useMemo, useReducer, useState} from "react";
 import type {
     Option,
     OtherItems,
     ShoppingCartComposition,
-    ShoppingCartCompositionProduct,    
+    ShoppingCartCompositionProduct,
 } from "../../Models/ExpressProgramModels";
 import Options from "./Options";
 import ConfigurationName from "./ConfigurationName";
-import { router } from "@inertiajs/react";
+import {router} from "@inertiajs/react";
+import {getSkuAndPrice, isAlphanumericWithSpaces, scrollToView,} from "../../utils/helperFunc";
+import {ProductInventory} from "../../Models/Product";
 import {
-    isAlphanumericWithSpaces,
-    getSkuAndPrice,
-    scrollToView,
-} from "../../utils/helperFunc";
-import { ProductInventory } from "../../Models/Product";
-import {
-    VanityOptions,
-    WallUnitOptions,
-    OpenUnitOptions,
-    SideCabinetOptions,
-    OpenUnit,
-    SideCabinet,
-    WallUnit,
-    Vanity,
     CurrentConfiguration,
+    OpenUnit,
+    OpenUnitOptions,
+    SideCabinet,
+    SideCabinetOptions,
+    Vanity,
+    VanityOptions,
+    WallUnit,
+    WallUnitOptions,
 } from "../../Models/MargiConfigTypes";
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
-import type { MirrorCategory } from "../../Models/MirrorConfigTypes";
-import { ItemFoxPro, Model } from "../../Models/ModelConfigTypes";
+import type {MirrorCategory} from "../../Models/MirrorConfigTypes";
+import {ItemFoxPro, Model} from "../../Models/ModelConfigTypes";
 import MirrorConfigurator from "./MirrorConfigurator";
 import useAccordionState from "../../Hooks/useAccordionState";
 import ConfigurationBreakdown from "./ConfigurationBreakdown";
-import { generateShoppingCartCompositionProductObjs } from "../../utils/shoppingCartUtils";
+import {generateShoppingCartCompositionProductObjs} from "../../utils/shoppingCartUtils";
+import useExtraProductsExpressProgram from "../../Hooks/useExtraProductsExpressProgram.tsx";
+import MultiItemSelector from "./MultiItemSelector.tsx";
+import {ExtraItems} from "../../Models/ExtraItemsHookModels.ts";
+
 
 interface MargiConfiguratorProps {
     composition: Composition;
@@ -42,9 +42,9 @@ interface MargiConfiguratorProps {
 }
 
 function MargiConfigurator({
-    composition,
-    onAddToCart,
-}: MargiConfiguratorProps) {
+                               composition,
+                               onAddToCart,
+                           }: MargiConfiguratorProps) {
     // |===== VANITY =====|
     const initialVanityOptions: VanityOptions = useMemo(() => {
         let baseSku: string = "";
@@ -165,12 +165,12 @@ function MargiConfigurator({
                         let doorStyle = codes[3].includes("F")
                             ? "FRAME"
                             : codes[3].includes("S")
-                            ? "STRIPES"
-                            : codes[3].includes("G")
-                            ? "GRID"
-                            : codes[3].includes("P")
-                            ? "PLAIN"
-                            : "";
+                                ? "STRIPES"
+                                : codes[3].includes("G")
+                                    ? "GRID"
+                                    : codes[3].includes("P")
+                                        ? "PLAIN"
+                                        : "";
                         let hanldeColor = codes[3].includes("1")
                             ? " W/ BLACK HANDLE"
                             : " W/ POLISH HANDLE";
@@ -308,12 +308,12 @@ function MargiConfigurator({
                 doorStyle === "F"
                     ? "FRAME"
                     : doorStyle === "S"
-                    ? "STRIPES"
-                    : doorStyle === "G"
-                    ? "GRID"
-                    : doorStyle === "P"
-                    ? "PLAIN"
-                    : "";
+                        ? "STRIPES"
+                        : doorStyle === "G"
+                            ? "GRID"
+                            : doorStyle === "P"
+                                ? "PLAIN"
+                                : "";
             if (!doorStyleOptionsMap.has(`${codes[3]}`)) {
                 doorStyleOptionsMap.set(`${codes[3]}`, {
                     code: codes[3],
@@ -377,7 +377,6 @@ function MargiConfigurator({
         handleResetMirrorConfigurator: resetMirrorConfigurator,
         handleClearMirrorCategory: clearMirrorCategory,
         getFormattedMirrorSkus,
-        getMirrorProductObj,
         isMirrorCabinetConfigValid,
     } = useMirrorOptions(composition.otherProductsAvailable.mirrors);
 
@@ -386,7 +385,7 @@ function MargiConfigurator({
     };
 
     // |===== ACCORDION =====|
-    const { accordionState, handleAccordionState, handleOrderedAccordion } =
+    const {accordionState, handleAccordionState, handleOrderedAccordion} =
         useAccordionState();
 
     const accordionsOrder = useMemo(() => {
@@ -476,7 +475,7 @@ function MargiConfigurator({
                         margiSideCabinetOptions.doorStyleAndHandleOptions
                             .length === 1
                             ? margiSideCabinetOptions
-                                  .doorStyleAndHandleOptions[0].code
+                                .doorStyleAndHandleOptions[0].code
                             : "",
                     finish:
                         margiSideCabinetOptions.finishOptions.length === 1
@@ -495,11 +494,11 @@ function MargiConfigurator({
 
         const currentProducts: ProductInventory[] = [];
         vanitySkuAndPrice.product !== null &&
-            currentProducts.push(vanitySkuAndPrice.product);
+        currentProducts.push(vanitySkuAndPrice.product);
         washbasinSkuAndPrice.product !== null &&
-            currentProducts.push(washbasinSkuAndPrice.product);
+        currentProducts.push(washbasinSkuAndPrice.product);
         sideUnitSkuAndPrice.product !== null &&
-            currentProducts.push(sideUnitSkuAndPrice.product);
+        currentProducts.push(sideUnitSkuAndPrice.product);
 
         let wallUnit = null;
         if (wallUnitOptions) {
@@ -719,6 +718,60 @@ function MargiConfigurator({
         initialConfiguration
     );
 
+    // |===== EXTRA PRODUCTS =====|
+    const {
+        extraItems,
+        extraItemsCurrentProducts,
+        handleAddExtraProduct,
+        setCurrentDisplayItem,
+        removeConfiguration,
+        handleOptionSelected: handleExtraItemOptionSelected,
+        updateExtraItemsStateOnMainConfigChanges,
+        clearExtraProduct,
+        getExtraItemsProductsGrandTotal,
+        resetExtraItems,
+        validateExtraItemsConfig,
+        getFormattedExtraItemsSkus,
+        getExtraItemsCurrentProductsAsArray
+    } = useExtraProductsExpressProgram(
+        "MARGI",
+        initialConfiguration,
+        {
+            vanity: {
+                options: vanityOptions,
+                config: {
+                    vanityObj: currentConfiguration.vanity,
+                    vanitySku: currentConfiguration.vanitySku,
+                    vanityPrice: currentConfiguration.vanityPrice
+                },
+            },
+            washbasin: {
+                options: washbasinOptions,
+                config: {
+                    washbasinSku: currentConfiguration.washbasin,
+                    washbasinPrice: currentConfiguration.washbasinPrice,
+                }
+            },
+            sideUnit: {
+                options: sideUnitOptions,
+                config: {
+                    sideUnitObj: currentConfiguration.sideUnit,
+                    sideUnitSku: currentConfiguration.sideUnitSku,
+                    sideUnitPrice: currentConfiguration.sideUnitPrice
+                }
+            },
+            wallUnit: {
+                options: wallUnitOptions,
+                config: {
+                    wallUnitObj: currentConfiguration.wallUnit,
+                    wallUnitSku: currentConfiguration.wallUnitSku,
+                    wallUnitPrice: currentConfiguration.wallUnitPrice,
+                }
+            },
+        }
+    );
+
+
     // |===== GRAND TOTAL =====|
     const grandTotal = useMemo(() => {
         const {
@@ -730,7 +783,7 @@ function MargiConfigurator({
             wallUnitPrice,
         } = currentConfiguration;
 
-        const { mirrorCabinetPrice, ledMirrorPrice, openCompMirrorPrice } =
+        const {mirrorCabinetPrice, ledMirrorPrice, openCompMirrorPrice} =
             currentMirrorsConfiguration;
 
         /**
@@ -753,18 +806,16 @@ function MargiConfigurator({
                 ? vanityPrice * 2
                 : vanityPrice;
 
-            const grandTotal =
-                finalVanityPrice +
+            return finalVanityPrice +
                 washbasinPrice +
                 sideUnitPrice +
                 wallUnitPrice +
                 mirrorCabinetPrice +
                 ledMirrorPrice +
-                openCompMirrorPrice;
-
-            return grandTotal;
+                openCompMirrorPrice +
+                getExtraItemsProductsGrandTotal();
         }
-    }, [currentConfiguration, currentMirrorsConfiguration]);
+    }, [currentConfiguration, currentMirrorsConfiguration, extraItemsCurrentProducts]);
 
     // |===== COMPOSITION NAME =====| (repeated logic)
     const [isMissingLabel, setIsMissingLabel] = useState(false);
@@ -773,12 +824,13 @@ function MargiConfigurator({
     // |===== HELPER FUNC =====|
     const updateCurrentProducts = (
         item: ItemFoxPro,
-        action: "update" | "remove",
+        action: "update" | "remove" | "add",
         product?: ProductInventory
     ) => {
         const updatedCurrentProducts = structuredClone(
             currentConfiguration.currentProducts
         );
+
         const index = updatedCurrentProducts.findIndex(
             (product) => product.item === item
         );
@@ -855,21 +907,21 @@ function MargiConfigurator({
 
             vanityCurrentConfiguration[
                 property as keyof typeof vanityCurrentConfiguration
-            ] = option;
+                ] = option;
 
-            const { sku, price, product } = getSkuAndPrice(
+            const {sku, price, product} = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 vanityCurrentConfiguration,
                 composition.vanities
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: sku });
+            dispatch({type: `set-${item}-sku`, payload: sku});
             dispatch({
                 type: `set-${item}-price`,
                 payload: price,
             });
-            dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
+            dispatch({type: `set-${item}-${property}`, payload: `${option}`});
 
             setVanityOptions(copyOptions);
 
@@ -904,9 +956,9 @@ function MargiConfigurator({
 
                 copyCurrentConfiguration[
                     property as keyof typeof copyCurrentConfiguration
-                ] = option;
+                    ] = option;
 
-                const { sku, price, product } = getSkuAndPrice(
+                const {sku, price, product} = getSkuAndPrice(
                     composition.model as Model,
                     "openUnit",
                     copyCurrentConfiguration,
@@ -974,9 +1026,9 @@ function MargiConfigurator({
 
                 copyCurrentConfiguration[
                     property as keyof typeof copyCurrentConfiguration
-                ] = option;
+                    ] = option;
 
-                const { sku, price, product } = getSkuAndPrice(
+                const {sku, price, product} = getSkuAndPrice(
                     composition.model as Model,
                     "sideCabinet",
                     copyCurrentConfiguration,
@@ -1003,7 +1055,19 @@ function MargiConfigurator({
         }
 
         if (item === "wallUnit") {
-            const copyOptions = structuredClone(wallUnitOptions);
+            const crrWallUnitOptions = extraItems.wallUnit.currentlyDisplay !== -1 ?
+                extraItems.wallUnit.configurations[extraItems.wallUnit.currentlyDisplay].options as WallUnitOptions
+                : wallUnitOptions as WallUnitOptions;
+
+            const copyOptions = structuredClone(crrWallUnitOptions);
+
+            const crrWallUnitConfig = extraItems.wallUnit.currentlyDisplay !== -1 ?
+                extraItems.wallUnit.currentConfig.wallUnitObj
+                : currentConfiguration.wallUnit;
+
+            const copyCurrentConfiguration = structuredClone(
+                crrWallUnitConfig
+            ) as WallUnit;
 
             for (const sizeOption of copyOptions?.sizeOptions!) {
                 if (property === "size") break;
@@ -1047,50 +1111,67 @@ function MargiConfigurator({
                 }
             }
 
-            const copyCurrentConfiguration = structuredClone(
-                currentConfiguration.wallUnit
-            ) as WallUnit;
-
             copyCurrentConfiguration[
                 property as keyof typeof copyCurrentConfiguration
-            ] = option;
+                ] = option;
 
-            const { sku, price, product } = getSkuAndPrice(
+            const {sku, price, product} = getSkuAndPrice(
                 composition.model as Model,
                 "wallUnit",
                 copyCurrentConfiguration,
                 composition.otherProductsAvailable.wallUnits
             );
 
-            dispatch({
-                type: `set-${item}-sku`,
-                payload: sku,
-            });
-            dispatch({
-                type: `set-${item}-price`,
-                payload: price,
-            });
-            dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
-            setWallUnitOptions(copyOptions);
+            if (extraItems.wallUnit.currentlyDisplay !== -1) {
+                handleExtraItemOptionSelected(
+                    item,
+                    extraItems.wallUnit.currentlyDisplay,
+                    {
+                        wallUnitObj: copyCurrentConfiguration,
+                        wallUnitSku: sku,
+                        wallUnitPrice: price
+                    },
+                    copyOptions,
+                    price > 0,
+                    product
+                );
+            }else {
+                dispatch({
+                    type: `set-${item}-sku`,
+                    payload: sku,
+                });
+                dispatch({
+                    type: `set-${item}-price`,
+                    payload: price,
+                });
+                dispatch({type: `set-${item}-${property}`, payload: `${option}`});
+                setWallUnitOptions(copyOptions);
 
-            setWallUnitStatus((prev) => ({
-                ...prev,
-                isWallUnitValid: price > 0,
-            }));
+                setWallUnitStatus((prev) => ({
+                    ...prev,
+                    isWallUnitValid: price > 0,
+                }));
 
-            !wallUnitStatus.isWallUnitSelected &&
+                !wallUnitStatus.isWallUnitSelected &&
                 setWallUnitStatus((prev) => ({
                     ...prev,
                     isWallUnitSelected: true,
                 }));
 
-            if (product) {
-                updateCurrentProducts("WALL UNIT", "update", product);
+                if (product) {
+                    updateCurrentProducts("WALL UNIT", "update", product);
+                }
+
+                updateExtraItemsStateOnMainConfigChanges(item,copyOptions,{
+                    wallUnitObj: copyCurrentConfiguration,
+                    wallUnitSku: sku,
+                    wallUnitPrice: price
+                });
             }
         }
 
         if (item === "washbasin") {
-            const { sku, price, product } = getSkuAndPrice(
+            const {sku, price, product} = getSkuAndPrice(
                 composition.model as Model,
                 item,
                 {},
@@ -1113,7 +1194,6 @@ function MargiConfigurator({
             }
         }
 
-        // |===vvvvvv SAME MIRROR LOGIC FOR ALL MODELS VVVVV===|
         updateMirrorOptions(
             item,
             property,
@@ -1137,7 +1217,7 @@ function MargiConfigurator({
             setIsInvalidLabel(false);
         }
 
-        dispatch({ type: "set-label", payload: name });
+        dispatch({type: "set-label", payload: name});
     };
 
     const isValidConfiguration = () => {
@@ -1167,47 +1247,34 @@ function MargiConfigurator({
             return false;
         }
 
+        const {isExtraItemsConfigValid,messages} = validateExtraItemsConfig()
+        if (!isExtraItemsConfigValid){
+            alert(messages.join("\n"));
+            return false;
+        }
+
         return true;
     };
 
     const handleOrderNow = () => {
         if (!isValidConfiguration()) return;
 
-        const {
-            vanitySku,
-            sideUnitSku,
-            washbasin: washbasinSku,
-            wallUnitSku,
-        } = currentConfiguration;
-
+        const {currentProducts,label,isDoubleSink} = currentConfiguration;
         const allFormattedSkus: string[] = [];
 
-        const vanityFormattedSku = `${vanitySku}!!${composition.model}${
-            currentConfiguration.isDoubleSink ? "--2" : "--1"
-        }##${currentConfiguration.label}`;
-        allFormattedSkus.push(vanityFormattedSku);
+        for (const product of currentProducts) {
+            if (product.item === "VANITY") {
+                allFormattedSkus.push(
+                    `${product.uscode}!!${composition.model}${isDoubleSink ? "--2" : "--1"
+                    }##${label}`
+                );
+            }else {
+                allFormattedSkus.push(`${product.uscode}!!${composition.model}--1##${label}`)
+            }
+        }
 
-        const sideUnitFormattedSku = sideUnitSku
-            ? `${sideUnitSku}!!${composition.model}--1##${currentConfiguration.label}`
-            : "";
-        sideUnitFormattedSku && allFormattedSkus.push(sideUnitFormattedSku);
-
-        const washbasinFormattedSku = washbasinSku
-            ? `${washbasinSku}!!${composition.model}--1##${currentConfiguration.label}`
-            : "";
-        washbasinFormattedSku && allFormattedSkus.push(washbasinFormattedSku);
-
-        const wallUnitFormattedSku = wallUnitSku
-            ? `${wallUnitSku}!!${composition.model}--1##${currentConfiguration.label}`
-            : "";
-        wallUnitFormattedSku && allFormattedSkus.push(wallUnitFormattedSku);
-
-        // ========= VVVV MIRROR (REPEATED LOGIC) ==========VVVVV
-        getFormattedMirrorSkus(
-            composition.model,
-            currentConfiguration.label,
-            allFormattedSkus
-        );
+        getFormattedMirrorSkus(composition.model, label, allFormattedSkus);
+        getFormattedExtraItemsSkus(allFormattedSkus,composition.model,label);
 
         router.get("/orders/create-so-num", {
             SKU: allFormattedSkus.join("~"),
@@ -1223,23 +1290,29 @@ function MargiConfigurator({
             isWallUnitValid: false,
         });
         resetMirrorConfigurator();
-        dispatch({ type: "reset-configurator", payload: "" });
+        dispatch({type: "reset-configurator", payload: ""});
         dispatch({
             type: `update-current-products`,
             payload: initialConfiguration.currentProducts,
         });
+        resetExtraItems();
     };
 
     const handleClearItem = (item: string) => {
+        if (extraItems[item as keyof typeof extraItems].currentlyDisplay !== -1){
+            clearExtraProduct(item as keyof ExtraItems,extraItems[item as keyof typeof extraItems].currentlyDisplay);
+            return;
+        }
+
         switch (item) {
             case "vanity":
                 setVanityOptions(initialVanityOptions);
-                dispatch({ type: "reset-vanity", payload: "" });
+                dispatch({type: "reset-vanity", payload: ""});
                 break;
 
             case "washbasin":
                 updateCurrentProducts("WASHBASIN/SINK", "remove");
-                dispatch({ type: "reset-washbasin", payload: "" });
+                dispatch({type: "reset-washbasin", payload: ""});
                 break;
 
             case "wallUnit":
@@ -1249,7 +1322,8 @@ function MargiConfigurator({
                     isWallUnitSelected: false,
                     isWallUnitValid: false,
                 });
-                dispatch({ type: "reset-wallUnit", payload: "" });
+                dispatch({type: "reset-wallUnit", payload: ""});
+                updateExtraItemsStateOnMainConfigChanges(item);
                 break;
 
             default:
@@ -1260,9 +1334,9 @@ function MargiConfigurator({
     const handleAddToCart = () => {
         if (!isValidConfiguration()) return;
 
-        const {            
+        const {
             label,
-            isDoubleSink,            
+            isDoubleSink,
         } = currentConfiguration;
 
         const shoppingCartObj: ShoppingCartComposition = {
@@ -1277,6 +1351,9 @@ function MargiConfigurator({
                 tallUnit: [] as ShoppingCartCompositionProduct[],
                 accessory: [] as ShoppingCartCompositionProduct[],
                 mirror: [] as ShoppingCartCompositionProduct[],
+                vanity: [] as ShoppingCartCompositionProduct[],
+                washbasin: [] as ShoppingCartCompositionProduct[],
+                sideUnit: [] as ShoppingCartCompositionProduct[],
             } as OtherItems,
             isDoubleSink,
             isDoubleSideUnit: false,
@@ -1286,9 +1363,12 @@ function MargiConfigurator({
         const allConfigs = {
             modelConfig: currentConfiguration,
             mirrorConfig: currentMirrorsConfiguration,
+            extraItemsConfig: {
+                currentProducts: getExtraItemsCurrentProductsAsArray(),
+            }
         };
 
-        generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,null,false,isDoubleSink);                   
+        generateShoppingCartCompositionProductObjs(allConfigs, shoppingCartObj, null, false, isDoubleSink);
         onAddToCart(shoppingCartObj);
     };
 
@@ -1339,6 +1419,7 @@ function MargiConfigurator({
                         mirrorProductsConfigurator={
                             currentMirrorsConfiguration.currentProducts
                         }
+                        extraItemsProducts={getExtraItemsCurrentProductsAsArray()}
                         isDoubleSink={currentConfiguration.isDoubleSink}
                         isDoubleSideUnit={false}
                     />
@@ -1437,13 +1518,21 @@ function MargiConfigurator({
                         onNavigation={handleOrderedAccordion}
                         onClear={handleClearItem}
                     >
+                        <MultiItemSelector
+                            item={"wallUnit"}
+                            initialOptions={initialWallUnitOptions as WallUnitOptions}
+                            extraItems={extraItems}
+                            handleAddExtraProduct={handleAddExtraProduct}
+                            setCurrentDisplayItem={setCurrentDisplayItem}
+                            removeConfiguration={removeConfiguration}
+                        />
                         <Options
                             item="wallUnit"
                             property="size"
                             title="SELECT SIZE"
-                            options={wallUnitOptions.sizeOptions}
+                            options={extraItems.wallUnit.currentOptions.sizeOptions}
                             crrOptionSelected={
-                                currentConfiguration.wallUnit!.size
+                                extraItems.wallUnit.currentConfig.wallUnitObj.size
                             }
                             onOptionSelected={handleOptionSelected}
                         />
@@ -1451,9 +1540,9 @@ function MargiConfigurator({
                             item="wallUnit"
                             property="doorStyle"
                             title="SELECT DOOR STYLE"
-                            options={wallUnitOptions.doorStyleOptions}
+                            options={extraItems.wallUnit.currentOptions.doorStyleOptions}
                             crrOptionSelected={
-                                currentConfiguration.wallUnit!.doorStyle
+                                extraItems.wallUnit.currentConfig.wallUnitObj.doorStyle
                             }
                             onOptionSelected={handleOptionSelected}
                         />
@@ -1461,9 +1550,9 @@ function MargiConfigurator({
                             item="wallUnit"
                             property="finish"
                             title="SELECT FINISH"
-                            options={wallUnitOptions.finishOptions}
+                            options={extraItems.wallUnit.currentOptions.finishOptions}
                             crrOptionSelected={
-                                currentConfiguration.wallUnit!.finish
+                                extraItems.wallUnit.currentConfig.wallUnitObj.finish
                             }
                             onOptionSelected={handleOptionSelected}
                         />
@@ -1506,13 +1595,13 @@ function MargiConfigurator({
                         SPECS
                     </a>
                     <button
-                        disabled={grandTotal === 0}
+                        disabled={!grandTotal}
                         onClick={handleOrderNow}
                     >
                         ORDER NOW
                     </button>
                     <button
-                        disabled={grandTotal === 0}
+                        disabled={!grandTotal}
                         onClick={handleAddToCart}
                     >
                         ADD TO CART
@@ -1537,11 +1626,11 @@ interface SizeUnitProps {
 }
 
 function SizeUnit({
-    composition,
-    currentConfiguration,
-    handleOptionSelected,
-    sideUnitOptions,
-}: SizeUnitProps) {
+                      composition,
+                      currentConfiguration,
+                      handleOptionSelected,
+                      sideUnitOptions,
+                  }: SizeUnitProps) {
     if (composition.sideUnits[0].descw.includes("8")) {
         const options = sideUnitOptions as OpenUnitOptions;
         const sideUnitCurrentConfi = currentConfiguration.sideUnit as OpenUnit;
@@ -1587,3 +1676,4 @@ function SizeUnit({
         );
     }
 }
+

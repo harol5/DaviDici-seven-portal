@@ -41,8 +41,8 @@ Route::post('/express-program/shopping-cart/update', [ExpressProgramController::
 
 Route::middleware(['auth','auth.session'])->group(function () {
 
-    // Admin only endpoints.
-    Route::post('/users/invite', [UserController::class, 'sendInvitation']);    
+    // - Admin only endpoints.
+    Route::post('/users/invite', [UserController::class, 'sendInvitation']);
     Route::get('/users/add-to-portal', [UserController::class, 'showFormAddUserToPortal']);
     Route::post('/users/add-to-portal/add', [UserController::class, 'addUserToPortal']);
     Route::get('/intuit', [IntuitController::class, 'connectToIntuit']);
@@ -51,23 +51,23 @@ Route::middleware(['auth','auth.session'])->group(function () {
     Route::get('/media', [ExpressProgramController::class, 'fileForm']);
     Route::post('/media/upload-images', [ExpressProgramController::class, 'storeImages']);
     Route::get('/media/images', [ExpressProgramController::class, 'getAllCompositionImages']);
-    Route::post('/media/images/delete', [ExpressProgramController::class, 'deleteImages']);    
+    Route::post('/media/images/delete', [ExpressProgramController::class, 'deleteImages']);
     Route::get('/tokens/create', [UserController::class, 'generateToken']);
     Route::get('/users/admin/pwd-form', [UserController::class, 'changePwdAdminForm']);
     Route::post('/users/admin/pwd', [UserController::class, 'changePasswordAdmin']);
-    //===========TESTING ROUTE================//
+
+    // TESTING ROUTE.
     Route::get('/testing', [OrdersController::class, 'testApi'])->middleware(TestMiddleware::class);
 
-
-    // Owner only endpoints.    
+    // - Owner only endpoints.
     Route::get('/register/salesperson', [UserController::class, 'registerSalesPerson'])->name('user.register.salesperson');
     Route::post('/users/salesperson', [UserController::class, 'createSalesPerson']);
 
-    // Salesperson endpoints.
+    // - Salesperson endpoints.
     Route::get('/salesperson/update', [UserController::class, 'updateSalesPersonForm'])->name('user.update.salesperson');
     Route::post('/salesperson/update', [UserController::class, 'updateSalesPersonInfo']);
 
-    // Orders routes - read operations.
+    // - Orders routes - read operations.
     Route::get('/orders', [OrdersController::class, 'all']);
     Route::get('/orders/create-so-num', [OrdersController::class, 'createOrderNumber']); // coming from davidici pricelist.
     Route::get('/orders/{orderNumber}/products', [OrdersController::class, 'getProducts']);
@@ -76,7 +76,7 @@ Route::middleware(['auth','auth.session'])->group(function () {
     Route::get('/orders/{orderNumber}/delivery', [OrdersController::class, 'orderDelivery']);
     Route::get('/orders/{orderNumber}/payment', [OrdersController::class, 'orderPayment']);
 
-    // Orders routes - create operations.    
+    // - Orders routes - create operations.
     Route::post('/orders/create', [OrdersController::class, 'createOrder']);
     Route::post('/orders/{orderNumber}/products/update', [OrdersController::class, 'updateQuantity']);
     Route::post('/orders/{orderNumber}/products/note', [OrdersController::class, 'updateProductNote']);
@@ -85,15 +85,15 @@ Route::middleware(['auth','auth.session'])->group(function () {
     Route::post('/orders/{orderNumber}/products/delivery', [OrdersController::class, 'saveDeliveryInfo']);
     Route::post('/orders/{orderNumber}/products/payment', [OrdersController::class, 'createCharge']);
     Route::post('/orders/{orderNumber}/products/payment-bank', [OrdersController::class, 'createBankCharge']);
-    Route::post('/orders/{orderNumber}/products/payment-bank/status', [OrdersController::class, 'getStatusCheck']);   
-    Route::post('/orders/{orderNumber}/products/approve', [OrdersController::class, 'approveOrder']); 
+    Route::post('/orders/{orderNumber}/products/payment-bank/status', [OrdersController::class, 'getStatusCheck']);
+    Route::post('/orders/{orderNumber}/products/approve', [OrdersController::class, 'approveOrder']);
 
-    // Inventory routes.
-    Route::get('/inventory', function(){        
+    // - Inventory routes.
+    Route::get('/inventory', function(){
         return Inertia::render("Inventory/Inventory");
     });
 
-    // Others
+    // - Others.
     Route::post('/logout', [UserController::class, 'logout']);
 });
 

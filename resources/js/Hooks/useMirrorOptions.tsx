@@ -1,6 +1,6 @@
 import { useMemo, useReducer, useState } from "react";
 import { ProductInventory } from "../Models/Product";
-import type { Option, OtherItems } from "../Models/ExpressProgramModels";
+import type { Option } from "../Models/ExpressProgramModels";
 import {
     Name,
     MirrorCabinet,
@@ -535,23 +535,23 @@ function useMirrorOptions(mirrors: ProductInventory[]) {
             allFormattedSkus.push(openCompMirrorFormattedSku);
     };
 
-    const getMirrorProductObj = (
-        mirrorsInventory: ProductInventory[],
-        otherProducts: OtherItems
-    ) => {
-        const {
-            mirrorCabinetSku,
-            ledMirror: ledMirrorSku,
-            openCompMirror: openCompMirrorSku,
-        } = currentMirrorsConfiguration;
-
-        const mirrorSku = mirrorCabinetSku || ledMirrorSku || openCompMirrorSku;
-
-        const mirrorObj = mirrorsInventory.find(
-            (mirror) => mirror.uscode === mirrorSku
-        );
-        mirrorObj && otherProducts.mirror.push(mirrorObj);
-    };
+    // const getMirrorProductObj = (
+    //     mirrorsInventory: ProductInventory[],
+    //     otherProducts: OtherItems
+    // ) => {
+    //     const {
+    //         mirrorCabinetSku,
+    //         ledMirror: ledMirrorSku,
+    //         openCompMirror: openCompMirrorSku,
+    //     } = currentMirrorsConfiguration;
+    //
+    //     const mirrorSku = mirrorCabinetSku || ledMirrorSku || openCompMirrorSku;
+    //
+    //     const mirrorObj = mirrorsInventory.find(
+    //         (mirror) => mirror.uscode === mirrorSku
+    //     );
+    //     mirrorObj && otherProducts.mirror.push(mirrorObj);
+    // };
 
     const isMirrorCabinetConfigValid = () => {
         const { isMirrorCabinetSelected, isMirrorCabinetValid } =
@@ -574,7 +574,6 @@ function useMirrorOptions(mirrors: ProductInventory[]) {
         handleResetMirrorConfigurator,
         handleClearMirrorCategory,
         getFormattedMirrorSkus,
-        getMirrorProductObj,
         isMirrorCabinetConfigValid,
     };
 }

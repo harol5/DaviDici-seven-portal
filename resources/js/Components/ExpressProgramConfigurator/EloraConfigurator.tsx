@@ -1,21 +1,17 @@
-import { Composition } from "../../Models/Composition";
+import {Composition} from "../../Models/Composition";
 import classes from "../../../css/product-configurator.module.css";
-import { useMemo, useReducer, useState } from "react";
+import {useMemo, useReducer, useState} from "react";
 import type {
     Option,
     OtherItems,
     ShoppingCartComposition,
-    ShoppingCartCompositionProduct,    
+    ShoppingCartCompositionProduct,
 } from "../../Models/ExpressProgramModels";
 import Options from "./Options";
 import ConfigurationName from "./ConfigurationName";
-import { router } from "@inertiajs/react";
-import {
-    getSkuAndPrice,
-    isAlphanumericWithSpaces,
-    scrollToView,
-} from "../../utils/helperFunc";
-import { ProductInventory } from "../../Models/Product";
+import {router} from "@inertiajs/react";
+import {getSkuAndPrice, isAlphanumericWithSpaces, scrollToView,} from "../../utils/helperFunc";
+import {ProductInventory} from "../../Models/Product";
 import {
     CurrentConfiguration,
     TallUnit,
@@ -25,21 +21,20 @@ import {
     WallUnit,
     WallUnitOptions,
 } from "../../Models/EloraConfigTypes";
-import { ItemFoxPro, Model } from "../../Models/ModelConfigTypes";
+import {ItemFoxPro, Model} from "../../Models/ModelConfigTypes";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
-import { MirrorCategory } from "../../Models/MirrorConfigTypes";
+import {MirrorCategory} from "../../Models/MirrorConfigTypes";
 import MirrorConfigurator from "./MirrorConfigurator";
 import useAccordionState from "../../Hooks/useAccordionState";
 import ConfigurationBreakdown from "./ConfigurationBreakdown";
 import useImagesComposition from "../../Hooks/useImagesComposition";
 import ImageSlider from "./ImageSlider";
-import { generateShoppingCartCompositionProductObjs } from "../../utils/shoppingCartUtils";
+import {generateShoppingCartCompositionProductObjs} from "../../utils/shoppingCartUtils";
+import useExtraProductsExpressProgram from "../../Hooks/useExtraProductsExpressProgram.tsx";
+import MultiItemSelector from "./MultiItemSelector.tsx";
+import {ExtraItems} from "../../Models/ExtraItemsHookModels.ts";
 
-/**
- * TODO;
- * 2. add other products options.
- */
 
 interface EloraConfiguratorProps {
     composition: Composition;
@@ -318,7 +313,6 @@ function EloraConfigurator({
         handleResetMirrorConfigurator: resetMirrorConfigurator,
         handleClearMirrorCategory: clearMirrorCategory,
         getFormattedMirrorSkus,
-        getMirrorProductObj,
         isMirrorCabinetConfigValid,
     } = useMirrorOptions(composition.otherProductsAvailable.mirrors);
 
@@ -604,6 +598,66 @@ function EloraConfigurator({
         initialConfiguration
     );
 
+    // |===== EXTRA PRODUCTS =====|
+    const {
+        extraItems,
+        extraItemsCurrentProducts,
+        handleAddExtraProduct,
+        setCurrentDisplayItem,
+        removeConfiguration,
+        handleOptionSelected: handleExtraItemOptionSelected,
+        updateExtraItemsStateOnMainConfigChanges,
+        clearExtraProduct,
+        getExtraItemsProductsGrandTotal,
+        resetExtraItems,
+        validateExtraItemsConfig,
+        getFormattedExtraItemsSkus,
+        getExtraItemsCurrentProductsAsArray
+    } = useExtraProductsExpressProgram(
+        "ELORA",
+        initialConfiguration,
+        {
+            vanity: {
+                options: vanityOptions,
+                config: {
+                    vanityObj: currentConfiguration.vanity,
+                    vanitySku: currentConfiguration.vanitySku,
+                    vanityPrice: currentConfiguration.vanityPrice
+                },
+            },
+            washbasin: {
+                options: washbasinOptions,
+                config: {
+                    washbasinSku: currentConfiguration.washbasin,
+                    washbasinPrice: currentConfiguration.washbasinPrice,
+                }
+            },
+            wallUnit: {
+                options: wallUnitOptions,
+                config: {
+                    wallUnitObj: currentConfiguration.wallUnit,
+                    wallUnitSku: currentConfiguration.wallUnitSku,
+                    wallUnitPrice: currentConfiguration.wallUnitPrice,
+                }
+            },
+            tallUnit: {
+                options: tallUnitOptions,
+                config: {
+                    tallUnitObj: currentConfiguration.tallUnit,
+                    tallUnitSku: currentConfiguration.tallUnitSku,
+                    tallUnitPrice: currentConfiguration.tallUnitPrice
+                }
+            },
+            accessory: {
+                options: accessoryOptions,
+                config: {
+                    accessorySku: currentConfiguration.accessory,
+                    accessoryPrice: currentConfiguration.accessoryPrice
+                }
+            }
+        }
+    );
+
     // |===== GRAND TOTAL =====|
     const grandTotal = useMemo(() => {
         const {
@@ -638,19 +692,17 @@ function EloraConfigurator({
                 ? vanityPrice * 2
                 : vanityPrice;
 
-            const grandTotal =
-                finalVanityPrice +
+            return finalVanityPrice +
                 washbasinPrice +
                 wallUnitPrice +
                 tallUnitPrice +
                 mirrorCabinetPrice +
                 ledMirrorPrice +
                 openCompMirrorPrice +
-                accessoryPrice;
-
-            return grandTotal;
+                accessoryPrice +
+                getExtraItemsProductsGrandTotal();
         }
-    }, [currentConfiguration, currentMirrorsConfiguration]);
+    }, [currentConfiguration, currentMirrorsConfiguration, extraItemsCurrentProducts]);
 
     // |===== COMPOSITION NAME =====| (repeated logic)
     const [isMissingLabel, setIsMissingLabel] = useState(false);
@@ -788,9 +840,14 @@ function EloraConfigurator({
         }
 
         if (item === "wallUnit") {
+
+            const crrWallUnitOptions = extraItems.wallUnit.currentlyDisplay !== -1 ?
+                extraItems.wallUnit.configurations[extraItems.wallUnit.currentlyDisplay].options as WallUnitOptions
+                : wallUnitOptions as WallUnitOptions;
+
             const copyOptions = structuredClone(
-                wallUnitOptions
-            ) as WallUnitOptions;
+                crrWallUnitOptions
+            );
 
             // Checks if any matt option should be disabled.
             for (const mattFinishOption of copyOptions.mattFinishOptions) {
@@ -822,9 +879,14 @@ function EloraConfigurator({
                 }
             }
 
+            const crrWallUnitConfig = extraItems.wallUnit.currentlyDisplay !== -1 ?
+                extraItems.wallUnit.currentConfig.wallUnitObj
+                : currentConfiguration.wallUnit;
+
+
             const wallUnitCurrentConfiguration = structuredClone(
-                currentConfiguration.wallUnit
-            ) as WallUnit;
+                crrWallUnitConfig
+            );
 
             wallUnitCurrentConfiguration[
                 property as keyof typeof wallUnitCurrentConfiguration
@@ -839,34 +901,57 @@ function EloraConfigurator({
 
             const { isWallUnitSelected } = wallUnitStatus;
 
-            dispatch({ type: `set-${item}-sku`, payload: sku });
-            dispatch({
-                type: `set-${item}-price`,
-                payload: price,
-            });
-            dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
-            setWallUnitOptions(copyOptions);
+            const extraItemUpdatedConfigObj = {
+                wallUnitObj: wallUnitCurrentConfiguration,
+                wallUnitSku: sku,
+                wallUnitPrice: price
+            }
 
-            setWallUnitStatus((prev) => ({
-                ...prev,
-                isWallUnitValid: price > 0,
-            }));
+            if (extraItems.wallUnit.currentlyDisplay !== -1) {
+                handleExtraItemOptionSelected(
+                    item,
+                    extraItems.wallUnit.currentlyDisplay,
+                    extraItemUpdatedConfigObj,
+                    copyOptions,
+                    price > 0,
+                    product
+                );
+            }else {
+                dispatch({ type: `set-${item}-sku`, payload: sku });
+                dispatch({
+                    type: `set-${item}-price`,
+                    payload: price,
+                });
+                dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
+                setWallUnitOptions(copyOptions);
 
-            !isWallUnitSelected &&
+                setWallUnitStatus((prev) => ({
+                    ...prev,
+                    isWallUnitValid: price > 0,
+                }));
+
+                !isWallUnitSelected &&
                 setWallUnitStatus((prev) => ({
                     ...prev,
                     isWallUnitSelected: true,
                 }));
 
-            if (product) {
-                updateCurrentProducts("WALL UNIT", "update", product);
+                if (product) {
+                    updateCurrentProducts("WALL UNIT", "update", product);
+                }
+
+                updateExtraItemsStateOnMainConfigChanges(item,copyOptions,extraItemUpdatedConfigObj);
             }
         }
 
         if (item === "tallUnit") {
+            const crrTallUnitOptions = extraItems.tallUnit.currentlyDisplay !== -1 ?
+                extraItems.tallUnit.configurations[extraItems.tallUnit.currentlyDisplay].options as TallUnitOptions
+                : tallUnitOptions as TallUnitOptions;
+
             const copyOptions = structuredClone(
-                tallUnitOptions
-            ) as TallUnitOptions;
+                crrTallUnitOptions
+            );
 
             // Checks if any matt option should be disabled.
             for (const mattFinishOption of copyOptions.mattFinishOptions) {
@@ -898,9 +983,13 @@ function EloraConfigurator({
                 }
             }
 
+            const crrTallUnitConfig = extraItems.tallUnit.currentlyDisplay !== -1 ?
+                extraItems.tallUnit.currentConfig.tallUnitObj
+                : currentConfiguration.tallUnit;
+
             const tallUnitCurrentConfiguration = structuredClone(
-                currentConfiguration.tallUnit
-            ) as TallUnit;
+                crrTallUnitConfig
+            );
 
             tallUnitCurrentConfiguration[
                 property as keyof typeof tallUnitCurrentConfiguration
@@ -915,30 +1004,49 @@ function EloraConfigurator({
 
             const { isTallUnitSelected } = tallUnitStatus;
 
-            dispatch({ type: `set-${item}-sku`, payload: sku });
-            dispatch({
-                type: `set-${item}-price`,
-                payload: price,
-            });
-            dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
-            setTallUnitOptions(copyOptions);
+            const extraItemUpdatedConfigObj = {
+                tallUnitObj: tallUnitCurrentConfiguration,
+                tallUnitSku: sku,
+                tallUnitPrice: price
+            }
 
-            setTallUnitStatus((prev) => ({
-                ...prev,
-                isTallUnitValid: price > 0,
-            }));
-            !isTallUnitSelected &&
+            if (extraItems.tallUnit.currentlyDisplay !== -1) {
+                handleExtraItemOptionSelected(
+                    item,
+                    extraItems.tallUnit.currentlyDisplay,
+                    extraItemUpdatedConfigObj,
+                    copyOptions,
+                    price > 0,
+                    product
+                );
+            }else {
+                dispatch({ type: `set-${item}-sku`, payload: sku });
+                dispatch({
+                    type: `set-${item}-price`,
+                    payload: price,
+                });
+                dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
+                setTallUnitOptions(copyOptions);
+
+                setTallUnitStatus((prev) => ({
+                    ...prev,
+                    isTallUnitValid: price > 0,
+                }));
+                !isTallUnitSelected &&
                 setTallUnitStatus((prev) => ({
                     ...prev,
                     isTallUnitSelected: true,
                 }));
 
-            if (product) {
-                updateCurrentProducts(
-                    "TALL UNIT/LINEN CLOSET",
-                    "update",
-                    product
-                );
+                if (product) {
+                    updateCurrentProducts(
+                        "TALL UNIT/LINEN CLOSET",
+                        "update",
+                        product
+                    );
+                }
+
+                updateExtraItemsStateOnMainConfigChanges(item,copyOptions,extraItemUpdatedConfigObj);
             }
         }
 
@@ -951,18 +1059,36 @@ function EloraConfigurator({
                 option
             );
 
-            dispatch({
-                type: `set-${item}-${property}`,
-                payload: sku,
-            });
+            const extraItemUpdatedConfigObj = {
+                accessorySku: sku,
+                accessoryPrice: price
+            }
 
-            dispatch({
-                type: `set-${item}-price`,
-                payload: price,
-            });
+            if (extraItems.accessory.currentlyDisplay !== -1) {
+                handleExtraItemOptionSelected(
+                    item,
+                    extraItems.accessory.currentlyDisplay,
+                    extraItemUpdatedConfigObj,
+                    accessoryOptions,
+                    price > 0,
+                    product
+                );
+            }else {
+                dispatch({
+                    type: `set-${item}-${property}`,
+                    payload: sku,
+                });
 
-            if (product) {
-                updateCurrentProducts("ACCESSORY", "update", product);
+                dispatch({
+                    type: `set-${item}-price`,
+                    payload: price,
+                });
+
+                if (product) {
+                    updateCurrentProducts("ACCESSORY", "update", product);
+                }
+
+                updateExtraItemsStateOnMainConfigChanges(item,accessoryOptions,extraItemUpdatedConfigObj);
             }
         }
 
@@ -1031,6 +1157,12 @@ function EloraConfigurator({
             return false;
         }
 
+        const {isExtraItemsConfigValid,messages} = validateExtraItemsConfig();
+        if (!isExtraItemsConfigValid){
+            alert(messages.join("\n"));
+            return false;
+        }
+
         return true;
     };
 
@@ -1038,49 +1170,26 @@ function EloraConfigurator({
         if (!isValidConfiguration()) return;
 
         const {
-            vanitySku,
-            washbasin: washbasinSku,
             label,
             isDoubleSink,
-            wallUnitSku,
-            tallUnitSku,
-            accessory: accessorySku,
+            currentProducts
         } = currentConfiguration;
 
         const allFormattedSkus: string[] = [];
 
-        const vanityFormattedSku = `${vanitySku}!!${composition.model}${
-            isDoubleSink ? "--2" : "--1"
-        }##${label}`;
-        allFormattedSkus.push(vanityFormattedSku);
+        for (const product of currentProducts) {
+            if (product.item === "VANITY") {
+                allFormattedSkus.push(
+                    `${product.uscode}!!${composition.model}${isDoubleSink ? "--2" : "--1"
+                    }##${label}`
+                );
+            }else {
+                allFormattedSkus.push(`${product.uscode}!!${composition.model}--1##${label}`)
+            }
+        }
 
-        const washbasinFormattedSku = washbasinSku
-            ? `${washbasinSku}!!${composition.model}--1##${label}`
-            : "";
-        washbasinFormattedSku && allFormattedSkus.push(washbasinFormattedSku);
-
-        const wallUnitFormattedSku = wallUnitSku
-            ? `${wallUnitSku}!!${composition.model}--1##${label}`
-            : "";
-        wallUnitFormattedSku && allFormattedSkus.push(wallUnitFormattedSku);
-
-        const tallUnitFormattedSku = tallUnitSku
-            ? `${tallUnitSku}!!${composition.model}--1##${label}`
-            : "";
-        tallUnitFormattedSku && allFormattedSkus.push(tallUnitFormattedSku);
-
-        const accessoryFormattedSku = accessorySku
-            ? `${accessorySku}!!${composition.model}--1##${label}`
-            : "";
-        accessoryFormattedSku && allFormattedSkus.push(accessoryFormattedSku);
-
-        // ========= VVVV MIRROR (REPEATED LOGIC) ==========VVVVV
-        getFormattedMirrorSkus(
-            composition.model,
-            currentConfiguration.label,
-            allFormattedSkus
-        );
-
+        getFormattedMirrorSkus(composition.model, label, allFormattedSkus);
+        getFormattedExtraItemsSkus(allFormattedSkus,composition.model,label);
         router.get("/orders/create-so-num", {
             SKU: allFormattedSkus.join("~"),
         });
@@ -1104,9 +1213,15 @@ function EloraConfigurator({
             type: `update-current-products`,
             payload: initialConfiguration.currentProducts,
         });
+        resetExtraItems();
     };
 
     const handleClearItem = (item: string) => {
+        if (extraItems[item as keyof typeof extraItems].currentlyDisplay !== -1){
+            clearExtraProduct(item as keyof ExtraItems,extraItems[item as keyof typeof extraItems].currentlyDisplay);
+            return;
+        }
+
         switch (item) {
             case "vanity":
                 updateCurrentProducts("VANITY", "remove");
@@ -1127,6 +1242,7 @@ function EloraConfigurator({
                     isWallUnitValid: false,
                 });
                 dispatch({ type: "reset-wallUnit", payload: "" });
+                updateExtraItemsStateOnMainConfigChanges(item);
                 break;
 
             case "tallUnit":
@@ -1137,11 +1253,13 @@ function EloraConfigurator({
                     isTallUnitValid: false,
                 });
                 dispatch({ type: "reset-tallUnit", payload: "" });
+                updateExtraItemsStateOnMainConfigChanges(item);
                 break;
 
             case "accessory":
                 updateCurrentProducts("ACCESSORY", "remove");
                 dispatch({ type: "reset-accessory", payload: "" });
+                updateExtraItemsStateOnMainConfigChanges(item);
                 break;
 
             default:
@@ -1152,9 +1270,9 @@ function EloraConfigurator({
     const handleAddToCart = () => {
         if (!isValidConfiguration()) return;
 
-        const {            
+        const {
             label,
-            isDoubleSink,            
+            isDoubleSink,
         } = currentConfiguration;
 
         const shoppingCartObj: ShoppingCartComposition = {
@@ -1169,6 +1287,9 @@ function EloraConfigurator({
                 tallUnit: [] as ShoppingCartCompositionProduct[],
                 accessory: [] as ShoppingCartCompositionProduct[],
                 mirror: [] as ShoppingCartCompositionProduct[],
+                vanity: [] as ShoppingCartCompositionProduct[],
+                washbasin: [] as ShoppingCartCompositionProduct[],
+                sideUnit: [] as ShoppingCartCompositionProduct[],
             } as OtherItems,
             isDoubleSink,
             isDoubleSideUnit: false,
@@ -1178,9 +1299,12 @@ function EloraConfigurator({
         const allConfigs = {
             modelConfig: currentConfiguration,
             mirrorConfig: currentMirrorsConfiguration,
+            extraItemsConfig: {
+                currentProducts: getExtraItemsCurrentProductsAsArray(),
+            }
         };
 
-        generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,null,false,isDoubleSink);        
+        generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,null,false,isDoubleSink);
         onAddToCart(shoppingCartObj);
     };
 
@@ -1226,6 +1350,7 @@ function EloraConfigurator({
                         mirrorProductsConfigurator={
                             currentMirrorsConfiguration.currentProducts
                         }
+                        extraItemsProducts={getExtraItemsCurrentProductsAsArray()}
                         isDoubleSink={currentConfiguration.isDoubleSink}
                         isDoubleSideUnit={false}
                     />
@@ -1306,13 +1431,21 @@ function EloraConfigurator({
                             src={`https://${location.hostname}/images/express-program/ELORA/wall-unit.webp`}
                             alt="image of wall unit"
                         />
+                        <MultiItemSelector
+                            item={"wallUnit"}
+                            initialOptions={initialWallUnitOptions as WallUnitOptions}
+                            extraItems={extraItems}
+                            handleAddExtraProduct={handleAddExtraProduct}
+                            setCurrentDisplayItem={setCurrentDisplayItem}
+                            removeConfiguration={removeConfiguration}
+                        />
                         <Options
                             item="wallUnit"
                             property="mattFinish"
                             title="SELECT MATT FINISH"
-                            options={wallUnitOptions.mattFinishOptions}
+                            options={extraItems.wallUnit.currentOptions.mattFinishOptions}
                             crrOptionSelected={
-                                currentConfiguration.wallUnit?.mattFinish!
+                                extraItems.wallUnit.currentConfig.wallUnitObj.mattFinish!
                             }
                             onOptionSelected={handleOptionSelected}
                         />
@@ -1320,9 +1453,9 @@ function EloraConfigurator({
                             item="wallUnit"
                             property="glassFinish"
                             title="SELECT GLASS FINISH"
-                            options={wallUnitOptions.glassFinishOptions}
+                            options={extraItems.wallUnit.currentOptions.glassFinishOptions}
                             crrOptionSelected={
-                                currentConfiguration.wallUnit?.glassFinish!
+                                extraItems.wallUnit.currentConfig.wallUnitObj.glassFinish!
                             }
                             onOptionSelected={handleOptionSelected}
                         />
@@ -1345,13 +1478,21 @@ function EloraConfigurator({
                             src={`https://${location.hostname}/images/express-program/ELORA/tall-unit.webp`}
                             alt="image of wall unit"
                         />
+                        <MultiItemSelector
+                            item={"tallUnit"}
+                            initialOptions={initialTallUnitOptions as TallUnitOptions}
+                            extraItems={extraItems}
+                            handleAddExtraProduct={handleAddExtraProduct}
+                            setCurrentDisplayItem={setCurrentDisplayItem}
+                            removeConfiguration={removeConfiguration}
+                        />
                         <Options
                             item="tallUnit"
                             property="mattFinish"
                             title="SELECT MATT FINISH"
-                            options={tallUnitOptions.mattFinishOptions}
+                            options={extraItems.tallUnit.currentOptions.mattFinishOptions}
                             crrOptionSelected={
-                                currentConfiguration.tallUnit?.mattFinish!
+                                extraItems.tallUnit.currentConfig.tallUnitObj.mattFinish
                             }
                             onOptionSelected={handleOptionSelected}
                         />
@@ -1359,9 +1500,9 @@ function EloraConfigurator({
                             item="tallUnit"
                             property="glassFinish"
                             title="SELECT GLASS FINISH"
-                            options={tallUnitOptions.glassFinishOptions}
+                            options={extraItems.tallUnit.currentOptions.glassFinishOptions}
                             crrOptionSelected={
-                                currentConfiguration.tallUnit?.glassFinish!
+                                extraItems.tallUnit.currentConfig.tallUnitObj.glassFinish
                             }
                             onOptionSelected={handleOptionSelected}
                         />
@@ -1379,12 +1520,20 @@ function EloraConfigurator({
                         onNavigation={handleOrderedAccordion}
                         onClear={handleClearItem}
                     >
+                        <MultiItemSelector
+                            item={"accessory"}
+                            initialOptions={accessoryOptions as Option[]}
+                            extraItems={extraItems}
+                            handleAddExtraProduct={handleAddExtraProduct}
+                            setCurrentDisplayItem={setCurrentDisplayItem}
+                            removeConfiguration={removeConfiguration}
+                        />
                         <Options
                             item="accessory"
                             property="type"
                             title="SELECT ACCESSORY"
-                            options={accessoryOptions}
-                            crrOptionSelected={currentConfiguration.accessory}
+                            options={extraItems.accessory.currentOptions}
+                            crrOptionSelected={extraItems.accessory.currentConfig.accessorySku}
                             onOptionSelected={handleOptionSelected}
                         />
                     </ItemPropertiesAccordion>
@@ -1426,13 +1575,13 @@ function EloraConfigurator({
                         SPECS
                     </a>
                     <button
-                        disabled={grandTotal === 0}
+                        disabled={!grandTotal}
                         onClick={handleOrderNow}
                     >
                         ORDER NOW
                     </button>
                     <button
-                        disabled={grandTotal === 0}
+                        disabled={!grandTotal}
                         onClick={handleAddToCart}
                     >
                         ADD TO CART

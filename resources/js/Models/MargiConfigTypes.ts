@@ -1,32 +1,7 @@
-import type { Option } from "./ExpressProgramModels";
-import { ProductInventory } from "./Product";
+import type {Option} from "./ExpressProgramModels";
+import {ProductInventory} from "./Product";
 
 export const Name = "MARGI";
-
-type Vanity = {
-    baseSku: string;
-    drawer: string;
-    handle: string;
-    finish: string;
-};
-
-type OpenUnit = {
-    baseSku: string;
-    finish: string;
-};
-
-type SideCabinet = {
-    baseSku: string;
-    doorStyleAndHandle: string;
-    finish: string;
-};
-
-type WallUnit = {
-    baseSku: string;
-    size: string;
-    doorStyle: string;
-    finish: string;
-};
 
 type VanityOptions = {
     baseSku: string;
@@ -53,6 +28,31 @@ type SideCabinetOptions = {
     finishOptions: Option[];
 };
 
+type Vanity = {
+    baseSku: string;
+    drawer: string;
+    handle: string;
+    finish: string;
+};
+
+type OpenUnit = {
+    baseSku: string;
+    finish: string;
+};
+
+type SideCabinet = {
+    baseSku: string;
+    doorStyleAndHandle: string;
+    finish: string;
+};
+
+type WallUnit = {
+    baseSku: string;
+    size: string;
+    doorStyle: string;
+    finish: string;
+};
+
 type CurrentConfiguration = {
     label: string;
     vanity: Vanity;
@@ -70,6 +70,7 @@ type CurrentConfiguration = {
     wallUnitPrice: number;
     currentProducts: ProductInventory[];
 };
+
 
 export const SkuLengths = {
     wallUnit: 4,

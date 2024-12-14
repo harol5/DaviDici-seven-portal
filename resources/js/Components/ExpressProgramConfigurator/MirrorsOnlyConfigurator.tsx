@@ -43,7 +43,6 @@ function MirrorsOnlyConfigurator({
         handleResetMirrorConfigurator: resetMirrorConfigurator,
         handleClearMirrorCategory: clearMirrorCategory,
         getFormattedMirrorSkus,
-        getMirrorProductObj,
         isMirrorCabinetConfigValid,
     } = useMirrorOptions(composition.otherProductsAvailable.mirrors);
 
@@ -210,7 +209,7 @@ function MirrorsOnlyConfigurator({
     const handleAddToCart = () => {
         if (!isValidConfiguration()) return;
 
-        const { label, isDoubleSink } = currentConfiguration;        
+        const { label, isDoubleSink } = currentConfiguration;
 
         const shoppingCartObj: ShoppingCartComposition = {
             info: composition,
@@ -235,7 +234,7 @@ function MirrorsOnlyConfigurator({
             mirrorConfig: currentMirrorsConfiguration,
         };
 
-        generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,null,false,isDoubleSink);        
+        generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,null,false,isDoubleSink);
         onAddToCart(shoppingCartObj);
     };
 
@@ -281,6 +280,7 @@ function MirrorsOnlyConfigurator({
                         mirrorProductsConfigurator={
                             currentMirrorsConfiguration.currentProducts
                         }
+                        extraItemsProducts={[]}
                         isDoubleSink={currentConfiguration.isDoubleSink}
                         isDoubleSideUnit={false}
                     />
@@ -330,13 +330,13 @@ function MirrorsOnlyConfigurator({
                         SPECS
                     </a>
                     <button
-                        disabled={grandTotal === 0}
+                        disabled={!grandTotal}
                         onClick={handleOrderNow}
                     >
                         ORDER NOW
                     </button>
                     <button
-                        disabled={grandTotal === 0}
+                        disabled={!grandTotal}
                         onClick={handleAddToCart}
                     >
                         ADD TO CART

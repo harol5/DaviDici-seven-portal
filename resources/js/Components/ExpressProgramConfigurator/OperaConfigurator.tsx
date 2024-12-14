@@ -1,42 +1,41 @@
-import { Composition } from "../../Models/Composition";
+import {Composition} from "../../Models/Composition";
 import classes from "../../../css/product-configurator.module.css";
-import { useMemo, useReducer, useState } from "react";
+import {useMemo, useReducer, useState} from "react";
 import type {
     Option,
     OtherItems,
     ShoppingCartComposition,
-    ShoppingCartCompositionProduct,    
+    ShoppingCartCompositionProduct,
 } from "../../Models/ExpressProgramModels";
 import Options from "./Options";
 import ConfigurationName from "./ConfigurationName";
-import {
-    getSkuAndPrice,
-    isAlphanumericWithSpaces,
-    scrollToView,
-} from "../../utils/helperFunc";
-import { ProductInventory } from "../../Models/Product";
+import {getSkuAndPrice, isAlphanumericWithSpaces, scrollToView,} from "../../utils/helperFunc";
+import {ProductInventory} from "../../Models/Product";
 import type {
-    Vanity,
-    VanityOptions,
-    SideUnit,
-    SideUnitOptions,
-    WallUnit,
-    WallUnitOptions,
+    CurrentConfiguration,
     DrawerBase,
     DrawerBaseOptions,
-    CurrentConfiguration,
+    SideUnit,
+    SideUnitOptions,
+    Vanity,
+    VanityOptions,
+    WallUnit,
+    WallUnitOptions,
 } from "../../Models/OperaConfigTypes";
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
-import { MirrorCategory } from "../../Models/MirrorConfigTypes";
-import { ItemFoxPro, Model } from "../../Models/ModelConfigTypes";
+import {MirrorCategory} from "../../Models/MirrorConfigTypes";
+import {ItemFoxPro, Model} from "../../Models/ModelConfigTypes";
 import MirrorConfigurator from "./MirrorConfigurator";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
-import { router } from "@inertiajs/react";
+import {router} from "@inertiajs/react";
 import useAccordionState from "../../Hooks/useAccordionState";
 import ConfigurationBreakdown from "./ConfigurationBreakdown";
 import useImagesComposition from "../../Hooks/useImagesComposition";
 import ImageSlider from "./ImageSlider";
-import { generateShoppingCartCompositionProductObjs } from "../../utils/shoppingCartUtils";
+import {generateShoppingCartCompositionProductObjs} from "../../utils/shoppingCartUtils";
+import useExtraProductsExpressProgram from "../../Hooks/useExtraProductsExpressProgram.tsx";
+import MultiItemSelector from "./MultiItemSelector.tsx";
+import {ExtraItems} from "../../Models/ExtraItemsHookModels.ts";
 
 interface OperaConfiguratorProps {
     composition: Composition;
@@ -329,7 +328,6 @@ function OperaConfigurator({
         handleResetMirrorConfigurator: resetMirrorConfigurator,
         handleClearMirrorCategory: clearMirrorCategory,
         getFormattedMirrorSkus,
-        getMirrorProductObj,
         isMirrorCabinetConfigValid,
     } = useMirrorOptions(composition.otherProductsAvailable.mirrors);
 
@@ -644,6 +642,75 @@ function OperaConfigurator({
         initialConfiguration
     );
 
+    // |===== EXTRA PRODUCTS =====|
+    const {
+        extraItems,
+        extraItemsCurrentProducts,
+        handleAddExtraProduct,
+        setCurrentDisplayItem,
+        removeConfiguration,
+        handleOptionSelected: handleExtraItemOptionSelected,
+        updateExtraItemsStateOnMainConfigChanges,
+        clearExtraProduct,
+        getExtraItemsProductsGrandTotal,
+        resetExtraItems,
+        validateExtraItemsConfig,
+        getFormattedExtraItemsSkus,
+        getExtraItemsCurrentProductsAsArray
+    } = useExtraProductsExpressProgram(
+        "OPERA",
+        initialConfiguration,
+        {
+            vanity: {
+                options: vanityOptions,
+                config: {
+                    vanityObj: currentConfiguration.vanity,
+                    vanitySku: currentConfiguration.vanitySku,
+                    vanityPrice: currentConfiguration.vanityPrice
+                },
+            },
+            washbasin: {
+                options: washbasinOptions,
+                config: {
+                    washbasinSku: currentConfiguration.washbasin,
+                    washbasinPrice: currentConfiguration.washbasinPrice,
+                }
+            },
+            sideUnit: {
+                options: sideUnitOptions,
+                config: {
+                    sideUnitObj: currentConfiguration.sideUnit,
+                    sideUnitSku: currentConfiguration.sideUnitSku,
+                    sideUnitPrice: currentConfiguration.sideUnitPrice
+                }
+            },
+            wallUnit: {
+                options: wallUnitOptions,
+                config: {
+                    wallUnitObj: currentConfiguration.wallUnit,
+                    wallUnitSku: currentConfiguration.wallUnitSku,
+                    wallUnitPrice: currentConfiguration.wallUnitPrice,
+                }
+            },
+            tallUnit: {
+                options: tallUnitOptions,
+                config: {
+                    tallUnitObj: null,
+                    tallUnitSku: currentConfiguration.tallUnit,
+                    tallUnitPrice: currentConfiguration.tallUnitPrice
+                }
+            },
+            drawerBase: {
+                options: drawerBaseOptions,
+                config: {
+                    drawerBaseObj: currentConfiguration.drawerBase,
+                    drawerBaseSku: currentConfiguration.drawerBaseSku,
+                    drawerBasePrice: currentConfiguration.drawerBasePrice
+                }
+            }
+        }
+    );
+
     // |===== GRAND TOTAL =====|
     const grandTotal = useMemo(() => {
         const {
@@ -685,8 +752,7 @@ function OperaConfigurator({
                 ? sideUnitPrice * 2
                 : sideUnitPrice;
 
-            const grandTotal =
-                finalVanityPrice +
+            return finalVanityPrice +
                 washbasinPrice +
                 finalSideUnitPrice +
                 wallUnitPrice +
@@ -694,11 +760,10 @@ function OperaConfigurator({
                 mirrorCabinetPrice +
                 ledMirrorPrice +
                 openCompMirrorPrice +
-                drawerBasePrice;
-
-            return grandTotal;
+                drawerBasePrice +
+                getExtraItemsProductsGrandTotal();
         }
-    }, [currentConfiguration, currentMirrorsConfiguration]);
+    }, [currentConfiguration, currentMirrorsConfiguration, extraItemsCurrentProducts]);
 
     // |===== COMPOSITION NAME =====| (repeated logic)
     const [isMissingLabel, setIsMissingLabel] = useState(false);
@@ -755,7 +820,7 @@ function OperaConfigurator({
         vanitySku: currentConfiguration.vanitySku,
         isDoubleSink: currentConfiguration.isDoubleSink,
         sinkPosition: composition.sinkPosition,
-        hasSideUnit: sideUnitOptions ? true : false,
+        hasSideUnit: !!sideUnitOptions,
         sideUnitSku: currentConfiguration.sideUnitSku,
         isDoubleSideUnit: currentConfiguration.isDoubleSideUnit,
         currentProducts: currentConfiguration.currentProducts,
@@ -897,9 +962,10 @@ function OperaConfigurator({
         }
 
         if (item === "wallUnit") {
-            const copyOptions = structuredClone(
-                wallUnitOptions
-            ) as WallUnitOptions;
+            const crrWallUnitOptions = extraItems.wallUnit.currentlyDisplay !== -1 ?
+                extraItems.wallUnit.configurations[extraItems.wallUnit.currentlyDisplay].options as WallUnitOptions
+                : wallUnitOptions as WallUnitOptions;
+            const copyOptions = structuredClone(crrWallUnitOptions);
 
             for (const typeOption of copyOptions.typeOptions) {
                 if (property === "type") break;
@@ -943,9 +1009,10 @@ function OperaConfigurator({
                 }
             }
 
-            const wallUnitCurrentConfiguration = structuredClone(
-                currentConfiguration.wallUnit
-            ) as WallUnit;
+            const crrWallUnitConfig = extraItems.wallUnit.currentlyDisplay !== -1 ?
+                extraItems.wallUnit.currentConfig.wallUnitObj
+                : currentConfiguration.wallUnit;
+            const wallUnitCurrentConfiguration = structuredClone(crrWallUnitConfig);
 
             wallUnitCurrentConfiguration[
                 property as keyof typeof wallUnitCurrentConfiguration
@@ -958,27 +1025,46 @@ function OperaConfigurator({
                 composition.otherProductsAvailable.wallUnits
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: sku });
-            dispatch({
-                type: `set-${item}-price`,
-                payload: price,
-            });
-            dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
-            setWallUnitOptions(copyOptions);
+            const extraItemUpdatedConfigObj = {
+                wallUnitObj: wallUnitCurrentConfiguration,
+                wallUnitSku: sku,
+                wallUnitPrice: price
+            }
 
-            setWallUnitStatus((prev) => ({
-                ...prev,
-                isWallUnitValid: price > 0,
-            }));
+            if (extraItems.wallUnit.currentlyDisplay !== -1) {
+                handleExtraItemOptionSelected(
+                    item,
+                    extraItems.wallUnit.currentlyDisplay,
+                    extraItemUpdatedConfigObj,
+                    copyOptions,
+                    price > 0,
+                    product
+                );
+            } else {
+                dispatch({ type: `set-${item}-sku`, payload: sku });
+                dispatch({
+                    type: `set-${item}-price`,
+                    payload: price,
+                });
+                dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
+                setWallUnitOptions(copyOptions);
 
-            !wallUnitStatus.isWallUnitSelected &&
+                setWallUnitStatus((prev) => ({
+                    ...prev,
+                    isWallUnitValid: price > 0,
+                }));
+
+                !wallUnitStatus.isWallUnitSelected &&
                 setWallUnitStatus((prev) => ({
                     ...prev,
                     isWallUnitSelected: true,
                 }));
 
-            if (product) {
-                updateCurrentProducts("WALL UNIT", "update", product);
+                if (product) {
+                    updateCurrentProducts("WALL UNIT", "update", product);
+                }
+
+                updateExtraItemsStateOnMainConfigChanges(item,copyOptions,extraItemUpdatedConfigObj);
             }
         }
 
@@ -991,35 +1077,55 @@ function OperaConfigurator({
                 option
             );
 
-            dispatch({
-                type: `set-${item}-${property}`,
-                payload: sku,
-            });
+            const extraItemUpdatedConfigObj = {
+                tallUnitObj: null,
+                tallUnitSku: sku,
+                tallUnitPrice: price,
+            }
 
-            dispatch({
-                type: `set-${item}-price`,
-                payload: price,
-            });
-
-            setTallUnitStatus((prev) => ({
-                ...prev,
-                isTallUnitValid: price > 0,
-                isTallUnitSelected: true,
-            }));
-
-            if (product) {
-                updateCurrentProducts(
-                    "TALL UNIT/LINEN CLOSET",
-                    "update",
+            if (extraItems.tallUnit.currentlyDisplay !== -1) {
+                handleExtraItemOptionSelected(
+                    item,
+                    extraItems.tallUnit.currentlyDisplay,
+                    extraItemUpdatedConfigObj,
+                    tallUnitOptions,
+                    price > 0,
                     product
                 );
+            }else {
+                dispatch({
+                    type: `set-${item}-${property}`,
+                    payload: sku,
+                });
+
+                dispatch({
+                    type: `set-${item}-price`,
+                    payload: price,
+                });
+
+                setTallUnitStatus((prev) => ({
+                    ...prev,
+                    isTallUnitValid: price > 0,
+                    isTallUnitSelected: true,
+                }));
+
+                if (product) {
+                    updateCurrentProducts(
+                        "TALL UNIT/LINEN CLOSET",
+                        "update",
+                        product
+                    );
+                }
+
+                updateExtraItemsStateOnMainConfigChanges(item,tallUnitOptions,extraItemUpdatedConfigObj);
             }
         }
 
         if (item === "drawerBase") {
-            const copyOptions = structuredClone(
-                drawerBaseOptions
-            ) as DrawerBaseOptions;
+            const crrDrawerBaseOptions = extraItems.drawerBase.currentlyDisplay !== -1 ?
+                extraItems.drawerBase.configurations[extraItems.drawerBase.currentlyDisplay].options as DrawerBaseOptions
+                : drawerBaseOptions as DrawerBaseOptions;
+            const copyOptions = structuredClone(crrDrawerBaseOptions);
 
             for (const sizeOption of copyOptions.sizeOptions) {
                 if (property === "size") break;
@@ -1049,9 +1155,10 @@ function OperaConfigurator({
                 }
             }
 
-            const drawerBaseCurrentConfiguration = structuredClone(
-                currentConfiguration.drawerBase
-            ) as DrawerBase;
+            const crrDrawerBaseConfig = extraItems.drawerBase.currentlyDisplay !== -1 ?
+                extraItems.drawerBase.currentConfig.drawerBaseObj
+                : currentConfiguration.drawerBase;
+            const drawerBaseCurrentConfiguration = structuredClone(crrDrawerBaseConfig);
 
             drawerBaseCurrentConfiguration[
                 property as keyof typeof drawerBaseCurrentConfiguration
@@ -1064,27 +1171,46 @@ function OperaConfigurator({
                 composition.otherProductsAvailable.drawersVanities
             );
 
-            dispatch({ type: `set-${item}-sku`, payload: sku });
-            dispatch({
-                type: `set-${item}-price`,
-                payload: price,
-            });
-            dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
-            setDrawerBaseOptions(copyOptions);
+            const extraItemUpdatedConfigObj = {
+                drawerBaseObj: drawerBaseCurrentConfiguration,
+                drawerBaseSku: sku,
+                drawerBasePrice: price
+            }
 
-            setDrawerBaseStatus((prev) => ({
-                ...prev,
-                isDrawerBaseValid: price > 0,
-            }));
+            if (extraItems.drawerBase.currentlyDisplay !== -1) {
+                handleExtraItemOptionSelected(
+                    item,
+                    extraItems.drawerBase.currentlyDisplay,
+                    extraItemUpdatedConfigObj,
+                    copyOptions,
+                    price > 0,
+                    product
+                );
+            }else {
+                dispatch({ type: `set-${item}-sku`, payload: sku });
+                dispatch({
+                    type: `set-${item}-price`,
+                    payload: price,
+                });
+                dispatch({ type: `set-${item}-${property}`, payload: `${option}` });
+                setDrawerBaseOptions(copyOptions);
 
-            !drawerBaseStatus.isDrawerBaseSelected &&
+                setDrawerBaseStatus((prev) => ({
+                    ...prev,
+                    isDrawerBaseValid: price > 0,
+                }));
+
+                !drawerBaseStatus.isDrawerBaseSelected &&
                 setDrawerBaseStatus((prev) => ({
                     ...prev,
                     isDrawerBaseSelected: true,
                 }));
 
-            if (product) {
-                updateCurrentProducts("DRAWER/VANITY", "update", product);
+                if (product) {
+                    updateCurrentProducts("DRAWER/VANITY", "update", product);
+                }
+
+                updateExtraItemsStateOnMainConfigChanges(item,copyOptions,extraItemUpdatedConfigObj);
             }
         }
 
@@ -1164,6 +1290,12 @@ function OperaConfigurator({
             return false;
         }
 
+        const {isExtraItemsConfigValid,messages} = validateExtraItemsConfig();
+        if (!isExtraItemsConfigValid){
+            alert(messages.join("\n"));
+            return false;
+        }
+
         return true;
     };
 
@@ -1171,58 +1303,32 @@ function OperaConfigurator({
         if (!isValidConfiguration()) return;
 
         const {
-            vanitySku,
-            sideUnitSku,
-            washbasin: washbasinSku,
-            wallUnitSku,
-            tallUnit: tallUnitSku,
-            drawerBaseSku,
             label,
             isDoubleSink,
             isDoubleSideUnit,
+            currentProducts
         } = currentConfiguration;
 
         const allFormattedSkus: string[] = [];
 
-        const vanityFormattedSku = `${vanitySku}!!${composition.model}--${
-            isDoubleSink ? "2" : "1"
-        }##${label}`;
-        allFormattedSkus.push(vanityFormattedSku);
+        for (const product of currentProducts) {
+            if (product.item === "VANITY") {
+                allFormattedSkus.push(
+                    `${product.uscode}!!${composition.model}${isDoubleSink ? "--2" : "--1"
+                    }##${label}`
+                );
+            } else if (product.item === "SIDE UNIT") {
+                allFormattedSkus.push(
+                    `${product.uscode}!!${composition.model}${isDoubleSideUnit ? "--2" : "--1"
+                    }##${label}`
+                );
+            } else {
+                allFormattedSkus.push(`${product.uscode}!!${composition.model}--1##${label}`)
+            }
+        }
 
-        const sideUnitFormattedSku = sideUnitSku
-            ? `${sideUnitSku}!!${composition.model}--${
-                  isDoubleSideUnit ? "2" : "1"
-              }##${label}`
-            : "";
-        sideUnitFormattedSku && allFormattedSkus.push(sideUnitFormattedSku);
-
-        const washbasinFormattedSku = washbasinSku
-            ? `${washbasinSku}!!${composition.model}--1##${label}`
-            : "";
-        washbasinFormattedSku && allFormattedSkus.push(washbasinFormattedSku);
-
-        const wallUnitFormattedSku = wallUnitSku
-            ? `${wallUnitSku}!!${composition.model}--1##${label}`
-            : "";
-        wallUnitFormattedSku && allFormattedSkus.push(wallUnitFormattedSku);
-
-        const tallUnitFormattedSku = tallUnitSku
-            ? `${tallUnitSku}!!${composition.model}--1##${label}`
-            : "";
-        tallUnitFormattedSku && allFormattedSkus.push(tallUnitFormattedSku);
-
-        const drawerBaseFormattedSku = drawerBaseSku
-            ? `${drawerBaseSku}!!${composition.model}--1##${label}`
-            : "";
-        drawerBaseFormattedSku && allFormattedSkus.push(drawerBaseFormattedSku);
-
-        // ========= VVVV MIRROR (REPEATED LOGIC) ==========VVVVV
-        getFormattedMirrorSkus(
-            composition.model,
-            currentConfiguration.label,
-            allFormattedSkus
-        );
-
+        getFormattedMirrorSkus(composition.model, label, allFormattedSkus);
+        getFormattedExtraItemsSkus(allFormattedSkus,composition.model,label);
         router.get("/orders/create-so-num", {
             SKU: allFormattedSkus.join("~"),
         });
@@ -1251,9 +1357,15 @@ function OperaConfigurator({
             type: `update-current-products`,
             payload: initialConfiguration.currentProducts,
         });
+        resetExtraItems();
     };
 
     const handleClearItem = (item: string) => {
+        if (extraItems[item as keyof typeof extraItems].currentlyDisplay !== -1){
+            clearExtraProduct(item as keyof ExtraItems,extraItems[item as keyof typeof extraItems].currentlyDisplay);
+            return;
+        }
+
         switch (item) {
             case "washbasin":
                 updateCurrentProducts("WASHBASIN/SINK", "remove");
@@ -1268,6 +1380,7 @@ function OperaConfigurator({
                     isWallUnitValid: false,
                 });
                 dispatch({ type: "reset-wallUnit", payload: "" });
+                updateExtraItemsStateOnMainConfigChanges(item);
                 break;
 
             case "tallUnit":
@@ -1277,6 +1390,7 @@ function OperaConfigurator({
                     isTallUnitValid: false,
                 });
                 dispatch({ type: "reset-tallUnit", payload: "" });
+                updateExtraItemsStateOnMainConfigChanges(item);
                 break;
 
             case "drawerBase":
@@ -1287,6 +1401,7 @@ function OperaConfigurator({
                     isDrawerBaseValid: false,
                 });
                 dispatch({ type: "reset-drawerBase", payload: "" });
+                updateExtraItemsStateOnMainConfigChanges(item);
                 break;
 
             default:
@@ -1297,10 +1412,10 @@ function OperaConfigurator({
     const handleAddToCart = () => {
         if (!isValidConfiguration()) return;
 
-        const {            
+        const {
             label,
             isDoubleSink,
-            isDoubleSideUnit,                    
+            isDoubleSideUnit,
         } = currentConfiguration;
 
         const shoppingCartObj: ShoppingCartComposition = {
@@ -1316,6 +1431,9 @@ function OperaConfigurator({
                 accessory: [] as ShoppingCartCompositionProduct[],
                 drawerBase: [] as ShoppingCartCompositionProduct[],
                 mirror: [] as ShoppingCartCompositionProduct[],
+                vanity: [] as ShoppingCartCompositionProduct[],
+                washbasin: [] as ShoppingCartCompositionProduct[],
+                sideUnit: [] as ShoppingCartCompositionProduct[],
             } as OtherItems,
             isDoubleSink,
             isDoubleSideUnit,
@@ -1325,9 +1443,12 @@ function OperaConfigurator({
         const allConfigs = {
             modelConfig: currentConfiguration,
             mirrorConfig: currentMirrorsConfiguration,
+            extraItemsConfig: {
+                currentProducts: getExtraItemsCurrentProductsAsArray(),
+            }
         };
-        
-        generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,null,isDoubleSideUnit,isDoubleSink);                        
+
+        generateShoppingCartCompositionProductObjs(allConfigs,shoppingCartObj,null,isDoubleSideUnit,isDoubleSink);
         onAddToCart(shoppingCartObj);
     };
 
@@ -1373,6 +1494,7 @@ function OperaConfigurator({
                         mirrorProductsConfigurator={
                             currentMirrorsConfiguration.currentProducts
                         }
+                        extraItemsProducts={getExtraItemsCurrentProductsAsArray()}
                         isDoubleSink={currentConfiguration.isDoubleSink}
                         isDoubleSideUnit={currentConfiguration.isDoubleSideUnit}
                     />
@@ -1469,13 +1591,21 @@ function OperaConfigurator({
                         onNavigation={handleOrderedAccordion}
                         onClear={handleClearItem}
                     >
+                        <MultiItemSelector
+                            item={"wallUnit"}
+                            initialOptions={initialWallUnitOptions as WallUnitOptions}
+                            extraItems={extraItems}
+                            handleAddExtraProduct={handleAddExtraProduct}
+                            setCurrentDisplayItem={setCurrentDisplayItem}
+                            removeConfiguration={removeConfiguration}
+                        />
                         <Options
                             item="wallUnit"
                             property="type"
                             title="SELECT TYPE"
-                            options={wallUnitOptions.typeOptions}
+                            options={extraItems.wallUnit.currentOptions.typeOptions}
                             crrOptionSelected={
-                                currentConfiguration.wallUnit?.type!
+                                extraItems.wallUnit.currentConfig.wallUnitObj.type
                             }
                             onOptionSelected={handleOptionSelected}
                         />
@@ -1483,9 +1613,9 @@ function OperaConfigurator({
                             item="wallUnit"
                             property="size"
                             title="SELECT SIZE"
-                            options={wallUnitOptions.sizeOptions}
+                            options={extraItems.wallUnit.currentOptions.sizeOptions}
                             crrOptionSelected={
-                                currentConfiguration.wallUnit?.size!
+                                extraItems.wallUnit.currentConfig.wallUnitObj.size
                             }
                             onOptionSelected={handleOptionSelected}
                         />
@@ -1493,9 +1623,9 @@ function OperaConfigurator({
                             item="wallUnit"
                             property="finish"
                             title="SELECT FINISH"
-                            options={wallUnitOptions.finishOptions}
+                            options={extraItems.wallUnit.currentOptions.finishOptions}
                             crrOptionSelected={
-                                currentConfiguration.wallUnit?.finish!
+                                extraItems.wallUnit.currentConfig.wallUnitObj.finish
                             }
                             onOptionSelected={handleOptionSelected}
                         />
@@ -1513,12 +1643,20 @@ function OperaConfigurator({
                         onNavigation={handleOrderedAccordion}
                         onClear={handleClearItem}
                     >
+                        <MultiItemSelector
+                            item={"tallUnit"}
+                            initialOptions={tallUnitOptions as Option[]}
+                            extraItems={extraItems}
+                            handleAddExtraProduct={handleAddExtraProduct}
+                            setCurrentDisplayItem={setCurrentDisplayItem}
+                            removeConfiguration={removeConfiguration}
+                        />
                         <Options
                             item="tallUnit"
                             property="type"
                             title="SELECT TALL UNIT"
-                            options={tallUnitOptions}
-                            crrOptionSelected={currentConfiguration.tallUnit}
+                            options={extraItems.tallUnit.currentOptions}
+                            crrOptionSelected={extraItems.tallUnit.currentConfig.tallUnitSku}
                             onOptionSelected={handleOptionSelected}
                         />
                     </ItemPropertiesAccordion>
@@ -1535,13 +1673,21 @@ function OperaConfigurator({
                         onNavigation={handleOrderedAccordion}
                         onClear={handleClearItem}
                     >
+                        <MultiItemSelector
+                            item={"drawerBase"}
+                            initialOptions={initialDrawerBaseOptions as DrawerBaseOptions}
+                            extraItems={extraItems}
+                            handleAddExtraProduct={handleAddExtraProduct}
+                            setCurrentDisplayItem={setCurrentDisplayItem}
+                            removeConfiguration={removeConfiguration}
+                        />
                         <Options
                             item="drawerBase"
                             property="size"
                             title="SELECT SIZE"
-                            options={drawerBaseOptions.sizeOptions}
+                            options={extraItems.drawerBase.currentOptions.sizeOptions}
                             crrOptionSelected={
-                                currentConfiguration.wallUnit?.size!
+                                extraItems.drawerBase.currentConfig.drawerBaseObj.size
                             }
                             onOptionSelected={handleOptionSelected}
                         />
@@ -1549,9 +1695,9 @@ function OperaConfigurator({
                             item="drawerBase"
                             property="finish"
                             title="SELECT FINISH"
-                            options={drawerBaseOptions.finishOptions}
+                            options={extraItems.drawerBase.currentOptions.finishOptions}
                             crrOptionSelected={
-                                currentConfiguration.wallUnit?.finish!
+                                extraItems.drawerBase.currentConfig.drawerBaseObj.finish
                             }
                             onOptionSelected={handleOptionSelected}
                         />

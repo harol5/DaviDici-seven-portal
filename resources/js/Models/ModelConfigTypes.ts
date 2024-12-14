@@ -80,7 +80,7 @@ type ModelCurrConfig = {
     isDoubleSink: boolean;
 };
 
-export type { ItemObj, Model, ModelCurrConfig, Item, ItemFoxPro };
+export type {ItemObj, Model, ModelCurrConfig, Item, ItemFoxPro};
 
 export const SkuLengthModels: Record<Model, SkuLengthObj> = {
     MARGI: Margi.SkuLengths,
