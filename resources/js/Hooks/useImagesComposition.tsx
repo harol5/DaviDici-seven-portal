@@ -69,7 +69,7 @@ function useImagesComposition({
 
         const skus: string[] = [];
 
-        const finalVanitySku = isDoubleSink
+        const finalVanitySku = isDoubleSink && !hasSideUnit
             ? `${vanitySku}-double`
             : isDoubleSink && hasSideUnit
             ? `${vanitySku}-double-with-side-unit`
