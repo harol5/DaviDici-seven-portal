@@ -7,6 +7,8 @@ import * as Opera from "./OperaConfigTypes";
 import * as Kora from "./KoraConfigTypes";
 import * as KoraXl from "./KoraXlConfigTypes";
 
+type ModelCurrentConfiguration = Margi.CurrentConfiguration | NewYork.CurrentConfiguration |  Elora.CurrentConfiguration | NewBali.CurrentConfiguration | Opera.CurrentConfiguration | Kora.CurrentConfiguration | KoraXl.CurrentConfiguration;
+
 type ItemObj =
     | Margi.Vanity
     | Margi.OpenUnit
@@ -80,7 +82,7 @@ type ModelCurrConfig = {
     isDoubleSink: boolean;
 };
 
-export type {ItemObj, Model, ModelCurrConfig, Item, ItemFoxPro};
+export type {ItemObj, Model, ModelCurrConfig, Item, ItemFoxPro, ModelCurrentConfiguration};
 
 export const SkuLengthModels: Record<Model, SkuLengthObj> = {
     MARGI: Margi.SkuLengths,

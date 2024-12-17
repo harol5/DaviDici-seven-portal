@@ -1,10 +1,11 @@
 import {
     Item,
     ItemObj,
-    Model,
+    Model, ModelCurrentConfiguration,
     SkuLengthModels,
 } from "../Models/ModelConfigTypes";
 import { ProductInventory } from "../Models/Product";
+import {Composition} from "../Models/Composition.ts";
 
 
 export function isAlphanumericWithSpaces(str: string) {
@@ -77,7 +78,7 @@ export const getFormattedDate = () => {
     return `${String(today.getMonth() + 1).padStart(2, "0")}/${String(
         today.getDate()
     ).padStart(2, "0")}/${today.getFullYear()}`;
-  
+
 };
 
 export const scrollToView = (item: Item | "compositionNameWrapper") => {
@@ -88,3 +89,15 @@ export const scrollToView = (item: Item | "compositionNameWrapper") => {
         });
     }
 };
+
+export const getConfigTitle = (composition: Composition, currentConfiguration: ModelCurrentConfiguration) => {
+    let title = `${composition.model} ${composition.size}"`;
+    if (currentConfiguration.washbasin) {
+        composition.washbasins.forEach((washbasin) => {
+            if (washbasin.uscode === currentConfiguration.washbasin) {
+                title += ` Incl a ${washbasin.model} ${washbasin.finish} SINK`;
+            }
+        });
+    }
+    return title;
+}

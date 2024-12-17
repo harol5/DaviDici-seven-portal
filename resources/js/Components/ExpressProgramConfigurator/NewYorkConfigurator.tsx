@@ -10,7 +10,7 @@ import {
 import Options from "./Options";
 import ConfigurationName from "./ConfigurationName";
 import {router} from "@inertiajs/react";
-import {getSkuAndPrice, isAlphanumericWithSpaces, scrollToView,} from "../../utils/helperFunc";
+import {getConfigTitle, getSkuAndPrice, isAlphanumericWithSpaces, scrollToView,} from "../../utils/helperFunc";
 import {ProductInventory} from "../../Models/Product";
 import {
     CurrentConfiguration,
@@ -1466,7 +1466,7 @@ function NewYorkConfigurator({
                         />
                         <p>BACK</p>
                     </span>
-                    <h1>{composition.name}</h1>
+                    <h1>{getConfigTitle(composition, currentConfiguration)}</h1>
                     <div className={classes.buttonsWrapper}>
                         <button
                             className={classes.resetButton}

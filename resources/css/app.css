@@ -1093,7 +1093,7 @@ main {
     nav {
         border: none;
     }
-    .nav-links {
+    .nav-links, .guess-links {
         display: none;
     }
     .settings-wrapper {

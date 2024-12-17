@@ -7,7 +7,7 @@ import type {
     ShoppingCartCompositionProduct,
 } from "../../Models/ExpressProgramModels";
 import type {CurrentConfiguration, Vanity, VanityOptions,} from "../../Models/KoraConfigTypes";
-import {getSkuAndPrice, isAlphanumericWithSpaces, scrollToView,} from "../../utils/helperFunc";
+import {getSkuAndPrice, isAlphanumericWithSpaces, scrollToView, getConfigTitle} from "../../utils/helperFunc";
 import {router} from "@inertiajs/react";
 import {ProductInventory} from "../../Models/Product";
 import classes from "../../../css/product-configurator.module.css";
@@ -704,7 +704,7 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
                         />
                         <p>BACK</p>
                     </span>
-                    <h1>{composition.name}</h1>
+                    <h1>{getConfigTitle(composition,currentConfiguration)}</h1>
                     <div className={classes.buttonsWrapper}>
                         <button
                             className={classes.resetButton}
