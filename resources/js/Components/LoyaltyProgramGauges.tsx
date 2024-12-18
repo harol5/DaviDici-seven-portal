@@ -59,19 +59,24 @@ function LoyaltyProgramGauges({ commissionInfo }: LoyaltyProgramGaugesProps) {
 
         commissionInfo.sort(
             (a: monthCommissionInfo, b: monthCommissionInfo) => {
-                const valueA = a.monyear.toUpperCase();
-                const valueB = b.monyear.toUpperCase();
+                const aArr = a.monyear.split("-");
+                const aMonth = Number.parseInt(aArr[0]);
+                const aYear = Number.parseInt(aArr[1]);
 
-                if (valueA < valueB) return 1;
-                if (valueA > valueB) return -1;
+                const bArr = b.monyear.split("-");
+                const bMonth = Number.parseInt(bArr[0]);
+                const bYear = Number.parseInt(bArr[1]);
+
+                if (aMonth < bMonth && aYear < bMonth) return -1;
+                if (aMonth > bMonth && aYear > bYear) return 1;
                 return 0;
             }
         );
 
-        const latestMonth = commissionInfo[0];
+
+        const latestMonth = commissionInfo[commissionInfo.length - 1];
         const arr = latestMonth.monyear.split("-");
-        const selectedMonthName = months[Number.parseInt(arr[0]) - 1];
-        currentMonthObj.month = `${selectedMonthName} ${arr[1]}`;
+        currentMonthObj.month = `${months[Number.parseInt(arr[0]) - 1]} ${arr[1]}`;
 
         if (latestMonth.l2need !== 0) {
             currentMonthObj.currentSales.dollarAmountToTarget =

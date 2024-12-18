@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
 use App\Mail\RegisterMail;
 use Illuminate\Support\Str;
 use App\FoxproApi\FoxproApi;
-use Illuminate\Http\Request;
+use Illuminate\Http\{ Request, Response as LaravelResponse , RedirectResponse, JsonResponse};
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
@@ -19,24 +20,24 @@ use Illuminate\Support\Facades\Session;
 class UserController extends Controller
 {
     // Show login form ----------
-    public function login(Request $request)
-    {        
+    public function login(Request $request): RedirectResponse | InertiaResponse
+    {
         if (auth()->user()) {
             return redirect('/orders');
         }
 
-        $message = $request->session()->get('message');   
-        
+        $message = $request->session()->get('message');
+
         //set location where user will be redirected after auth if any.
         $location = $request->query('location', '');
-        if ($location) session()->flash('location', $location);        
-        
+        if ($location) session()->flash('location', $location);
+
 
         return Inertia::render('Users/Login', ['message' => $message]);
     }
 
     // Authenticate user ------------
-    public function authenticate(Request $request)
+    public function authenticate(Request $request): RedirectResponse
     {
         $formFields = $request->validate([
             'email' => ['required', 'email'],
@@ -58,7 +59,7 @@ class UserController extends Controller
     }
 
     // Logout user ------------
-    public function logout(Request $request)
+    public function logout(Request $request): RedirectResponse
     {
         auth()->logout();
 
@@ -69,7 +70,7 @@ class UserController extends Controller
     }
 
     // Send invitation with signed url for register form -----------
-    public function sendInvitation(Request $request)
+    public function sendInvitation(Request $request): LaravelResponse
     {
         $data = $request->all();
 
@@ -95,7 +96,7 @@ class UserController extends Controller
     }
 
     // Show register form (signed url or admins) ------------------
-    public function register(Request $request)
+    public function register(Request $request): RedirectResponse | InertiaResponse
     {
         if (Gate::allows('create-user') || $request->hasValidSignature()) {
             return Inertia::render('Users/Register');
@@ -104,7 +105,7 @@ class UserController extends Controller
     }
 
     // Create user (admin only) ----------------------
-    public function create(Request $request)
+    public function create(Request $request): RedirectResponse
     {
         $formFields = $request->validate([
             'firstName' => ['required', 'min:3'],
@@ -136,10 +137,10 @@ class UserController extends Controller
         $formFields['password'] = bcrypt($formFields['password']);
 
         // Assigning role:
-        // owner = 1919 , admin = 3478 
+        // owner = 1919 , admin = 3478
         $formFields['role'] === 'admin' ? $formFields['role'] = 3478 : $formFields['role'] = 1919;
 
-        // 'Result' => 'New User Added' | 
+        // 'Result' => 'New User Added' |
         $foxproResponse = FoxproApi::call([
             'action' => 'SaveUserInfo',
             'params' => [
@@ -188,7 +189,7 @@ class UserController extends Controller
     }
 
     // Shows welcome page ----------------------
-    public function welcome(Request $request)
+    public function welcome(Request $request): InertiaResponse
     {
         $name = $request->session()->get('name');
         $error = $request->session()->get('error');
@@ -199,44 +200,44 @@ class UserController extends Controller
     public function changePwdAdminForm(Request $request)
     {
         if (Gate::allows('admin-only')) {
-            $message = $request->session()->get('message');        
+            $message = $request->session()->get('message');
 
             return Inertia::render('Users/ChangePasswordAdm', ['message' => $message]);
         }
 
-        abort(403);        
+        abort(403);
     }
 
-    public function changePasswordAdmin(Request $request)
+    public function changePasswordAdmin(Request $request): RedirectResponse
     {
         if (Gate::allows('admin-only')) {
             $formFields = $request->validate([
                 'email' => ['required', 'email'],
                 'password' => 'required',
-            ]);        
-        
-            $queryResponse = User::where('email', Str::lower($formFields['email']))->update(['password' => bcrypt($formFields['password'])]);        
-    
+            ]);
+
+            $queryResponse = User::where('email', Str::lower($formFields['email']))->update(['password' => bcrypt($formFields['password'])]);
+
             if ($queryResponse === 0) {
                 back()->with('message', "user not found");
             }
-    
+
             back()->with('message', "password updated");
         }
 
         abort(403);
-        
+
     }
 
     // Show user portal (admin only) (user exits already in foxpro) -----------
-    public function showFormAddUserToPortal(Request $request)
+    public function showFormAddUserToPortal(Request $request): InertiaResponse
     {
         $message = $request->session()->get('message');
         return Inertia::render('Users/AddUserPortal', ['message' => $message]);
     }
 
     // Add user only to portal (admin only) (user exits already in foxpro) -----------
-    public function addUserToPortal(Request $request)
+    public function addUserToPortal(Request $request): RedirectResponse
     {
         //---- Validate data.
         $formFields = $request->validate([
@@ -513,7 +514,7 @@ class UserController extends Controller
                 $formFields['ssn'],
                 $formFields['phone'], // phone
                 ' ', // faxnumber.
-                $formFields['businessPhone'], // businessPhone                
+                $formFields['businessPhone'], // businessPhone
             ],
             'keep_session' => false,
         ]);
@@ -530,10 +531,10 @@ class UserController extends Controller
     public function generateToken(Request $request)
     {
         if (Gate::allows('generate-token')) {
-            $token = $request->user()->createToken('seven_configurator');        
+            $token = $request->user()->createToken('seven_configurator');
             return response(['token' => $token->plainTextToken])->header('Content-Type', 'application/json');
         }
-        
+
         abort(403);
     }
 
@@ -545,12 +546,12 @@ class UserController extends Controller
         if (!array_key_exists('email',$data) || !array_key_exists('password',$data)) {
             return response(['message' => 'missing information'])->header('Content-Type', 'application/json');
         }
-                
-        // will return 0 if could not find user with that email.        
+
+        // will return 0 if could not find user with that email.
         $queryResponse = User::where('email', Str::lower($data['email']))->update(['password' => bcrypt($data['password'])]);
 
         if ($queryResponse === 0) {
-            return response(['message' => 'no user found'])->header('Content-Type', 'application/json');    
+            return response(['message' => 'no user found'])->header('Content-Type', 'application/json');
         }
 
         return response(['message' => 'user updated'])->header('Content-Type', 'application/json');
@@ -559,12 +560,12 @@ class UserController extends Controller
     public function sendChangePwdEmail(Request $request)
     {
         $formFields = $request->validate([
-            'email' => ['required', 'email'],            
-        ]);       
-        
+            'email' => ['required', 'email'],
+        ]);
+
         $queryResponse = User::where('email', Str::lower($formFields['email']))->first();
 
-        if ($queryResponse) {            
+        if ($queryResponse) {
             // generate url
             $url = URL::temporarySignedRoute(
                 'user.change-pwd',
@@ -572,7 +573,7 @@ class UserController extends Controller
                 ['email' => $queryResponse->email],
             );
 
-            // create email template                
+            // create email template
             $options = [
                 'from' => 'not-reply@mg.davidici.com',
                 'to' => $queryResponse->email,
@@ -588,19 +589,19 @@ class UserController extends Controller
             if ($response->successful()) {
                 return redirect('/')->with('message', 'Email sent!!, Please check your inbox.');
             }
-            
+
             logFoxproError('mailgun error', 'sendChangePwdEmail', [], $response);
             return redirect('/')->with('message', 'we could not send the email with the link, Please contact support.');
         }
-        
+
         return redirect('/')->with('message', 'An error has occurred!!. try later');
-        
+
     }
 
     public function changePwdForm(Request $request)
-    {           
+    {
         if ($request->hasValidSignature()) {
-            $email = $request->route('email');                    
+            $email = $request->route('email');
             $message = $request->session()->get('message');
             return Inertia::render('Users/ChangePassword',['message' => $message,'email'=>$email]);
         }
@@ -610,10 +611,10 @@ class UserController extends Controller
 
     public function handleChangePwd(Request $request)
     {
-        $formFields = $request->validate([            
+        $formFields = $request->validate([
             'password' => 'required|confirmed|min:6'
-        ]);            
-        $data = $request->all();        
+        ]);
+        $data = $request->all();
         $user = User::where('email', Str::lower($data['email']))->first();
 
         // Result: Password Updated Successfully || User Name or User Email not found
@@ -621,10 +622,10 @@ class UserController extends Controller
             'action' => 'ChangePW',
             'params' => [$user->username, $user->email, $data['password']],
             'keep_session' => false,
-        ]);        
+        ]);
 
         if ( array_key_exists('Result',$foxproResponse) && $foxproResponse['Result'] === 'Password Updated Successfully') {
-            $queryResponse = User::where('email', Str::lower($user->email))->update(['password' => bcrypt($data['password'])]); 
+            $queryResponse = User::where('email', Str::lower($user->email))->update(['password' => bcrypt($data['password'])]);
 
             $credentials = [
                 'email' => Str::lower($user->email),
@@ -636,13 +637,13 @@ class UserController extends Controller
                 $defaultIntendedUrl = session()->has('location') ? '/' . session('location') : '/orders';
                 return redirect()->intended($defaultIntendedUrl)->with('message', 'You are now logged in!');
             }
-            // return back()->with('message', 'password changed');  
-        }        
+            // return back()->with('message', 'password changed');
+        }
 
         logFoxproError('ChangePW', 'handleChangePwd', [$user->username,$user->email], $foxproResponse);
-        return back()->with('message', 'Could not change password, Please contact support');        
+        return back()->with('message', 'Could not change password, Please contact support');
     }
-  
+
     public function EULA()
     {
         return Inertia::render('Users/EULA');

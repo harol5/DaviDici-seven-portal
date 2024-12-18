@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Inertia\Inertia;
+use Inertia\{ Inertia, Response as InertiaResponse};
 use Illuminate\Support\Str;
 use App\FoxproApi\FoxproApi;
 use Illuminate\Http\Request;
@@ -15,10 +15,15 @@ use Illuminate\Support\Facades\Gate;
 
 use App\Services\TestingService;
 
+/*
+ * TODO:
+ *  replace magic variable (foxpro program names) with CONSTANTS
+ * */
+
 class OrdersController extends Controller
 {
     // Show all orders.
-    public function all(Request $request)
+    public function all(Request $request): InertiaResponse
     {
         $username = auth()->user()->username;
         $message = $request->session()->get('message');
@@ -35,7 +40,7 @@ class OrdersController extends Controller
             'keep_session' => false,
         ]);
 
-        // assings an empty array so template can display proper message.
+        // assigns an empty array so template can display proper message.
         if ($orders['status'] === 500) $orders['rows'] = [];
 
         if ($commissionInfo['status'] === 500 || array_key_exists('Result', $commissionInfo) && $commissionInfo['Result'] === 'there are no sales orders for this wholesaler') {
@@ -789,12 +794,6 @@ class OrdersController extends Controller
                 'keep_session' => false,
             ]);
 
-            $getInvStockRes = FoxproApi::call([
-                'action' => 'GETINVSTOCK',
-                'params' => ['','','','S'],
-                'keep_session' => false,
-            ]);
-
             return response(
                 [
                     'response' => $testingService->getUniqueInstanceId(),
@@ -804,6 +803,24 @@ class OrdersController extends Controller
                     'ordersByCompany' => $foxproRes,
                     'companySalesReps' => $salesrepInfo,
                     'printSo' => $printSo,
+                ]
+            )->header('Content-Type', 'application/json');
+        }
+        abort(403);
+    }
+    public function testApiTwo(TestingService $testingService)
+    {
+        if (Gate::allows('admin-only')) {
+            // return Inertia::render('Test',['response' => $response]);
+            // return response(['response' => $response])->header('Content-Type', 'application/json');
+            $getInvStockRes = FoxproApi::call([
+                'action' => 'GETINVSTOCK',
+                'params' => ['','','','S'],
+                'keep_session' => false,
+            ]);
+
+            return response(
+                [
                     '$getInvStockRes' => $getInvStockRes
                 ]
             )->header('Content-Type', 'application/json');

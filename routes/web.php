@@ -58,6 +58,7 @@ Route::middleware(['auth','auth.session'])->group(function () {
 
     // TESTING ROUTE.
     Route::get('/testing', [OrdersController::class, 'testApi'])->middleware(TestMiddleware::class);
+    Route::get('/testingTwo', [OrdersController::class, 'testApiTwo'])->middleware(TestMiddleware::class);
 
     // - Owner only endpoints.
     Route::get('/register/salesperson', [UserController::class, 'registerSalesPerson'])->name('user.register.salesperson');

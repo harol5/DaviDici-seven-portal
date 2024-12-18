@@ -365,8 +365,17 @@
 }
 
 @media print {
+    .compositionConfiguratorWrapper {
+        display: block;
+    }
+
+    .compositionImageWrapper {
+        margin: 0;
+    }
+
     .configurationName {
-        display: none;
+        margin: 2rem 0;
+        padding: 0;
     }
 
     .leftSideConfiguratorWrapper .backButtonAndNameWrapper {

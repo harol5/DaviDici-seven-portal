@@ -18,7 +18,7 @@ interface ordersProp {
 function Orders({ auth, orders, message = "", commissionInfo }: ordersProp) {
     const [userOrders, setUserOrders] = useState(orders);
 
-    const handleSearhInput = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleSearchInput = (e: ChangeEvent<HTMLInputElement>) => {
         const filteredOrders = orders.filter((order: OrderModel) => {
             const target = e.target!;
             return order.ordernum.includes(target.value.toLowerCase());
@@ -37,10 +37,6 @@ function Orders({ auth, orders, message = "", commissionInfo }: ordersProp) {
                 : "am";
         return ampm;
     }, []);
-
-    console.log("==== Orders ====");
-    console.log("Orders:", orders);
-    console.log("commission info:", commissionInfo);
 
     return (
         <UserAuthenticatedLayout auth={auth} crrPage="orders">
@@ -65,7 +61,7 @@ function Orders({ auth, orders, message = "", commissionInfo }: ordersProp) {
                         className="search-order-input rounded-xl"
                         type="search"
                         placeholder="Search Order..."
-                        onChange={handleSearhInput}
+                        onChange={handleSearchInput}
                     />
                 </div>
                 <section className={classes.loyaltyProgramAndOrderWrapper}>
