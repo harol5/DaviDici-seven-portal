@@ -1,6 +1,7 @@
 import { Link } from "@inertiajs/react";
 import { ReactNode, useEffect, useState } from "react";
 import type { Order as OrderModel, OrderRecord } from "../Models/Order";
+import axios from "axios";
 
 interface OrderLayoutProps {
     children?: ReactNode;
@@ -25,7 +26,7 @@ function OrderLayout({ children, order, crrOrderOption }: OrderLayoutProps) {
 
     //this changes the query string on reload to make sure it have updated data.
     useEffect(() => {
-        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+        const handleBeforeUnload = (_event: BeforeUnloadEvent) => {
             // event.preventDefault();
             location.replace(
                 `${location.origin}/orders/${
@@ -43,6 +44,23 @@ function OrderLayout({ children, order, crrOrderOption }: OrderLayoutProps) {
 
     const orderFormatted: OrderRecord = {
         ...order,
+    };
+
+    const downloadPdf =  () => {
+        axios({
+            url: `/orders/${order.ordernum}/generate-pdf`,
+            method: 'GET',
+            responseType: 'blob', // Important for binary file downloads
+        }).then((response) => {
+            // Create a URL for the file blob
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = 'generated-document.pdf';
+            link.click();
+        }).catch((error) => {
+            console.error('Error generating PDF:', error);
+        });
     };
 
     return (

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use App\Services\OAuthTokenService;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Gate;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 use App\Services\TestingService;
 
@@ -743,6 +744,33 @@ class OrdersController extends Controller
         return response(['cashRes' => 'could not approve order.', 'status' => 500])->header('Content-Type', 'application/json');
     }
 
+    public function generatePdf(Request $request, string $orderNumber)
+    {
+
+        info('generatePdf');
+        info($this->getOrderInfoPdf($orderNumber));
+
+        // Sample: JSON response from an API (replace with your dynamic data)
+        $jsonResponse = [
+            'title' => 'Sample PDF Title',
+            'description' => 'This is a description from a JSON API response.',
+            'details' => [
+                'key1' => 'Value 1',
+                'key2' => 'Value 2',
+                'key3' => 'Value 3',
+            ],
+        ];
+
+        // Prepare the HTML content (can come from a Blade view)
+        $pdfData = view('pdf.order', compact('jsonResponse'))->render();
+
+        // Generate the PDF
+        $pdf = Pdf::loadHTML($pdfData);
+
+        // Directly download the PDF
+        return $pdf->download('sample-document.pdf');
+    }
+
     public function testApi(TestingService $testingService)
     {
         if (Gate::allows('admin-only')) {
@@ -851,5 +879,61 @@ class OrdersController extends Controller
             'keep_session' => false,
         ]);
         return array_key_exists('rows', $deliveryInfo) && $deliveryInfo['rows'][0]['deldate'];
+    }
+
+    public function getOrderInfoPdf(string $orderNumber)
+    {
+        $printSo = FoxproApi::call([
+            'action' => 'PrintSo',
+            'params' => [$orderNumber],
+            'keep_session' => false,
+        ]);
+
+        if ($printSo['status'] !== 201 || !array_key_exists('rows', $printSo) || count($printSo['rows']) === 0) {
+            logFoxproError('foxpro:PrintSo controllerFunc:getOrderInfoPdf','OrderController',[$orderNumber],$printSo);
+            return  [
+                'title' => 'Order Number ' . $orderNumber,
+                'description' => 'An error occurred while generating the PDF.',
+            ];
+        }
+
+        /*
+         * I have a field RPMODE which tells you what info is on that line.
+
+        When RPMODE is '0':
+        Take the header from the HLINE field
+        Take the Bill info  from the BILL field
+        Take the Ship info  from the SHIP field
+
+        When RPMODE IS '1'
+        Take Line by Line info from the TYPE   QTY PRICE    TOTAL fields
+
+        When RPMODE IS '2'
+        Take the total credits info from the TYPE  AMT   TOTAL  fields
+
+        When RPMODE IS '3'
+        Take the net total  info from the TYPE  AMT   TOTAL  fields
+
+        When RPMODE IS '4'
+        Take the header info from the HLINE field 2 times
+        Take the payment info from the PDATE    BANK     CKNUM  AMT   TOTAL   fields
+
+
+        When RPMODE is '5'
+        Take the header from the HLINE field
+        Take the Shipped balance from the SHCHG field
+        Take the in Warehouse balance from the  FPRICE field
+        Take the In Transit balance from the FCOST field
+        Take the Open Balance from the TOTAL field
+        Take the Total Balance from the AMT field
+
+        When RPMODE is '6'
+        Take the header from the HLINE field
+        Take the stock status info from the LN    PARTNUM   TYPE    CDETAIL fields
+         * */
+
+        foreach ($printSo['rows'] as $row) {}
+
+        return $printSo;
     }
 }

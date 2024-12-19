@@ -76,6 +76,7 @@ Route::middleware(['auth','auth.session'])->group(function () {
     Route::get('/orders/{orderNumber}/details', [OrdersController::class, 'orderDetails'])->name('order.details');
     Route::get('/orders/{orderNumber}/delivery', [OrdersController::class, 'orderDelivery']);
     Route::get('/orders/{orderNumber}/payment', [OrdersController::class, 'orderPayment']);
+    Route::get('/orders/{orderNumber}/generate-pdf', [OrdersController::class, 'generatePdf'])->name('generate.pdf');
 
     // - Orders routes - create operations.
     Route::post('/orders/create', [OrdersController::class, 'createOrder']);
