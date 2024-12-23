@@ -34,6 +34,8 @@ import {generateShoppingCartCompositionProductObjs} from "../../utils/shoppingCa
 import useExtraProductsExpressProgram from "../../Hooks/useExtraProductsExpressProgram.tsx";
 import MultiItemSelector from "./MultiItemSelector.tsx";
 import {ExtraItems} from "../../Models/ExtraItemsHookModels.ts";
+import useImagesComposition from "../../Hooks/useImagesComposition.tsx";
+import ImageSlider from "./ImageSlider.tsx";
 
 
 interface MargiConfiguratorProps {
@@ -850,6 +852,19 @@ function MargiConfigurator({
         });
     };
 
+    // |===== COMPOSITION IMAGES =====|
+    const imageUrls = useImagesComposition({
+        model: composition.model as Model,
+        vanitySku: currentConfiguration.vanitySku,
+        isDoubleSink: currentConfiguration.isDoubleSink,
+        sinkPosition: composition.sinkPosition,
+        hasSideUnit: !!sideUnitOptions,
+        sideUnitSku: currentConfiguration.sideUnitSku,
+        isDoubleSideUnit: false,
+        currentProducts: currentConfiguration.currentProducts,
+        currentMirrors: currentMirrorsConfiguration.currentProducts,
+    });
+
     // |===== EVENT HANDLERS =====|
     const handleOptionSelected = (
         item: string,
@@ -1403,14 +1418,9 @@ function MargiConfigurator({
                     </div>
                 </section>
                 <section className={classes.compositionImageWrapper}>
-                    <img
-                        src={composition.compositionImage}
-                        alt="product image"
-                        onError={(e) => {
-                            (e.target as HTMLImageElement).onerror = null;
-                            (e.target as HTMLImageElement).src =
-                                "https://portal.davidici.com/images/express-program/not-image.jpg";
-                        }}
+                    <ImageSlider
+                        imageUrls={imageUrls}
+                        defaultImage={composition.compositionImage}
                     />
                     <ConfigurationBreakdown
                         productsConfigurator={
