@@ -59,7 +59,7 @@ function OrderPayment({
         //     depositInfo?.percdep === 0 &&
         //     Number.parseInt(order.totcredit as string) === 0;
 
-        const crrDeliveryType = deliveryInfo[0].dtype;
+        const crrDeliveryType = deliveryInfo[0].dtype.toUpperCase();
         const deliveryFee =
             crrDeliveryType === "TO DEALER"
                 ? 50
@@ -71,7 +71,7 @@ function OrderPayment({
 
         const isExemptOfDeposit = depositInfo.percdep === 0 && !order.submitted;
 
-        const isDepositPaid = depositInfo.percdep > 0 && totalCredit > 0;
+        const isDepositPaid = depositInfo.percdep >= 0 && totalCredit > 0;
 
         let subTotal = depositInfo.depneeded;
 
@@ -311,12 +311,9 @@ function OrderPayment({
         }
     };
 
-    console.log("==== OrderPayment ====");
-    console.log("Order:", order);
-    console.log("Delivery Info:", deliveryInfo);
-    console.log("Deposit Info:", depositInfo);
-    console.log("token url:", intuitMaskTokenUrl);
-    console.log("is delivery info?:", isDeliveryInfo);
+    console.log(depositInfo)
+    console.log(deliveryInfo)
+    console.log(finalTotal)
 
     return (
         <UserAuthenticatedLayout auth={auth} crrPage="orders">

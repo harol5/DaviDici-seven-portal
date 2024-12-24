@@ -189,7 +189,7 @@ function OrderLayout({ children, order, crrOrderOption }: OrderLayoutProps) {
                         </div>
                     </section>
                     <div className="order-buttons-wrapper">
-                        <button className="common-button">Print Order</button>
+                        <button className="common-button" onClick={downloadPdf}>Print Order</button>
                         <button className="common-button">
                             <Link
                                 href={`/orders/${order.ordernum}/payment`}

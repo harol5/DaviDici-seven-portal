@@ -746,28 +746,9 @@ class OrdersController extends Controller
 
     public function generatePdf(Request $request, string $orderNumber)
     {
-
-        info('generatePdf');
-        info($this->getOrderInfoPdf($orderNumber));
-
-        // Sample: JSON response from an API (replace with your dynamic data)
-        $jsonResponse = [
-            'title' => 'Sample PDF Title',
-            'description' => 'This is a description from a JSON API response.',
-            'details' => [
-                'key1' => 'Value 1',
-                'key2' => 'Value 2',
-                'key3' => 'Value 3',
-            ],
-        ];
-
-        // Prepare the HTML content (can come from a Blade view)
-        $pdfData = view('pdf.order', compact('jsonResponse'))->render();
-
-        // Generate the PDF
+        $orderInfo = $this->getOrderInfoPdf($orderNumber);
+        $pdfData = view('pdf.order', compact('orderInfo'))->render();
         $pdf = Pdf::loadHTML($pdfData);
-
-        // Directly download the PDF
         return $pdf->download('sample-document.pdf');
     }
 
@@ -780,7 +761,7 @@ class OrdersController extends Controller
             // is returning the pdf order? PENDING
             $printSo = FoxproApi::call([
                  'action' => 'PrintSo',
-                 'params' => ['HAR000030'],
+                 'params' => ['KJT002686'], //KJT002686 (outstading),  KJT002928 (-75), KJT003667 (-50), KJT003047 (-50), KJT003756 (0)
                  'keep_session' => false,
             ]);
 
@@ -883,6 +864,26 @@ class OrdersController extends Controller
 
     public function getOrderInfoPdf(string $orderNumber)
     {
+        $formattedOrderInfo = [
+            'date' => '',
+            'orderNumber' => $orderNumber,
+            'billTo' => '',
+            'address' => '',
+            'cityStateZip' => '',
+            'products' => [],
+            'grandTotal' => '',
+            'balanceDetails' => [
+                'shipped' => '',
+                'inWarehouse' => '',
+                'inTransit' => '',
+                'open' => '',
+                'balance' => '',
+            ],
+            'orderStockStatusByProduct' => [],
+            'paymentDetails' => []
+        ];
+
+        // "Result": "this sales order number is not in system"
         $printSo = FoxproApi::call([
             'action' => 'PrintSo',
             'params' => [$orderNumber],
@@ -891,10 +892,7 @@ class OrdersController extends Controller
 
         if ($printSo['status'] !== 201 || !array_key_exists('rows', $printSo) || count($printSo['rows']) === 0) {
             logFoxproError('foxpro:PrintSo controllerFunc:getOrderInfoPdf','OrderController',[$orderNumber],$printSo);
-            return  [
-                'title' => 'Order Number ' . $orderNumber,
-                'description' => 'An error occurred while generating the PDF.',
-            ];
+            return  $formattedOrderInfo;
         }
 
         /*
@@ -932,8 +930,78 @@ class OrdersController extends Controller
         Take the stock status info from the LN    PARTNUM   TYPE    CDETAIL fields
          * */
 
-        foreach ($printSo['rows'] as $row) {}
+        foreach ($printSo['rows'] as $index => $row) {
+            switch ($row['rpmode']) {
+                case '0':
+                    if ($row['hline']) {
+                        $dateAndOrderNumber = explode(' ', $row['hline']);
+                        $formattedOrderInfo['date'] = $dateAndOrderNumber[0];
+                    }
 
-        return $printSo;
+                    // order is important, rpmode 0 MUST BE FIRST, index 0 will be the header, 1,2, and 3 following info.
+                    if ($row['bill'] && $index === 1) {
+                        $formattedOrderInfo['billTo'] = ltrim($row['bill']);
+                    }
+                    if ($row['bill'] && $index === 2) {
+                        $formattedOrderInfo['address'] = $row['bill'];
+                    }
+                    if ($row['bill'] && $index === 3) {
+                        $formattedOrderInfo['cityStateZip'] = $row['bill'];
+                    }
+                    break;
+
+                case '1':
+                    $formattedOrderInfo['products'][] = [
+                        'product' => $row['type'],
+                        'model' => $row['model'],
+                        'sku' => $row['partnum'],
+                        'finish' => $row['colr'],
+                        'quantity' => $row['qty'],
+                        'price' => $row['price'],
+                        'total' => $row['total'],
+                    ];
+                    break;
+
+                case '4':
+                    if ($row['pdate']) {
+                        $formattedOrderInfo['paymentDetails'][] = [
+                            'date' => $row['pdate'],
+                            'method' => $row['cknum'],
+                            'amount' => $row['amt'],
+                        ];
+                    }
+                    break;
+
+                case '5':
+                    if ($row['rpfirst'] === 'Y') {
+                        $formattedOrderInfo['balanceDetails']['shipped'] = $row['shchg'];
+                        $formattedOrderInfo['balanceDetails']['inWarehouse'] = $row['fprice'];
+                        $formattedOrderInfo['balanceDetails']['inTransit'] = $row['fcost'];
+                        $formattedOrderInfo['balanceDetails']['open'] = $row['total'];
+                        $formattedOrderInfo['balanceDetails']['balance'] = $row['amt'];
+                    }
+                    break;
+
+                case '6':
+                    if ($row['partnum']) {
+                        $formattedOrderInfo['orderStockStatusByProduct'][] = [
+                            'sku' => $row['partnum'],
+                            'product' => $row['type'],
+                            'status' => $row['cdetail'],
+                        ];
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+
+        }
+
+        $formattedOrderInfo['grandTotal'] = array_reduce($formattedOrderInfo['products'], function ($sum, $product) {
+            return $sum + (isset($product['total']) ? floatval($product['total']) : 0);
+        }, 0);
+
+        return $formattedOrderInfo;
     }
 }
