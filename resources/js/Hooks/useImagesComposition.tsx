@@ -63,6 +63,16 @@ function useImagesComposition({
                 .then((res) => res.data),
     });
 
+
+    console.log("==== useImagesComposition (useMemo ran!!) ====");
+    console.log("composition images:", compositionImages);
+    console.log("vanity sku:", vanitySku);
+    console.log("has side unit:", hasSideUnit);
+    console.log("side unit sku:", sideUnitSku);
+    console.log("is double sink?", isDoubleSink);
+    console.log("sink position", sinkPosition);
+    console.log("is double side unit", isDoubleSideUnit);
+
     return useMemo(() => {
         // if (!vanitySku || (hasSideUnit && !sideUnitSku)) return [];
         if (!vanitySku) return [];
@@ -104,6 +114,7 @@ function useImagesComposition({
 
         console.log("skus", skus);
         console.log("skusRegex", skusRegex);
+        console.log("imageUrls", imageUrls);
 
         if (compositionImages) {
             const { images } = compositionImages;
