@@ -136,7 +136,7 @@ function useImagesComposition({
                     )
                         continue;
 
-                    if (!isDoubleSink && name.includes("double")) continue;
+                    if (!isDoubleSink && name.includes("double") && !name.includes("doublesideunit")) continue;
 
                     imageUrls.push(image["image_url"]);
                 }
