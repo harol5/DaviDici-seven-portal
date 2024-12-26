@@ -749,6 +749,7 @@ class OrdersController extends Controller
         $orderInfo = $this->getOrderInfoPdf($orderNumber);
         $pdfData = view('pdf.order', compact('orderInfo'))->render();
         $pdf = Pdf::loadHTML($pdfData);
+//        $pdf = Pdf::setOptions(['isPhpEnabled' => true])->loadHTML($pdfData);
         return $pdf->download('sample-document.pdf');
     }
 

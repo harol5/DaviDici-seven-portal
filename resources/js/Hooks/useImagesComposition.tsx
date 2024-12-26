@@ -102,18 +102,21 @@ function useImagesComposition({
         const skusRegex = new RegExp(skus.join(""));
         const imageUrls: string[] = [];
 
+        console.log("skus", skus);
+        console.log("skusRegex", skusRegex);
+
         if (compositionImages) {
             const { images } = compositionImages;
-
+            console.log("images", images);
             // console.log(skusRegex);
             // console.log(images);
 
             for (const image of images) {
                 const name: string = image["composition_name"];
 
-                // console.log("=========");
-                // console.log(image);
-                // console.log(skusRegex.test(name));
+                console.log("=========");
+                console.log(image);
+                console.log(skusRegex.test(name));
 
                 if (skusRegex.test(name)) {
                     if (

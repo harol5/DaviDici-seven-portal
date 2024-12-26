@@ -50,13 +50,12 @@ function OrderLayout({ children, order, crrOrderOption }: OrderLayoutProps) {
         axios({
             url: `/orders/${order.ordernum}/generate-pdf`,
             method: 'GET',
-            responseType: 'blob', // Important for binary file downloads
+            responseType: 'blob',
         }).then((response) => {
-            // Create a URL for the file blob
             const blob = new Blob([response.data], { type: 'application/pdf' });
             const link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
-            link.download = 'generated-document.pdf';
+            link.download = `${order.ordernum}.pdf`;
             link.click();
         }).catch((error) => {
             console.error('Error generating PDF:', error);
