@@ -2,15 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-    font-family: "DMSans";
-    src: url("https://portal.davidici.com/fonts/DM_Sans/DMSans-VariableFont_opsz,wght.ttf");
-}
-
 /*@font-face {
     font-family: "DMSans";
-    src: url("https://seven.test/fonts/DM_Sans/DMSans-VariableFont_opsz,wght.ttf");
+    src: url("https://portal.davidici.com/fonts/DM_Sans/DMSans-VariableFont_opsz,wght.ttf");
 }*/
+
+@font-face {
+    font-family: "DMSans";
+    src: url("https://seven.test/fonts/DM_Sans/DMSans-VariableFont_opsz,wght.ttf");
+}
 
 /*@font-face {
     font-family: "DMSans";
@@ -811,6 +811,9 @@ main {
 }
 
 @media (max-width: 1000px) {
+    #login-page {
+        width: 60%;
+    }
     /*====== MAIN LAYOUT ======*/
     .nav-content {
         margin: 15px 10px;
@@ -906,6 +909,11 @@ main {
 }
 
 @media (max-width: 800px) {
+    /*== login ==*/
+    #form-wrapper form > input {
+        width: 80%;
+    }
+
     .horizontally-message {
         display: block;
         font-size: smaller;
@@ -1008,7 +1016,7 @@ main {
 @media (max-width: 600px) {
     /*== login page ==*/
     #login-page {
-        width: auto;
+        width: 90%;
     }
     /*== nav bar ==*/
     .nav-content {
