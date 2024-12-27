@@ -13,12 +13,13 @@ import { useMemo } from "react";
  * 68-VB-024D-P1-right
  * 65-024-VBB-CP-doublesideunit
  *
- * I just want to do a recap on the naming of the images.
+ I just want to do a recap on the naming of the images.
     - name should have the sku of the vanity and if the image have a side unit, include it as well.
     - each sku must be separate by a "~" character.
     - add "-left" or "-right" (depending on the position of the vanity) at the end of the vanity sku if the image has a side unit.
     - if the image has double vanity add "-double" to the end of the vanity sku.
     - if the image has double side unit (opera and new york), add "-doublesideunit" at the end of the vanity sku and add "-double" at the end of the side unit sku.
+    - if the image has double vanity and a side unit in the middle, add "-doubleWithCenteredSideUnit" at the end of the vanity sku.
     - after following this naming convention, if you have more than one picture with the same name, add "~1" or "~2" , etc (depending on the number of images) at the end of the name of the image.
     - NO SPACES!!
 
@@ -27,6 +28,7 @@ Examples
     - image with vanity left side and side unit: 73-VB-024-M23-left~73-SO-012-M16.webp
     - image with double vanity: 71-VB-024-M15-V15-double.webp
     - 3rd image with centered vanity and 2 side units on each side: 65-024-VBB-CP-doublesideunit~65-012-SCB-RX-CP-double~3.webp
+    - image with double vanity and centered side unit: 71-VB-024-M15-V15-doublecenteredsideunit~65-012-SCB-RX-CP.webp
  *
  */
 
@@ -55,6 +57,20 @@ function useImagesComposition({
     currentProducts,
     currentMirrors,
 }: useImagesCompositionProps) {
+    console.log("===== useImagesComposition =====");
+    console.log("model: ", model);
+    console.log("vanitySku: ", vanitySku);
+    console.log("isDoubleSink: ", isDoubleSink);
+    console.log("sinkPosition: ", sinkPosition);
+    console.log("hasSideUnit: ", hasSideUnit);
+    console.log("sideUnitSku: ", sideUnitSku);
+    console.log("isDoubleSideUnit: ", isDoubleSideUnit);
+    console.log("currentProducts: ", currentProducts);
+    console.log("currentMirrors: ", currentMirrors);
+    console.log("==============================");
+
+
+
     const { data: compositionImages } = useQuery({
         queryKey: ["modelImagesCompositionData"],
         queryFn: () =>
@@ -64,12 +80,12 @@ function useImagesComposition({
                 )
                 .then((res) => res.data),
     });
+
+
+
     return useMemo(() => {
-        // if (!vanitySku || (hasSideUnit && !sideUnitSku)) return [];
         if (!vanitySku) return [];
-
         const skus: string[] = [];
-
         const finalVanitySku = isDoubleSink && !hasSideUnit
             ? `${vanitySku}-double`
             : isDoubleSink && hasSideUnit
@@ -103,14 +119,20 @@ function useImagesComposition({
         const skusRegex = new RegExp(skus.join(""));
         const imageUrls: string[] = [];
 
+        console.log("skus:", skus);
+        console.log("skusRegex: ", skusRegex);
+
         if (compositionImages) {
             const { images } = compositionImages;
-            console.log("images", images);
-            // console.log(skusRegex);
-            // console.log(images);
+            console.log("images: ", images);
 
             for (const image of images) {
                 const name: string = image["composition_name"];
+                console.log("-- iterating --");
+                console.log("image name: ", name);
+                console.log("skusRegex: ", skusRegex);
+                console.log("is image name valid: ", skusRegex.test(name));
+
                 if (skusRegex.test(name)) {
                     if (
                         !hasSideUnit &&
@@ -118,12 +140,15 @@ function useImagesComposition({
                     )
                         continue;
 
-                    if (!isDoubleSink && name.includes("double") && !name.includes("doublesideunit")) continue;
+                    if (!isDoubleSink && !isDoubleSideUnit && name.includes("double")) continue;
+                    if (!isDoubleSideUnit && name.includes("doublesideunit")) continue;
 
                     imageUrls.push(image["image_url"]);
                 }
             }
         }
+
+        console.log("imageUrls: ", imageUrls);
 
         return imageUrls.length === 0 ? [] : imageUrls;
     }, [
@@ -136,18 +161,3 @@ function useImagesComposition({
 }
 
 export default useImagesComposition;
-
-// console.log("==== useImagesComposition (useMemo ran!!) ====");
-// console.log("composition images:", compositionImages);
-// console.log("vanity sku:", vanitySku);
-// console.log("has side unit:", hasSideUnit);
-// console.log("side unit sku:", sideUnitSku);
-// console.log("is double sink?", isDoubleSink);
-// console.log("sink position", sinkPosition);
-// console.log("is double side unit", isDoubleSideUnit);
-// console.log("final vanity sku:", finalVanitySku);
-// console.log("skus array for regex:", skus);
-// console.log("== checking image name ==");
-// console.log("At least one string from the set is present.");
-// console.log("image name:", name);
-// console.log("current skus:", skus);
