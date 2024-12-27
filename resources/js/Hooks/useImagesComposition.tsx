@@ -57,20 +57,17 @@ function useImagesComposition({
     currentProducts,
     currentMirrors,
 }: useImagesCompositionProps) {
-    console.log("===== useImagesComposition =====");
-    console.log("model: ", model);
-    console.log("vanitySku: ", vanitySku);
-    console.log("isDoubleSink: ", isDoubleSink);
-    console.log("sinkPosition: ", sinkPosition);
-    console.log("hasSideUnit: ", hasSideUnit);
-    console.log("sideUnitSku: ", sideUnitSku);
-    console.log("isDoubleSideUnit: ", isDoubleSideUnit);
-    console.log("currentProducts: ", currentProducts);
-    console.log("currentMirrors: ", currentMirrors);
-    console.log("==============================");
-
-
-
+    // console.log("===== useImagesComposition =====");
+    // console.log("model: ", model);
+    // console.log("vanitySku: ", vanitySku);
+    // console.log("isDoubleSink: ", isDoubleSink);
+    // console.log("sinkPosition: ", sinkPosition);
+    // console.log("hasSideUnit: ", hasSideUnit);
+    // console.log("sideUnitSku: ", sideUnitSku);
+    // console.log("isDoubleSideUnit: ", isDoubleSideUnit);
+    // console.log("currentProducts: ", currentProducts);
+    // console.log("currentMirrors: ", currentMirrors);
+    // console.log("==============================");
     const { data: compositionImages } = useQuery({
         queryKey: ["modelImagesCompositionData"],
         queryFn: () =>
@@ -128,10 +125,10 @@ function useImagesComposition({
 
             for (const image of images) {
                 const name: string = image["composition_name"];
-                console.log("-- iterating --");
-                console.log("image name: ", name);
-                console.log("skusRegex: ", skusRegex);
-                console.log("is image name valid: ", skusRegex.test(name));
+                // console.log("-- iterating --");
+                // console.log("image name: ", name);
+                // console.log("skusRegex: ", skusRegex);
+                // console.log("is image name valid: ", skusRegex.test(name));
 
                 if (skusRegex.test(name)) {
                     if (
@@ -147,9 +144,7 @@ function useImagesComposition({
                 }
             }
         }
-
-        console.log("imageUrls: ", imageUrls);
-
+        // console.log("imageUrls: ", imageUrls);
         return imageUrls.length === 0 ? [] : imageUrls;
     }, [
         currentProducts,
