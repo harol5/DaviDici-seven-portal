@@ -311,10 +311,6 @@ function OrderPayment({
         }
     };
 
-    console.log(depositInfo)
-    console.log(deliveryInfo)
-    console.log(finalTotal)
-
     return (
         <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <OrderLayout order={order} crrOrderOption="payment">

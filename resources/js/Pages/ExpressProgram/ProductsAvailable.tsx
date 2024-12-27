@@ -130,7 +130,7 @@ function ProductsAvailable({auth, listingType}: ProductsAvailableProps) {
                     <></>
                 )}
 
-                {isLoading && <LoadingSpinner message="fetching products..."/>}
+                {isLoading && <LoadingSpinner message="Fetching Products..."/>}
 
                 {!isLoading && (
                     <>

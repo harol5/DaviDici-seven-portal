@@ -30,6 +30,9 @@ Examples
  *
  */
 
+const imageURL = import.meta.env.MODE === "development" ? "https://portal.davidici.com/api" : "";
+console.log("imageURL", imageURL);
+
 interface useImagesCompositionProps {
     model: Model;
     vanitySku: string;
@@ -58,7 +61,7 @@ function useImagesComposition({
         queryFn: () =>
             axios
                 .get(
-                    `/express-program/composition-images?model=${model.toLocaleLowerCase()}`
+                    `${imageURL}/express-program/composition-images?model=${model.toLocaleLowerCase()}`
                 )
                 .then((res) => res.data),
     });
