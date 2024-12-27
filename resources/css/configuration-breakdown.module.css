@@ -16,9 +16,9 @@
         .configurationBreakdownContent {
             padding: 1.4em;
             background-color: white;
-            margin: 2.4em;
-            margin-bottom: 1.4em;
-            margin-top: 1.4em;
+            margin: 1.4em 2.4em 1.4em;
+            /*margin-bottom: 1.4em;*/
+            /*margin-top: 1.4em;*/
 
             .headerTitle {
                 color: #d1aa68;
@@ -75,6 +75,26 @@
         /*triangleDownIcon*/
         .rotateTriangle {
             transform: rotate(180deg);
+        }
+    }
+}
+
+@media (max-width: 850px) {
+    .breakdownWrapper {
+        position: static;
+
+        .configurationBreakdown {
+            max-height: initial;
+            background-color: white;
+
+            .configurationBreakdownContent {
+                margin: 1em 0;
+                padding: 0;
+            }
+        }
+
+        .breakdownButton {
+            display: none;
         }
     }
 }
