@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import classes from "../../../css/image-slider.module.css";
 import Modal from "../Modal";
 
+const imageHost = import.meta.env.MODE === "development" ? "portal.davidici.com" : location.hostname;
+
 interface ImageSliderProps {
     imageUrls: string[];
     defaultImage: string;
@@ -39,7 +41,7 @@ function ImageSlider({ imageUrls, defaultImage }: ImageSliderProps) {
                     {imageUrls.map((image, index) => (
                         <img
                             key={index}
-                            src={`https://${location.hostname}/storage/${image}`}
+                            src={`https://${imageHost}/storage/${image}`}
                             className={
                                 crrImageIndex === index
                                     ? classes.display
@@ -51,7 +53,7 @@ function ImageSlider({ imageUrls, defaultImage }: ImageSliderProps) {
                 {imageUrls.length > 1 && (
                     <>
                         <div className={classes.indicatorsContainer}>
-                            {imageUrls.map((image, index) => (
+                            {imageUrls.map((_image, index) => (
                                 <span
                                     key={index}
                                     onClick={() => setCrrImageIndex(index)}
@@ -113,7 +115,7 @@ function ImageSlider({ imageUrls, defaultImage }: ImageSliderProps) {
                         {imageUrls.map((image, index) => (
                             <img
                                 key={index}
-                                src={`https://${location.hostname}/storage/${image}`}
+                                src={`https://${imageHost}/storage/${image}`}
                                 className={
                                     crrImageIndex === index
                                         ? classes.display
@@ -125,7 +127,7 @@ function ImageSlider({ imageUrls, defaultImage }: ImageSliderProps) {
                     {imageUrls.length > 1 && (
                         <>
                             <div className={classes.indicatorsContainer}>
-                                {imageUrls.map((image, index) => (
+                                {imageUrls.map((_image, index) => (
                                     <span
                                         key={index}
                                         onClick={() => setCrrImageIndex(index)}

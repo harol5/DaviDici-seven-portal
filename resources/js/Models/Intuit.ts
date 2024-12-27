@@ -12,18 +12,18 @@ type ErrorIntuit = {
     type: string;
 };
 
-type ErrorIntuitFinal = {
-    code: "PMT-4000" | "PMT-6000";
-    detail:
-        | "card.cvc"
-        | "card.expyear"
-        | "card.expmonth"
-        | "card.number"
-        | "card.ExpirationMonth/ExpirationYear";
-    infoLink: string;
-    message: string;
-    moreInfo: string;
-    type: "invalid_request";
-};
+// type ErrorIntuitFinal = {
+//     code: "PMT-4000" | "PMT-6000";
+//     detail:
+//         | "card.cvc"
+//         | "card.expyear"
+//         | "card.expmonth"
+//         | "card.number"
+//         | "card.ExpirationMonth/ExpirationYear";
+//     infoLink: string;
+//     message: string;
+//     moreInfo: string;
+//     type: "invalid_request";
+// };
 
 export type { ErrorIntuit };
