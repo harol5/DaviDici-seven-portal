@@ -84,17 +84,26 @@
         position: static;
 
         .configurationBreakdown {
-            max-height: initial;
             background-color: white;
+            order: 1;
 
             .configurationBreakdownContent {
-                margin: 1em 0;
+                margin: 1em;
                 padding: 0;
             }
         }
 
         .breakdownButton {
-            display: none;
+            border-radius: 4px;
+            width: auto;
+            padding: 0;
+            border-top: 1px solid black;
+            margin-top: 1em;
+            box-shadow: none;
+
+            .triangleDownIcon {
+                width: 10%;
+            }
         }
     }
 }

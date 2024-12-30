@@ -330,6 +330,12 @@
     }
 }
 
+@media (min-aspect-ratio: 6/5) {
+    .leftSideConfiguratorWrapper {
+        position: static;
+    }
+}
+
 @media (max-width: 850px) {
     .compositionConfiguratorWrapper {
         flex-direction: column;
@@ -338,47 +344,95 @@
         gap: 0;
     }
 
-    .leftSideConfiguratorWrapper {
-        flex-basis: 100%;
-        position: static;
-    }
-
     .rightSideConfiguratorWrapper {
         flex-basis: 100%;
+        margin: 0 10px;
+    }
+
+    .leftSideConfiguratorWrapper {
+        flex-basis: 100%;
+        z-index: 1;
+        padding: 0 0 1em;
+        border-bottom: 1px solid #d1aa68;
+        /*position: static;*/
+    }
+
+    .leftSideConfiguratorWrapper .backButtonAndNameWrapper {
+        margin: 1em 0.5em;
+        gap: 0.8em;
+    }
+
+    .leftSideConfiguratorWrapper .backButtonAndNameWrapper .backButtonWrapper p {
+        font-size: 0.8rem;
     }
 
     .leftSideConfiguratorWrapper .backButtonAndNameWrapper h1 {
-        font-size: medium;
+        font-size: small;
     }
 
     .leftSideConfiguratorWrapper .backButtonAndNameWrapper .buttonsWrapper {
-        flex-direction: column;
+        /*flex-direction: column;*/
+        gap: 0.6em;
+    }
+
+    .leftSideConfiguratorWrapper .backButtonAndNameWrapper .buttonsWrapper .resetButton {
+        padding: 0.3rem 1rem;
     }
 
     .leftSideConfiguratorWrapper .compositionImageWrapper {
         border: none;
         margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .rightSideConfiguratorWrapper .configurationName {
+        margin: 0.7rem 0;
+
+        label {
+            font-size: 0.9rem;
+        }
     }
 
     .option {
-        width: 30%;
+        width: 15%;
+    }
+
+    .option p {
+        font-size: 0.65rem;
+    }
+
+    .option .imageAndOverlayWrapper img {
+        height: 4em;
+        width: 4em;
+    }
+
+    .finishOption .imageAndOverlayWrapper img {
+        height: 3em;
+        width: 3em;
+    }
+
+    .finishOption.optionSelected .imageAndOverlayWrapper .imageOverlay {
+        height: 3em;
+        width: 3em;
     }
 
     .grandTotalAndOrderNowButtonWrapper {
-        padding: 0.9rem 1.7rem;
+        padding: 0.7rem 0.7rem;
+        row-gap: 5px;
+        /*position: static;*/
     }
 
-    .grandTotalAndOrderNowButtonWrapper .grandTotalWrapper h1 {
-        font-size: 1.6rem;
-    }
-
-    .grandTotalAndOrderNowButtonWrapper .grandTotalWrapper .amount {
-        font-size: 1.6rem;
+    .grandTotalAndOrderNowButtonWrapper .grandTotalWrapper h1,
+    .grandTotalAndOrderNowButtonWrapper .grandTotalWrapper .amount{
+        font-size: 1.4rem;
     }
 
     .grandTotalAndOrderNowButtonWrapper button,
     .grandTotalAndOrderNowButtonWrapper .specsLink {
         font-size: 0.75rem;
+        padding: 0.4em 1.7em;
     }
 }
 

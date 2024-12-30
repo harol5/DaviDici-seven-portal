@@ -1039,6 +1039,11 @@ main {
 
     .nav-logo-mobile {
         display: block;
+        width: 2.1em;
+    }
+
+    .settings-wrapper img {
+        width: 2.1em;
     }
 
     .nav-links {
@@ -1065,7 +1070,8 @@ main {
     }
 
     .main-content-wrapper {
-        margin: 0 10px;
+        /*margin: 0 10px;*/
+        margin: 0;
     }
 
     /*== order layout ==*/

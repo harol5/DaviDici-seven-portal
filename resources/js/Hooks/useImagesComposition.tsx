@@ -19,7 +19,7 @@ import { useMemo } from "react";
     - add "-left" or "-right" (depending on the position of the vanity) at the end of the vanity sku if the image has a side unit.
     - if the image has double vanity add "-double" to the end of the vanity sku.
     - if the image has double side unit (opera and new york), add "-doublesideunit" at the end of the vanity sku and add "-double" at the end of the side unit sku.
-    - if the image has double vanity and a side unit in the middle, add "-doubleWithCenteredSideUnit" at the end of the vanity sku.
+    - if the image has double vanity and a side unit in the middle, add "-doublecenteredsideunit" at the end of the vanity sku.
     - after following this naming convention, if you have more than one picture with the same name, add "~1" or "~2" , etc (depending on the number of images) at the end of the name of the image.
     - NO SPACES!!
 
@@ -86,7 +86,7 @@ function useImagesComposition({
         const finalVanitySku = isDoubleSink && !hasSideUnit
             ? `${vanitySku}-double`
             : isDoubleSink && hasSideUnit
-            ? `${vanitySku}-double-with-side-unit`
+            ? `${vanitySku}-doublecenteredsideunit`
             : sinkPosition === "LEFT" || sinkPosition === "RIGHT"
             ? `${vanitySku}-${sinkPosition.toLowerCase()}`
             : isDoubleSideUnit

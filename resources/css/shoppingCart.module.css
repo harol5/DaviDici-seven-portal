@@ -66,7 +66,7 @@
 
 .grandTotalAndPlaceOrderButtonWrapper .placeOrderButton:hover {
     background-color: white;
-    color: #d1aa68;       
+    color: #d1aa68;
 }
 
 @media (max-width: 950px) {
@@ -96,6 +96,24 @@
     .grandTotalAndPlaceOrderButtonWrapper .granTotalWrapper {
         flex-basis: 100%;
         text-align: center;
+    }
+}
+
+@media (max-width: 600px) {
+    .shoppingCartButton {
+        width: 40px;
+        bottom: 8vw;
+        right: 1vh;
+    }
+
+    .shoppingCartButton .counter {
+        font-size: 0.6rem;
+        width: 15px;
+        height: 15px;
+    }
+
+    .shoppingCartModal {
+        padding: 2.5rem 1rem;
     }
 }
 

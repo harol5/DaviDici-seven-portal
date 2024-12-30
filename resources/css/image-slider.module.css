@@ -65,6 +65,13 @@
 
     .imageSlider {
         border: #d1aa68 1px solid;
+        width: 100%;
+    }
+}
+
+@media (max-width: 850px) {
+    .imageSlider {
+        width: 60%;
     }
 }
 

@@ -73,6 +73,18 @@
     }
 }
 
+@media (max-width: 600px) {
+    .itemPropertiesAccordion {
+        .itemPropertiesHeader {
+            padding: 0.7em;
+
+            .headerTitle {
+                font-size: 1.2rem;
+            }
+        }
+    }
+}
+
 @media print {
     .itemPropertiesAccordion {
         display: none;
