@@ -611,7 +611,7 @@ function useExpressProgramProducts(
         const modelsForFilterMap = new Map<string, ModelObj>();
 
         // ONLY FOR THOSE MODELS THAT HAVE INTEGRATED SINK
-        if (vanitiesAndSideUnitsMap.get("VANITY").has("20")) {
+        if (vanitiesAndSideUnitsMap.has("VANITY") && vanitiesAndSideUnitsMap.get("VANITY").has("20")) {
             initialSizesForFilter.push("20");
             const modelsMap = vanitiesAndSideUnitsMap.get("VANITY").get("20");
             for (const [model, products] of modelsMap) {
@@ -839,7 +839,6 @@ function useExpressProgramProducts(
 
     return useMemo(() => {
         if (!rawProducts || rawProducts.length === 0) return;
-
         return getExpressProgramData(createProductsTree());
     }, [rawProducts]);
 }
