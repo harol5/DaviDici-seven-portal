@@ -790,16 +790,19 @@ function useExpressProgramProducts(
             }
         }
 
-        // creates object for mirrors.
-        modelsForFilterMap.set("MIRRORS", {
-            name: "MIRRORS",
-            url: `https://${location.hostname}/images/express-program/mirrors/main.webp`,
-        });
-        generateMirrorsCompositionObj(
-            initialCompositions,
-            otherProductsMap,
-            sharedItemsMap
-        );
+        // Creates composition object for mirrors.
+        if (sharedItemsMap.size > 0 && sharedItemsMap.has("MIRROR")) {
+            modelsForFilterMap.set("MIRRORS", {
+                name: "MIRRORS",
+                url: `https://${location.hostname}/images/express-program/mirrors/main.webp`,
+            });
+            generateMirrorsCompositionObj(
+                initialCompositions,
+                otherProductsMap, // this is only pass because this is a generic function, not relevant to getting mirrors objects.
+                sharedItemsMap
+            );
+        }
+
 
         // Converts finishesForFilterMap values to and array with such values.
         const initialFinishesForFilter: FinishObj[] = Object.values(
