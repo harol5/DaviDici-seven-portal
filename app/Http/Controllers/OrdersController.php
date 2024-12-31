@@ -954,10 +954,12 @@ class OrdersController extends Controller
                 case '1':
                     $formattedOrderInfo['products'][] = [
                         'product' => $row['type'],
+                        'group' => $row['sgroup'],
                         'model' => $row['model'],
                         'sku' => $row['partnum'],
                         'finish' => $row['colr'],
                         'quantity' => $row['qty'],
+                        'status' => $row['cdetail'],
                         'price' => $row['price'],
                         'total' => $row['total'],
                     ];
@@ -1002,6 +1004,17 @@ class OrdersController extends Controller
         $formattedOrderInfo['grandTotal'] = array_reduce($formattedOrderInfo['products'], function ($sum, $product) {
             return $sum + (isset($product['total']) ? floatval($product['total']) : 0);
         }, 0);
+
+        // Sorting products by group, then by model.
+        usort($formattedOrderInfo['products'], function ($a, $b) {
+            // Compare by group first
+            $groupComparison = strcmp($a['group'], $b['group']);
+            // If groups are equal, compare by model
+            if ($groupComparison === 0) {
+                return strcmp($a['model'], $b['model']);
+            }
+            return $groupComparison;
+        });
 
         return $formattedOrderInfo;
     }

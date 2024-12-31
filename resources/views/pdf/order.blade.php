@@ -76,21 +76,18 @@
             margin: 0;
         }
 
-        .content .products table,
-        .content .order-status table {
+        .content .products table {
             border-spacing: 15px 12px;
             border-collapse: separate;
             width: 100%;
         }
 
-        .content .products table thead th,
-        .content .order-status table thead th {
+        .content .products table thead th {
             border-bottom: 2px solid #000;
             padding-bottom: 5px;
         }
 
-        .content .products table tbody td,
-        .content .order-status table tbody td{
+        .content .products table tbody td {
             border-bottom: 1px solid gray;
             padding: 10px 5px;
             text-align: center;
@@ -159,9 +156,11 @@
                 <tr>
                     <th>Quantity</th>
                     <th>Model</th>
+                    <th>Product</th>
+                    <th>Group</th>
                     <th>Finish</th>
                     <th>SKU</th>
-                    <th>Product</th>
+                    <th>Status</th>
                     <th>Price</th>
                     <th>Total</th>
                 </tr>
@@ -171,9 +170,11 @@
                     <tr>
                         <td>{{ $product['quantity'] }}</td>
                         <td>{{ $product['model'] }}</td>
+                        <td>{{ $product['product'] }}</td>
+                        <td>{{ $product['group'] }}</td>
                         <td>{{ $product['finish'] }}</td>
                         <td>{{ $product['sku'] }}</td>
-                        <td>{{ $product['product'] }}</td>
+                        <td>{{ $product['status'] }}</td>
                         <td>${{ $product['price'] }}</td>
                         <td>${{ $product['total'] }}</td>
                     </tr>
@@ -181,7 +182,7 @@
                 </tbody>
                 <tfoot>
                 <tr>
-                    <td colspan="6" style="text-align: right;">Grand Total:</td>
+                    <td colspan="8" style="text-align: right;">Grand Total:</td>
                     <td>${{ $orderInfo['grandTotal'] }}</td>
                 </tr>
                 </tfoot>
@@ -231,27 +232,6 @@
                     <td>${{ $orderInfo['balanceDetails']['open'] }}</td>
                     <td>${{ $orderInfo['balanceDetails']['balance'] }}</td>
                 </tr>
-                </tbody>
-            </table>
-        </section>
-        <section class="order-status">
-            <h1>ORDER STOCK STATUS:</h1>
-            <table>
-                <thead>
-                <tr>
-                    <th>Sku</th>
-                    <th>Description</th>
-                    <th>Status</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach($orderInfo['orderStockStatusByProduct'] as $productStatus)
-                    <tr>
-                        <td>{{ $productStatus['sku'] }}</td>
-                        <td>{{ $productStatus['product'] }}</td>
-                        <td>{{ $productStatus['status'] }}</td>
-                    </tr>
-                @endforeach
                 </tbody>
             </table>
         </section>
