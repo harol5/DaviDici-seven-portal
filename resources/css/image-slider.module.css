@@ -76,6 +76,10 @@
 }
 
 @media print {
+    .imageSlider {
+        width: 100%;
+    }
+
     .imageSlider img:nth-child(1) {
         margin-bottom: 200px;
     }

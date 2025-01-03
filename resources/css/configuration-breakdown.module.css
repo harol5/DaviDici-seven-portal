@@ -111,6 +111,7 @@
 @media print {
     .breakdownWrapper {
         position: static;
+        page-break-inside: avoid;
 
         .configurationBreakdown {
             .configurationBreakdownContent {

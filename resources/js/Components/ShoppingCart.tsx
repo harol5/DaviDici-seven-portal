@@ -81,7 +81,7 @@ function ShoppingCart({
         otherProductIndex: number | null,
         sideUnitIndex: number | null,
         removeAction: "composition" | "composition product",
-    ) => {                
+    ) => {
         const { shoppingCartCompositionsCopy, crrComposition, crrProduct } =
             getCompositionAndProduct(
                 composition,
@@ -91,15 +91,15 @@ function ShoppingCart({
                 sideUnitIndex
             );
 
-        if (removeAction === "composition") {            
+        if (removeAction === "composition") {
             shoppingCartCompositionsCopy.splice(compositionIndex,1);
         }
 
 
-        if (removeAction === "composition product" && crrComposition && crrProduct) {            
+        if (removeAction === "composition product" && crrComposition && crrProduct) {
             crrComposition.grandTotal -= crrProduct.total;
 
-            if (otherProductIndex !== null) {                
+            if (otherProductIndex !== null) {
                 crrComposition.otherProducts[crrProduct.type as keyof typeof crrComposition.otherProducts]!.splice(otherProductIndex,1);
             }else if (sideUnitIndex !== null){
                 crrComposition[crrProduct.type as keyof typeof crrComposition].splice(sideUnitIndex,1);
@@ -108,7 +108,7 @@ function ShoppingCart({
             }else {
                 crrComposition.vanity = null;
             }
-        }                        
+        }
 
         try {
             const response = await axios.post(
@@ -125,12 +125,12 @@ function ShoppingCart({
         }
     };
 
-    
+
     const handleQtyUpdated = async (
         composition: ShoppingCartComposition,
-        compositionIndex: number, 
+        compositionIndex: number,
         product: ShoppingCartCompositionProduct,
-        otherProductIndex: number | null, 
+        otherProductIndex: number | null,
         sideUnitIndex: number | null,
         qty: number | typeof NaN,
         type: "decrement" | "increment" | "changeValue"
@@ -182,9 +182,9 @@ function ShoppingCart({
         let SKU: string[] = [];
 
         crrShoppingCartCompositions.forEach((composition) => {
-            const skusArr: string[] = [];            
-            
-            if (composition.vanity) {                
+            const skusArr: string[] = [];
+
+            if (composition.vanity) {
                 skusArr.push(
                     `${composition.vanity.productObj.uscode}!!${
                         composition.info.model
@@ -194,7 +194,7 @@ function ShoppingCart({
                 );
             }
 
-            if (composition.washbasin) {                
+            if (composition.washbasin) {
                 skusArr.push(
                     `${composition.washbasin.productObj.uscode}!!${composition.info.model}--${composition.washbasin.quantity}##${composition.label}`
                 );
@@ -226,20 +226,20 @@ function ShoppingCart({
             }
 
             SKU.push(skusArr.join("~"));
-        });        
+        });
 
         router.get("/orders/create-so-num", {
             SKU: SKU.join("~"),
             isShoppingCart: true,
         });
     };
-    
+
     const calGrandTotal = (): number => {
         return crrShoppingCartCompositions.reduce((prev, crr) => {
             return prev + crr.grandTotal;
         }, 0);
     };
-    
+
     useEffect(() => {
         const getShoppingCartProducts = async () => {
             try {
@@ -250,7 +250,7 @@ function ShoppingCart({
             }
         };
         getShoppingCartProducts();
-    }, []);    
+    }, []);
 
     return (
         <section className={classes.shoppingCart}>

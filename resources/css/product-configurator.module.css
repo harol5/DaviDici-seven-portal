@@ -332,7 +332,7 @@
 
 @media (min-aspect-ratio: 6/5) {
     .leftSideConfiguratorWrapper {
-        position: static;
+        /*position: static;*/
     }
 }
 
