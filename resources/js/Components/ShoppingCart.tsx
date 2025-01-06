@@ -240,6 +240,40 @@ function ShoppingCart({
         }, 0);
     };
 
+
+    const handlePrint = async () => {
+        console.log(crrShoppingCartCompositions);
+        try {
+            // Send the current shopping cart compositions to the backend
+            const response = await axios.post(
+                "/express-program/shopping-cart/generate-pdf",
+                crrShoppingCartCompositions,
+                { responseType: "blob" } // Ensure response is properly handled as binary
+            );
+
+            // Create a URL for the PDF blob
+            const pdfBlob = new Blob([response.data], { type: "application/pdf" });
+            const pdfURL = URL.createObjectURL(pdfBlob);
+
+            // Open the PDF in a new tab
+            /*const newWindow = window.open();
+            if (newWindow) {
+                newWindow.document.write(
+                    `<iframe src="${pdfURL}" frameborder="0" style="width:100%; height:100%;"></iframe>`
+                );
+            }*/
+
+            // Alternatively, programmatically prompt print window directly
+            const printWindow = window.open(pdfURL);
+            if (printWindow) {
+                printWindow.onload = () => printWindow.print();
+            }
+        } catch (error) {
+            console.error("Error while generating PDF: ", error);
+        }
+    };
+
+
     useEffect(() => {
         const getShoppingCartProducts = async () => {
             try {
@@ -274,6 +308,7 @@ function ShoppingCart({
                 >
                     CLOSE CART
                 </button>
+                {/*<button className={classes.placeOrderButton} onClick={handlePrint}>Print</button>*/}
             </section>
             <section className={classes.shoppingCartContent}>
                 {crrShoppingCartCompositions.map((composition, index) => (

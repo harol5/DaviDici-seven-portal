@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Inertia\Inertia;
 use App\FoxproApi\FoxproApi;
 use App\Models\ModelCompositionImage;
@@ -23,14 +24,14 @@ class ExpressProgramController extends Controller
         /** @var mixed $listingType */
         $listingType;
 
-        array_key_exists('listing-type',$input) ? $listingType = $input['listing-type'] : $listingType = 'fullInventory';                
+        array_key_exists('listing-type',$input) ? $listingType = $input['listing-type'] : $listingType = 'fullInventory';
 
         return Inertia::render('ExpressProgram/ProductsAvailable',
-                [                                           
+                [
                     'message' => $message,
-                    'listingType' => $listingType,                 
+                    'listingType' => $listingType,
                 ]
-            );                                        
+            );
     }
 
     public function getExpressProgramProducts()
@@ -50,70 +51,70 @@ class ExpressProgramController extends Controller
     }
 
     public function setProduct(Request $request){
-        $composition = $request->all();        
+        $composition = $request->all();
         return redirect()->route('expressProgram.product', ['product' => $composition['name']])->with(['data' => $composition]);
     }
 
     public function productConfigurator(Request $request){
-        $composition = $request->session()->get('data');           
-        
+        $composition = $request->session()->get('data');
+
         if(!$composition) {
             return redirect('/express-program')->with('message', 'Product expired!!!');
         }
-                
+
 
         return Inertia::render('ExpressProgram/ProductConfigurator',
-            [                                    
-                'composition' => $composition,                     
+            [
+                'composition' => $composition,
             ]
         );
     }
 
     public function getShoppingCart(Request $request) {
-        
+
         /** @var mixed $shoppingCartProducts */
         $shoppingCartProducts;
 
         /** @var int $statusCode */
         $statusCode;
 
-        if($request->user()) {            
+        if($request->user()) {
             // can this trow an error?
             $shoppingCart = DB::table('shopping_cart')->where('user_id', $request->user()->id)->first();
 
             $shoppingCartProducts = $shoppingCart ? json_decode($shoppingCart->products) : [];
-            $statusCode = 201;    
+            $statusCode = 201;
         }else {
-            $shoppingCartProducts = "missing user";            
+            $shoppingCartProducts = "missing user";
             $statusCode = 401;
-        }        
-        
+        }
+
         return response(['shoppingCartProducts' => $shoppingCartProducts], $statusCode)
         ->header('Content-Type', 'application/json');
     }
 
-    public function updateShoppingCart(Request $request) {        
+    public function updateShoppingCart(Request $request) {
         /** @var string $message*/
         $message;
 
         /** @var int $statusCode*/
         $statusCode;
 
-        if($request->user()) {            
+        if($request->user()) {
             DB::table('shopping_cart')
             ->updateOrInsert(
                 ['user_id' => $request->user()->id],
                 ['products' => $request->getContent()]
-            );                                                           
+            );
             $message = 'shopping cart updated';
-            $statusCode = 201;                        
+            $statusCode = 201;
         }else {
             $message = 'missing user';
-            $statusCode = 401;                 
-        }            
+            $statusCode = 401;
+        }
 
         return response(['message' => $message, 'status' => $statusCode], $statusCode)
-        ->header('Content-Type', 'application/json');                                                
+        ->header('Content-Type', 'application/json');
     }
 
     public function fileForm(){
@@ -130,8 +131,8 @@ class ExpressProgramController extends Controller
         $uploadedFiles = $request->file('images');
         $uploadedPaths = [];
 
-        foreach ($uploadedFiles as $file) {                        
-            $name = $file->getClientOriginalName();      
+        foreach ($uploadedFiles as $file) {
+            $name = $file->getClientOriginalName();
             $path = $file->store('/images/express_program','public');
             // $path = $file->store('/images/resource', ['disk' => 'my_files']);
 
@@ -155,8 +156,8 @@ class ExpressProgramController extends Controller
         $images = ModelCompositionImage::select('composition_name','image_url')->where('model', $model)->orderBy('composition_name')->get();
 
         return response()->json([
-            'images' => $images,            
-        ]); 
+            'images' => $images,
+        ]);
     }
 
     // get all images.
@@ -164,8 +165,8 @@ class ExpressProgramController extends Controller
         $images = ModelCompositionImage::all();
 
         return response()->json([
-            'images' => $images,            
-        ]); 
+            'images' => $images,
+        ]);
     }
 
     // delete image.
@@ -173,14 +174,22 @@ class ExpressProgramController extends Controller
         $name = $request->all()['name'];
         $imageUrl = $request->all()['url'];
 
-        $res = ModelCompositionImage::destroy($name);        
+        $res = ModelCompositionImage::destroy($name);
         Storage::delete('public/' . $imageUrl);
 
         return response()->json([
-            'deleted' => $res,            
-        ]); 
+            'deleted' => $res,
+        ]);
     }
 
-
+    public function generatePdf(Request $request) {
+        $data = $request->all();
+        $pdf = Pdf::loadView('pdf.shopping-cart', ['compositions' => $data]);
+        return response()->streamDownload(
+            fn () => print($pdf->output()),
+            'shopping_cart.pdf',
+            ['Content-Type' => 'application/pdf']
+        );
+    }
     // replace image (if image with same name is uploaded);
 }

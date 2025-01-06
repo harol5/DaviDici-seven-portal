@@ -557,13 +557,15 @@ class OrdersController extends Controller
 
             if ($userInfoRes['status'] === 201 || (array_key_exists('rows', $userInfoRes) && count($userInfoRes['rows']) > 0)) {
                 $companyCode = $userInfoRes['rows'][0]['wholesaler'];
+
+                // "Result": "no such salesman found",
                 $salesPersonsRes = FoxproApi::call([
                     'action' => 'GETSLMNINFO',
                     'params' => ['',$companyCode],
                     'keep_session' => false,
                 ]);
 
-                if ($salesPersonsRes['status'] === 201 || (array_key_exists('rows', $salesPersonsRes) && count($salesPersonsRes['rows']) > 0)) {
+                if (array_key_exists('rows', $salesPersonsRes) && count($salesPersonsRes['rows']) > 0) {
                     $salesPersonsList = $salesPersonsRes['rows'];
                 }
             }

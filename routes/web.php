@@ -38,6 +38,7 @@ Route::get('/express-program/composition-images', [ExpressProgramController::cla
 Route::get('/express-program/{product}', [ExpressProgramController::class, 'productConfigurator'])->name('expressProgram.product');
 Route::get('/express-program/shopping-cart/products', [ExpressProgramController::class, 'getShoppingCart']);
 Route::post('/express-program/shopping-cart/update', [ExpressProgramController::class, 'updateShoppingCart']);
+Route::post('/express-program/shopping-cart/generate-pdf', [ExpressProgramController::class, 'generatePdf']);
 
 Route::middleware(['auth','auth.session'])->group(function () {
 
