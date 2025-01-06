@@ -1,5 +1,5 @@
 .inputAndRemoveButtonWrapper {
-    display: flex;    
+    display: flex;
     justify-content:space-evenly;
 }
 
@@ -7,17 +7,17 @@
 
 }
 
-.removeButton {    
+.removeButton {
     box-shadow: 0px 0px 1px 1px rgba(0, 0, 0, 0.214);
     padding: 0.25rem 1.5rem;
     border-radius: 2px;
-    font-size: 0.8rem;    
+    font-size: 0.8rem;
     color: #000000c2;
 
 }
 
 .removeButton:hover {
-    box-shadow: 0px 0px 3px 0px #d1ab68a0;    
+    box-shadow: 0px 0px 3px 0px #d1ab68a0;
 }
 
 .allFiltersWrapper .resetFiltersAndCloseFilterButtonsWrapper button {
@@ -30,8 +30,8 @@
 
 .allFiltersWrapper .resetFiltersAndCloseFilterButtonsWrapper button:hover {
     background-color: white;
-    color: #d1aa68;   
-    font-weight: 600;     
+    color: #d1aa68;
+    font-weight: 600;
 }
 
 
@@ -61,7 +61,7 @@
     cursor: auto;
 }
 
-.inputQty:focus-visible {    
+.inputQty:focus-visible {
     outline-width: 0;
 }
 
@@ -79,20 +79,20 @@
     box-shadow: 0px 0px 1px 1px rgba(0, 0, 0, 0.214);
 }
 
-.increment:hover,
-.decrement:hover {
-    box-shadow: 0px 0px 3px 0px #d1ab68a0;   
+.increment:not(:disabled):hover,
+.decrement:not(:disabled):hover {
+    box-shadow: 0px 0px 3px 0px #d1ab68a0;
 }
 
-/* .removeButton {    
+/* .removeButton {
     box-shadow: 0px 0px 1px 1px rgba(0, 0, 0, 0.214);
     padding: 0.25rem 1.5rem;
     border-radius: 2px;
-    font-size: 0.8rem;    
+    font-size: 0.8rem;
     color: #000000c2;
 
 }
 
 .removeButton:hover {
-    box-shadow: 0px 0px 3px 0px #d1ab68a0;    
+    box-shadow: 0px 0px 3px 0px #d1ab68a0;
 } */

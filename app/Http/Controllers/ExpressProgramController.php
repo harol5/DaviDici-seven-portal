@@ -183,13 +183,43 @@ class ExpressProgramController extends Controller
     }
 
     public function generatePdf(Request $request) {
-        $data = $request->all();
-        $pdf = Pdf::loadView('pdf.shopping-cart', ['compositions' => $data]);
+        $shoppingCartCompositions = $request->all();
+        $shoppingCartGrandTotal = 0;
+
+        foreach ($shoppingCartCompositions as &$composition) {
+            $otherProductsValidItems = [];
+            foreach ($composition['otherProducts'] as $item => $products) {
+                if (count($products) > 0) $otherProductsValidItems[] = $products;
+            }
+            $composition['otherProductsValidItems'] = $otherProductsValidItems;
+
+            // create actual description.
+            $size = $composition['info']['size'] ?? '';
+            $sinkPosition = $composition['info']['sinkPosition'] ?? '';
+            $sinkDescription = $composition['washbasin'] ? 'SINK' . ' ' . $composition['washbasin']['productObj']['model']  : 'NOT SINK';
+            $composition['description'] =  $composition['info']['model'] . " " . $size . " " . $sinkPosition . " " . $sinkDescription;
+
+            // Calculate Grand Total.
+            $shoppingCartGrandTotal += $composition['grandTotal'];
+        }
+        unset($composition);
+
+        $currencyFormatter = new \NumberFormatter('en_US', \NumberFormatter::CURRENCY);
+        $formattedGrandTotal = $currencyFormatter->formatCurrency($shoppingCartGrandTotal, 'USD');
+
+        $pdf = Pdf::loadView(
+            'pdf.shopping-cart',
+            [
+                'compositions' => $shoppingCartCompositions,
+                'grandTotal' => $formattedGrandTotal,
+                'currencyFormatter' => $currencyFormatter
+            ]
+        );
+
         return response()->streamDownload(
             fn () => print($pdf->output()),
             'shopping_cart.pdf',
             ['Content-Type' => 'application/pdf']
         );
     }
-    // replace image (if image with same name is uploaded);
 }

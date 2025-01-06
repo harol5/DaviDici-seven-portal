@@ -80,13 +80,20 @@
     }
 }
 
+@media (max-width: 805px) {
+    .grandTotalAndPlaceOrderButtonWrapper {
+        row-gap: 0;
+    }
+
+    .grandTotalAndPlaceOrderButtonWrapper .granTotalWrapper {
+        flex-basis: 100%;
+        text-align: center;
+    }
+}
+
 @media (max-width: 700px) {
     .shoppingCartContent {
         flex-direction: column;
-    }
-
-    .grandTotalAndPlaceOrderButtonWrapper {
-        row-gap: 2em;
     }
 
     .grandTotalAndPlaceOrderButtonWrapper .placeOrderButton {
@@ -114,6 +121,10 @@
 
     .shoppingCartModal {
         padding: 2.5rem 1rem;
+    }
+
+    .grandTotalAndPlaceOrderButtonWrapper .placeOrderButton {
+        margin: 0.5em;
     }
 }
 
