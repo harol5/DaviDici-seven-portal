@@ -201,7 +201,7 @@ class ExpressProgramController extends Controller
 
             // get actual image.
             $displayImage = '';
-            if (count($composition['images']) > 0) {
+            if ( isset($composition['images']) && count($composition['images']) > 0) {
                 $displayImage = 'storage/' . $composition['images'][0];
             }else {
                 $displayImage = ltrim(parse_url($composition['info']['compositionImage'], PHP_URL_PATH), '/');
