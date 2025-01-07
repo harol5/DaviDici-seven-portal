@@ -249,7 +249,14 @@ function ShoppingCart({
             );
 
             const pdfBlob = new Blob([response.data], { type: "application/pdf" });
-            const pdfURL = URL.createObjectURL(pdfBlob);
+
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(pdfBlob);
+            link.download = `shopping_cart.pdf`;
+            link.click();
+
+
+            /*const pdfURL = URL.createObjectURL(pdfBlob);*/
 
             // Open the PDF in a new tab
             /*const newWindow = window.open();
@@ -259,10 +266,10 @@ function ShoppingCart({
                 );
             }*/
 
-            const printWindow = window.open(pdfURL);
+            /*const printWindow = window.open(pdfURL);
             if (printWindow) {
                 printWindow.onload = () => printWindow.print();
-            }
+            }*/
         } catch (error) {
             console.error("Error while generating PDF: ", error);
         }
