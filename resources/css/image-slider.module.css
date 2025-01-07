@@ -77,11 +77,19 @@
 
 @media print {
     .imageSlider {
-        width: 100%;
+        width: 70%;
+
+        .indicatorsContainer {
+            display: none;
+        }
+
+        .arrowsContainer {
+            display: none;
+        }
     }
 
     .imageSlider img:nth-child(1) {
-        margin-bottom: 200px;
+        margin-bottom: 10px;
     }
 
     .expandImageIcon {

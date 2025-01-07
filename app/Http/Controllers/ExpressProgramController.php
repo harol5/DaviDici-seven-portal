@@ -199,6 +199,15 @@ class ExpressProgramController extends Controller
             $sinkDescription = $composition['washbasin'] ? 'SINK' . ' ' . $composition['washbasin']['productObj']['model']  : 'NOT SINK';
             $composition['description'] =  $composition['info']['model'] . " " . $size . " " . $sinkPosition . " " . $sinkDescription;
 
+            // get actual image.
+            $displayImage = '';
+            if (count($composition['images']) > 0) {
+                $displayImage = 'storage/' . $composition['images'][0];
+            }else {
+                $displayImage = ltrim(parse_url($composition['info']['compositionImage'], PHP_URL_PATH), '/');
+            }
+            $composition['displayImage'] = $displayImage;
+
             // Calculate Grand Total.
             $shoppingCartGrandTotal += $composition['grandTotal'];
         }

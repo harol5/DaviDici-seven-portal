@@ -10,7 +10,7 @@
 
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 180px 20px 20px 20px;
             padding: 0;
             font-size: 11px;
         }
@@ -20,12 +20,16 @@
         }
 
         .main-header {
-            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: calc(100% - 40px);
+            padding: 20px;
             border-bottom: 1px solid #000;
         }
 
         .main-header .logo-wrapper img {
-            width: 30%;
+            width: 25%;
         }
 
         .main-header .contact-info-wrapper {
@@ -55,14 +59,20 @@
         }
 
         .content .composition-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
             page-break-inside: avoid; /* Prevent section from splitting across pages */
         }
 
-        .content .composition-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+        .content .composition-table .image-cell {
+            text-align: center;
         }
+
+        .content .composition-table .image-cell img {
+            width: 50%;
+        }
+
         .content .composition-table, .content th, .content td {
             border: 1px solid #000;
         }
@@ -123,6 +133,11 @@
                 <thead>
                 <tr class="title-row">
                     <th colspan="6">{{ $composition['description'] }}</th>
+                </tr>
+                <tr>
+                    <th colspan="6" class="image-cell">
+                        <img src="{{ public_path($composition['displayImage']) }}" alt="composition image">
+                    </th>
                 </tr>
                 <tr>
                     <th>Product</th>
