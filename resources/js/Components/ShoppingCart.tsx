@@ -9,6 +9,7 @@ import classes from "../../css/shoppingCart.module.css";
 import { router } from "@inertiajs/react";
 import USDollar from "../utils/currentFormatter";
 import { getShoppingCartCompositions } from "../utils/shoppingCartUtils";
+import LoadingSpinner from "./LoadingSpinner.tsx";
 
 
 interface ShoppingCartProps {
@@ -23,6 +24,8 @@ function ShoppingCart({
     const [crrShoppingCartCompositions, setShoppingCartCompositions] = useState<
         ShoppingCartComposition[]
     >([]);
+
+    const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
     const getCompositionAndProduct = (
         composition: ShoppingCartComposition,
@@ -242,6 +245,7 @@ function ShoppingCart({
 
     const handlePrint = async () => {
         try {
+            setIsGeneratingPdf(true);
             const response = await axios.post(
                 "/express-program/shopping-cart/generate-pdf",
                 crrShoppingCartCompositions,
@@ -249,28 +253,17 @@ function ShoppingCart({
             );
 
             const pdfBlob = new Blob([response.data], { type: "application/pdf" });
+            const pdfURL = URL.createObjectURL(pdfBlob);
 
-            const link = document.createElement('a');
-            link.href = window.URL.createObjectURL(pdfBlob);
-            link.download = `shopping_cart.pdf`;
-            link.click();
-
-
-            /*const pdfURL = URL.createObjectURL(pdfBlob);*/
-
+            setIsGeneratingPdf(false);
             // Open the PDF in a new tab
-            /*const newWindow = window.open();
-            if (newWindow) {
-                newWindow.document.write(
-                    `<iframe src="${pdfURL}" frameborder="0" style="width:100%; height:100%;"></iframe>`
-                );
-            }*/
-
+            window.open(pdfURL);
             /*const printWindow = window.open(pdfURL);
             if (printWindow) {
                 printWindow.onload = () => printWindow.print();
             }*/
         } catch (error) {
+            setIsGeneratingPdf(false);
             console.error("Error while generating PDF: ", error);
         }
     };
@@ -290,6 +283,13 @@ function ShoppingCart({
 
     return (
         <section className={classes.shoppingCart}>
+            {isGeneratingPdf && (
+                <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-start z-10">
+                    <div className="relative bg-white rounded-lg shadow-lg mt-[10%] w-[300px] h-[200px]">
+                        <LoadingSpinner message={"Generating PDF... This may take a few seconds."} />
+                    </div>
+                </div>
+            )}
             <section className={classes.grandTotalAndPlaceOrderButtonWrapper}>
                 <span className={classes.granTotalWrapper}>
                     <h1>GRAND TOTAL:</h1>

@@ -58,19 +58,25 @@
             vertical-align: middle;
         }
 
+        .content .composition-header {
+            text-align: center;
+        }
+
+        .content .composition-header h1 {
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .content .composition-header img {
+            width: 50%;
+            margin-bottom: 10px;
+        }
+
         .content .composition-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
             page-break-inside: avoid; /* Prevent section from splitting across pages */
-        }
-
-        .content .composition-table .image-cell {
-            text-align: center;
-        }
-
-        .content .composition-table .image-cell img {
-            width: 50%;
         }
 
         .content .composition-table, .content th, .content td {
@@ -129,16 +135,12 @@
     </section>
     <section class="content">
         @foreach ($compositions as $composition)
+            <section class="composition-header">
+                <h1>{{ $composition['description'] }}</h1>
+                <img src="{{ public_path($composition['displayImage']) }}" alt="composition image">
+            </section>
             <table class="composition-table">
                 <thead>
-                <tr class="title-row">
-                    <th colspan="6">{{ $composition['description'] }}</th>
-                </tr>
-                <tr>
-                    <th colspan="6" class="image-cell">
-                        <img src="{{ public_path($composition['displayImage']) }}" alt="composition image">
-                    </th>
-                </tr>
                 <tr>
                     <th>Product</th>
                     <th>Label</th>
