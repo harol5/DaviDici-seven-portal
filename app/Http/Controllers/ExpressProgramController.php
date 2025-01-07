@@ -207,7 +207,7 @@ class ExpressProgramController extends Controller
                 $displayImage = ltrim(parse_url($composition['info']['compositionImage'], PHP_URL_PATH), '/');
             }
             /*$composition['displayImage'] = $displayImage;*/
-            $composition['displayImage'] = 'images/express_program/shopping-cart-test.jpeg';
+            $composition['displayImage'] = 'images/express-program/shopping-cart-test.jpeg';
 
             // Calculate Grand Total.
             $shoppingCartGrandTotal += $composition['grandTotal'];
