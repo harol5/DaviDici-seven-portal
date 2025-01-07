@@ -58,28 +58,29 @@
             vertical-align: middle;
         }
 
-        .content .composition-header {
+        .content .composition-content .composition-header {
             text-align: center;
+            page-break-inside: avoid; /* Prevent section from splitting across pages */
         }
 
-        .content .composition-header h1 {
+        .content .composition-content .composition-header h1 {
             font-size: 12px;
             margin-bottom: 10px;
         }
 
-        .content .composition-header img {
+        .content .composition-content .composition-header img {
             width: 50%;
             margin-bottom: 10px;
         }
 
-        .content .composition-table {
+        .content .composition-content .composition-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
             page-break-inside: avoid; /* Prevent section from splitting across pages */
         }
 
-        .content .composition-table, .content th, .content td {
+        .content .composition-content .composition-table, .content th, .content td {
             border: 1px solid #000;
         }
         .content th, .content td {
@@ -135,74 +136,76 @@
     </section>
     <section class="content">
         @foreach ($compositions as $composition)
-            <section class="composition-header">
-                <h1>{{ $composition['description'] }}</h1>
-                <img src="{{ public_path($composition['displayImage']) }}" alt="composition image">
+            <section class="composition-content">
+                <section class="composition-header">
+                    <h1>{{ $composition['description'] }}</h1>
+                    <img src="{{ public_path($composition['displayImage']) }}" alt="composition image">
+                </section>
+                <table class="composition-table">
+                    <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Label</th>
+                        <th>Sku</th>
+                        <th>Unit Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @if( isset($composition['vanity']) && $composition['vanity'] )
+                        <tr>
+                            <td>{{ $composition['vanity']['productObj']['descw'] }}</td>
+                            <td>{{ $composition['label'] }}</td>
+                            <td>{{ $composition['vanity']['productObj']['uscode'] }}</td>
+                            <td>${{ $composition['vanity']['unitPrice'] }}</td>
+                            <td>{{ $composition['vanity']['quantity'] }}</td>
+                            <td>${{ $composition['vanity']['total'] }}</td>
+                        </tr>
+                    @endif
+                    @if( isset($composition['washbasin']) && $composition['washbasin'] )
+                        <tr>
+                            <td>{{ $composition['washbasin']['productObj']['descw'] }}</td>
+                            <td>{{ $composition['label'] }}</td>
+                            <td>{{ $composition['washbasin']['productObj']['uscode'] }}</td>
+                            <td>${{ $composition['washbasin']['unitPrice'] }}</td>
+                            <td>{{ $composition['washbasin']['quantity'] }}</td>
+                            <td>${{ $composition['washbasin']['total'] }}</td>
+                        </tr>
+                    @endif
+                    @if( count($composition['sideUnits']) > 0 )
+                        @foreach ($composition['sideUnits'] as $sideUnit)
+                            <tr>
+                                <td>{{ $sideUnit['productObj']['descw'] }}</td>
+                                <td>{{ $composition['label'] }}</td>
+                                <td>{{ $sideUnit['productObj']['uscode'] }}</td>
+                                <td>${{ $sideUnit['unitPrice'] }}</td>
+                                <td>{{ $sideUnit['quantity'] }}</td>
+                                <td>${{ $sideUnit['total'] }}</td>
+                            </tr>
+                        @endforeach
+                    @endif
+                    @foreach ($composition['otherProductsValidItems'] as $otherProducts)
+                        @foreach ($otherProducts as $otherProduct)
+                            <tr>
+                                <td>{{ $otherProduct['productObj']['descw'] }}</td>
+                                <td>{{ $composition['label'] }}</td>
+                                <td>{{ $otherProduct['productObj']['uscode'] }}</td>
+                                <td>${{ $otherProduct['unitPrice'] }}</td>
+                                <td>{{ $otherProduct['quantity'] }}</td>
+                                <td>${{ $otherProduct['total'] }}</td>
+                            </tr>
+                        @endforeach
+                    @endforeach
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <td colspan="5">Total</td>
+                        <td>{{ $currencyFormatter->formatCurrency($composition['grandTotal'], 'USD') }}</td>
+                    </tr>
+                    </tfoot>
+                </table>
             </section>
-            <table class="composition-table">
-                <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Label</th>
-                    <th>Sku</th>
-                    <th>Unit Price</th>
-                    <th>Quantity</th>
-                    <th>Total</th>
-                </tr>
-                </thead>
-                <tbody>
-                @if( isset($composition['vanity']) && $composition['vanity'] )
-                    <tr>
-                        <td>{{ $composition['vanity']['productObj']['descw'] }}</td>
-                        <td>{{ $composition['label'] }}</td>
-                        <td>{{ $composition['vanity']['productObj']['uscode'] }}</td>
-                        <td>${{ $composition['vanity']['unitPrice'] }}</td>
-                        <td>{{ $composition['vanity']['quantity'] }}</td>
-                        <td>${{ $composition['vanity']['total'] }}</td>
-                    </tr>
-                @endif
-                @if( isset($composition['washbasin']) && $composition['washbasin'] )
-                    <tr>
-                        <td>{{ $composition['washbasin']['productObj']['descw'] }}</td>
-                        <td>{{ $composition['label'] }}</td>
-                        <td>{{ $composition['washbasin']['productObj']['uscode'] }}</td>
-                        <td>${{ $composition['washbasin']['unitPrice'] }}</td>
-                        <td>{{ $composition['washbasin']['quantity'] }}</td>
-                        <td>${{ $composition['washbasin']['total'] }}</td>
-                    </tr>
-                @endif
-                @if( count($composition['sideUnits']) > 0 )
-                    @foreach ($composition['sideUnits'] as $sideUnit)
-                        <tr>
-                            <td>{{ $sideUnit['productObj']['descw'] }}</td>
-                            <td>{{ $composition['label'] }}</td>
-                            <td>{{ $sideUnit['productObj']['uscode'] }}</td>
-                            <td>${{ $sideUnit['unitPrice'] }}</td>
-                            <td>{{ $sideUnit['quantity'] }}</td>
-                            <td>${{ $sideUnit['total'] }}</td>
-                        </tr>
-                    @endforeach
-                @endif
-                @foreach ($composition['otherProductsValidItems'] as $otherProducts)
-                    @foreach ($otherProducts as $otherProduct)
-                        <tr>
-                            <td>{{ $otherProduct['productObj']['descw'] }}</td>
-                            <td>{{ $composition['label'] }}</td>
-                            <td>{{ $otherProduct['productObj']['uscode'] }}</td>
-                            <td>${{ $otherProduct['unitPrice'] }}</td>
-                            <td>{{ $otherProduct['quantity'] }}</td>
-                            <td>${{ $otherProduct['total'] }}</td>
-                        </tr>
-                    @endforeach
-                @endforeach
-                </tbody>
-                <tfoot>
-                <tr>
-                    <td colspan="5">Total</td>
-                    <td>{{ $currencyFormatter->formatCurrency($composition['grandTotal'], 'USD') }}</td>
-                </tr>
-                </tfoot>
-            </table>
         @endforeach
         <section class="grand-total">
             <h2>Grand Total:</h2>
