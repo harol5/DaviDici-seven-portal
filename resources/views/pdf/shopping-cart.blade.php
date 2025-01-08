@@ -145,7 +145,7 @@
                     <thead>
                     <tr>
                         <th>Product</th>
-                        <th>Label</th>
+                        <th>Configuration Name</th>
                         <th>Sku</th>
                         <th>Unit Price</th>
                         <th>Quantity</th>

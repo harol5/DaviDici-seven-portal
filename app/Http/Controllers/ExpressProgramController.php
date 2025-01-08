@@ -4,18 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Spatie\Browsershot\Browsershot;
+
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Imagick\Driver;
-use Intervention\Image\Image;
 use Inertia\Inertia;
 use App\FoxproApi\FoxproApi;
 use App\Models\ModelCompositionImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -211,20 +207,9 @@ class ExpressProgramController extends Controller
             }else {
                 $displayImage = ltrim(parse_url($composition['info']['compositionImage'], PHP_URL_PATH), '/');
             }
-            /*$composition['displayImage'] = $displayImage;*/
-            /*$composition['displayImage'] = 'images/express-program/shopping-cart-test.jpeg';*/
+            $composition['displayImage'] = $manager->read(public_path($displayImage))->toJpeg(75)->toDataUri();
 
-            /*$imagePath = public_path('images/express-program/ELORA/24.webp');*/
-            $imagePath = public_path($displayImage);
-            info($imagePath);
-            $encoded = $manager->read($imagePath)->toJpeg(75);
-            info("image encoded to jpeg");
-            $base64 = $encoded->toDataUri();
-            $composition['displayImage'] = $base64;
-
-
-
-                // Calculate Grand Total.
+            // Calculate Grand Total.
             $shoppingCartGrandTotal += $composition['grandTotal'];
         }
         unset($composition);
