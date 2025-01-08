@@ -214,7 +214,8 @@ class ExpressProgramController extends Controller
             /*$composition['displayImage'] = $displayImage;*/
             /*$composition['displayImage'] = 'images/express-program/shopping-cart-test.jpeg';*/
 
-            $imagePath = public_path('images/express-program/ELORA/24.webp');
+            /*$imagePath = public_path('images/express-program/ELORA/24.webp');*/
+            $imagePath = public_path($displayImage);
             info($imagePath);
             $encoded = $manager->read($imagePath)->toJpeg(75);
             info("image encoded to jpeg");
