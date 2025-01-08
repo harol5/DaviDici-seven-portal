@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Spatie\Browsershot\Browsershot;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Imagick\Driver;
+use Intervention\Image\Image;
 use Inertia\Inertia;
 use App\FoxproApi\FoxproApi;
 use App\Models\ModelCompositionImage;
@@ -186,6 +189,7 @@ class ExpressProgramController extends Controller
     public function generatePdf(Request $request) {
         $shoppingCartCompositions = $request->all();
         $shoppingCartGrandTotal = 0;
+        $manager = new ImageManager(new Driver());
 
         foreach ($shoppingCartCompositions as &$composition) {
             $otherProductsValidItems = [];
@@ -208,9 +212,18 @@ class ExpressProgramController extends Controller
                 $displayImage = ltrim(parse_url($composition['info']['compositionImage'], PHP_URL_PATH), '/');
             }
             /*$composition['displayImage'] = $displayImage;*/
-            $composition['displayImage'] = 'images/express-program/shopping-cart-test.jpeg';
+            /*$composition['displayImage'] = 'images/express-program/shopping-cart-test.jpeg';*/
 
-            // Calculate Grand Total.
+            $imagePath = public_path('images/express-program/ELORA/24.webp');
+            info($imagePath);
+            $encoded = $manager->read($imagePath)->toJpeg(75);
+            info("image encoded to jpeg");
+            $base64 = $encoded->toDataUri();
+            $composition['displayImage'] = $base64;
+
+
+
+                // Calculate Grand Total.
             $shoppingCartGrandTotal += $composition['grandTotal'];
         }
         unset($composition);

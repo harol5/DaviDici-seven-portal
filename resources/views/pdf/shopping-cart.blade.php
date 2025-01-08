@@ -139,7 +139,7 @@
             <section class="composition-content">
                 <section class="composition-header">
                     <h1>{{ $composition['description'] }}</h1>
-                    <img src="{{ public_path($composition['displayImage']) }}" alt="composition image">
+                    <img src="{{ $composition['displayImage'] }}" alt="composition image">
                 </section>
                 <table class="composition-table">
                     <thead>
