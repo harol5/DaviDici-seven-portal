@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Spatie\Browsershot\Browsershot;
 use Inertia\Inertia;
 use App\FoxproApi\FoxproApi;
 use App\Models\ModelCompositionImage;
@@ -206,8 +207,8 @@ class ExpressProgramController extends Controller
             }else {
                 $displayImage = ltrim(parse_url($composition['info']['compositionImage'], PHP_URL_PATH), '/');
             }
-            /*$composition['displayImage'] = $displayImage;*/
-            $composition['displayImage'] = 'images/express-program/shopping-cart-test.jpeg';
+            $composition['displayImage'] = $displayImage;
+            /*$composition['displayImage'] = 'images/express-program/shopping-cart-test.jpeg';*/
 
             // Calculate Grand Total.
             $shoppingCartGrandTotal += $composition['grandTotal'];
@@ -217,7 +218,30 @@ class ExpressProgramController extends Controller
         $currencyFormatter = new \NumberFormatter('en_US', \NumberFormatter::CURRENCY);
         $formattedGrandTotal = $currencyFormatter->formatCurrency($shoppingCartGrandTotal, 'USD');
 
-        $pdf = Pdf::loadView(
+        // ------------------------------------------------------------------------------
+
+        $html = view('pdf.shopping-cart', [
+            'compositions' => $shoppingCartCompositions,
+            'grandTotal' => $formattedGrandTotal,
+            'currencyFormatter' => $currencyFormatter
+        ])->render();
+
+        /*$pdfPath = storage_path('app/public/pdf/shopping-cart.pdf');*/
+
+        /*Browsershot::html($html)->format('A4')->showBackground()->save($pdfPath);*/
+        $pdf = Browsershot::html($html)
+            ->setNodeBinary(env('NODE_PATH'))
+            ->setNpmBinary(env('NPM_PATH'))
+            ->format('A4')
+            ->pdf();
+
+        return response()->streamDownload(
+            fn () => print($pdf),
+            'shopping_cart.pdf',
+            ['Content-Type' => 'application/pdf']
+        );
+
+        /*$pdf = Pdf::loadView(
             'pdf.shopping-cart',
             [
                 'compositions' => $shoppingCartCompositions,
@@ -230,6 +254,6 @@ class ExpressProgramController extends Controller
             fn () => print($pdf->output()),
             'shopping_cart.pdf',
             ['Content-Type' => 'application/pdf']
-        );
+        );*/
     }
 }
