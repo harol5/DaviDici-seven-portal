@@ -36,6 +36,7 @@ import MultiItemSelector from "./MultiItemSelector.tsx";
 import {ExtraItems} from "../../Models/ExtraItemsHookModels.ts";
 import useImagesComposition from "../../Hooks/useImagesComposition.tsx";
 import ImageSlider from "./ImageSlider.tsx";
+import {handlePrint} from "../../utils/expressProgramUtils.ts";
 
 
 interface MargiConfiguratorProps {
@@ -1405,7 +1406,23 @@ function MargiConfigurator({
                     <div className={classes.buttonsWrapper}>
                         <button
                             className={classes.resetButton}
-                            onClick={() => print()}
+                            /*onClick={() => print()}*/
+                            onClick={() => {
+                                if (!isValidConfiguration()) return;
+                                handlePrint(
+                                    getConfigTitle(composition,currentConfiguration),
+                                    currentConfiguration.label,
+                                    imageUrls,
+                                    composition.compositionImage,
+                                    currentConfiguration.currentProducts.concat(
+                                        currentMirrorsConfiguration.currentProducts,
+                                        getExtraItemsCurrentProductsAsArray()
+                                    ),
+                                    currentConfiguration.isDoubleSink,
+                                    false,
+                                    grandTotal,
+                                )}
+                            }
                         >
                             PRINT
                         </button>

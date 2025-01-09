@@ -34,6 +34,7 @@ import {generateShoppingCartCompositionProductObjs} from "../../utils/shoppingCa
 import useExtraProductsExpressProgram from "../../Hooks/useExtraProductsExpressProgram.tsx";
 import MultiItemSelector from "./MultiItemSelector.tsx";
 import {ExtraItems} from "../../Models/ExtraItemsHookModels.ts";
+import {handlePrint} from "../../utils/expressProgramUtils.ts";
 
 
 interface EloraConfiguratorProps {
@@ -1120,6 +1121,14 @@ function EloraConfigurator({
     };
 
     const isValidConfiguration = () => {
+        if (grandTotal === 0) {
+            alert(
+                "Looks like you forgot to select all available VANITY OPTIONS. Please select the missing option(s). "
+            );
+            scrollToView("vanity");
+            return false;
+        };
+
         if (!currentConfiguration.label) {
             alert("Looks like COMPOSITION NAME is missing!!");
             setIsMissingLabel(true);
@@ -1326,7 +1335,22 @@ function EloraConfigurator({
                     <div className={classes.buttonsWrapper}>
                         <button
                             className={classes.resetButton}
-                            onClick={() => print()}
+                            onClick={() => {
+                                if (!isValidConfiguration()) return;
+                                handlePrint(
+                                    getConfigTitle(composition,currentConfiguration),
+                                    currentConfiguration.label,
+                                    imageUrls,
+                                    composition.compositionImage,
+                                    currentConfiguration.currentProducts.concat(
+                                        currentMirrorsConfiguration.currentProducts,
+                                        getExtraItemsCurrentProductsAsArray()
+                                    ),
+                                    currentConfiguration.isDoubleSink,
+                                    false,
+                                    grandTotal,
+                                )}
+                            }
                         >
                             PRINT
                         </button>

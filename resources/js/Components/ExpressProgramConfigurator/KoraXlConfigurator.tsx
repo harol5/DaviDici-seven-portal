@@ -26,6 +26,7 @@ import {generateShoppingCartCompositionProductObjs} from "../../utils/shoppingCa
 import useExtraProductsExpressProgram from "../../Hooks/useExtraProductsExpressProgram.tsx";
 import MultiItemSelector from "./MultiItemSelector.tsx";
 import {ExtraItems} from "../../Models/ExtraItemsHookModels.ts";
+import {handlePrint} from "../../utils/expressProgramUtils.ts";
 
 interface KoraXlConfiguratorProps {
     composition: Composition;
@@ -731,7 +732,22 @@ function KoraXlConfigurator({
                     <div className={classes.buttonsWrapper}>
                         <button
                             className={classes.resetButton}
-                            onClick={() => print()}
+                            onClick={() => {
+                                if (!isValidConfiguration()) return;
+                                handlePrint(
+                                    getConfigTitle(composition,currentConfiguration),
+                                    currentConfiguration.label,
+                                    imageUrls,
+                                    composition.compositionImage,
+                                    currentConfiguration.currentProducts.concat(
+                                        currentMirrorsConfiguration.currentProducts,
+                                        getExtraItemsCurrentProductsAsArray()
+                                    ),
+                                    currentConfiguration.isDoubleSink,
+                                    false,
+                                    grandTotal,
+                                )}
+                            }
                         >
                             PRINT
                         </button>

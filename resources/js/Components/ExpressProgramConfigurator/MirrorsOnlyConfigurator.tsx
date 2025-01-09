@@ -3,7 +3,7 @@ import classes from "../../../css/product-configurator.module.css";
 import { useMemo, useReducer, useState } from "react";
 import type { OtherItems, ShoppingCartComposition, ShoppingCartCompositionProduct } from "../../Models/ExpressProgramModels";
 import ConfigurationName from "./ConfigurationName";
-import { isAlphanumericWithSpaces, scrollToView } from "../../utils/helperFunc";
+import {isAlphanumericWithSpaces, scrollToView} from "../../utils/helperFunc";
 import { ProductInventory } from "../../Models/Product";
 import { Model } from "../../Models/ModelConfigTypes";
 import useMirrorOptions from "../../Hooks/useMirrorOptions";
@@ -15,6 +15,7 @@ import useImagesComposition from "../../Hooks/useImagesComposition";
 import ImageSlider from "./ImageSlider";
 import { router } from "@inertiajs/react";
 import { generateShoppingCartCompositionProductObjs } from "../../utils/shoppingCartUtils";
+import {handlePrint} from "../../utils/expressProgramUtils.ts";
 
 type CurrentConfiguration = {
     label: string;
@@ -256,7 +257,21 @@ function MirrorsOnlyConfigurator({
                     <div className={classes.buttonsWrapper}>
                         <button
                             className={classes.resetButton}
-                            onClick={() => print()}
+                            onClick={() => {
+                                if (!isValidConfiguration()) return;
+                                handlePrint(
+                                    composition.name,
+                                    currentConfiguration.label,
+                                    imageUrls,
+                                    composition.compositionImage,
+                                    currentConfiguration.currentProducts.concat(
+                                        currentMirrorsConfiguration.currentProducts,
+                                    ),
+                                    currentConfiguration.isDoubleSink,
+                                    false,
+                                    grandTotal,
+                                )}
+                            }
                         >
                             PRINT
                         </button>

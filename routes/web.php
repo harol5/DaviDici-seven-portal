@@ -36,6 +36,7 @@ Route::get('/express-program/products', [ExpressProgramController::class, 'getEx
 Route::post('/express-program/set-product', [ExpressProgramController::class, 'setProduct']);
 Route::get('/express-program/composition-images', [ExpressProgramController::class, 'getModelCompositionImages']);
 Route::get('/express-program/{product}', [ExpressProgramController::class, 'productConfigurator'])->name('expressProgram.product');
+Route::post('/express-program/generate-current-config-pdf', [ExpressProgramController::class, 'generateCurrentConfigPdf']);
 Route::get('/express-program/shopping-cart/products', [ExpressProgramController::class, 'getShoppingCart']);
 Route::post('/express-program/shopping-cart/update', [ExpressProgramController::class, 'updateShoppingCart']);
 Route::post('/express-program/shopping-cart/generate-pdf', [ExpressProgramController::class, 'generatePdf']);

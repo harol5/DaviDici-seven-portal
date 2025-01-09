@@ -26,6 +26,7 @@ import {generateShoppingCartCompositionProductObjs} from "../../utils/shoppingCa
 import useExtraProductsExpressProgram from "../../Hooks/useExtraProductsExpressProgram.tsx";
 import MultiItemSelector from "./MultiItemSelector.tsx";
 import {ExtraItems} from "../../Models/ExtraItemsHookModels.ts";
+import {handlePrint} from "../../utils/expressProgramUtils.ts";
 
 interface KoraConfiguratorProps {
     composition: Composition;
@@ -690,6 +691,75 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
         onAddToCart(shoppingCartObj);
     };
 
+    /*const handlePrintAA = async () => {
+        if (!isValidConfiguration()) return;
+
+        console.log(getConfigTitle(composition,currentConfiguration));
+        console.log(currentConfiguration.label)
+        console.log(imageUrls);
+        console.log(composition.compositionImage);
+        console.log(grandTotal);
+
+        const allCurrentProducts =
+            currentConfiguration.currentProducts.concat(
+                currentMirrorsConfiguration.currentProducts,
+                getExtraItemsCurrentProductsAsArray()
+            )
+
+
+        const products: any[] = []
+        allCurrentProducts.forEach(product => {
+            const quantity =
+                product.item === "VANITY" && currentConfiguration.isDoubleSink ||
+                product.item === "SIDE UNIT" &&  ? 1 : 2
+
+            products.push(
+                {
+                    description: product.descw,
+                    compositionName: currentConfiguration.label,
+                    sku: product.uscode,
+                    unitPrice: product.sprice ? product.sprice : product.price,
+                    quantity,
+                }
+            );
+        })
+
+        const currentConfigurationObj = {
+            description: getConfigTitle(composition,currentConfiguration),
+            compositionName: currentConfiguration.label,
+            image: imageUrls.length > 0 ? `storage/${imageUrls[0]}` : new URL(composition.compositionImage).pathname,
+            products,
+            isDoubleSink: currentConfiguration.isDoubleSink,
+            isDoubleSideUnit: false,
+            grandTotal: grandTotal,
+        }
+        console.log(currentConfigurationObj);
+
+        try {
+            /!*setIsGeneratingPdf(true);*!/
+            const response = await axios.post(
+                "/express-program/generate-current-config-pdf",
+                currentConfigurationObj,
+                { responseType: "blob" } // Ensure response is properly handled as binary
+            );
+
+            const pdfBlob = new Blob([response.data], { type: "application/pdf" });
+            const pdfURL = URL.createObjectURL(pdfBlob);
+
+            /!*setIsGeneratingPdf(false);*!/
+
+            // Open the PDF in a new tab
+            window.open(pdfURL);
+            /!*const printWindow = window.open(pdfURL);
+            if (printWindow) {
+                printWindow.onload = () => printWindow.print();
+            }*!/
+        } catch (error) {
+            /!*setIsGeneratingPdf(false);*!/
+            console.error("Error while generating PDF: ", error);
+        }
+    }*/
+
     return (
         <div className={classes.compositionConfiguratorWrapper}>
             <section className={classes.leftSideConfiguratorWrapper}>
@@ -708,7 +778,22 @@ function KoraConfigurator({ composition, onAddToCart }: KoraConfiguratorProps) {
                     <div className={classes.buttonsWrapper}>
                         <button
                             className={classes.resetButton}
-                            onClick={() => print()}
+                            onClick={() => {
+                                if (!isValidConfiguration()) return;
+                                handlePrint(
+                                    getConfigTitle(composition, currentConfiguration),
+                                    currentConfiguration.label,
+                                    imageUrls,
+                                    composition.compositionImage,
+                                    currentConfiguration.currentProducts.concat(
+                                        currentMirrorsConfiguration.currentProducts,
+                                        getExtraItemsCurrentProductsAsArray()
+                                    ),
+                                    currentConfiguration.isDoubleSink,
+                                    false,
+                                    grandTotal,
+                                )
+                            }}
                         >
                             PRINT
                         </button>

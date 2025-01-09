@@ -512,7 +512,7 @@ class OrdersController extends Controller
         }
     }
 
-    // Create a order number for new order.
+    // Create an order number for new order.
     public function createOrderNumber(Request $request)
     {
         $username = auth()->user()->username;

@@ -207,6 +207,7 @@ class ExpressProgramController extends Controller
             }else {
                 $displayImage = ltrim(parse_url($composition['info']['compositionImage'], PHP_URL_PATH), '/');
             }
+            info(public_path($displayImage));
             $composition['displayImage'] = $manager->read(public_path($displayImage))->toJpeg(75)->toDataUri();
 
             // Calculate Grand Total.
@@ -253,6 +254,27 @@ class ExpressProgramController extends Controller
         return response()->streamDownload(
             fn () => print($pdf->output()),
             'shopping_cart.pdf',
+            ['Content-Type' => 'application/pdf']
+        );
+    }
+
+    public function generateCurrentConfigPdf(Request $request) {
+        $currentConfig = $request->all();
+        $manager = new ImageManager(new Driver());
+        $currencyFormatter = new \NumberFormatter('en_US', \NumberFormatter::CURRENCY);
+        $currentConfig['image'] = $manager->read(public_path($currentConfig['image']))->toJpeg(75)->toDataUri();
+        $currentConfig['grandTotal'] = $currencyFormatter->formatCurrency($currentConfig['grandTotal'], 'USD');
+        $pdf = Pdf::loadView(
+            'pdf.current-config',
+            [
+                'currentConfig' => $currentConfig,
+                'currencyFormatter' => $currencyFormatter
+            ]
+        );
+
+        return response()->streamDownload(
+            fn () => print($pdf->output()),
+            'current_config.pdf',
             ['Content-Type' => 'application/pdf']
         );
     }

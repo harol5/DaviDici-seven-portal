@@ -38,8 +38,7 @@ function ConfigurationBreakdown({
                     <h2 className={classes.headerTitle}>
                         CURRENT PRODUCTS SELECTED
                     </h2>
-                    {productsConfigurator.length === 0 &&
-                    mirrorProductsConfigurator.length === 0 ? (
+                    {productsConfigurator.length === 0 && mirrorProductsConfigurator.length === 0 ? (
                         <p>No Products Selected.</p>
                     ) : null}
                     {productsConfigurator.map((product, index) => (

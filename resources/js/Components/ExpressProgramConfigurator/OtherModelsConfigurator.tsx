@@ -10,7 +10,7 @@ import type {
 import Options from "./Options";
 import ConfigurationName from "./ConfigurationName";
 import {router} from "@inertiajs/react";
-import {getSkuAndPrice, isAlphanumericWithSpaces,} from "../../utils/helperFunc";
+import { getSkuAndPrice, isAlphanumericWithSpaces,} from "../../utils/helperFunc";
 import {ProductInventory} from "../../Models/Product";
 import {Model} from "../../Models/ModelConfigTypes";
 import useImagesComposition from "../../Hooks/useImagesComposition";
@@ -19,6 +19,7 @@ import ConfigurationBreakdown from "./ConfigurationBreakdown";
 import ItemPropertiesAccordion from "./ItemPropertiesAccordion";
 import useAccordionState from "../../Hooks/useAccordionState";
 import {generateShoppingCartCompositionProductObjs} from "../../utils/shoppingCartUtils";
+import {handlePrint} from "../../utils/expressProgramUtils.ts";
 
 /**
  * TODO;
@@ -290,7 +291,19 @@ function OtherModelsConfigurator({
                     <div className={classes.buttonsWrapper}>
                         <button
                             className={classes.resetButton}
-                            onClick={() => print()}
+                            onClick={() => {
+                                if (!isValidConfiguration()) return;
+                                handlePrint(
+                                    composition.name,
+                                    currentConfiguration.label,
+                                    imageUrls,
+                                    composition.compositionImage,
+                                    currentConfiguration.currentProducts,
+                                    false,
+                                    false,
+                                    grandTotal,
+                                )}
+                            }
                         >
                             PRINT
                         </button>

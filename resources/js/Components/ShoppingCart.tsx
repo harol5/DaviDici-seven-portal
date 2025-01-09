@@ -24,7 +24,7 @@ function ShoppingCart({
     const [crrShoppingCartCompositions, setShoppingCartCompositions] = useState<
         ShoppingCartComposition[]
     >([]);
-    console.log(crrShoppingCartCompositions);
+
     const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
     const getCompositionAndProduct = (
