@@ -16,6 +16,7 @@ function Input({
     errors,
     setData,
 }: InputProps) {
+    console.log(fieldType);
     return (
         <div className="mb-6 last-name">
             <label htmlFor={htmlFor} className="inline-block text-lg mb-2">

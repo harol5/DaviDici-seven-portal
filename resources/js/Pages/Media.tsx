@@ -73,7 +73,7 @@ function Media({ auth }: { auth: User }) {
                 name: image["composition_name"],
                 url: image["image_url"],
             })
-            .then((res) => {
+            .then((_res) => {
                 const updatedImages = images.filter(
                     (crrImage) =>
                         crrImage["composition_name"] !==

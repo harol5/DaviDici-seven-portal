@@ -11,15 +11,6 @@ export async function handlePrint(
     isDoubleSideUnit: boolean,
     grandTotal: number,
 ) {
-    console.log(configTitle);
-    console.log(label)
-    console.log(imageUrls);
-    console.log(defaultImage);
-    console.log(allCurrentProducts);
-    console.log(isDoubleSink);
-    console.log(isDoubleSideUnit);
-    console.log(grandTotal);
-
     const products: any[] = []
     allCurrentProducts.forEach(product => {
         const quantity =
@@ -46,29 +37,17 @@ export async function handlePrint(
         products,
         grandTotal,
     }
-    console.log(currentConfigurationObj);
 
     try {
-        /*setIsGeneratingPdf(true);*/
         const response = await axios.post(
             "/express-program/generate-current-config-pdf",
             currentConfigurationObj,
             { responseType: "blob" } // Ensure response is properly handled as binary
         );
-
         const pdfBlob = new Blob([response.data], { type: "application/pdf" });
         const pdfURL = URL.createObjectURL(pdfBlob);
-
-        /*setIsGeneratingPdf(false);*/
-
-        // Open the PDF in a new tab
         window.open(pdfURL);
-        /*const printWindow = window.open(pdfURL);
-        if (printWindow) {
-            printWindow.onload = () => printWindow.print();
-        }*/
     } catch (error) {
-        /*setIsGeneratingPdf(false);*/
         console.error("Error while generating PDF: ", error);
     }
 }
