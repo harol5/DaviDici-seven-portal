@@ -18,12 +18,6 @@ interface ordersProp {
 
 type CurrentOrderType = "own" | "company";
 
-/*
-* TODO:
-*  when swiyching between orders, reset search input and filtered orders.
-*
-* */
-
 function Orders({ auth, orders, message = "", commissionInfo, allOrders }: ordersProp) {
     const [userOrders, setUserOrders] = useState(orders);
     const [companyOrders, setCompanyOrders] = useState(allOrders);
