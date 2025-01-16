@@ -41,6 +41,28 @@ class OrdersController extends Controller
             'keep_session' => false,
         ]);
 
+        // get all orders if user is owner.
+        $userRole = auth()->user()->role;
+        $companyOrders = [];
+        if ($userRole === 1919 || $userRole === 3478) {
+            $foxproRes = FoxproApi::call([
+                'action' => 'getordersbycompany',
+                'params' => [$username],
+                'keep_session' => false,
+            ]);
+
+            if ($foxproRes['status'] !== 500 && array_key_exists('rows', $foxproRes) && isset($foxproRes['rows'])) {
+                $companyOrders = $foxproRes['rows'];
+            } else {
+                logFoxproError(
+                    'getordersbycompany',
+                    'OrdersController->all',
+                    [$username],
+                    $foxproRes
+                );
+            }
+        }
+
         // assigns an empty array so template can display proper message.
         if ($orders['status'] === 500) $orders['rows'] = [];
 
@@ -54,7 +76,15 @@ class OrdersController extends Controller
             $commissionInfo['rows'] = [];
         }
 
-        return Inertia::render('Orders/Orders', ['orders' => $orders['rows'], 'message' => $message, 'commissionInfo' => $commissionInfo['rows']]);
+        return Inertia::render(
+            'Orders/Orders',
+            [
+                'orders' => $orders['rows'],
+                'message' => $message,
+                'commissionInfo' => $commissionInfo['rows'],
+                'allOrders' => $companyOrders
+            ]
+        );
     }
 
     // Show single order overview.

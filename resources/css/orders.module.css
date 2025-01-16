@@ -6,6 +6,25 @@
 
 .ordersMainContainer {
     flex-grow: 1;
+
+    .orderSwitcher {
+        display: flex;
+        gap: 1em;
+        margin-bottom: 0.8em;
+
+        .buttonSwitcher {
+            padding: 0.5em 0.8em;
+            background-color: white;
+            border: 1px solid #d1aa68;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .active {
+            background-color: #d1aa68;
+            color: white;
+        }
+    }
 }
 
 @media (max-width: 1150px) {

@@ -256,7 +256,6 @@ main {
 
 /*individual orders*/
 .order-container {
-    /* width: 33.33333%; */
     width: 50%;
 }
 .order {
@@ -759,7 +758,7 @@ main {
     }
     /*== orders page ==*/
     .order-container {
-        width: 50%;
+        width: 100%;
     }
     .overview-wrapper {
         flex-direction: column;
@@ -954,9 +953,6 @@ main {
     }
     .search-order-input {
         width: 300px;
-    }
-    .order-container {
-        width: 100%;
     }
 
     /*== order layout ==*/

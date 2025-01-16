@@ -13,18 +13,39 @@ interface ordersProp {
     orders: OrderModel[];
     message: string;
     commissionInfo: monthCommissionInfo[];
+    allOrders: OrderModel[];
 }
 
-function Orders({ auth, orders, message = "", commissionInfo }: ordersProp) {
+type CurrentOrderType = "own" | "company";
+
+/*
+* TODO:
+*  when swiyching between orders, reset search input and filtered orders.
+*
+* */
+
+function Orders({ auth, orders, message = "", commissionInfo, allOrders }: ordersProp) {
     const [userOrders, setUserOrders] = useState(orders);
+    const [companyOrders, setCompanyOrders] = useState(allOrders);
+    const [currentOrders, setCurrentOrders] = useState<CurrentOrderType>("own");
+    const [searchInput, setSearchInput] = useState("");
 
     const handleSearchInput = (e: ChangeEvent<HTMLInputElement>) => {
-        const filteredOrders = orders.filter((order: OrderModel) => {
-            const target = e.target!;
-            return order.ordernum.includes(target.value.toLowerCase());
+        const value = e.target.value;
+        const actualOrders = currentOrders === "own" ? orders : allOrders;
+        const filteredOrders = actualOrders.filter((order: OrderModel) => {
+            return order.ordernum.includes(value.toLowerCase());
         });
-        setUserOrders(filteredOrders);
+        setSearchInput(value);
+        currentOrders === "own" ? setUserOrders(filteredOrders) : setCompanyOrders(filteredOrders);
     };
+
+    const handleOrderSwitcher = (currentOrder: CurrentOrderType) => {
+        setUserOrders(orders);
+        setCompanyOrders(allOrders);
+        setCurrentOrders(currentOrder);
+        setSearchInput("");
+    }
 
     const dayTime = useMemo(() => {
         const date = new Date();
@@ -61,34 +82,59 @@ function Orders({ auth, orders, message = "", commissionInfo }: ordersProp) {
                         className="search-order-input rounded-xl"
                         type="search"
                         placeholder="Search Order..."
+                        value={searchInput}
                         onChange={handleSearchInput}
                     />
                 </div>
                 <section className={classes.loyaltyProgramAndOrderWrapper}>
-                    <LoyaltyProgramGauges commissionInfo={commissionInfo} />
-                    {userOrders.length === 0 ? (
-                        <p id="empty-orders-message">
-                            orders not found!. To report any issues, please
-                            contact support
+                    <LoyaltyProgramGauges commissionInfo={commissionInfo}/>
+                    <div className={classes.ordersMainContainer}>
+                        <p
+                            id="empty-orders-message"
+                            className="search-result"
+                        >
+                            orders not found!
                         </p>
-                    ) : (
-                        <div className={classes.ordersMainContainer}>
-                            <p
-                                id="empty-orders-message"
-                                className="search-result"
-                            >
-                                orders not found!
+                        {allOrders.length > 0 && (
+                            <section className={classes.orderSwitcher}>
+                                <button
+                                    onClick={() => handleOrderSwitcher("own")}
+                                    className={currentOrders === "own" ? `${classes.buttonSwitcher} ${classes.active}` : classes.buttonSwitcher}
+                                >
+                                    My Orders
+                                </button>
+                                <button
+                                    onClick={() => handleOrderSwitcher("company")}
+                                    className={currentOrders === "company" ? `${classes.buttonSwitcher} ${classes.active}` : classes.buttonSwitcher}
+                                >
+                                    Company Orders
+                                </button>
+                            </section>
+                        )}
+                        {userOrders.length === 0 || allOrders.length > 0 && companyOrders.length === 0 ? (
+                            <p id="empty-orders-message">
+                                orders not found!. To report any issues, please
+                                contact support
                             </p>
+                        ): null}
+                        {currentOrders === "own" && (
                             <div className="orders-wrapper">
                                 {userOrders.map((order) => (
-                                    <Order key={order.ordernum} order={order} />
+                                    <Order key={order.ordernum} order={order}/>
                                 ))}
                             </div>
-                        </div>
-                    )}
+                        )}
+                        {currentOrders === "company" && (
+                            <div className="orders-wrapper">
+                                {companyOrders.map((order) => (
+                                    <Order key={order.ordernum} order={order}/>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </section>
             </div>
-            {message && <FlashMessage message={message} />}
+            {message && <FlashMessage message={message}/>}
         </UserAuthenticatedLayout>
     );
 }
