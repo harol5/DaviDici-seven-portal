@@ -53,6 +53,9 @@ function Orders({ auth, orders, message = "", commissionInfo, allOrders }: order
         return ampm;
     }, []);
 
+    console.log(orders)
+    console.log(allOrders)
+
     return (
         <UserAuthenticatedLayout auth={auth} crrPage="orders">
             <div className="main-content-wrapper">

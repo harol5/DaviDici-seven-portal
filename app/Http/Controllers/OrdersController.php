@@ -794,7 +794,7 @@ class OrdersController extends Controller
             // is returning the pdf order? PENDING
             $printSo = FoxproApi::call([
                  'action' => 'PrintSo',
-                 'params' => ['KJT002686'], //KJT002686 (outstading),  KJT002928 (-75), KJT003667 (-50), KJT003047 (-50), KJT003756 (0)
+                 'params' => ['KJT004952'], //KJT002686 (outstading),  KJT002928 (-75), KJT003667 (-50), KJT003047 (-50), KJT003756 (0)
                  'keep_session' => false,
             ]);
 
@@ -836,6 +836,12 @@ class OrdersController extends Controller
                 'keep_session' => false,
             ]);
 
+            $deliveryInfo = FoxproApi::call([
+                'action' => 'GetDeliveryInfo',
+                'params' => ['KJT004952'],
+                'keep_session' => false,
+            ]);
+
             return response(
                 [
                     'response' => $testingService->getUniqueInstanceId(),
@@ -845,6 +851,7 @@ class OrdersController extends Controller
                     'ordersByCompany' => $foxproRes,
                     'companySalesReps' => $salesrepInfo,
                     'printSo' => $printSo,
+                    'deliveryInfo' => $deliveryInfo,
                 ]
             )->header('Content-Type', 'application/json');
         }
@@ -855,15 +862,30 @@ class OrdersController extends Controller
         if (Gate::allows('admin-only')) {
             // return Inertia::render('Test',['response' => $response]);
             // return response(['response' => $response])->header('Content-Type', 'application/json');
-            $getInvStockRes = FoxproApi::call([
-                'action' => 'GETINVSTOCK',
-                'params' => ['','','','S'],
+
+            $orders = FoxproApi::call([
+                'action' => 'getordersbyuser',
+                'params' => [env('TEST_USERNAME')],
+                'keep_session' => false,
+            ]);
+
+            $companyOrders = FoxproApi::call([
+                'action' => 'getordersbycompany',
+                'params' => [env('TEST_USERNAME')],
+                'keep_session' => false,
+            ]);
+
+            $GetSoStatus = FoxproApi::call([
+                'action' => 'GetSoStatus',
+                'params' => ['KJT004952'],
                 'keep_session' => false,
             ]);
 
             return response(
                 [
-                    '$getInvStockRes' => $getInvStockRes
+                    'ordersByUser' => $orders,
+                    'ordersByCompany' => $companyOrders,
+                    'GetSoStatus' => $GetSoStatus,
                 ]
             )->header('Content-Type', 'application/json');
         }
