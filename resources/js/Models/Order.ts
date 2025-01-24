@@ -3,7 +3,7 @@ export type Order = {
     ordernum: string;
     slmn: string;
     slmuser: string;
-    status: string; // "Will Ship From Italy and ETA approx. 6-8" |
+    status: string; // "Will Ship From Italy and ETA approx. 6-8" | "In Stock" | "Delivered"
     submitted: string;
     subtotal: number | string;
     total: number | string;

@@ -1,7 +1,7 @@
 import UserAuthenticatedLayout from "../../Layouts/UserAuthenticatedLayout";
 import Order from "../../Components/Order";
 import FlashMessage from "../../Components/FlashMessage";
-import { ChangeEvent, useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import User from "../../Models/User";
 import type { Order as OrderModel } from "../../Models/Order";
 import type { monthCommissionInfo } from "../../Models/LoyaltyProgram";
@@ -22,23 +22,64 @@ function Orders({ auth, orders, message = "", commissionInfo, allOrders }: order
     const [userOrders, setUserOrders] = useState(orders);
     const [companyOrders, setCompanyOrders] = useState(allOrders);
     const [currentOrders, setCurrentOrders] = useState<CurrentOrderType>("own");
-    const [searchInput, setSearchInput] = useState("");
 
-    const handleSearchInput = (e: ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
+    const [searchInput, setSearchInput] = useState("");
+    const [isShowingOnlyPendingDeliveryOrders, setIsShowingOnlyPendingDeliveryOrders] = useState(false);
+    const [salesrep, setSalesrep] = useState("all");
+    const salesrepsList = useMemo(() => {
+        return allOrders.length > 0 ?
+            Array.from(new Set(allOrders.map(order => order.slmn))) :
+            [];
+    }, [allOrders]);
+
+
+    const filterOrders = (name: string, value?: string | boolean) => {
+        console.log("filter orders called -------")
+        console.log(name);
+        console.log(value);
+
+        let currentIsShowingOnlyPendingDeliveryOrders = isShowingOnlyPendingDeliveryOrders;
+        if (name === "showOnlyPendingForDelivery") {
+            currentIsShowingOnlyPendingDeliveryOrders = value as boolean;
+            setIsShowingOnlyPendingDeliveryOrders(currentIsShowingOnlyPendingDeliveryOrders);
+        }
+
+        let currentSalesrep = salesrep;
+        if (name === "salesrep") {
+            currentSalesrep = value as string;
+            setSalesrep(currentSalesrep);
+        }
+
+        let currentSearchInput = searchInput;
+        if (name === "orderNumber") {
+            currentSearchInput = value as string;
+            setSearchInput(currentSearchInput);
+        }
+
         const actualOrders = currentOrders === "own" ? orders : allOrders;
         const filteredOrders = actualOrders.filter((order: OrderModel) => {
-            return order.ordernum.includes(value.toLowerCase());
+            const hasPendingStatus =
+                !currentIsShowingOnlyPendingDeliveryOrders || order.status !== "Delivered";
+
+            const hasSalesrep = currentSalesrep === "all" || order.slmn === currentSalesrep;
+
+            const hasSearchInput = currentSearchInput === "" || order.ordernum.includes(currentSearchInput.toLowerCase());
+
+            return hasPendingStatus && hasSalesrep && hasSearchInput;
         });
-        setSearchInput(value);
+
         currentOrders === "own" ? setUserOrders(filteredOrders) : setCompanyOrders(filteredOrders);
-    };
+    }
+
+    useEffect(() => {
+        filterOrders("ordersSwitcher");
+    },[currentOrders]);
 
     const handleOrderSwitcher = (currentOrder: CurrentOrderType) => {
         setUserOrders(orders);
         setCompanyOrders(allOrders);
         setCurrentOrders(currentOrder);
-        setSearchInput("");
+        /*setSearchInput("");*/
     }
 
     const dayTime = useMemo(() => {
@@ -55,6 +96,8 @@ function Orders({ auth, orders, message = "", commissionInfo, allOrders }: order
 
     console.log(orders)
     console.log(allOrders)
+    console.log(auth);
+    console.log(commissionInfo);
 
     return (
         <UserAuthenticatedLayout auth={auth} crrPage="orders">
@@ -75,12 +118,24 @@ function Orders({ auth, orders, message = "", commissionInfo, allOrders }: order
                             Good Evening {auth?.user.first_name}
                         </h1>
                     )}
+                    <div>
+                        <label>Show orders only pending for delivery:</label>
+                        <input
+                            type={"checkbox"}
+                            name={"showOnlyPendingForDelivery"}
+                            checked={isShowingOnlyPendingDeliveryOrders}
+                            onChange={(e) =>
+                                filterOrders(e.target.name, e.target.checked)
+                            }
+                        />
+                    </div>
                     <input
                         className="search-order-input rounded-xl"
                         type="search"
                         placeholder="Search Order..."
+                        name="orderNumber"
                         value={searchInput}
-                        onChange={handleSearchInput}
+                        onChange={(e) => filterOrders(e.target.name, e.target.value)}
                     />
                 </div>
                 <section className={classes.loyaltyProgramAndOrderWrapper}>
@@ -106,6 +161,21 @@ function Orders({ auth, orders, message = "", commissionInfo, allOrders }: order
                                 >
                                     Company Orders
                                 </button>
+                                {currentOrders === "company" && (
+                                    <div>
+                                        <label>Choose sales rep:</label>
+                                        <select
+                                            name={"salesrep"}
+                                            value={salesrep}
+                                            onChange={(e) =>
+                                                filterOrders(e.target.name, e.target.value)
+                                            }
+                                        >
+                                            <option value="all">All</option>
+                                            {salesrepsList.map((salesrep, index) => (<option key={index} value={salesrep}>{salesrep}</option>))}
+                                        </select>
+                                    </div>
+                                )}
                             </section>
                         )}
                         {userOrders.length === 0 || allOrders.length > 0 && companyOrders.length === 0 ? (
