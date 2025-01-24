@@ -79,6 +79,7 @@ function Orders({ auth, orders, message = "", commissionInfo, allOrders }: order
         setUserOrders(orders);
         setCompanyOrders(allOrders);
         setCurrentOrders(currentOrder);
+        currentOrder === "own" && setSalesrep("all");
         /*setSearchInput("");*/
     }
 
