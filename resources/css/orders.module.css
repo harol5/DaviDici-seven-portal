@@ -1,28 +1,55 @@
+.orderFiltersWrapper {
+    display: flex;
+    gap: 2em;
+}
+
+.pendingDeliveryFilterWrapper {
+    display: flex;
+    gap: 0.5em;
+    align-items: center;
+}
+
 .loyaltyProgramAndOrderWrapper {
     display: flex;
     gap: 1em;
     align-items: flex-start;
-}
 
-.ordersMainContainer {
-    flex-grow: 1;
+    .ordersMainContainer {
+        flex-grow: 1;
 
-    .orderSwitcher {
-        display: flex;
-        gap: 1em;
-        margin-bottom: 0.8em;
+        .orderSwitcherAndFilterWrapper {
+            display: flex;
+            justify-content: space-between;
+            gap: 1em;
+            margin-bottom: 0.8em;
 
-        .buttonSwitcher {
-            padding: 0.5em 0.8em;
-            background-color: white;
-            border: 1px solid #d1aa68;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+            .switcherButtons {
+                display: flex;
+                gap: 1em;
 
-        .active {
-            background-color: #d1aa68;
-            color: white;
+                .buttonSwitcher {
+                    padding: 0.5em 0.8em;
+                    background-color: white;
+                    border: 1px solid #d1aa68;
+                    border-radius: 5px;
+                    cursor: pointer;
+                }
+
+                .active {
+                    background-color: #d1aa68;
+                    color: white;
+                }
+            }
+
+            .salesrepFilter {
+                display: flex;
+                align-items: center;
+                gap: 1em;
+
+                select {
+                    border: 1px solid;
+                }
+            }
         }
     }
 }

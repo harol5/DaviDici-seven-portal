@@ -32,7 +32,6 @@ function Orders({ auth, orders, message = "", commissionInfo, allOrders }: order
             [];
     }, [allOrders]);
 
-
     const filterOrders = (name: string, value?: string | boolean) => {
         console.log("filter orders called -------")
         console.log(name);
@@ -95,8 +94,8 @@ function Orders({ auth, orders, message = "", commissionInfo, allOrders }: order
         return ampm;
     }, []);
 
-    console.log(orders)
-    console.log(allOrders)
+    console.log(orders);
+    console.log(allOrders);
     console.log(auth);
     console.log(commissionInfo);
 
@@ -119,25 +118,27 @@ function Orders({ auth, orders, message = "", commissionInfo, allOrders }: order
                             Good Evening {auth?.user.first_name}
                         </h1>
                     )}
-                    <div>
-                        <label>Show orders only pending for delivery:</label>
+                    <div className={classes.orderFiltersWrapper}>
+                        <div className={classes.pendingDeliveryFilterWrapper}>
+                            <label>Show orders only pending for delivery:</label>
+                            <input
+                                type={"checkbox"}
+                                name={"showOnlyPendingForDelivery"}
+                                checked={isShowingOnlyPendingDeliveryOrders}
+                                onChange={(e) =>
+                                    filterOrders(e.target.name, e.target.checked)
+                                }
+                            />
+                        </div>
                         <input
-                            type={"checkbox"}
-                            name={"showOnlyPendingForDelivery"}
-                            checked={isShowingOnlyPendingDeliveryOrders}
-                            onChange={(e) =>
-                                filterOrders(e.target.name, e.target.checked)
-                            }
+                            className="search-order-input rounded-xl"
+                            type="search"
+                            placeholder="Search Order..."
+                            name="orderNumber"
+                            value={searchInput}
+                            onChange={(e) => filterOrders(e.target.name, e.target.value)}
                         />
                     </div>
-                    <input
-                        className="search-order-input rounded-xl"
-                        type="search"
-                        placeholder="Search Order..."
-                        name="orderNumber"
-                        value={searchInput}
-                        onChange={(e) => filterOrders(e.target.name, e.target.value)}
-                    />
                 </div>
                 <section className={classes.loyaltyProgramAndOrderWrapper}>
                     <LoyaltyProgramGauges commissionInfo={commissionInfo}/>
@@ -149,21 +150,23 @@ function Orders({ auth, orders, message = "", commissionInfo, allOrders }: order
                             orders not found!
                         </p>
                         {allOrders.length > 0 && (
-                            <section className={classes.orderSwitcher}>
-                                <button
-                                    onClick={() => handleOrderSwitcher("own")}
-                                    className={currentOrders === "own" ? `${classes.buttonSwitcher} ${classes.active}` : classes.buttonSwitcher}
-                                >
-                                    My Orders
-                                </button>
-                                <button
-                                    onClick={() => handleOrderSwitcher("company")}
-                                    className={currentOrders === "company" ? `${classes.buttonSwitcher} ${classes.active}` : classes.buttonSwitcher}
-                                >
-                                    Company Orders
-                                </button>
+                            <section className={classes.orderSwitcherAndFilterWrapper}>
+                                <div className={classes.switcherButtons}>
+                                    <button
+                                        onClick={() => handleOrderSwitcher("own")}
+                                        className={currentOrders === "own" ? `${classes.buttonSwitcher} ${classes.active}` : classes.buttonSwitcher}
+                                    >
+                                        My Orders
+                                    </button>
+                                    <button
+                                        onClick={() => handleOrderSwitcher("company")}
+                                        className={currentOrders === "company" ? `${classes.buttonSwitcher} ${classes.active}` : classes.buttonSwitcher}
+                                    >
+                                        Company Orders
+                                    </button>
+                                </div>
                                 {currentOrders === "company" && (
-                                    <div>
+                                    <div className={classes.salesrepFilter}>
                                         <label>Choose sales rep:</label>
                                         <select
                                             name={"salesrep"}
