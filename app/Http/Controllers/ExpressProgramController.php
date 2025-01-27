@@ -197,7 +197,7 @@ class ExpressProgramController extends Controller
             // create actual description.
             $size = $composition['info']['size'] ?? '';
             $sinkPosition = $composition['info']['sinkPosition'] ?? '';
-            $sinkDescription = $composition['washbasin'] ? 'SINK' . ' ' . $composition['washbasin']['productObj']['model']  : 'NOT SINK';
+            $sinkDescription = isset($composition['washbasin']) ? 'SINK' . ' ' . $composition['washbasin']['productObj']['model']  : 'NOT SINK';
             $composition['description'] =  $composition['info']['model'] . " " . $size . " " . $sinkPosition . " " . $sinkDescription;
 
             // get actual image.

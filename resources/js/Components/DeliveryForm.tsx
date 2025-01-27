@@ -88,7 +88,8 @@ function DeliveryForm({
                     deliveryInstruction: data.deliveryInstruction || "N/A",
                 }
             );
-
+            console.log("-- rsponse when savinf delivery data ---");
+            console.log(res);
             if (res.data.foxproRes.status === 201) {
                 setIsDataSaved(true);
                 setDeliveryFee(crrDeliveryType, data.deliveryType);

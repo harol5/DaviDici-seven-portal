@@ -88,14 +88,10 @@ class OrdersController extends Controller
     }
 
     // Show single order overview.
-    public function orderOverview(Request $request)
+    public function orderOverview(Request $request, string $orderNumber)
     {
         // throw 404 if order number does not exist
-
-        $username = auth()->user()->username;
         $order = $request->all();
-        $orderNumber = getOrderNumberFromPath($request->path());
-
         $response = FoxproApi::call([
             'action' => 'GetSoStatus',
             'params' => [$orderNumber],

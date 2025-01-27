@@ -115,7 +115,12 @@ function ProductDetailsCard({
                                 onChange={(e) =>
                                     handleQty(e.target.value, product)
                                 }
-                                readOnly={isPaymentSubmitted || isSubmitedDate}
+                                readOnly={
+                                    isPaymentSubmitted ||
+                                    isSubmitedDate ||
+                                    product.model === "Pick Up" ||
+                                    product.model === "Davidici Final Mile"
+                                }
                             />
                         </span>
                         <p className="total">${product.total}</p>

@@ -42,7 +42,9 @@ function OrderDetails({
 
     const formatProducts = () => {
         return rawProducts.filter(
-            (product) => product.item !== "3% Credit Card Charge"
+            (product) => (
+                product.item !== "3% Credit Card Charge"
+            )
         );
     };
 
