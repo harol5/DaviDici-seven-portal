@@ -77,7 +77,7 @@ class OrdersController extends Controller
         }
 
         // sorts orders by date
-        if (count($orders['rows']) > 1) {
+        /*if (count($orders['rows']) > 1) {
             info($orders['rows']);
             usort($orders, function ($a, $b) {
                 return strcmp($b['orderdate'], $a['orderdate']);
@@ -87,7 +87,7 @@ class OrdersController extends Controller
             usort($companyOrders, function ($a, $b) {
                 return strcmp($b['orderdate'], $a['orderdate']);
             });
-        }
+        }*/
 
         return Inertia::render(
             'Orders/Orders',
