@@ -76,18 +76,13 @@ class OrdersController extends Controller
             $commissionInfo['rows'] = [];
         }
 
-        // sorts orders by date
-        /*if (count($orders['rows']) > 1) {
-            info($orders['rows']);
-            usort($orders, function ($a, $b) {
-                return strcmp($b['orderdate'], $a['orderdate']);
-            });
-        }
-        if (count($companyOrders) > 1) {
-            usort($companyOrders, function ($a, $b) {
-                return strcmp($b['orderdate'], $a['orderdate']);
-            });
-        }*/
+        // --- sorts orders by date.
+        usort($orders['rows'], function ($a, $b) {
+            return strcmp($b['orderdate'], $a['orderdate']);
+        });
+        usort($companyOrders, function ($a, $b) {
+            return strcmp($b['orderdate'], $a['orderdate']);
+        });
 
         return Inertia::render(
             'Orders/Orders',
