@@ -159,8 +159,8 @@ function OrderDetails({
         product: ProductModel,
         handleCloseModal: () => void
     ) => {
+        setIsDeletingOrder(true);
         if (shouldOrderBeDeleted()) {
-            setIsDeletingOrder(true);
             const handleDeleteProductsSequentially = async () => {
                 let numOfProduct = products.length;
                 for (const product of products) {
@@ -223,8 +223,12 @@ function OrderDetails({
                             total: grandTotalFormatted,
                         }));
                     }
+                    setIsDeletingOrder(false);
                 })
-                .catch((err) => console.log(err));
+                .catch((err) => {
+                    console.log(err);
+                    setIsDeletingOrder(false);
+                });
         }
     };
 
