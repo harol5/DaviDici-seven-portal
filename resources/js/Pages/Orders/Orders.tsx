@@ -182,25 +182,35 @@ function Orders({ auth, orders, message = "", commissionInfo, allOrders }: order
                                 )}
                             </section>
                         )}
-                        {userOrders.length === 0 || allOrders.length > 0 && companyOrders.length === 0 ? (
-                            <p id="empty-orders-message">
-                                orders not found!. To report any issues, please
-                                contact support
-                            </p>
-                        ): null}
                         {currentOrders === "own" && (
-                            <div className="orders-wrapper">
-                                {userOrders.map((order) => (
-                                    <Order key={order.ordernum} order={order}/>
-                                ))}
-                            </div>
+                            <>
+                                {userOrders.length === 0 && (
+                                    <p id="empty-orders-message">
+                                        orders not found!. To report any issues, please
+                                        contact support
+                                    </p>
+                                )}
+                                <div className="orders-wrapper">
+                                    {userOrders.map((order) => (
+                                        <Order key={order.ordernum} order={order}/>
+                                    ))}
+                                </div>
+                            </>
                         )}
                         {currentOrders === "company" && (
-                            <div className="orders-wrapper">
-                                {companyOrders.map((order) => (
-                                    <Order key={order.ordernum} order={order}/>
-                                ))}
-                            </div>
+                            <>
+                                {companyOrders.length === 0 && (
+                                    <p id="empty-orders-message">
+                                        orders not found!. To report any issues, please
+                                        contact support
+                                    </p>
+                                )}
+                                <div className="orders-wrapper">
+                                    {companyOrders.map((order) => (
+                                        <Order key={order.ordernum} order={order}/>
+                                    ))}
+                                </div>
+                            </>
                         )}
                     </div>
                 </section>

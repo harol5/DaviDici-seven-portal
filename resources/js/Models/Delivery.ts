@@ -34,3 +34,9 @@ export type DeliveryFoxpro = {
     uscode: string;
     waddress: string;
 };
+
+export const DeliveryTypes = [
+    "Pick Up",
+    "Davidici Final Mile",
+    "To Dealer"
+]

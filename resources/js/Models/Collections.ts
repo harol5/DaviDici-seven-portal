@@ -14,5 +14,6 @@ export const collections = [
     "RAFFAELLO",
     "MIRRORS",
     "Pick Up",
-    "Davidici Final Mile"
+    "Davidici Final Mile",
+    "To Dealer"
 ];

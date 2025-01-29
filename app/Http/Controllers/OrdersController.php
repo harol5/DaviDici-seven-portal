@@ -201,32 +201,46 @@ class OrdersController extends Controller
     }
 
     // Delete product.
-    public function deleteProduct(Request $request)
+    public function deleteProduct(Request $request, string $orderNumber)
     {
         $req = $request->all();
         $product = $req['product'];
         $numOfProducts = $req['numOfProduct'];
-        $orderNumber = getOrderNumberFromPath($request->path());
+        $shouldOrderBeDeleted = $req['shouldOrderBeDeleted'];
+        /*$orderNumber = getOrderNumberFromPath($request->path());*/
+        $actualSku = $product['uscode'];
+
+        if (!isset($product['uscode'])) {
+            $product['uscode'] = '';
+        }
+
+        if (
+            $product['model'] === 'Pick Up' ||
+            $product['model'] === 'Davidici Final Mile' ||
+            $product['model'] === 'To Dealer'
+        ) {
+            $actualSku = $product['partnum'];
+        }
 
         $res = FoxproApi::call([
             'action' => 'DELETELINE',
-            'params' => [$orderNumber, $product['uscode'], $product['linenum'], $product['qty']],
+            'params' => [$orderNumber, $actualSku, $product['linenum'], $product['qty']],
             'keep_session' => false,
         ]);
 
         if ($res['status'] === 201 && $res['Result'] === 'Updated Info') {
-
             if ($numOfProducts === 1) {
                 return redirect('/orders')->with('message', 'Order Number ' . $orderNumber . ' deleted!!');
+            } else if ($shouldOrderBeDeleted && $numOfProducts > 1) {
+                return back();
+            } else {
+                $products = FoxproApi::call([
+                    'action' => 'GetSoStatus',
+                    'params' => [$orderNumber],
+                    'keep_session' => false,
+                ]);
+                return response(['status' => 201, 'products' => $products['rows']])->header('Content-Type', 'application/json');
             }
-
-            $products = FoxproApi::call([
-                'action' => 'GetSoStatus',
-                'params' => [$orderNumber],
-                'keep_session' => false,
-            ]);
-
-            return response(['status' => 201, 'products' => $products['rows']])->header('Content-Type', 'application/json');
         }
 
         Log::error("=VVVVV=== ERROR REQUESTING DATA FROM FOXPRO. function: DeleteLine ====VVVVV");

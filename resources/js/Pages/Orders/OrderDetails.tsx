@@ -13,6 +13,7 @@ import type {
 } from "../../Models/Product";
 import { collections } from "../../Models/Collections";
 import User from "../../Models/User";
+import {DeliveryTypes} from "../../Models/Delivery.ts";
 
 interface OrderDetailsProps {
     auth: User;
@@ -65,7 +66,7 @@ function OrderDetails({
         outdatedProduct: ProductModel,
         updatedProduct: ProductModel
     ) => {
-        //cal new sub total and grand Total.
+        //cal new sub-total and grand Total.
         const subtotal =
             order.subtotal - outdatedProduct.total + updatedProduct.total;
         const subTotalFormatted =
@@ -122,30 +123,83 @@ function OrderDetails({
         }
     };
 
-    const handleDelete = (
+    // ======================== DELETING PRODUCTS AND ORDER ================================== //
+    const [isDeletingOrder, setIsDeletingOrder] = useState(false);
+    const shouldOrderBeDeleted = () => {
+        /*
+        *  there are 2 possible conditions to where an order should be deleted:
+        *  1- if there are only 2 products left, and one of them is the delivery fee, must delete both
+        *  2- if there is only one product left
+        */
+        return products.length === 1 ||
+            (
+                products.length === 2 &&
+                products.some(product => DeliveryTypes.includes(product.model))
+            )
+    }
+
+    const routerPost = (url: string, data: {}) => {
+        return new Promise<void>((resolve, reject) => {
+            router.post(
+                url,
+                data,
+                {
+                    onSuccess: (_visit) => {
+                        resolve();
+                    },
+                    onError: (error) => {
+                        reject(error);
+                    },
+                }
+            );
+        });
+    };
+
+    const handleDelete = async (
         product: ProductModel,
         handleCloseModal: () => void
     ) => {
-        if (products.length === 1) {
-            //specific type just for inertia.
-            const productFormatted: ProductRecord = {
-                ...product,
+        if (shouldOrderBeDeleted()) {
+            setIsDeletingOrder(true);
+            const handleDeleteProductsSequentially = async () => {
+                let numOfProduct = products.length;
+                for (const product of products) {
+                    // this makes sure that the order matches the lines in foxpro.
+                    if (product.model === "Pick Up" || product.model === "Davidici Final Mile" || product.model === "To Dealer") {
+                        product.linenum = 1;
+                    }
+                    // Specific type just for inertia.
+                    const productFormatted: ProductRecord = { ...product };
+                    try {
+                        await routerPost(
+                            `/orders/${order.ordernum}/products/delete`,
+                            {
+                                product: productFormatted,
+                                numOfProduct,
+                                shouldOrderBeDeleted: true,
+                            },
+                        );
+                        numOfProduct--;
+                    } catch (error) {
+                        console.error("Error deleting product:", error);
+                    }
+                }
             };
-            // Router from inertia is used in this case because when there is no products, user should be redirect to main page.
-            router.post(`/orders/${order.ordernum}/products/delete`, {
-                product: productFormatted,
-                numOfProduct: products.length,
-            });
+            await handleDeleteProductsSequentially();
+            setIsDeletingOrder(false);
             handleCloseModal();
         } else {
             axios
                 .post(`/orders/${order.ordernum}/products/delete`, {
                     product,
                     numOfProduct: products.length,
+                    shouldOrderBeDeleted: false
                 })
                 .then(({ data }) => {
                     // "Updated Info" | "Can not delete -- already on PO"? | "Line Number does not match item"?
                     if (data.status === 201) {
+                        // --------------------------------------
+                        handleCloseModal();
                         const filteredProducts = data.products.filter(
                             (product: ProductModel) =>
                                 product.item !== "3% Credit Card Charge"
@@ -168,8 +222,6 @@ function OrderDetails({
                             subtotal: subTotalFormatted,
                             total: grandTotalFormatted,
                         }));
-                        // --------------------------------------
-                        handleCloseModal();
                     }
                 })
                 .catch((err) => console.log(err));
@@ -247,12 +299,13 @@ function OrderDetails({
                         <ProductDetailsCard
                             key={product.linenum}
                             product={product}
-                            numOfProducts={products.length}
                             modelsAvailable={modelsAvailable}
                             handleQty={handleQty}
                             handleNote={handleNote}
                             handleDelete={handleDelete}
                             handleModel={handleModel}
+                            shouldOrderBeDeleted={shouldOrderBeDeleted}
+                            isDeletingOrder={isDeletingOrder}
                             isPaymentSubmitted={isPaymentSubmitted}
                             isSubmitedDate={order.submitted ? true : false}
                         />

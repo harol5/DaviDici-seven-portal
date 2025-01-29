@@ -2,10 +2,11 @@ import Modal from "./Modal";
 import { useMemo, useRef, useState } from "react";
 import type { Product as ProductModel } from "../Models/Product";
 import { collections } from "../Models/Collections";
+import {DeliveryTypes} from "../Models/Delivery.ts";
+import LoadingSpinner from "./LoadingSpinner.tsx";
 
 interface ProductDetailsCardProps {
     product: ProductModel;
-    numOfProducts: number;
     modelsAvailable: { set: Set<string>; arr: string[] };
     handleQty: (value: string, product: ProductModel) => void;
     handleNote: (
@@ -16,18 +17,21 @@ interface ProductDetailsCardProps {
     ) => void;
     handleDelete: (product: ProductModel, handleCloseModal: () => void) => void;
     handleModel: (sku: string, lineNum: number, model: string) => void;
+    shouldOrderBeDeleted: () => boolean;
+    isDeletingOrder: boolean;
     isPaymentSubmitted: boolean;
     isSubmitedDate: boolean;
 }
 
 function ProductDetailsCard({
     product,
-    numOfProducts,
     modelsAvailable,
     handleQty,
     handleNote,
     handleDelete,
     handleModel,
+    shouldOrderBeDeleted,
+    isDeletingOrder,
     isPaymentSubmitted,
     isSubmitedDate,
 }: ProductDetailsCardProps) {
@@ -36,7 +40,9 @@ function ProductDetailsCard({
         [product.model]
     );
 
-    const isPaymentORSubmittedDate = isPaymentSubmitted || isSubmitedDate;
+    const isPaymentORSubmittedDate = isPaymentSubmitted ||
+        isSubmitedDate ||
+        DeliveryTypes.includes(product.model)
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -118,8 +124,7 @@ function ProductDetailsCard({
                                 readOnly={
                                     isPaymentSubmitted ||
                                     isSubmitedDate ||
-                                    product.model === "Pick Up" ||
-                                    product.model === "Davidici Final Mile"
+                                    DeliveryTypes.includes(product.model)
                                 }
                             />
                         </span>
@@ -148,31 +153,38 @@ function ProductDetailsCard({
             <Modal show={openModal} onClose={handleCloseModal}>
                 {crrModalContent === "removeModal" && (
                     <section className="m-8 text-center">
-                        {numOfProducts === 1 && (
-                            <p className="text-orange-300 font-bold">
-                                There is only one product on your order, if you
-                                remove it, your order will be delete.
-                            </p>
-                        )}
-                        <p className=" my-4">
-                            are you sure you want to remove this product?
-                        </p>
-                        <section className="flex justify-center my-4 gap-4">
-                            <button
-                                className="rounded border shadow-sm shadow-gray-950 px-4 py-1 transition-shadow hover:shadow-none text-sm"
-                                onClick={handleCloseModal}
-                            >
-                                cancel
-                            </button>
-                            <button
-                                className="rounded border shadow-sm shadow-gray-950 px-4 py-1 transition-shadow hover:shadow-none bg-red-500 hover:text-white text-sm"
-                                onClick={() => {
-                                    handleDelete(product, handleCloseModal);
-                                }}
-                            >
-                                confirm
-                            </button>
-                        </section>
+                        {isDeletingOrder ?
+                            <div className="relative bg-white rounded-lg shadow-lg mt-[10%] w-[300px] h-[200px]">
+                                <LoadingSpinner message={"Deleting Order..."} />
+                            </div> :
+                            <>
+                                {shouldOrderBeDeleted() && (
+                                    <p className="text-orange-300 font-bold">
+                                        There is only one product on your order, if you
+                                        remove it, your order will be delete.
+                                    </p>
+                                )}
+                                <p className=" my-4">
+                                    are you sure you want to remove this product?
+                                </p>
+                                <section className="flex justify-center my-4 gap-4">
+                                    <button
+                                        className="rounded border shadow-sm shadow-gray-950 px-4 py-1 transition-shadow hover:shadow-none text-sm"
+                                        onClick={handleCloseModal}
+                                    >
+                                        cancel
+                                    </button>
+                                    <button
+                                        className="rounded border shadow-sm shadow-gray-950 px-4 py-1 transition-shadow hover:shadow-none bg-red-500 hover:text-white text-sm"
+                                        onClick={() => {
+                                            handleDelete(product, handleCloseModal);
+                                        }}
+                                    >
+                                        confirm
+                                    </button>
+                                </section>
+                            </>
+                        }
                     </section>
                 )}
 
