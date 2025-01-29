@@ -155,7 +155,7 @@ function ProductDetailsCard({
                     <section className="m-8 text-center">
                         {isDeletingOrder ?
                             <div className="relative bg-white rounded-lg shadow-lg mt-[10%] w-[300px] h-[200px]">
-                                <LoadingSpinner message={"Deleting Order..."} />
+                                <LoadingSpinner message={"Deleting Product..."} />
                             </div> :
                             <>
                                 {shouldOrderBeDeleted() && (
