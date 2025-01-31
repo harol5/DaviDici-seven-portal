@@ -46,16 +46,16 @@ function OrderLayout({ children, order, crrOrderOption }: OrderLayoutProps) {
         ...order,
     };
 
-    const downloadPdf =  () => {
+    const downloadPdf =  (onlyInStock: boolean) => {
         axios({
-            url: `/orders/${order.ordernum}/generate-pdf`,
+            url: `/orders/${order.ordernum}/generate-pdf?onlyInStock=${onlyInStock}`,
             method: 'GET',
             responseType: 'blob',
         }).then((response) => {
             const blob = new Blob([response.data], { type: 'application/pdf' });
             const link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
-            link.download = `${order.ordernum}.pdf`;
+            link.download = `${order.ordernum}-${onlyInStock ? "Only-In-Stock" : "All-Products"}.pdf`;
             link.click();
         }).catch((error) => {
             console.error('Error generating PDF:', error);
@@ -188,7 +188,8 @@ function OrderLayout({ children, order, crrOrderOption }: OrderLayoutProps) {
                         </div>
                     </section>
                     <div className="order-buttons-wrapper">
-                        <button className="common-button" onClick={downloadPdf}>Print Order</button>
+                        <button className="common-button" onClick={() => downloadPdf(false)}>Print Order</button>
+                        <button className="common-button" onClick={() => downloadPdf(true)}>Print Order <br/> (Only In Stock)</button>
                         <button className="common-button">
                             <Link
                                 href={`/orders/${order.ordernum}/payment`}

@@ -796,7 +796,8 @@ class OrdersController extends Controller
 
     public function generatePdf(Request $request, string $orderNumber)
     {
-        $orderInfo = $this->getOrderInfoPdf($orderNumber);
+        $onlyInStock = $request->all()['onlyInStock'];
+        $orderInfo = $this->getOrderInfoPdf($orderNumber, $onlyInStock === 'true');
         $pdfData = view('pdf.order', compact('orderInfo'))->render();
         $pdf = Pdf::loadHTML($pdfData);
 //        $pdf = Pdf::setOptions(['isPhpEnabled' => true])->loadHTML($pdfData);
@@ -935,7 +936,7 @@ class OrdersController extends Controller
         return array_key_exists('rows', $deliveryInfo) && $deliveryInfo['rows'][0]['deldate'];
     }
 
-    public function getOrderInfoPdf(string $orderNumber)
+    public function getOrderInfoPdf(string $orderNumber, bool $onlyInStock)
     {
         $formattedOrderInfo = [
             'date' => '',
@@ -955,7 +956,6 @@ class OrdersController extends Controller
             'orderStockStatusByProduct' => [],
             'paymentDetails' => []
         ];
-
         // "Result": "this sales order number is not in system"
         $printSo = FoxproApi::call([
             'action' => 'PrintSo',
@@ -1071,6 +1071,16 @@ class OrdersController extends Controller
                     break;
             }
 
+        }
+
+        // Filter the array
+        if ($onlyInStock) {
+            $formattedOrderInfo['products'] = array_filter($formattedOrderInfo['products'], function ($product) {
+                return $product['status'] === 'In Stock' ||
+                    $product['model'] === 'Davidici Final Mile' ||
+                    $product['model'] === 'To Dealer' ||
+                    $product['model'] === 'Pick Up';
+            });
         }
 
         $formattedOrderInfo['grandTotal'] = array_reduce($formattedOrderInfo['products'], function ($sum, $product) {
