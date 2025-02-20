@@ -19,7 +19,7 @@ class CheckListController extends Controller
                 ['id' => 1],
                 ['state' => $request->getContent()]
             );
-        return response(['response' => "good", 'status' => 200])->header('Content-Type', 'application/json');
+        return response(['message' => 'data saved', 'status' => 200])->header('Content-Type', 'application/json');
     }
 
     public function getPunchListData() {

@@ -1,6 +1,7 @@
 import { useRef, useState, FormEvent, useEffect } from "react";
 // @ts-ignore
 import SignatureCanvas from "react-signature-canvas";
+import { ToastContainer, toast } from "react-toastify";
 import axios from "axios";
 
 type Unit = {
@@ -185,20 +186,30 @@ function PunchList() {
     const submitForm = (e: FormEvent) => {
         e.preventDefault();
         console.log(formState);
-        //post("/submit-signature");
-
-        axios.post("/punch-list/store", formState).then(res => {console.log(res)}).catch(err => {console.log(err)})
+        axios.post("/punch-list/store", formState)
+            .then(res => {toast.success(res.data.message)})
+            .catch(err => {
+                toast.error("Something went wrong. Please try again later.");
+                console.log(err);
+            })
     };
 
     const getDatalist = () => {
-        axios.get("/punch-list/get-datalist").then(res => {console.log(res)}).catch(err => {console.log(err)})
+        axios.get("/punch-list/get-datalist")
+            .then(res => {console.log(res)})
+            .catch(err => {console.log(err)})
     }
 
     useEffect(() => {
         axios.get("/punch-list/get-datalist")
             .then(res => {
                 console.log(res)
-                res.data.state && setFormState(res.data.state);
+                const datalist = res.data.state;
+                if (datalist) {
+                    setFormState(datalist);
+                    setSignature(datalist.clientSignature);
+                    setSignatureProject(datalist.projectManagerSignature);
+                }
             })
             .catch(err => {console.log(err)})
     },[])
@@ -482,17 +493,20 @@ function PunchList() {
                     </div>
                     <div className="flex justify-center gap-4">
                         <div>
-                            <input
-                                type="text"
-                                placeholder="Client Name"
-                                value={formState.clientName}
-                                onChange={(e) => setFormState(prev => ({
-                                    ...prev,
-                                    clientName: e.target.value,
-                                }))}
-                                className="border p-2 w-full mb-3"
-                                required
-                            />
+                            <div>
+                                <label htmlFor="clientName">Client Name</label>
+                                <input
+                                    type="text"
+                                    id="clientName"
+                                    value={formState.clientName}
+                                    onChange={(e) => setFormState(prev => ({
+                                        ...prev,
+                                        clientName: e.target.value,
+                                    }))}
+                                    className="border p-2 mb-3 ml-2 border-black rounded"
+                                    required
+                                />
+                            </div>
                             <p className="mb-2">Client Signature:</p>
                             <SignatureCanvas
                                 ref={sigClientCanvas}
@@ -501,17 +515,21 @@ function PunchList() {
                             />
                         </div>
                         <div>
-                            <input
-                                type="text"
-                                placeholder="Project Manager Name"
-                                value={formState.projectManagerName}
-                                onChange={(e) => setFormState(prev => ({
-                                    ...prev,
-                                    projectManagerName: e.target.value,
-                                }))}
-                                className="border p-2 w-full mb-3"
-                                required
-                            />
+                            <div>
+                                <label htmlFor="projectManagerName">Project Manager Name</label>
+                                <input
+                                    type="text"
+                                    id="projectManagerName"
+                                    value={formState.projectManagerName}
+                                    onChange={(e) => setFormState(prev => ({
+                                        ...prev,
+                                        projectManagerName: e.target.value,
+                                    }))}
+                                    className="border p-2 mb-3 ml-2 border-black rounded"
+                                    required
+                                />
+                            </div>
+
                             <p className="mb-2">Project Manager Signature:</p>
                             <SignatureCanvas
                                 ref={sigProjectCanvas}
@@ -528,15 +546,14 @@ function PunchList() {
                             </button>
                         </div>
                     </div>
-                    <p>Signatures captured</p>
-                    <div className="flex justify-center gap-4">
+                    <div className="flex justify-center gap-4 mt-6">
                         <div className="flex justify-center gap-4">
                             {signature && <div>
-                                <p className="mb-2">Client Signature:</p>
+                                <p className="mb-2">Client Signature captured:</p>
                                 <img src={signature} alt="Signature preview" className="mt-3 border" />
                             </div>}
                             {signatureProject && <div>
-                                <p className="mb-2">Project Manager Signature:</p>
+                                <p className="mb-2">Project Manager Signature captured:</p>
                                 <img src={signatureProject} alt="Signature preview" className="mt-3 border" />
                             </div>}
                         </div>
@@ -548,6 +565,7 @@ function PunchList() {
                 </form>
                 {/*<button type="button" onClick={getDatalist} className="bg-green-500 text-white px-3 py-1 mt-3">get data</button>*/}
             </div>
+            <ToastContainer />
         </>
     );
 }
