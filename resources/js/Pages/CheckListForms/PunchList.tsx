@@ -198,7 +198,7 @@ function PunchList() {
         axios.get("/punch-list/get-datalist")
             .then(res => {
                 console.log(res)
-                setFormState(res.data.state);
+                res.data.state && setFormState(res.data.state);
             })
             .catch(err => {console.log(err)})
     },[])

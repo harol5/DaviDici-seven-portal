@@ -24,7 +24,7 @@ class CheckListController extends Controller
 
     public function getPunchListData() {
         $data = DB::table('checklist')->where('id', 1)->first();
-        $dataState = $data ? json_decode($data->state) : [];
+        $dataState = $data ? json_decode($data->state) : null;
         return response(['state' => $dataState], 200)
             ->header('Content-Type', 'application/json');
     }
