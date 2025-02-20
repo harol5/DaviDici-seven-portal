@@ -94,10 +94,6 @@ function Orders({ auth, orders, message = "", commissionInfo, allOrders }: order
         return ampm;
     }, []);
 
-    console.log(orders);
-    console.log(allOrders);
-    console.log(auth);
-    console.log(commissionInfo);
 
     return (
         <UserAuthenticatedLayout auth={auth} crrPage="orders">

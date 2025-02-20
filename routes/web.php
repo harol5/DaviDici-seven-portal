@@ -8,6 +8,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\ExpressProgramController;
 use App\Http\Controllers\IntuitController;
+use App\Http\Controllers\CheckListController;
 
 // -- PRACTICING MIDDLEWRE AND SERVICE CONTAINER BINDINGS -- MUST DELETE!!!! --
 use App\Services\TestingService;
@@ -57,6 +58,11 @@ Route::middleware(['auth','auth.session'])->group(function () {
     Route::get('/tokens/create', [UserController::class, 'generateToken']);
     Route::get('/users/admin/pwd-form', [UserController::class, 'changePwdAdminForm']);
     Route::post('/users/admin/pwd', [UserController::class, 'changePasswordAdmin']);
+
+
+    Route::get('/punch-list', [CheckListController::class, 'getPunchList']);
+    Route::post('/punch-list/store', [CheckListController::class, 'storePunchList']);
+    Route::get('/punch-list/get-datalist', [CheckListController::class, 'getPunchListData']);
 
     // TESTING ROUTE.
     Route::get('/testing', [OrdersController::class, 'testApi'])->middleware(TestMiddleware::class);
