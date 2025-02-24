@@ -63,6 +63,7 @@ Route::middleware(['auth','auth.session'])->group(function () {
     Route::get('/punch-list', [CheckListController::class, 'getPunchList']);
     Route::post('/punch-list/store', [CheckListController::class, 'storePunchList']);
     Route::get('/punch-list/get-datalist', [CheckListController::class, 'getPunchListData']);
+    Route::post('/punch-list/generate-pending-tasks-pdf', [CheckListController::class, 'generatePunchListPendingTasksPDF']);
 
     // TESTING ROUTE.
     Route::get('/testing', [OrdersController::class, 'testApi'])->middleware(TestMiddleware::class);

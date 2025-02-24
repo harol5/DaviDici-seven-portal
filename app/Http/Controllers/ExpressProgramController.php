@@ -207,7 +207,6 @@ class ExpressProgramController extends Controller
             }else {
                 $displayImage = ltrim(parse_url($composition['info']['compositionImage'], PHP_URL_PATH), '/');
             }
-            info(public_path($displayImage));
             $composition['displayImage'] = $manager->read(public_path($displayImage))->toJpeg(75)->toDataUri();
 
             // Calculate Grand Total.

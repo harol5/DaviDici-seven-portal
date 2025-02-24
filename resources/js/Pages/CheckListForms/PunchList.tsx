@@ -185,7 +185,6 @@ function PunchList() {
 
     const submitForm = (e: FormEvent) => {
         e.preventDefault();
-        console.log(formState);
         axios.post("/punch-list/store", formState)
             .then(res => {toast.success(res.data.message)})
             .catch(err => {
@@ -194,16 +193,30 @@ function PunchList() {
             })
     };
 
-    const getDatalist = () => {
-        axios.get("/punch-list/get-datalist")
-            .then(res => {console.log(res)})
-            .catch(err => {console.log(err)})
+    const generatePendingTasksPdf = () => {
+        // === converting the object to an array of entries so we can push the position to each entry.
+        const unitsOrder = ['unitOne','unitTwo','unitThree','unitFour', 'unitClub']
+        // @ts-ignore
+        const formStateAsArray:[string, string | Unit, number][] = Object.entries(formState);
+        formStateAsArray.forEach(state => state.push(unitsOrder.indexOf(state[0])));
+        formStateAsArray.sort((a,b) => a[2] - b[2]);
+        // ===
+
+        axios.post("/punch-list/generate-pending-tasks-pdf", {formState,formStateAsArray},  { responseType: "blob" })
+            .then(res => {
+                const pdfBlob = new Blob([res.data], { type: "application/pdf" });
+                const pdfURL = URL.createObjectURL(pdfBlob);
+                window.open(pdfURL);
+            })
+            .catch(err => {
+                toast.error("Something went wrong. Please try again later.");
+                console.log(err);
+            })
     }
 
     useEffect(() => {
         axios.get("/punch-list/get-datalist")
             .then(res => {
-                console.log(res)
                 const datalist = res.data.state;
                 if (datalist) {
                     setFormState(datalist);
@@ -212,7 +225,7 @@ function PunchList() {
                 }
             })
             .catch(err => {console.log(err)})
-    },[])
+    },[]);
 
     return (
         <>
@@ -220,6 +233,7 @@ function PunchList() {
                 <img
                     className="w-[220px] mx-auto my-2"
                     src="https://portal.davidici.com/images/davidici-logo-nav-cropped.png"
+                    alt="Davidici Logo"
                 />
             </section>
             <div className="main-content-wrapper">
@@ -558,12 +572,18 @@ function PunchList() {
                             </div>}
                         </div>
                     </div>
-
                     <button type="submit" className="bg-green-500 text-white px-3 py-1 mt-3 w-full text-sm">
                         SAVE
                     </button>
+
+                    <button
+                        type="button"
+                        className="bg-green-500 text-white px-3 py-1 mt-3 w-full text-sm"
+                        onClick={generatePendingTasksPdf}
+                    >
+                        PRINT OPEN TASKS
+                    </button>
                 </form>
-                {/*<button type="button" onClick={getDatalist} className="bg-green-500 text-white px-3 py-1 mt-3">get data</button>*/}
             </div>
             <ToastContainer />
         </>
