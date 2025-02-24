@@ -81,6 +81,10 @@
             text-align: center;
         }
 
+        .content .signatures-container .signature img {
+            width: 80%;
+        }
+
         @page {
             size: letter;
         }
